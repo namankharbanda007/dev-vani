@@ -180,7 +180,7 @@ ElatoAI consists of three main components:
 19. **No PSRAM Required**: The ESP32 device does not require PSRAM to run the speech to speech AI.
 20. **OAuth for Web client**: OAuth for your users to manage their AI characters and devices.
 21. **Pitch Factor**: Control the pitch of the AI's voice from the NextJS webapp to create cartoon-like voices.
-22. **Tool calling**: Call tools from the ESP32 device to the Deno Edge Functions for a complete voice AI agent.
+22. **Tool calling**: Call tools and functions from the ESP32 device to the Deno Edge Functions for a complete voice AI agent.
 
 ## 🛠 Tech Stack
 
