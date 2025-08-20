@@ -125,26 +125,26 @@ void pulseBlue()
 
 void blinkWhite()
 {
-    int ledState = ledState ? HIGH : LOW;
-    digitalWrite(RED_LED_PIN, ledState);
-    digitalWrite(GREEN_LED_PIN, ledState);
-    digitalWrite(BLUE_LED_PIN, ledState);
+    int out = ledState ? HIGH : LOW;
+    digitalWrite(RED_LED_PIN, out);
+    digitalWrite(GREEN_LED_PIN, out);
+    digitalWrite(BLUE_LED_PIN, out);
 }
 
 void blinkGreen()
 {
-    int ledState = ledState ? HIGH : LOW;
+    int out = ledState ? HIGH : LOW;
     digitalWrite(BLUE_LED_PIN, LOW);
     digitalWrite(RED_LED_PIN, LOW);   
-    digitalWrite(GREEN_LED_PIN, ledState);    
+    digitalWrite(GREEN_LED_PIN, out);    
 }
 
 void blinkYellow()
 {
-    int ledState = ledState ? HIGH : LOW;
+    int out = ledState ? HIGH : LOW;
     digitalWrite(BLUE_LED_PIN, LOW);
-    digitalWrite(RED_LED_PIN, ledState);
-    digitalWrite(GREEN_LED_PIN, ledState);    
+    digitalWrite(RED_LED_PIN, out);
+    digitalWrite(GREEN_LED_PIN, out);    
 }
 
 void turnOffLED()
@@ -184,10 +184,10 @@ void blinkCyanPulse()
 
 void blinkBlue()
 {
-    int ledState = ledState ? HIGH : LOW;
+    int out = ledState ? HIGH : LOW;
     digitalWrite(GREEN_LED_PIN, LOW);
     digitalWrite(RED_LED_PIN, LOW);   
-    digitalWrite(BLUE_LED_PIN, ledState); 
+    digitalWrite(BLUE_LED_PIN, out); 
 }
 
 void staticYellow()
