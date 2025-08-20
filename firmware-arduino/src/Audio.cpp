@@ -1,10 +1,10 @@
+#include <WebSocketsClient.h>
 #include "OTA.h"
 #include "Print.h"
 #include "Config.h"
 #include "AudioTools.h"
 // #include "AudioTools/Concurrency/RTOS.h"
 #include "AudioTools/AudioCodecs/CodecOpus.h"
-#include <WebSocketsClient.h>
 #include "Audio.h"
 #include "PitchShift.h"
 
@@ -31,7 +31,7 @@ const int BITS_PER_SAMPLE = 16; // 16-bit audio
 // AUDIO OUTPUT
 class BufferPrint : public Print {
 public:
-  BufferPrint(BufferRTOS<uint8_t>& buf) : _buffer(buf) {}
+  explicit BufferPrint(BufferRTOS<uint8_t>& buf) : _buffer(buf) {}
 
   // networkTask -> webSocket.loop() -> webSocketEvent(WStype_BIN, ...) -> opusDecoder.write() -> bufferPrint.write()
   virtual size_t write(uint8_t data) override {
@@ -230,7 +230,7 @@ void micTask(void *parameter) {
     micToWsCopier.setDelayOnNoData(0);
 
     while (1) {
-        if ( i2sInputFlushScheduled ) {
+        if (i2sInputFlushScheduled) {
             i2sInputFlushScheduled = false;
             i2sInput.flush();
         }
@@ -249,7 +249,7 @@ void micTask(void *parameter) {
 
 // WEBSOCKET EVENTS
 // networkTask -> webSocket.loop() -> webSocketEvent()
-void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
+void webSocketEvent(WStype_t type, const uint8_t *payload, size_t length)
 {
     switch (type)
     {
@@ -367,9 +367,9 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 }
 
 // wifiTask -> WIFIMANAGER::loop() -> WIFIMANAGER::tryConnect() -> connectCb() -> websocketSetup()
-void websocketSetup(String server_domain, int port, String path)
+void websocketSetup(const String& server_domain, int port, const String& path)
 {
-    String headers = "Authorization: Bearer " + String(authTokenGlobal);
+    const String headers = "Authorization: Bearer " + String(authTokenGlobal);
 
     xSemaphoreTake(wsMutex, portMAX_DELAY);
 

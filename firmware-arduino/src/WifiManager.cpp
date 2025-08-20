@@ -205,7 +205,7 @@ void WIFIMANAGER::fallbackToSoftAp(const bool state) {
  * @return true
  * @return false
  */
-bool WIFIMANAGER::getFallbackState() {
+bool WIFIMANAGER::getFallbackState() const {
   return createFallbackAP;
 }
 
@@ -349,7 +349,7 @@ bool WIFIMANAGER::delWifi(String apName) {
  * @return true if one or more SSIDs stored
  * @return false if no configuration is available
  */
-bool WIFIMANAGER::configAvailable() {
+bool WIFIMANAGER::configAvailable() const {
     return configuredSSIDs != 0;
 }
 

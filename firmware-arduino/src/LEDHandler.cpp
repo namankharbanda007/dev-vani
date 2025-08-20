@@ -12,7 +12,7 @@ void setLEDColor(uint8_t r, uint8_t g, uint8_t b)
     analogWrite(BLUE_LED_PIN, b);
 }
 
-enum class StaticColor
+enum class StaticColor : uint8_t
 {
     RED,
     GREEN,
@@ -22,41 +22,44 @@ enum class StaticColor
     CYAN,
 };
 
+struct RGB {
+    bool red;
+    bool green;
+    bool blue;
+};
+
 void setStaticColor(StaticColor color)
 {
+    RGB colorMap;
+
     switch (color)
     {
     case StaticColor::RED:
-        digitalWrite(RED_LED_PIN, LOW);
-        digitalWrite(GREEN_LED_PIN, HIGH);
-        digitalWrite(BLUE_LED_PIN, HIGH);
+        colorMap = {LOW, HIGH, HIGH};
         break;
     case StaticColor::GREEN:
-        digitalWrite(RED_LED_PIN, HIGH);
-        digitalWrite(GREEN_LED_PIN, LOW);
-        digitalWrite(BLUE_LED_PIN, HIGH);
+        colorMap = {HIGH, LOW, HIGH};
         break;
     case StaticColor::BLUE:
-        digitalWrite(RED_LED_PIN, HIGH);
-        digitalWrite(GREEN_LED_PIN, HIGH);
-        digitalWrite(BLUE_LED_PIN, LOW);
+        colorMap = {HIGH, HIGH, LOW};
         break;
     case StaticColor::YELLOW:
-        digitalWrite(RED_LED_PIN, LOW);
-        digitalWrite(GREEN_LED_PIN, LOW);
-        digitalWrite(BLUE_LED_PIN, HIGH);
+        colorMap = {LOW, LOW, HIGH};
         break;
     case StaticColor::MAGENTA:
-        digitalWrite(RED_LED_PIN, LOW);
-        digitalWrite(GREEN_LED_PIN, HIGH);
-        digitalWrite(BLUE_LED_PIN, LOW);
+        colorMap = {LOW, HIGH, LOW};
         break;
     case StaticColor::CYAN:
-        digitalWrite(RED_LED_PIN, HIGH);
-        digitalWrite(GREEN_LED_PIN, LOW);
-        digitalWrite(BLUE_LED_PIN, LOW);
+        colorMap = {HIGH, LOW, LOW};
+        break;
+    default:
+        colorMap = {HIGH, HIGH, HIGH};
         break;
     }
+
+    digitalWrite(RED_LED_PIN, colorMap.red);
+    digitalWrite(GREEN_LED_PIN, colorMap.green);
+    digitalWrite(BLUE_LED_PIN, colorMap.blue);
 }
 
 void loopCyanPinkYellow()
@@ -122,47 +125,26 @@ void pulseBlue()
 
 void blinkWhite()
 {
-    if (ledState)
-    {
-        digitalWrite(RED_LED_PIN, HIGH);
-        digitalWrite(GREEN_LED_PIN, HIGH);
-        digitalWrite(BLUE_LED_PIN, HIGH);
-    }
-    else
-    {
-        digitalWrite(RED_LED_PIN, LOW);
-        digitalWrite(GREEN_LED_PIN, LOW);
-        digitalWrite(BLUE_LED_PIN, LOW);
-    }
+    int ledState = ledState ? HIGH : LOW;
+    digitalWrite(RED_LED_PIN, ledState);
+    digitalWrite(GREEN_LED_PIN, ledState);
+    digitalWrite(BLUE_LED_PIN, ledState);
 }
 
 void blinkGreen()
 {
+    int ledState = ledState ? HIGH : LOW;
     digitalWrite(BLUE_LED_PIN, LOW);
-    digitalWrite(RED_LED_PIN, LOW);
-    if (ledState)
-    {
-        digitalWrite(GREEN_LED_PIN, HIGH);
-    }
-    else
-    {
-        digitalWrite(GREEN_LED_PIN, LOW);
-    }
+    digitalWrite(RED_LED_PIN, LOW);   
+    digitalWrite(GREEN_LED_PIN, ledState);    
 }
 
 void blinkYellow()
 {
+    int ledState = ledState ? HIGH : LOW;
     digitalWrite(BLUE_LED_PIN, LOW);
-    if (ledState)
-    {
-        digitalWrite(RED_LED_PIN, HIGH);
-        digitalWrite(GREEN_LED_PIN, HIGH);
-    }
-    else
-    {
-        digitalWrite(RED_LED_PIN, LOW);
-        digitalWrite(GREEN_LED_PIN, LOW);
-    }
+    digitalWrite(RED_LED_PIN, ledState);
+    digitalWrite(GREEN_LED_PIN, ledState);    
 }
 
 void turnOffLED()
@@ -199,12 +181,29 @@ void blinkCyanPulse()
     }
 }
 
-const uint8_t colorSequence[][3] = {
+
+void blinkBlue()
+{
+    int ledState = ledState ? HIGH : LOW;
+    digitalWrite(GREEN_LED_PIN, LOW);
+    digitalWrite(RED_LED_PIN, LOW);   
+    digitalWrite(BLUE_LED_PIN, ledState); 
+}
+
+void staticYellow()
+{
+    digitalWrite(BLUE_LED_PIN, LOW);
+    digitalWrite(RED_LED_PIN, HIGH);
+    digitalWrite(GREEN_LED_PIN, HIGH);
+}
+
+static const uint8_t colorSequence[][3] = {
     {0, 255, 255}, // Cyan   (R=0,   G=255, B=255)
     {255, 0, 255}, // Pink   (R=255, G=0,   B=255)
     {255, 255, 0}, // Yellow (R=255, G=255, B=0)
 };
-const int NUM_COLORS = sizeof(colorSequence) / sizeof(colorSequence[0]);
+
+static const int NUM_COLORS = sizeof(colorSequence) / sizeof(colorSequence[0]);
 
 void loopCyanPinkYellowPulse(unsigned long currentTime)
 {
@@ -268,27 +267,6 @@ void loopCyanPinkYellowPulse(unsigned long currentTime)
     }
 }
 
-void blinkBlue()
-{
-    digitalWrite(GREEN_LED_PIN, LOW);
-    digitalWrite(RED_LED_PIN, LOW);
-    if (ledState)
-    {
-        digitalWrite(BLUE_LED_PIN, HIGH);
-    }
-    else
-    {
-        digitalWrite(BLUE_LED_PIN, LOW);
-    }
-}
-
-void staticYellow()
-{
-    digitalWrite(BLUE_LED_PIN, LOW);
-    digitalWrite(RED_LED_PIN, HIGH);
-    digitalWrite(GREEN_LED_PIN, HIGH);
-}
-
 void ledTask(void *parameter)
 {
     setupRGBLED();
@@ -304,7 +282,7 @@ void ledTask(void *parameter)
             lastToggle = currentTime;
         }
 
-         switch (deviceState)
+        switch (deviceState)
         {
         case IDLE:
             setStaticColor(StaticColor::GREEN);

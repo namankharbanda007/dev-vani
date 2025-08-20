@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PITCHSHIFT_H
+#define PITCHSHIFT_H
 
 #include <math.h>
 #include <stdio.h>
@@ -9,7 +10,7 @@
 //pitch shift effect with interpolaion fixed to 1.5 frequency factor, fixed delay, int16_t, 1 channel
 class PitchShiftFixedOutput : public AudioOutput {
 public:
-  PitchShiftFixedOutput(Print &out) { p_out = &out; }
+  explicit PitchShiftFixedOutput(Print &out) { p_out = &out; }
 
   PitchShiftInfo defaultConfig() {
     PitchShiftInfo result;
@@ -42,3 +43,5 @@ protected:
   uint32_t pitchMul;
   unsigned long secondaryOffset;
 };
+
+#endif

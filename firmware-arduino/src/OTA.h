@@ -1,5 +1,6 @@
 #ifndef OTA_H
 #define OTA_H
+
 #include "Config.h"
 
 extern const char *server_certificate;
