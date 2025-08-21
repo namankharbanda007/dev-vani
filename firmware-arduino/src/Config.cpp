@@ -1,5 +1,5 @@
-#include "Config.h"
 #include <nvs_flash.h>
+#include "Config.h"
 
 // ! define preferences
 Preferences preferences;

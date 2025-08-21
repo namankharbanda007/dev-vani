@@ -42,7 +42,7 @@ class WIFIMANAGER {
     String uiPrefix = "/wifi";          // Prefix for all UI endpionts
 
     Preferences preferences;            // Used to store AP credentials to NVS
-    char * NVS;                         // Name used for NVS preferences
+    char* NVS;                         // Name used for NVS preferences
 
     struct apCredentials_t {
       String apName;                    // Name of the AP SSID
@@ -83,7 +83,7 @@ class WIFIMANAGER {
     void fallbackToSoftAp(bool state = true);
 
     // Get the current fallback state
-    bool getFallbackState();
+    bool getFallbackState() const;
 
     // Call to run the Task in the background
     void startBackgroundTask(String apName = "", String apPass = "");
@@ -110,7 +110,7 @@ class WIFIMANAGER {
     bool tryConnect();
 
     // Check if a SSID is stored in the config
-    bool configAvailable();
+    bool configAvailable() const;
 
     // Preconfigure the SoftAP
     void configueSoftAp(String apName = "", String apPass = "");

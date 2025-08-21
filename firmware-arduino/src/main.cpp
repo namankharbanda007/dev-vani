@@ -1,12 +1,7 @@
-#include "OTA.h"
-#include <Arduino.h>
-#include <driver/rtc_io.h>
-#include "LEDHandler.h"
-#include "Config.h"
-#include "SPIFFS.h"
-#include "WifiManager.h"
 #include <driver/touch_sensor.h>
-#include "Button.h"
+#include "OTA.h"
+#include "WifiManager.h"
+#include "LEDHandler.h"
 #include "FactoryReset.h"
 
 #define TOUCH_THRESHOLD 28000
@@ -131,43 +126,43 @@ void setupWiFi()
 }
 
 void touchTask(void* parameter) {
-  touch_pad_init();
-  touch_pad_config(TOUCH_PAD_NUM2);
+    touch_pad_init();
+    touch_pad_config(TOUCH_PAD_NUM2);
 
-  bool touched = false;
-  unsigned long pressStartTime = 0;
-  unsigned long lastTouchTime = 0;
-  const unsigned long LONG_PRESS_DURATION = 500; // 500ms for long press
+    bool touched = false;
+    unsigned long pressStartTime = 0;
+    unsigned long lastTouchTime = 0;
+    const unsigned long LONG_PRESS_DURATION = 500; // 500ms for long press
 
-  while (1) {
-    // Read the touch sensor
-    uint32_t touchValue = touchRead(TOUCH_PAD_NUM2);
-    bool isTouched = (touchValue > TOUCH_THRESHOLD);
-    unsigned long currentTime = millis();
+    while (1) {
+        // Read the touch sensor
+        uint32_t touchValue = touchRead(TOUCH_PAD_NUM2);
+        bool isTouched = (touchValue > TOUCH_THRESHOLD);
+        unsigned long currentTime = millis();
 
-    // Initial touch detection
-    if (isTouched && !touched && (currentTime - lastTouchTime > TOUCH_DEBOUNCE_DELAY)) {
-      touched = true;
-      pressStartTime = currentTime;  // Start timing the press
-      lastTouchTime = currentTime;
+        // Initial touch detection
+        if (isTouched && !touched && (currentTime - lastTouchTime > TOUCH_DEBOUNCE_DELAY)) {
+            touched = true;
+            pressStartTime = currentTime;  // Start timing the press
+            lastTouchTime = currentTime;
+        }
+
+        // Check for long press while touched
+        if (touched && isTouched) {
+            if (currentTime - pressStartTime >= LONG_PRESS_DURATION) {
+                sleepRequested = true;  // Only enter sleep after 500ms of continuous touch
+            }
+        }
+
+        // Release detection
+        if (!isTouched && touched) {
+            touched = false;
+            pressStartTime = 0;  // Reset the press timer
+        }
+
+        vTaskDelay(20);  // Reduced from 50ms to 20ms for better responsiveness
     }
-
-    // Check for long press while touched
-    if (touched && isTouched) {
-      if (currentTime - pressStartTime >= LONG_PRESS_DURATION) {
-        sleepRequested = true;  // Only enter sleep after 500ms of continuous touch
-      }
-    }
-
-    // Release detection
-    if (!isTouched && touched) {
-      touched = false;
-      pressStartTime = 0;  // Reset the press timer
-    }
-
-    vTaskDelay(20);  // Reduced from 50ms to 20ms for better responsiveness
-  }
-  vTaskDelete(NULL);
+    vTaskDelete(NULL);
 }
 
 void setupDeviceMetadata() {

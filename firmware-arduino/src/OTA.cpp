@@ -47,7 +47,7 @@ void markOTAUpdateComplete() {
     if (httpCode > 0) {
         if (httpCode == HTTP_CODE_OK) {
             Serial.println("OTA status updated successfully");
-             setOTAStatusInNVS(OTA_IDLE);
+            setOTAStatusInNVS(OTA_IDLE);
         } else {
             Serial.printf("OTA status update failed with code: %d\n", httpCode);
         }
