@@ -1,10 +1,6 @@
 #ifndef PITCHSHIFT_H
 #define PITCHSHIFT_H
 
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "AudioTools.h"
 
 //pitch shift effect with interpolaion fixed to 1.5 frequency factor, fixed delay, int16_t, 1 channel
