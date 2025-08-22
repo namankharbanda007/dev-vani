@@ -119,7 +119,7 @@ void setupWiFi()
     webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
         request->redirect("/wifi");
     });
-    webServer.onNotFound([&](AsyncWebServerRequest *request) {
+    webServer.onNotFound([](AsyncWebServerRequest *request) {
       request->send(404, "text/plain", "Not found");
     });
     webServer.begin();

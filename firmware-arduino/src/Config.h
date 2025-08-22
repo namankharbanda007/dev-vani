@@ -1,7 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <Arduino.h>
 #include <ArduinoJson.h>
 #include <driver/i2s.h>
 #include <Preferences.h>
