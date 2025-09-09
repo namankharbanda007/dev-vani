@@ -1,6 +1,6 @@
 <div align="center" style="margin: 20px 0;">
 <a href="https://cookbook.openai.com/examples/voice_solutions/running_realtime_api_speech_on_esp32_arduino_edge_runtime_elatoai" target="_blank">
-  <img src="https://img.shields.io/badge/OpenAI-Cookbook-black?style=for-the-badge&logo=openai&logoColor=black&labelColor=white" alt="OpenAI" style="margin: 0 10px;">
+  <img src="https://img.shields.io/badge/OpenAI-Cookbook-yellow?style=for-the-badge&logo=openai&logoColor=white&labelColor=black" alt="OpenAI" style="margin: 0 10px;">
 </a>
   <a href="https://news.ycombinator.com/item?id=43762409" target="_blank">
     <img src="https://img.shields.io/badge/Hacker_News_Launch-white?style=for-the-badge&logo=ycombinator" alt="Hacker News Launch" style="margin: 0 10px;">
