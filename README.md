@@ -23,7 +23,7 @@
 </h3>
 </div>
 
-<img src="assets/ks1.png" alt="Elato Logo" width="100%">
+<img src="assets/ks.png" alt="Elato Logo" width="100%">
 
 
 # 🚀 Kickstarter Pre-Launch
