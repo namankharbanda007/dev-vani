@@ -10,6 +10,15 @@ Elato is heading to Kickstarter! After a year of prototyping and shipping early 
 
 ---
 
+
+<div align="center">
+<h3>
+
+[Homepage](https://elatoai.com/) | [Buy AI device](https://www.elatoai.com/products) | [Buy AI Dev Kit](https://www.elatoai.com/products/ai-devkit)
+
+</h3>
+</div>
+
 <div align="center" style="margin: 20px 0;">
   <a href="https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices" target="_blank">
     <img src="https://img.shields.io/badge/Kickstarter_Pre_Launch-white?style=for-the-badge&logo=kickstarter" alt="Elato Kickstarter Prelaunch" style="margin: 0 10px;">
@@ -25,13 +34,6 @@ Elato is heading to Kickstarter! After a year of prototyping and shipping early 
   </a>
 </div>
 
-<div align="center">
-<h3>
-
-[Homepage](https://elatoai.com/) | [Buy AI device](https://www.elatoai.com/products) | [Buy AI Dev Kit](https://www.elatoai.com/products/ai-devkit)
-
-</h3>
-</div>
 
 
 # 👾 ElatoAI: Realtime Speech AI Agents for ESP32
