@@ -19,6 +19,8 @@ Elato is heading to Kickstarter! After a year of prototyping and shipping early 
 </h3>
 </div>
 
+<br />
+
 <div align="center" style="margin: 20px 0;">
   <!-- <a href="https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices" target="_blank">
     <img src="https://img.shields.io/badge/Kickstarter_Pre_Launch-white?style=for-the-badge&logo=kickstarter" alt="Elato Kickstarter Prelaunch" style="margin: 0 10px;">
