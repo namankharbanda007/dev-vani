@@ -197,6 +197,7 @@ ElatoAI consists of three main components:
 20. **OAuth for Web client**: OAuth for your users to manage their AI characters and devices.
 21. **Pitch Factor**: Control the pitch of the AI's voice from the NextJS webapp to create cartoon-like voices.
 22. **Tool calling**: Call tools and functions from the ESP32 device to the Deno Edge Functions for a complete voice AI agent.
+23. **Tap to turn on**: Tap the touchpad to turn it on from sleep.
 
 ## 🛠 Tech Stack
 
