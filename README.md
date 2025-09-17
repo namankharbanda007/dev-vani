@@ -1,7 +1,4 @@
 <div align="center" style="margin: 20px 0;">
-  <a href="https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices" target="_blank">
-    <img src="https://img.shields.io/badge/Kickstarter_Pre_Launch-white?style=for-the-badge&logo=kickstarter" alt="Elato Kickstarter Prelaunch" style="margin: 0 10px;">
-  </a>
 <a href="https://cookbook.openai.com/examples/voice_solutions/running_realtime_api_speech_on_esp32_arduino_edge_runtime_elatoai" target="_blank">
   <img src="https://img.shields.io/badge/OpenAI-Cookbook-yellow?style=for-the-badge&logo=openai&logoColor=white&labelColor=black" alt="OpenAI" style="margin: 0 10px;">
 </a>
@@ -13,14 +10,6 @@
   </a>
 </div>
 
-## 👾 Kickstarter Pre-Launch
-
-We’re just getting started. After a year of prototyping and shipping early units, Elato is ready for its next chapter: our first Kickstarter campaign.  
-
-👉 [Kickstarter Pre-launch Page](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices) — click **“Notify me on launch”** to be first in line when we go live.  
-
-This is my very first Kickstarter. Honestly, it’s exciting and a little scary, but I’d love your support to help bring Elato to more people. Even one click makes a huge difference. Let’s make voice AI more accessible. 
-
 <div align="center">
 <h3>
 
@@ -29,7 +18,17 @@ This is my very first Kickstarter. Honestly, it’s exciting and a little scary,
 </h3>
 </div>
 
-<img src="assets/elato-alien.png" alt="Elato Logo" width="100%">
+# 👾 Kickstarter Pre-Launch
+
+We’re launching on Kickstarter soon! After a year of prototyping and shipping early units, Elato is ready for its next chapter: our first Kickstarter campaign.  
+
+➡️ [Kickstarter Pre-launch Page](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices) — click **“Notify me on launch”** to be first in line when we go live.  
+
+This is my very first Kickstarter. Honestly, it’s exciting and a little scary, but I’d love your support to help bring Elato to more people. Even one click makes a huge difference. Let’s make voice AI more accessible. 
+
+
+
+<img src="assets/ks.png" alt="Elato Logo" width="100%">
 
 # 🚀 ElatoAI: Realtime Speech AI Agents for ESP32
 
