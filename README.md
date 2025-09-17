@@ -23,12 +23,12 @@
 </h3>
 </div>
 
-<img src="assets/elato-alien.png" alt="Elato Logo" width="100%">
+<img src="assets/ks.png" alt="Elato Logo" width="100%">
 
 
 # 🚀 Kickstarter Pre-Launch
 
-We’re launching on Kickstarter soon. After a year of prototyping and shipping early units, Elato is ready for its next chapter: our first Kickstarter campaign! Your early support means a lot. Even one click helps us bring Elato to more people.
+Elato is heading to Kickstarter! After a year of prototyping and shipping early units, we’re preparing our very first campaign. Your early support means a lot. Even one click helps us bring Elato to more people.
 
 ➡️ [Kickstarter Pre-launch Page](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices) — click **“Notify me on launch”** to be first in line when we go live.  
 
