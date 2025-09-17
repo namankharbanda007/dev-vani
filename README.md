@@ -1,4 +1,4 @@
-
+<!-- 
 <img src="assets/ks.png" alt="Elato Logo" width="100%">
 
 
@@ -8,7 +8,7 @@ Elato is heading to Kickstarter! After a year of prototyping and shipping early 
 
 ➡️ [Kickstarter Pre-launch Page](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices) — click **“Notify me on launch”** to be first in line when we go live.  
 
----
+--- -->
 
 
 <div align="center">
