@@ -14,7 +14,7 @@ Elato is heading to Kickstarter! After a year of prototyping and shipping early 
 <div align="center">
 <h3>
 
-[Homepage](https://elatoai.com/) | [Buy AI device](https://www.elatoai.com/products) | [Buy AI Dev Kit](https://www.elatoai.com/products/ai-devkit)
+[Homepage](https://elatoai.com/) | [Pre-Order AI device](https://www.elatoai.com/products) | [Pre-Order AI Dev Kit](https://www.elatoai.com/products/ai-devkit)
 
 </h3>
 </div>
@@ -35,14 +35,6 @@ Elato is heading to Kickstarter! After a year of prototyping and shipping early 
   </a>
 </div>
 
-
-
-
-# 👾 ElatoAI: Realtime Speech AI Agents for ESP32
-
-Realtime AI Speech powered by **OpenAI Realtime API** and **Gemini Live API**, ESP32, Secure WebSockets, and Deno Edge Functions for >15-minute uninterrupted global conversations
-
-
 <div align="center">
 
 [![Discord](https://img.shields.io/badge/Discord-101_members-5865F2?style=flat&logo=discord&logoColor=white)](https://discord.gg/KJWxDPBRUj)
@@ -52,6 +44,14 @@ Realtime AI Speech powered by **OpenAI Realtime API** and **Gemini Live API**, E
 ![React](https://img.shields.io/badge/React-18.2.0-blue.svg)
 
 </div>
+
+
+# 👾 ElatoAI: Realtime Speech AI Agents for ESP32
+
+Realtime AI Speech powered by **OpenAI Realtime API** and **Gemini Live API**, ESP32, Secure WebSockets, and Deno Edge Functions for >15-minute uninterrupted global conversations
+
+
+
 
 ## ⚡️ With SOTA Realtime AI Speech Models on an ESP32
 
