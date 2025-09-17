@@ -24,14 +24,14 @@
 <img src="assets/elato-alien.png" alt="Elato Logo" width="100%">
 
 
-# 👾 Kickstarter Pre-Launch
+# 🚀 Kickstarter Pre-Launch
 
-We’re launching on Kickstarter soon! After a year of prototyping and shipping early units, Elato is ready for its next chapter: our first Kickstarter campaign. Your early support means a lot. Even one click helps us bring Elato to more people.
+We’re launching on Kickstarter soon. After a year of prototyping and shipping early units, Elato is ready for its next chapter: our first Kickstarter campaign! Your early support means a lot. Even one click helps us bring Elato to more people.
 
 ➡️ [Kickstarter Pre-launch Page](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices) — click **“Notify me on launch”** to be first in line when we go live.  
 
 
-# 🚀 ElatoAI: Realtime Speech AI Agents for ESP32
+# 👾 ElatoAI: Realtime Speech AI Agents for ESP32
 
 Realtime AI Speech powered by **OpenAI Realtime API** and **Gemini Live API**, ESP32, Secure WebSockets, and Deno Edge Functions for >15-minute uninterrupted global conversations
 
