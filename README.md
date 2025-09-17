@@ -7,9 +7,26 @@
 Elato is heading to Kickstarter! After a year of prototyping and shipping early units, we’re preparing our very first campaign. Your early support means a lot. Even one click helps us bring Elato to more people.
 
 ➡️ [Kickstarter Pre-launch Page](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices) — click **“Notify me on launch”** to be first in line when we go live.  
+ -->
 
---- -->
+ <img src="assets/ks.png" alt="Elato Logo" width="100%">
 
+
+<div align="center" style="margin: 20px 0;">
+  <!-- <a href="https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices" target="_blank">
+    <img src="https://img.shields.io/badge/Kickstarter_Pre_Launch-white?style=for-the-badge&logo=kickstarter" alt="Elato Kickstarter Prelaunch" style="margin: 0 10px;">
+  </a> -->
+    <a href="https://cookbook.openai.com/examples/voice_solutions/running_realtime_api_speech_on_esp32_arduino_edge_runtime_elatoai" target="_blank">
+  <img src="https://img.shields.io/badge/OpenAI-Cookbook-yellow?style=for-the-badge&logo=openai&logoColor=white&labelColor=black" alt="OpenAI" style="margin: 0 10px;">
+</a>
+  <a href="https://news.ycombinator.com/item?id=43762409" target="_blank">
+    <img src="https://img.shields.io/badge/Hacker_News_Launch-white?style=for-the-badge&logo=ycombinator" alt="Hacker News Launch" style="margin: 0 10px;">
+  </a>
+
+  <a href="https://blog.adafruit.com/2025/05/06/elatoai-realtime-speech-ai-agents-for-esp32/" target="_blank">
+    <img src="https://img.shields.io/badge/Adafruit-Product-red?style=for-the-badge&logo=adafruit" alt="Adafruit" style="margin: 0 10px;">
+  </a>
+</div>
 
 <div align="center">
 <h3>
@@ -18,22 +35,6 @@ Elato is heading to Kickstarter! After a year of prototyping and shipping early 
 
 </h3>
 </div>
-
-<div align="center" style="margin: 20px 0;">
-  <a href="https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices" target="_blank">
-    <img src="https://img.shields.io/badge/Kickstarter_Pre_Launch-white?style=for-the-badge&logo=kickstarter" alt="Elato Kickstarter Prelaunch" style="margin: 0 10px;">
-  </a>
-  <a href="https://news.ycombinator.com/item?id=43762409" target="_blank">
-    <img src="https://img.shields.io/badge/Hacker_News_Launch-white?style=for-the-badge&logo=ycombinator" alt="Hacker News Launch" style="margin: 0 10px;">
-  </a>
-  <a href="https://cookbook.openai.com/examples/voice_solutions/running_realtime_api_speech_on_esp32_arduino_edge_runtime_elatoai" target="_blank">
-  <img src="https://img.shields.io/badge/OpenAI-Cookbook-yellow?style=for-the-badge&logo=openai&logoColor=white&labelColor=black" alt="OpenAI" style="margin: 0 10px;">
-</a>
-  <a href="https://blog.adafruit.com/2025/05/06/elatoai-realtime-speech-ai-agents-for-esp32/" target="_blank">
-    <img src="https://img.shields.io/badge/Adafruit-Product-red?style=for-the-badge&logo=adafruit" alt="Adafruit" style="margin: 0 10px;">
-  </a>
-</div>
-
 
 
 # 👾 ElatoAI: Realtime Speech AI Agents for ESP32
