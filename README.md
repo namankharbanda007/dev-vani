@@ -18,7 +18,7 @@ Click [**Notify me on launch**](https://www.kickstarter.com/projects/elatoai/ela
 <div align="center">
 <h3>
 
-[Homepage](https://elatoai.com/)  |  [Kickstarter](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices)  |  [Pre-Order AI device](https://www.elatoai.com/products)  |  [Pre-Order AI Dev Kit](https://www.elatoai.com/products/ai-devkit)
+[Homepage](https://elatoai.com/)  |  [Kickstarter](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices)  |  [AI Device](https://www.elatoai.com/products)  |  [AI Dev Kit](https://www.elatoai.com/products/ai-devkit)
 
 </h3>
 </div>
