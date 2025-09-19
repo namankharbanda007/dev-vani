@@ -27,7 +27,7 @@ Elato is heading to Kickstarter! After a year of prototyping and shipping early 
 
 # 👾 ElatoAI: Realtime Speech AI Agents for ESP32
 
-Realtime AI Speech powered by **OpenAI Realtime API** and **Gemini Live API**, ESP32, Secure WebSockets, and Deno Edge Functions for >15-minute uninterrupted global conversations
+Realtime AI Speech powered by **OpenAI Realtime API**, **Eleven Labs AI Agents**, and **Gemini Live API**, ESP32, Secure WebSockets, and Deno Edge Functions for >15-minute uninterrupted global conversations
 
 <div align="center" style="margin: 20px 0;">
   <!-- <a href="https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices" target="_blank">
@@ -63,6 +63,8 @@ Realtime AI Speech powered by **OpenAI Realtime API** and **Gemini Live API**, E
 <img src="assets/openai.png" alt="OpenAI Realtime API" width="45%">
 
 <img src="assets/gemini.png" alt="Gemini Live API" width="45%">
+
+<img src="assets/elevenlabs.svg" alt="Gemini Live API" width="45%">
 
 </div>
 
@@ -153,6 +155,7 @@ cp .env.example .env
 # SUPABASE_KEY=<your-supabase-anon-key>
 # OPENAI_API_KEY=<your-openai-api-key>
 # GEMINI_API_KEY=<your-gemini-api-key>
+# ELEVENLABS_API_KEY=<your-elevenlabs-api-key
 
 # Run the server at port 8000
 deno run -A --env-file=.env main.ts
@@ -177,13 +180,13 @@ Once your Wifi credentials are configured, turn the device off and on again and 
 ElatoAI consists of three main components:
 
 1. **Frontend Client** (`Next.js` hosted on Vercel) - to create and talk to your AI agents and 'send' it to your ESP32 device
-2. **Edge Server Functions** (`Deno` running on Deno/Supabase Edge) - to handle the websocket connections from the ESP32 device and the OpenAI and Gemini API calls
-3. **ESP32 IoT Client** (`PlatformIO/Arduino`) - to receive the websocket connections from the Edge Server Functions and send audio to the OpenAI and Gemini API via the Deno edge server.
+2. **Edge Server Functions** (`Deno` running on Deno/Supabase Edge) - to handle the websocket connections from the ESP32 device and the LLM Provider API calls
+3. **ESP32 IoT Client** (`PlatformIO/Arduino`) - to receive the websocket connections from the Edge Server Functions and send audio to the LLM Provider via the Deno edge server.
 
 
 ## 🌟 Full list of features
 
-1. **Realtime Speech-to-Speech**: Instant speech conversion powered by OpenAI's Realtime API and Gemini's Live API.
+1. **Realtime Speech-to-Speech**: Instant speech conversion powered by OpenAI's Realtime API, Gemini's Live API and Eleven Labs AI Agents.
 2. **Create Custom AI Agents**: Create custom agents with different personalities and voices.
 3. **Customizable Voices**: Choose from a variety of voices and personalities.
 4. **Secure WebSockets**: Reliable, encrypted WebSocket communication.
@@ -219,10 +222,6 @@ ElatoAI consists of three main components:
 | Communication   | Secure WebSockets                        |
 | Libraries       | ArduinoJson, WebSockets, AsyncWebServer, ESP32_Button, Arduino Audio Tools, ArduinoLibOpus        |
 
-## [📈 Core Use Cases](./docs/Usecases.md)
-
-## [🤖🤖🤖 Getting Started with multiple devices](./docs/MultipleDevices.md)
-
 ## High-Level Flowchart
 
 ```mermaid
@@ -236,8 +235,10 @@ flowchart TD
   ESP32[ESP32 Device] -->|WebSocket| Edge[Deno Edge Function]
   Edge -->|OpenAI API| OpenAI[OpenAI Realtime API]
   Edge -->|Gemini API| Gemini[Gemini Live API]
+  Edge -->|ElevenLabs API| ElevenLabs[ElevenLabs AI Agents]
   OpenAI --> Edge
   Gemini --> Edge
+  ElevenLabs --> Edge
   Edge -->|WebSocket| ESP32
   ESP32 --> UserOutput
 ```
@@ -279,6 +280,10 @@ lib_deps =
     https://github.com/pschatzmann/arduino-libopus.git#a1.1.0
 ```
 
+## Additional Docs
+- [⏸️ Using the ElevenLabs API](./docs/ElevenLabs.md)
+- [📈 Core Use Cases](./docs/Usecases.md)
+- [🤖🤖🤖 Getting Started with multiple devices](./docs/MultipleDevices.md)
 
 ## 📊 Important Stats
 
