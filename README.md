@@ -235,10 +235,10 @@ flowchart TD
   ESP32[ESP32 Device] -->|WebSocket| Edge[Deno Edge Function]
   Edge -->|OpenAI API| OpenAI[OpenAI Realtime API]
   Edge -->|Gemini API| Gemini[Gemini Live API]
-  Edge -->|Eleven Labs API| Eleven Labs[Eleven Labs AI Agents]
+  Edge -->|ElevenLabs API| ElevenLabs[ElevenLabs AI Agents]
   OpenAI --> Edge
   Gemini --> Edge
-  Eleven Labs --> Edge
+  ElevenLabs --> Edge
   Edge -->|WebSocket| ESP32
   ESP32 --> UserOutput
 ```
