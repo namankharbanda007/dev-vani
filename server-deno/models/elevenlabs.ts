@@ -312,22 +312,6 @@ export const connectToElevenLabs = async (
                 console.log("Closed debug audio file.");
             }
         });
-
-        // Send initial device info to ESP32
-        try {
-            const device = await getDeviceInfo(supabase, user.user_id);
-
-            if (device) {
-                ws.send(JSON.stringify({
-                    type: "server",
-                    msg: "DEVICE.INFO",
-                    volume_control: device.volume ?? 100,
-                }));
-            }
-        } catch (error) {
-            console.error("Error fetching device info:", error);
-        }
-
     } catch (error) {
         console.error("Failed to connect to ElevenLabs:", error);
 
