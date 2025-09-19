@@ -12,13 +12,12 @@ Elato is heading to Kickstarter! After a year of prototyping and shipping early 
  <img src="assets/ks.png" alt="Elato Logo" width="100%">
 </a>
 
-Click [**Notify me on launch**](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices) to secure early-backer discounts and be the first to receive your Elato AI Device & Dev Kit.
 <br />
 
 <div align="center">
 <h3>
 
-[Homepage](https://elatoai.com/)  |  [Kickstarter](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices)  |  [AI Device](https://www.elatoai.com/products)  |  [AI Dev Kit](https://www.elatoai.com/products/ai-devkit)
+[🏠 Homepage](https://elatoai.com/)  |  [🚀 Kickstarter](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices)
 
 </h3>
 </div>
