@@ -84,7 +84,7 @@ export default function ElevenLabsModal({ isOpen, onClose, onSuccess, selectedUs
         <Label htmlFor="elevenLabsName">Character Name</Label>
         <Input
           id="elevenLabsName"
-          placeholder="My ElevenLabs Character"
+          placeholder="My Eleven Labs Character"
           value={form.name}
           onChange={handleNameChange}
           required
@@ -101,7 +101,7 @@ export default function ElevenLabsModal({ isOpen, onClose, onSuccess, selectedUs
           required
         />
         <p className="text-xs text-gray-500">
-          Find this in your ElevenLabs dashboard under your agent settings
+          Find this in your Eleven Labs dashboard under your agent settings
         </p>
       </div>
 
@@ -130,7 +130,7 @@ export default function ElevenLabsModal({ isOpen, onClose, onSuccess, selectedUs
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add ElevenLabs Character</DialogTitle>
+            <DialogTitle>Add Eleven Labs Character</DialogTitle>
           </DialogHeader>
           {FormContent}
         </DialogContent>
@@ -142,7 +142,7 @@ export default function ElevenLabsModal({ isOpen, onClose, onSuccess, selectedUs
     <Drawer open={isOpen} onOpenChange={handleClose}>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Add ElevenLabs Character</DrawerTitle>
+          <DrawerTitle>Add Eleven Labs Character</DrawerTitle>
         </DrawerHeader>
         <div className="px-4 pb-4">
           {FormContent}

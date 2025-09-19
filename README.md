@@ -69,7 +69,7 @@ Realtime AI Speech powered by **OpenAI Realtime API**, **Eleven Labs AI Agents**
 </div>
 
 
-## 📽️ Demo Video [(✨ Gemini demo)](https://youtu.be/_zUBue3pfVI)
+## 📽️ Demo Video ([✨ Gemini demo](https://youtu.be/_zUBue3pfVI), [Eleven Labs Demo](https://youtu.be/7LKTIuEW-hg))
 
 <div align="center">
     <a href="https://www.youtube.com/watch?v=o1eIAwVll5I" target="_blank">
@@ -77,7 +77,7 @@ Realtime AI Speech powered by **OpenAI Realtime API**, **Eleven Labs AI Agents**
   </a>
 </div>
 
-Video links: [OpenAI Demo](https://youtu.be/o1eIAwVll5I) | [Gemini Demo](https://youtu.be/_zUBue3pfVI)
+Video links: [OpenAI Demo](https://youtu.be/o1eIAwVll5I) | [Gemini Demo](https://youtu.be/_zUBue3pfVI) | [Eleven Labs Demo](https://youtu.be/7LKTIuEW-hg)
 
 ## 👷‍♀️ DIY Hardware Design
 
@@ -235,10 +235,10 @@ flowchart TD
   ESP32[ESP32 Device] -->|WebSocket| Edge[Deno Edge Function]
   Edge -->|OpenAI API| OpenAI[OpenAI Realtime API]
   Edge -->|Gemini API| Gemini[Gemini Live API]
-  Edge -->|ElevenLabs API| ElevenLabs[ElevenLabs AI Agents]
+  Edge -->|Eleven Labs API| Eleven Labs[Eleven Labs AI Agents]
   OpenAI --> Edge
   Gemini --> Edge
-  ElevenLabs --> Edge
+  Eleven Labs --> Edge
   Edge -->|WebSocket| ESP32
   ESP32 --> UserOutput
 ```
@@ -281,7 +281,7 @@ lib_deps =
 ```
 
 ## Additional Docs
-- [⏸️ Using the ElevenLabs API](./docs/ElevenLabs.md)
+- [⏸️ Using the Eleven Labs API](./docs/ElevenLabs.md)
 - [📈 Core Use Cases](./docs/Usecases.md)
 - [🤖🤖🤖 Getting Started with multiple devices](./docs/MultipleDevices.md)
 
@@ -311,7 +311,7 @@ lib_deps =
 2. Adding Arduino IDE support
 3. Add Hume API client for emotion detection
 4. Add MCP support on Deno Edge
-5. Plug in ElevenLabs API for voice generation
+5. Plug in Eleven Labs API for voice generation
 6. Add Azure OpenAI Support (easy pickings)
 
 We welcome contributions
