@@ -10,7 +10,6 @@ import {
 
 import { addConversation, getDeviceInfo } from "../supabase.ts";
 import { encoder, FRAME_SIZE, isDev } from "../utils.ts";
-import type { IPayload } from "../types.d.ts";
 
 // Calculate audio level for debugging
 function calculateAudioLevel(audioData: any): number {
@@ -130,15 +129,15 @@ export const connectToElevenLabs = async (
         console.log(`ElevenLabs connection ready - conversation_initiation_metadata already processed by SDK`);
 
         // Send initial RESPONSE.CREATED for the first message
-        console.log("Sending initial RESPONSE.CREATED to ESP32");
-        ws.send(JSON.stringify({
-            type: "server",
-            msg: "RESPONSE.CREATED"
-        }));
+        // console.log("Sending initial RESPONSE.CREATED to ESP32");
+        // ws.send(JSON.stringify({
+        //     type: "server",
+        //     msg: "RESPONSE.CREATED"
+        // }));
 
         // Set up ElevenLabs event handlers
         elevenLabsConnection.onMessage(async (event: IncomingSocketEvent) => {
-            console.log("ElevenLabs message type:", event.type);
+            console.log("ElevenLabs message type:", event);
 
             switch (event.type) {
                 case "conversation_initiation_metadata":
@@ -201,11 +200,20 @@ export const connectToElevenLabs = async (
                         );
 
                         // Send audio committed message like OpenAI does
-                        console.log("Sending AUDIO.COMMITTED to ESP32");
-                        ws.send(JSON.stringify({
-                            type: "server",
-                            msg: "AUDIO.COMMITTED"
-                        }));
+                        // console.log("Sending AUDIO.COMMITTED to ESP32");
+                        // ws.send(JSON.stringify({
+                        //     type: "server",
+                        //     msg: "AUDIO.COMMITTED"
+                        // }));
+
+                        if (!hasResponseStarted) {
+                            console.log("Sending RESPONSE.CREATED to ESP32 (agent audio starting)");
+                            ws.send(JSON.stringify({
+                                type: "server",
+                                msg: "RESPONSE.CREATED"
+                            }));
+                            hasResponseStarted = true;
+                        }
 
 
                     }
@@ -226,19 +234,11 @@ export const connectToElevenLabs = async (
                         hasResponseStarted = false; // Reset for next response
                         try {
                             const device = await getDeviceInfo(supabase, user.user_id);
-
-                            if (device) {
-                                ws.send(JSON.stringify({
-                                    type: "server",
-                                    msg: "RESPONSE.COMPLETE",
-                                    volume_control: device.volume ?? 100,
-                                }));
-                            } else {
-                                ws.send(JSON.stringify({
-                                    type: "server",
-                                    msg: "RESPONSE.COMPLETE",
-                                }));
-                            }
+                            ws.send(JSON.stringify({
+                                type: "server",
+                                msg: "RESPONSE.COMPLETE",
+                                volume_control: device?.volume ?? 100,
+                            }));
                         } catch (error) {
                             console.error("Error fetching updated device info:", error);
                             ws.send(JSON.stringify({

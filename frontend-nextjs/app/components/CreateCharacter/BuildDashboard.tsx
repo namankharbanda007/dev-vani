@@ -272,7 +272,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
               </p>
 
               <div className="overflow-x-auto px-2">
-                <div className="flex gap-3 w-max">
+                <div className="flex gap-3 w-max py-2">
                   {[...openaiVoices, ...geminiVoices].map((voice: VoiceType) => (
                     <div
                       key={voice.id}
