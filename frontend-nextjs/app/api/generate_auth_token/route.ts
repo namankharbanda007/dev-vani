@@ -103,7 +103,7 @@ export async function GET(req: Request) {
         const token = createSupabaseToken(
             process.env.JWT_SECRET_KEY!,
             payload,
-            null,
+            3650,
         );
 
         return NextResponse.json({ token });
