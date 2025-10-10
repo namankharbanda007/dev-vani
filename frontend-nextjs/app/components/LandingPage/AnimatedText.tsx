@@ -9,10 +9,10 @@ const AnimatedText: React.FC = () => {
         const options = {
             strings: [
                 '<span class="text-blue-500">with interactive storytelling</span>',
-                '<span class="text-purple-500">for language learning</span>',
+                '<span class="text-orange-500">for language learning</span>',
                 '<span class="text-green-500">for bedtime stories</span>',
                 '<span class="text-orange-500">with educational adventures</span>',
-                '<span class="text-pink-500">for vocabulary building</span>',
+                '<span class="text-yellow-500">for vocabulary building</span>',
                 '<span class="text-teal-500">as a reading companion</span>',
             ],
             typeSpeed: 70,  // Slightly faster

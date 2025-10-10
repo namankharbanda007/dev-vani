@@ -128,7 +128,7 @@ export function NavbarDropdownMenu({ user, stars }: NavbarMenuButtonProps) {
                             className="flex flex-row gap-2 w-full"
                         >
                             <CalendarCheck size={ICON_SIZE} />
-                            <span>Business Demo</span>
+                            <span>Tample Contact</span>
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
@@ -169,7 +169,7 @@ export function NavbarDropdownMenu({ user, stars }: NavbarMenuButtonProps) {
                 <DropdownMenuSeparator />
                 <div className="flex flex-row gap-2">
     <Link
-        href="https://elatoai.com/products"
+        href="https://Smartmurti.com/products"
         passHref
         className="flex rounded-lg flex-row gap-2 items-center flex-1 bg-amber-100 dark:bg-amber-900/40 px-2 py-2 text-amber-800 dark:text-amber-200 hover:bg-yellow-100 dark:hover:bg-amber-900/60 transition-colors"
     >
@@ -179,7 +179,7 @@ export function NavbarDropdownMenu({ user, stars }: NavbarMenuButtonProps) {
         />
         <div className="flex flex-col items-center">
             <span className="font-medium text-xs text-amber-900 dark:text-amber-200">
-                AI Device
+                Smart Murti
             </span>
             <span className="text-xs text-amber-600 dark:text-amber-400">
                 Buy Now
@@ -187,7 +187,7 @@ export function NavbarDropdownMenu({ user, stars }: NavbarMenuButtonProps) {
         </div>
     </Link>
     <Link
-        href="https://elatoai.com/products/ai-devkit"
+        href="https://elatoai.com/products/Smart-Mandir"
         passHref
         className="flex rounded-lg flex-row gap-2 items-center flex-1 bg-blue-100 dark:bg-blue-900/40 px-2 py-2 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors"
     >
@@ -197,7 +197,7 @@ export function NavbarDropdownMenu({ user, stars }: NavbarMenuButtonProps) {
         />
         <div className="flex flex-col items-center">
             <span className="font-medium text-xs text-blue-900 dark:text-blue-200">
-                AI Devkit
+                Smart Mandir
             </span>
             <span className="text-xs text-blue-600 dark:text-blue-400">
                 Buy Now

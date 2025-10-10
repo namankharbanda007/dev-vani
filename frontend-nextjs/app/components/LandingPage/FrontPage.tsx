@@ -80,7 +80,7 @@ const FrontPage = ({ user }: FrontPageProps) => {
                     in one compact, open-source device
                 </h1> */}
                  <h1 className="text-3xl md:text-5xl font-medium max-w-2xl mx-auto relative z-10 mb-6 leading-[1.2] md:leading-[1.3]">
-                    <span className="bg-clip-text font-normal text-transparent bg-gradient-to-r from-amber-500 to-pink-600 drop-shadow-sm">
+                    <span className="bg-clip-text font-normal text-transparent bg-gradient-to-r from-amber-500 to-yellow-600 drop-shadow-sm">
                     The <span className="font-extrabold"></span>screen-free storytelling toy <span className="font-extrabold">starring your little one</span></span>
                 </h1>
                 {/* <div className="relative">

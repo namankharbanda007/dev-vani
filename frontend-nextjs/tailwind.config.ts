@@ -13,7 +13,7 @@ const config = {
     safelist: [
         // Voice background colors
         "bg-blue-100",
-        "bg-purple-100",
+        "bg-orange-100",
         "bg-cyan-100",
         "bg-gray-100",
         "bg-indigo-100",
@@ -22,7 +22,7 @@ const config = {
         "bg-rose-100",
         "bg-yellow-100",
         "bg-red-100",
-        "bg-pink-100",
+        "bg-yellow-100",
         "bg-slate-100",
         "bg-sky-100",
         "bg-amber-100",

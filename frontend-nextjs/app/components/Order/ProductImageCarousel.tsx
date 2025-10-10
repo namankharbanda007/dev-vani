@@ -49,7 +49,7 @@ const images = [
     //     objectFit: "contain",
     // },
     // {
-    //     src: "/products/pink.jpg",
+    //     src: "/products/yellow.jpg",
     //     alt: "Using it with toys",
     //     objectFit: "contain",
     // },

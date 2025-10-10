@@ -62,7 +62,7 @@ void setStaticColor(StaticColor color)
     digitalWrite(BLUE_LED_PIN, colorMap.blue);
 }
 
-void loopCyanPinkYellow()
+void loopCyanyellowYellow()
 {
     // Cyan (Green + Blue)
     digitalWrite(RED_LED_PIN, LOW);
@@ -70,7 +70,7 @@ void loopCyanPinkYellow()
     digitalWrite(BLUE_LED_PIN, HIGH);
     delay(500);
 
-    // Pink (Red + Blue)
+    // yellow (Red + Blue)
     digitalWrite(RED_LED_PIN, HIGH);
     digitalWrite(GREEN_LED_PIN, LOW);
     digitalWrite(BLUE_LED_PIN, HIGH);
@@ -199,13 +199,13 @@ void staticYellow()
 
 static const uint8_t colorSequence[][3] = {
     {0, 255, 255}, // Cyan   (R=0,   G=255, B=255)
-    {255, 0, 255}, // Pink   (R=255, G=0,   B=255)
+    {255, 0, 255}, // yellow   (R=255, G=0,   B=255)
     {255, 255, 0}, // Yellow (R=255, G=255, B=0)
 };
 
 static const int NUM_COLORS = sizeof(colorSequence) / sizeof(colorSequence[0]);
 
-void loopCyanPinkYellowPulse(unsigned long currentTime)
+void loopCyanyellowYellowPulse(unsigned long currentTime)
 {
     // Duration of each color fade
     const unsigned long transitionDuration = 1000; // 500 ms per fade

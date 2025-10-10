@@ -68,7 +68,7 @@ export default function ProductsSection() {
                             key={product.id}
                             className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 
                                      transform transition-all duration-300
-                                     hover:shadow-xl hover:border-purple-200
+                                     hover:shadow-xl hover:border-orange-200
                                      relative
                                      before:absolute before:inset-0  before:opacity-0 
                                      hover:before:opacity-100 before:transition-opacity
@@ -77,7 +77,7 @@ export default function ProductsSection() {
                             <CardContent className="p-0 relative">
                                 <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
                                     {/* Image Section */}
-                                    <div className="w-full md:w-2/5 min-h-[200px] h-full relative rounded-xl overflow-hidden border border-purple-100">
+                                    <div className="w-full md:w-2/5 min-h-[200px] h-full relative rounded-xl overflow-hidden border border-orange-100">
     <Image
         src={product.imageUrl}
         alt={product.name}
@@ -92,7 +92,7 @@ export default function ProductsSection() {
 							
                                     {/* Content Section */}
                                     <div className="flex-1 flex flex-col items-start md:text-left">
-                                        <h3 className="text-xl font-bold text-purple-900 mb-2">
+                                        <h3 className="text-xl font-bold text-orange-900 mb-2">
                                             {product.name}
                                         </h3>
                                         <p className="text-gray-600 mb-4">
@@ -107,12 +107,12 @@ export default function ProductsSection() {
 
                                     {/* Price and Button Section */}
                                     <div className="flex flex-row items-center justify-end gap-4">
-                                        <p className="text-2xl font-bold text-purple-900">
+                                        <p className="text-2xl font-bold text-orange-900">
                                             ${product.price}
                                         </p>
                                         <Button 
 											size="lg"
-                                            className="w-full sm:w-auto flex-row items-center gap-2 px-4 bg-purple-600 text-white border-0 text-md"
+                                            className="w-full sm:w-auto flex-row items-center gap-2 px-4 bg-orange-600 text-white border-0 text-md"
                                         >
                                             <ShoppingCart className="h-4 w-4" /> Buy Now
                                         </Button>

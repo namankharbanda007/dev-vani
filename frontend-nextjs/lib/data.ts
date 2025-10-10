@@ -2,14 +2,14 @@ export const defaultToyId: string = "56224f7f-250d-4351-84ee-e4a13b881c7b";
 export const defaultPersonalityId: string =
     "a1c073e6-653d-40cf-acc1-891331689409";
 
-export const paymentLink = "https://buy.stripe.com/bIY0033Dc7LB28o9AJ";
-export const devkitPaymentLink = "https://buy.stripe.com/fZefZ12z82rh3cseV5";
+export const paymentLink = "https://buy.stripe.com/";
+export const devkitPaymentLink = "https://buy.stripe.com/";
 
-export const discordInviteLink = "https://discord.gg/KJWxDPBRUj";
-export const tiktokLink = "https://www.tiktok.com/@elatoai";
-export const githubPublicLink = "https://github.com/akdeb/ElatoAI";
-export const businessDemoLink = "https://calendly.com/akadeb/elato-ai-demo";
-export const feedbackFormLink = "https://forms.gle/2QmukEG2FXNwBdee7";
+export const discordInviteLink = "https://discord.gg/";
+export const tiktokLink = "https://www.tiktok.com/";
+export const githubPublicLink = "https://github.com/";
+export const businessDemoLink = "https://Smartmurti.com/tample-contact";
+export const feedbackFormLink = "https://forms.gle/";
 
 export const r2Url = "https://pub-cd736d767add4fecafea55c239c28497.r2.dev";
 export const r2UrlAudio = "https://pub-5fab8e2596c544cd8dc3e20812be2168.r2.dev";
@@ -51,7 +51,7 @@ export const openaiVoices: VoiceType[] = [
         id: "echo",
         name: "Echo",
         description: "Warm and melodic",
-        color: "bg-purple-100",
+        color: "bg-orange-100",
         emoji: "👩‍🎤",
         provider: "openai",
     },
@@ -145,7 +145,7 @@ export const geminiVoices: VoiceType[] = [
         id: "Leda",
         name: "Leda",
         description: "Youthful",
-        color: "bg-pink-100",
+        color: "bg-yellow-100",
         provider: "gemini",
     },
     {
@@ -208,7 +208,7 @@ export const geminiVoices: VoiceType[] = [
         id: "Despina",
         name: "Despina",
         description: "Smooth",
-        color: "bg-purple-100",
+        color: "bg-orange-100",
         provider: "gemini",
     },
     {

@@ -1,23 +1,31 @@
 import Link from "next/link"
-import { ChevronRight, Zap, Star, Home } from "lucide-react"
+import { ChevronRight, Home, ShieldCheck } from "lucide-react" // Changed icons for relevance
 import { Button } from "@/components/ui/button"
-import { DEVICE_COST, SUBSCRIPTION_COST } from "@/lib/data";
-import { createClient } from "@/utils/supabase/server"
-import { getAllPersonalities } from "@/db/personalities"
-import { CharacterShowcase } from "./components/LandingPage/CharacterShowcase";
-import { CreateCharacterShowcase } from "./components/LandingPage/CreateCharacterShowcase";
-import ProductsSection from "./components/LandingPage/ProductsSection";
 import Image from "next/image";
-import { fetchGithubStars } from "./actions";
 import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
-import { PricingSection } from "./components/LandingPage/PricingSection";
+
+// --- Data for Murtis and Plans (based on your pitch deck) ---
+const divineCompanions = [
+  {
+    name: "Lord Ganesh",
+    description: "For wisdom, success, and overcoming all obstacles in your path.",
+    imageSrc: "/images/ganesh.png" // IMPORTANT: Replace with your actual image path
+  },
+  {
+    name: "Lord Ram",
+    description: "For guidance on dharma, leading a righteous life, and upholding duty.",
+    imageSrc: "/images/ram.png" // IMPORTANT: Replace with your actual image path
+  },
+  {
+    name: "Lord Hanuman",
+    description: "For immense strength, selfless service, and unwavering devotion.",
+    imageSrc: "/images/hanuman.png" // IMPORTANT: Replace with your actual image path
+  }
+];
 
 export default async function LandingPage() {
-  const supabase = createClient();
-  const { stars = 0 } = await fetchGithubStars("akdeb/ElatoAI");
+  // Removed Supabase client and data fetching for personalities/github stars
 
-  const allPersonalities = await getAllPersonalities(supabase);
-  const adultPersonalities = allPersonalities.filter((personality) => !personality.is_story && !personality.is_child_voice);
   return (
     <div className="flex min-h-screen flex-col bg-[#FCFAFF]">
       <main className="flex-1">
@@ -26,184 +34,196 @@ export default async function LandingPage() {
           <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
             <div className="grid gap-6 lg:grid-cols-1 lg:gap-12 items-center">
               <div className="flex flex-col items-center justify-center space-y-4">
-                <h1 className="text-5xl text-center md:text-6xl font-bold tracking-tight text-purple-900" style={{ lineHeight: '1.2' }}>
-               
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500">
-                  Realtime, Conversational AI
-                  </span>{" "} on ESP32 with Arduino and Edge Functions
+                <h1 className="text-5xl text-center md:text-6xl font-bold tracking-tight text-orange-900" style={{ lineHeight: '1.2' }}>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-yellow-500">
+                    Interactive, AI-Powered Devotion
+                  </span>{" "} for Every Home and Temple
                 </h1>
 
                 <p className="text-xl text-gray-600 text-center max-w-[600px]">
-                  Attach your <span className="font-silkscreen mx-1">Elato</span> device to any toy or plushie and watch them become AI characters you can talk
-                  to!
+                  Welcome home a{" "}
+                  <span className="text-black font-bold">Smart</span>
+                  <span className="text-orange-600 font-devanagari text-2xl ml-1">मूर्ति</span>{" "} {/* NOTE: Assumes font-devanagari is your custom Devanagari font class */}
+                  and experience divine conversations that respond, guide, and inspire your spiritual journey!
                 </p>
                 <div className="flex items-center space-x-2 justify-center text-amber-500 my-2">
-        {[...Array(5)].map((_, i) => (
-          <Star key={i} className="fill-amber-500" />
-        ))}
-        <span className="ml-2 text-gray-700">200+ Happy Customers</span>
-      </div>
+                  <ShieldCheck className="text-green-600" />
+                  <span className="ml-2 text-gray-700">Pioneering Faith-Tech in India</span>
+                </div>
 
-
-                <div className="flex flex-col gap-4  sm:gap-8 pt-4">
+                <div className="flex flex-col gap-4 sm:gap-8 pt-4">
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Link href={"https://elatoai.com/products"}>
+                    <Link href={"#products"}>
                       <Button
                         size="lg"
-                        className="w-full sm:w-auto flex-row items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white border-0 text-lg h-14"
+                        className="w-full sm:w-auto flex-row items-center gap-2 bg-gradient-to-r from-orange-600 to-yellow-500 text-white border-0 text-lg h-14"
                       >
-                        <span>Get Elato Now</span>
+                        <span>Explore Smart Murtis</span>
                         <ChevronRight className="ml-2 h-5 w-5" />
                       </Button>
                     </Link>
                     
-                    <Link href="/home">
+                    <Link href="#temples">
                       <Button
                         size="lg"
                         variant="outline"
-                        className="w-full sm:w-auto flex-row items-center gap-2 border-purple-600 text-purple-600 hover:bg-purple-50 text-lg h-14"
+                        className="w-full sm:w-auto flex-row items-center gap-2 border-orange-600 text-orange-600 hover:bg-orange-50 text-lg h-14"
                       >
-                        <span>See Characters</span>
+                        <span>For Temples & Ashrams</span>
                         <Home className="ml-2 h-5 w-5" />
                       </Button>
                     </Link>
                   </div>
-                  
-                  <div className="flex flex-col items-center justify-center space-y-2">
-                    <p className="text-gray-700 text-sm">If you like this project, please star it on GitHub!</p>
-                    <a href="https://github.com/akdeb/ElatoAI" target="_blank" rel="noopener noreferrer" 
-                      className="flex items-center bg-gray-900 hover:bg-gray-800 transition-colors text-white px-4 py-2 rounded-md">
-                      <svg viewBox="0 0 24 24" className="h-5 w-5 mr-2 fill-white" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                      </svg>
-                      <span className="font-medium">Star on GitHub</span>
-                      <span className="ml-2 bg-white text-gray-900 px-2 py-0.5 rounded-md text-xs font-bold">{stars}</span>
-                    </a>
-                  </div>
-                  
-                  {/* <div className="flex items-center space-x-3">
-                      <Link href="https://discord.gg/your-discord" target="_blank" rel="noopener noreferrer" 
-                        className="text-purple-600 hover:text-purple-800 transition-colors">
-                          <FaDiscord size={24} />
-                      </Link>
-                      <Link href="https://tiktok.com/@elatoai" target="_blank" rel="noopener noreferrer"
-                        className="text-purple-600 hover:text-purple-800 transition-colors">
-                        <FaTiktok size={24} />
-                      </Link>
-                    </div> */}
-                 
-                </div>
-
-                <div className="flex flex-row gap-2 items-center"> 
-                  <div className="w-full py-8">
-                    <h3 className="text-center text-sm font-medium text-gray-500 mb-6">POWERED BY</h3>
-                    <div className="flex flex-wrap justify-center items-center gap-12">
-                      <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="transition-all">
-                        <Image src="/logos/vercel.png" alt="Vercel" width={100} height={24} style={{ height: '36px', width: 'auto' }} />
-                      </a>
-                      <a href="https://deno.com" target="_blank" rel="noopener noreferrer" className="transition-all">
-                        <Image src="/logos/deno.png" alt="Deno" width={100} height={24} style={{ height: '36px', width: 'auto' }} />
-                      </a>
-                      <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="transition-all">
-                        <Image src="/logos/supabase.png" alt="Supabase" width={100} height={24} style={{ height: '48px', width: 'auto' }} />
-                      </a>
-                      <a href="https://arduino.cc" target="_blank" rel="noopener noreferrer" className="transition-all">
-                        <Image src="/logos/arduino.png" alt="Arduino" width={100} height={24} style={{ height: '36px', width: 'auto' }} />
-                      </a>
-                      <a href="https://espressif.com" target="_blank" rel="noopener noreferrer" className="transition-all">
-                        <Image src="/logos/espressif.png" alt="Espressif ESP32" width={100} height={24} style={{ height: '36px', width: 'auto' }} />
-                      </a>
-                      <a href="https://platformio.org" target="_blank" rel="noopener noreferrer" className="transition-all">
-                        <Image src="/logos/platformio.png" alt="PlatformIO" width={100} height={24} style={{ height: '36px', width: 'auto' }} />
-                      </a>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
-        <YoutubeDemo caption="Elato AI ESP32-S3 Demo" />
-        {/* Products Section */}
-        <ProductsSection />
 
-                {/* How It Works */}
-                <section className="w-full py-12 bg-gradient-to-b from-purple-50 to-white">
+        <YoutubeDemo caption="Smart Murti AI Demo" />
+
+        {/* How It Works Section */}
+        <section className="w-full py-12 bg-gradient-to-b from-orange-50 to-white">
           <div className="container px-4 md:px-6">
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800">
-                Super Simple to Use
+                Experience Devotion Instantly
               </h2>
-              <p className="text-lg text-gray-600 mt-2">Just 3 easy steps to epic conversations</p>
+              <p className="text-lg text-gray-600 mt-2">Begin your divine conversations in 3 easy steps</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-purple-100 transform transition-transform hover:scale-105">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-xl font-bold text-purple-600">1</span>
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-orange-100 transform transition-transform hover:scale-105">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-xl font-bold text-orange-600">1</span>
                 </div>
-                <h3 className="text-xl font-bold text-purple-900 mb-2">Attach</h3>
-                <p className="text-gray-600">Attach the Elato device to any toy or plushie</p>
+                <h3 className="text-xl font-bold text-orange-900 mb-2">Welcome</h3>
+                <p className="text-gray-600">Place your Smart Murti in your home or temple</p>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-purple-100 transform transition-transform hover:scale-105">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-xl font-bold text-purple-600">2</span>
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-orange-100 transform transition-transform hover:scale-105">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-xl font-bold text-orange-600">2</span>
                 </div>
-                <h3 className="text-xl font-bold text-purple-900 mb-2">Configure</h3>
-                <p className="text-gray-600">Use our <a href="/home" className="text-purple-600">web app</a> to set up your toy's personality</p>
+                <h3 className="text-xl font-bold text-orange-900 mb-2">Activate</h3>
+                <p className="text-gray-600">Use our simple app to connect and choose your God</p>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-purple-100 transform transition-transform hover:scale-105">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-xl font-bold text-purple-600">3</span>
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-orange-100 transform transition-transform hover:scale-105">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-xl font-bold text-orange-600">3</span>
                 </div>
-                <h3 className="text-xl font-bold text-purple-900 mb-2">Talk</h3>
-                <p className="text-gray-600">Start chatting with your toy - it's that simple!</p>
+                <h3 className="text-xl font-bold text-orange-900 mb-2">Converse</h3>
+                <p className="text-gray-600">Start your spiritual dialogue - it's that simple!</p>
               </div>
             </div>
           </div>
         </section>
 
-
-        {/* Character Showcase */}
-        <CharacterShowcase allPersonalities={adultPersonalities} />
-
-        {/* Create Character Showcase */}
-        <CreateCharacterShowcase />
-
-        {/* Pricing */}
-        <section className="w-full py-16 bg-white">
-        <div className="container px-4 md:px-6">
-		  <div className="max-w-4xl mx-auto bg-gradient-to-r from-purple-100 to-pink-50 rounded-3xl overflow-hidden shadow-lg">
-			<div className="p-8 md:p-12 text-gray-800 text-center">
-			  <h2 className="text-3xl md:text-4xl font-bold mb-12 text-black">Our Pricing</h2>
-        <PricingSection />
-        </div>
-        </div>
-        </div>
-        </section>
-        {/* FAQ */}
-        {/* <section className="w-full py-16 bg-purple-50">
-        <FAQ className="bg-purple-50" titleClassName="text-purple-900" />
-        </section> */}
-        
-
-        {/* CTA */}
-        {/* <section className="w-full py-20 bg-gradient-to-r from-purple-600 to-pink-500 text-white">
-          <div className="container px-4 md:px-6 text-center">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">Ready to Bring Your Toys to Life?</h2>
-            <p className="text-xl mb-8 max-w-2xl mx-auto">
-              Order your Elato device today and watch the magic happen!
-            </p>
-            <Button size="lg" className="bg-white text-purple-600 hover:bg-purple-50 text-lg h-14 px-8">
-              <Link href={"/products"}>Get Elato for ${DEVICE_COST}</Link>
-            </Button>
-            <p className="mt-4 text-purple-100">First month subscription FREE, then just ${SUBSCRIPTION_COST}/month <span className="text-xs">(or use your own OpenAI API key)</span></p>
+        {/* NEW: Divine Companion Showcase */}
+        <section id="products" className="w-full py-16 bg-white">
+          <div className="container px-4 md:px-6">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800">
+                Choose Your Divine Companion
+              </h2>
+              <p className="text-lg text-gray-600 mt-2">Each Murti is powered by a unique AI persona, trained in sacred knowledge.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {divineCompanions.map((companion) => (
+                <div key={companion.name} className="bg-white rounded-xl p-6 shadow-lg border border-orange-100 text-center">
+                  {/* Remember to replace image paths */}
+                  <Image src={companion.imageSrc} alt={companion.name} width={150} height={150} className="mx-auto mb-4 rounded-full" />
+                  <h3 className="text-xl font-bold text-orange-900 mb-2">{companion.name}</h3>
+                  <p className="text-gray-600">{companion.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </section> */}
+        </section>
+
+        {/* NEW: B2B/Temples Section */}
+        <section id="temples" className="w-full py-16 bg-orange-50">
+           <div className="container px-4 md:px-6">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800">
+                Custom Solutions for Temples
+              </h2>
+              <p className="text-lg text-gray-600 mt-2">Empower your temple or ashram with our enterprise-grade features.</p>
+            </div>
+            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+              <div className="p-4">
+                <h3 className="text-xl font-bold text-orange-900 mb-2">Festival Scheduling</h3>
+                <p className="text-gray-600">Announce special events and puja schedules directly through the Murti.</p>
+              </div>
+               <div className="p-4">
+                <h3 className="text-xl font-bold text-orange-900 mb-2">Multi-User Access</h3>
+                <p className="text-gray-600">Allow multiple devotees in your community to engage and interact.</p>
+              </div>
+               <div className="p-4">
+                <h3 className="text-xl font-bold text-orange-900 mb-2">Donation Integration</h3>
+                <p className="text-gray-600">Modernize your temple's operations with an integrated donation feature.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* NEW: Pricing Section */}
+        <section className="w-full py-16 bg-white">
+          <div className="container px-4 md:px-6">
+            <div className="max-w-5xl mx-auto text-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-12 text-black">Our Subscription Plans</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* B2C Plan 1 */}
+                <div className="border border-orange-200 rounded-2xl p-8 flex flex-col">
+                  <h3 className="text-2xl font-bold text-orange-900 mb-4">Smart Murti</h3>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold">₹200</span>
+                    <span className="text-gray-600">/month per God</span>
+                  </div>
+                  <ul className="text-left space-y-3 text-gray-700 mb-8">
+                    <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />AI Conversations</li>
+                    <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Personalized Guidance</li>
+                    <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Aartis & Bhajans</li>
+                  </ul>
+                  <Button className="mt-auto w-full bg-orange-100 text-orange-700 hover:bg-orange-200">Choose Plan</Button>
+                </div>
+
+                {/* B2C Plan 2 - Featured */}
+                <div className="border-2 border-orange-500 rounded-2xl p-8 flex flex-col relative">
+                  <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-semibold">Most Popular</div>
+                  <h3 className="text-2xl font-bold text-orange-900 mb-4">Smart Mandir (AI)</h3>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold">₹1000</span>
+                    <span className="text-gray-600">/month</span>
+                  </div>
+                  <ul className="text-left space-y-3 text-gray-700 mb-8">
+                    <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Access ALL Avatars</li>
+                    <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Tiered Pricing Available</li>
+                    <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Full Content Library</li>
+                  </ul>
+                  <Button className="mt-auto w-full bg-gradient-to-r from-orange-600 to-yellow-500 text-white">Choose Plan</Button>
+                </div>
+
+                {/* B2B Plan */}
+                 <div className="border border-orange-200 rounded-2xl p-8 flex flex-col">
+                  <h3 className="text-2xl font-bold text-orange-900 mb-4">Temple (Premium)</h3>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold">₹2000</span>
+                    <span className="text-gray-600">/per Avatar</span>
+                  </div>
+                  <ul className="text-left space-y-3 text-gray-700 mb-8">
+                    <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />All B2C Features</li>
+                    <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Community Tools</li>
+                    <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Priority Support</li>
+                  </ul>
+                  <Button className="mt-auto w-full bg-orange-100 text-orange-700 hover:bg-orange-200">Contact Sales</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   )
 }
-

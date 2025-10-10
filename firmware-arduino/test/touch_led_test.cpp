@@ -14,7 +14,7 @@
 // Color sequence and timing
 const uint8_t colorSequence[][3] = {
     {0, 255, 255},   // Cyan
-    {255, 0, 255},   // Pink
+    {255, 0, 255},   // yellow
     {255, 255, 0},   // Yellow
 };
 const int NUM_COLORS = sizeof(colorSequence) / sizeof(colorSequence[0]);
@@ -81,12 +81,12 @@ void loop() {
 void colorPulseTask(void *pvParameters) {
     while (1) {
         unsigned long currentTime = millis();
-        loopCyanPinkYellowPulse(currentTime);
+        loopCyanyellowYellowPulse(currentTime);
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
 
-void loopCyanPinkYellowPulse(unsigned long currentTime) {
+void loopCyanyellowYellowPulse(unsigned long currentTime) {
     const unsigned long transitionDuration = 1000; // 1 second per transition
     
     static int colorIndex = 0;
