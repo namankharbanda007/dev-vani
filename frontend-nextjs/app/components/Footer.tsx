@@ -38,7 +38,7 @@ export default function Footer() {
                     </Button>
                 </a>
                 <Label className={`font-normal text-xs text-gray-500`}>
-                   Made with ❤️ by Elato AI © {new Date().getFullYear()}
+                   Made with ❤️ by Naman Kharbanda © {new Date().getFullYear()}
                 </Label>
             </div>
             {/* <Separator orientation="vertical" /> */}

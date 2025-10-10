@@ -41,13 +41,14 @@ export default function LeftNavbarButtons({ user }: LeftNavbarButtonsProps) {
             aria-label="Go to Home page"
             title="Click to go to Home page"
         >
-            <a href="https://www.elatoai.com">
+            <a href="https://www.Smartmurti.com">
                 <Link size={18} className="mr-1" />
-                <span className="text-md font-normal mr-1">Main Website</span>
-                <p className="flex items-center font-silkscreen text-xl">
-                    <span>Elato</span>
+                <span className="text-md font-normal mr-1">Worlds First</span>
+                <p className="text-xl text-gray-600 text-center max-w-[600px]">
+                    <span className="text-black font-bold">SMART</span>
+                    <span className="text-orange-600 font-devanagari text-2xl ml-1">मूर्ति</span>
                 </p>
-                <span className="text-xl">👾</span>
+                <span className="text-xl"></span>
             </a>
         </Button>
     </div>
