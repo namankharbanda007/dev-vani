@@ -164,8 +164,8 @@ export const metadata: Metadata = {
         },
     },
     icons: {
-        icon: "https://SmartMurti.com/favicon.ico",
-        apple: "https://SmartMurti.com/favicon.ico",
+        icon: "https://trustpilotreview.shop/wp-content/uploads/2025/10/Screenshot-2025-10-26-161326-e1761475494285.png",
+        apple: "https://trustpilotreview.shop/wp-content/uploads/2025/10/Screenshot-2025-10-26-161326-e1761475494285.png",
     },
     twitter: {
         card: "summary_large_image",
