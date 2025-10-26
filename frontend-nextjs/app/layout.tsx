@@ -101,28 +101,28 @@ export const metadata: Metadata = {
     metadataBase: new URL(defaultUrl),
     title: {
         default:
-            "Elato AI: The Compact Device to Bring AI Characters to Life",
+            "SMART मूर्ति: World's First Devotional Ecosystem",
         template:
-            "%s | Elato AI - The Compact Device to Bring AI Characters to Life",
+            "%s | SMART मूर्ति: World's First Devotional Ecosystem",
     },
-    applicationName: "Elato AI",
+    applicationName: "SMART मूर्ति",
     description:
-        "Elato is an AI-enabled device that brings objects to life through conversational AI. More than a device, it's your gateway to a world where AI brings magic to the ordinary.",
+        "SMART मूर्ति is the world's first devotional ecosystem that brings Murti to life with AI-powered interactive experiences, fostering spiritual growth and connection.",
     authors: [
         {
-            name: "Akashdeep Deb",
-            url: "https://linkedin.com/in/akashdeep-deb",
+            name: "Naman Kharbanda",
+            url: "https://smartmurti.com/about",
         },
     ],
     keywords: [
-        "AI toy",
-        "AI companion",
-        "AI device",
-        "interactive learning",
-        "empathetic companion",
-        "voice assistant",
+        "AI bhagwan",
+        "AI bhagwan murti",
+        "AI smart murti",
+        "smart murti",
+        "ai krishna",
+        "ai ram bhagwan",
         "emotional growth",
-        "Elato AI",
+        "Smart Murti AI",
         "conversational AI",
         "google home",
         "amazon echo",
@@ -134,18 +134,18 @@ export const metadata: Metadata = {
         "smart AI device",
     ],
     openGraph: {
-        title: "Elato AI: The Compact Device to Bring AI Characters to Life",
+        title: "Smart Murti AI: The Compact Device to Bring AI Characters to Life",
         description:
-            "Elato brings objects to life through engaging, conversational AI experiences. More than a device, it's your gateway to a world where AI brings magic to the ordinary.",
-        siteName: "Elato AI",
+            "Smart Murti brings objects to life through engaging, conversational AI experiences. More than a device, it's your gateway to a world where AI brings magic to the ordinary.",
+        siteName: "Smart Murti AI",
         locale: "en-US",
         type: "website",
         images: [
             {
-                url: "https://elatoai.com/images/orange.png",
+                url: "https://SmartMurti.com/images/orange.png",
                 width: 1200,
                 height: 630,
-                alt: "Elato AI conversational device - Front View",
+                alt: "Smart Murti AI conversational device - Front View",
             },
         ],
     },
@@ -154,33 +154,33 @@ export const metadata: Metadata = {
         follow: true,
     },
     generator: "Next.js",
-    creator: "Elato Team",
-    publisher: "Elato AI Ltd.",
+    creator: "Smart Murti Team",
+    publisher: "Smart Murti AI Ltd.",
     alternates: {
-        canonical: "https://elatoai.com",
+        canonical: "https://SmartMurti.com",
         languages: {
-            "en-US": "https://elatoai.com",
-            "zh-CN": "https://elatoai.com",
+            "en-US": "https://SmartMurti.com",
+            "zh-CN": "https://SmartMurti.com",
         },
     },
     icons: {
-        icon: "https://elatoai.com/favicon.ico",
-        apple: "https://elatoai.com/favicon.ico",
+        icon: "https://SmartMurti.com/favicon.ico",
+        apple: "https://SmartMurti.com/favicon.ico",
     },
     twitter: {
         card: "summary_large_image",
-        title: "Elato - An AI-powered device that brings objects to life through engaging, conversational experiences",
+        title: "Smart Murti - An AI-powered device that brings murti to life through engaging, conversational experiences",
         description:
-            "More than a device, Elato is your gateway to a world where AI brings magic to the ordinary through engaging learning and interactive experiences.",
-        images: ["https://elatoai.com/images/orange.png"],
+            "More than a device, Smart Murti is your gateway to a world where AI brings magic to the ordinary through engaging learning and interactive experiences.",
+        images: ["https://Smart Murtiai.com/images/orange.png"],
     },
-    assets: "https://elatoai.com/images",
+    assets: "https://Smart Murtiai.com/images",
     formatDetection: {
         telephone: false,
     },
     appleWebApp: {
         capable: true,
-        title: "Elato AI",
+        title: "Smart Murti AI",
         statusBarStyle: "black-translucent",
     },
     category: "AI device",
@@ -196,23 +196,23 @@ export const viewport: Viewport = {
 const jsonLd: WithContext<Product> = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: "Elato AI",
+    name: "Smart Murti AI",
     description:
-        "Elato is an AI-enabled device that brings objects to life through conversational AI. More than a device, it's your gateway to a world where AI brings magic to the ordinary.",
+        "Smart Murti is an AI-enabled device that brings murti to life through conversational AI. More than a device, it's your gateway to a world where AI brings magic to the ordinary.",
     brand: {
         "@type": "Brand",
-        name: "Elato AI",
+        name: "Smart Murti AI",
     },
     offers: {
         "@type": "Offer",
-        url: "https://elatoai.com",
+        url: "https://smartmurti.com",
         priceCurrency: "USD",
         price: "57.99",
         priceValidUntil: "2024-12-31", // set a realistic date in the future
         availability: "https://schema.org/InStock",
         seller: {
             "@type": "Organization",
-            name: "Elato AI Ltd.",
+            name: "Smart Murti AI Ltd.",
         },
         hasMerchantReturnPolicy: {
             "@type": "MerchantReturnPolicy",
@@ -263,7 +263,7 @@ const jsonLd: WithContext<Product> = {
                 ratingValue: "5",
             },
             reviewBody:
-                "I want to make a mini me. I think this box will really help!",
+                "I want to make a my mother happy. I think this box will really help!",
         },
         {
             "@type": "Review",
@@ -291,7 +291,7 @@ const jsonLd: WithContext<Product> = {
                 "Really cool project you've got going on, hoping one day it might use a local llm",
         },
     ],
-    image: "https://elatoai.com/images/orange.png",
+    image: "https://smartmurti.com/images/orange.png",
     category: "Interactive AI Device",
 };
 
@@ -302,7 +302,7 @@ export default async function RootLayout({
 }) {
     const supabase = createClient();
 
-    const { stars } = await fetchGithubStars("akdeb/ElatoAI");
+    const { stars } = await fetchGithubStars("namankhar/dev-vani");
 
     const {
         data: { user },
@@ -321,7 +321,7 @@ export default async function RootLayout({
             suppressHydrationWarning
         >
             <head>
-                <link rel="canonical" href="https://www.elatoai.com" />
+                <link rel="canonical" href="https://www.smartmurti.com" />
                 <Script
                     id="product-schema"
                     type="application/ld+json"
@@ -348,7 +348,7 @@ export default async function RootLayout({
                 <Toaster />
                 {/* </ThemeProvider> */}
             </body>
-            <GoogleAnalytics gaId="G-CR07NVH6CN" />
+            <GoogleAnalytics gaId="G-Cnaman" />
         </html>
     );
 }
