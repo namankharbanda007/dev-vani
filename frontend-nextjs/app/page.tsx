@@ -53,7 +53,7 @@ export default async function LandingPage() {
 
                 <div className="flex flex-col gap-4 sm:gap-8 pt-4">
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Link href={"#products"}>
+                    <Link href={"/products"}>
                       <Button
                         size="lg"
                         className="w-full sm:w-auto flex-row items-center gap-2 bg-gradient-to-r from-orange-600 to-yellow-500 text-white border-0 text-lg h-14"
@@ -63,7 +63,7 @@ export default async function LandingPage() {
                       </Button>
                     </Link>
                     
-                    <Link href="#temples">
+                    <Link href="/temples">
                       <Button
                         size="lg"
                         variant="outline"
@@ -186,7 +186,9 @@ export default async function LandingPage() {
                     <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Personalized Guidance</li>
                     <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Aartis & Bhajans</li>
                   </ul>
-                  <Button className="mt-auto w-full bg-orange-100 text-orange-700 hover:bg-orange-200">Choose Plan</Button>
+                  <Link href="/pricing">
+                    <Button className="mt-auto w-full bg-orange-100 text-orange-700 hover:bg-orange-200">Choose Plan</Button>
+                  </Link>
                 </div>
 
                 {/* B2C Plan 2 - Featured */}
@@ -202,7 +204,9 @@ export default async function LandingPage() {
                     <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Tiered Pricing Available</li>
                     <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Full Content Library</li>
                   </ul>
-                  <Button className="mt-auto w-full bg-gradient-to-r from-orange-600 to-yellow-500 text-white">Choose Plan</Button>
+                  <Link href="/pricing">
+                    <Button className="mt-auto w-full bg-gradient-to-r from-orange-600 to-yellow-500 text-white">Choose Plan</Button>
+                  </Link>
                 </div>
 
                 {/* B2B Plan */}
@@ -217,7 +221,9 @@ export default async function LandingPage() {
                     <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Community Tools</li>
                     <li className="flex items-center"><ShieldCheck className="w-5 h-5 text-green-500 mr-2" />Priority Support</li>
                   </ul>
-                  <Button className="mt-auto w-full bg-orange-100 text-orange-700 hover:bg-orange-200">Contact Sales</Button>
+                  <Link href="/contact">
+                    <Button className="mt-auto w-full bg-orange-100 text-orange-700 hover:bg-orange-200">Contact Sales</Button>
+                  </Link>
                 </div>
               </div>
             </div>

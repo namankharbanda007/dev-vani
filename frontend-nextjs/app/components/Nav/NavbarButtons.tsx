@@ -1,15 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { User } from "@supabase/supabase-js";
-import Link from "next/link";
-import { businessDemoLink, githubPublicLink } from "@/lib/data";
-import { Separator } from "@/components/ui/separator";
 import { NavbarDropdownMenu } from "./NavbarDropdownMenu";
-import { FaGithub } from "react-icons/fa";
 import PremiumBadge from "../PremiumBadge";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { usePathname } from "next/navigation";
-import GetInTouchButton from "../GetInTouch";
-import { CalendarCheck } from "lucide-react";
 
 interface NavbarButtonsProps {
     user: IUser | null;
@@ -35,46 +27,7 @@ const NavbarButtons: React.FC<NavbarButtonsProps> = ({
                     <PremiumBadge currentUserId={user.user_id} />
                 </div>
             )}
-            {!isHome && (
-                <Link
-                    href={githubPublicLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Visit our GitHub"
-                    className="ml-4"
-                    // className="bg-nav-bar rounded-full px-3"
-                >
-                     <Button
-                        size="sm"
-                        variant={isMobile ? "ghost" : "outline"}
-                        className="flex bg-nav-bar border-0 sm:mr-2 sm:border flex-row gap-2 items-center rounded-full"
-                    >
-                        <FaGithub className="text-xl" />
-                        <p className="hidden sm:flex font-normal">GitHub</p>
-                        <Separator
-                            orientation="vertical"
-                            className="hidden sm:flex"
-                        />
-                        <p className="hidden sm:flex text-xs font-normal">
-                            {stars?.toLocaleString() ?? 347}
-                        </p>
-                    </Button>
-                </Link>
-            )}
-            {!isHome && !isMobile && (
-                <Link href={businessDemoLink} passHref tabIndex={-1}>
-                    <Button
-                        size="sm"
-                        variant="secondary"
-                        className="flex flex-row gap-2 items-center rounded-full bg-nav-bar focus:shadow-none focus-visible:shadow-none"
-                    >
-                        <CalendarCheck size={20} />
-                        <span className="hidden sm:flex font-normal">
-                            Business demo
-                        </span>
-                    </Button>
-                </Link>
-            )}
+            {/* Removed public GitHub and Business demo buttons for security/privacy reasons. */}
             <NavbarDropdownMenu user={user} stars={stars} />
         </div>
     );
