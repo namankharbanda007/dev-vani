@@ -43,11 +43,10 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
             <div className="flex flex-row gap-4 p-4 ">
                 <Button
                     size="lg"
-                    className={`w-full rounded-full text-sm md:text-lg flex flex-row items-center gap-1 md:gap-2 transition-colors duration-300 ${
-                        isSent || isCurrentPersonality
+                    className={`w-full rounded-full text-sm md:text-lg flex flex-row items-center gap-1 md:gap-2 transition-colors duration-300 ${isSent || isCurrentPersonality
                             ? "bg-green-500 hover:bg-green-600"
                             : ""
-                    }`}
+                        }`}
                     variant={disableButtons ? "upsell_primary" : "default"}
                     disabled={isCurrentPersonality || disableButtons}
                     onClick={() => {
@@ -68,24 +67,24 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
     const PersonalCharacterComponent = () => {
         return (
             <>
-            <p className="text-gray-400">
-                        {"Character prompt"}
-                    </p>
-                    <p className="text-gray-600 whitespace-pre-line">
-                            {openPersonality.character_prompt}
-                        </p>
-                        <p className="text-gray-400">
-                        {"First message prompt"}
-                    </p>
-                    <p className="text-gray-600">
-                            {openPersonality.first_message_prompt}
-                        </p>
-                     <p className="text-gray-400">
-                        {"Voice prompt"}
-                    </p>
-                    <p className="text-gray-600">
-                            {openPersonality.voice_prompt}
-                        </p>
+                <p className="text-gray-400">
+                    {"Character prompt"}
+                </p>
+                <p className="text-gray-600 whitespace-pre-line">
+                    {openPersonality.character_prompt}
+                </p>
+                <p className="text-gray-400">
+                    {"First message prompt"}
+                </p>
+                <p className="text-gray-600">
+                    {openPersonality.first_message_prompt}
+                </p>
+                <p className="text-gray-400">
+                    {"Voice prompt"}
+                </p>
+                <p className="text-gray-600">
+                    {openPersonality.voice_prompt}
+                </p>
             </>
         );
     };
@@ -96,7 +95,7 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
                 <div className="flex flex-col items-center gap-6">
                     {isPersonalCharacter ? (
                         <div className="relative w-full h-[100px] sm:h-[200px] flex items-center justify-center">
-                        <EmojiComponent personality={openPersonality} size={100} />
+                            <EmojiComponent personality={openPersonality} size={100} />
                         </div>
                     ) : (
                         <div className="relative w-full h-[300px] sm:h-[400px]">
@@ -105,35 +104,35 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
                                 alt={openPersonality.title}
                                 className="rounded-lg object-top sm:object-center object-cover"
                                 fill
-                                // style={{
-                                //     objectFit: "cover",
+                            // style={{
+                            //     objectFit: "cover",
                             //     objectPosition: "top sm:center",
                             // }}
                             />
                         </div>
                     )}
                     <div className="space-y-2 text-left w-full relative">
-                    <div className="absolute top-0 right-0">
+                        {/* <div className="absolute top-0 right-0">
                     <Badge variant="outline">
                         {openPersonality.provider}
                     </Badge>
-                </div>
-                    <div className="flex flex-row items-center gap-2">
-                        <h3 className="text-xl font-semibold">
-                            {openPersonality.title}
-                        </h3>
-                    </div>
+                </div> */}
+                        <div className="flex flex-row items-center gap-2">
+                            <h3 className="text-xl font-semibold">
+                                {openPersonality.title}
+                            </h3>
+                        </div>
 
-                    <p className="text-gray-400">
-                        {openPersonality.subtitle}
-                    </p>
-                    <p className="text-gray-600">
-                        {openPersonality.short_description}
-                    </p>
-                    {(isPersonalCharacter || isDoctor) && (
-                        <PersonalCharacterComponent />
-                    )}
-                </div>
+                        <p className="text-gray-400">
+                            {openPersonality.subtitle}
+                        </p>
+                        <p className="text-gray-600">
+                            {openPersonality.short_description}
+                        </p>
+                        {(isPersonalCharacter || isDoctor) && (
+                            <PersonalCharacterComponent />
+                        )}
+                    </div>
                 </div>
             </div>
         );

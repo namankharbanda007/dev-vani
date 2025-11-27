@@ -21,7 +21,7 @@ function BottomToolbar({
   const isConnecting = sessionStatus === "CONNECTING";
 
   function getConnectionButtonIcon() {
-    if (isConnected) return <X className="flex-shrink-0 h-4 w-4 md:h-4 md:w-4" size={12}  />;
+    if (isConnected) return <X className="flex-shrink-0 h-4 w-4 md:h-4 md:w-4" size={12} />;
     if (isConnecting) return <Loader2 className="flex-shrink-0 h-4 w-4 md:h-4 md:w-4" size={12} />;
     return isDoctor ? <Stethoscope className="flex-shrink-0 h-4 w-4 md:h-4 md:w-4" size={12} /> : <PhoneCall className="flex-shrink-0 h-4 w-4 md:h-4 md:w-4" size={12} />;
   }
@@ -58,28 +58,28 @@ function BottomToolbar({
 
   return (
     <>
-    <TooltipProvider>
+      <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-          <button
-        onClick={() => {
-          onToggleConnection();
-        }}
-        className={getConnectionButtonClasses()}
-        disabled={isDisabled}
-      >
-        {getConnectionButtonIcon()}
-        {isDoctor ? getConnectionButtonLabelForDoctor() : getConnectionButtonLabel()}
-      </button>
+            <button
+              onClick={() => {
+                onToggleConnection();
+              }}
+              className={getConnectionButtonClasses()}
+              disabled={isDisabled}
+            >
+              {getConnectionButtonIcon()}
+              {isDoctor ? getConnectionButtonLabelForDoctor() : getConnectionButtonLabel()}
+            </button>
           </TooltipTrigger>
           {isDisabled && (
             <TooltipContent>
-              {personality.provider === "gemini" ? <p>Talk to Gemini on your Elato device.</p> : <p>Add an API key in Settings to chat with your AI character.</p>}
+              {personality.provider === "gemini" ? <p>Talk to your AI companion on your SMART मूर्ति device.</p> : <p>Add an API key in Settings to chat with your AI character.</p>}
             </TooltipContent>
           )}
         </Tooltip>
       </TooltipProvider>
-     
+
     </>
   );
 }

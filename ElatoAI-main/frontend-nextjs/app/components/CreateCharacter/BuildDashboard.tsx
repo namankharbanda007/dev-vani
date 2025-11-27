@@ -209,7 +209,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
     voiceInputLabel: string;
     voiceInputPlaceholder: string;
     voiceDescription: string;
-} | null>(null);
+  } | null>(null);
 
 
   const previewVoice = (voice: VoiceType) => {
@@ -302,10 +302,10 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                           <div className="flex flex-col text-center">
                             <span className="font-semibold text-gray-900">{voice.name}</span>
                             <span className="text-xs text-gray-600 mt-1">{voice.description}</span>
-                            <div className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium mt-2 ${voice.provider === 'openai' ? 'bg-emerald-500 text-white' : 'bg-purple-500 text-white'
+                            {/* <div className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium mt-2 ${voice.provider === 'openai' ? 'bg-emerald-500 text-white' : 'bg-purple-500 text-white'
                               }`}>
                               {voice.provider === 'openai' ? 'OpenAI' : 'Gemini'}
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                         {previewingVoice === voice.id && (
@@ -339,28 +339,28 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
 
                   </p>
                 </div>
-<div className="flex flex-row sm:flex-col gap-2 justify-end">
-<Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowVoiceCloneModal({ provider: "hume", title: "Hume Character", voiceInputLabel: "Hume Config ID", voiceInputPlaceholder: "your-hume-config-id-here", voiceDescription: "Find this in your Hume playground in configurations" })}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4 flex-shrink-0" />
-                  Hume EVI4
-                </Button>
-<Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowVoiceCloneModal({ provider: "elevenlabs", title: "Eleven Labs Character", voiceInputLabel: "Eleven Labs Agent ID", voiceInputPlaceholder: "your-elevenlabs-agent-id-here", voiceDescription: "Find this in your Eleven Labs dashboard in agent settings" })}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4 flex-shrink-0" />
-                  Eleven Labs Agent
-                </Button>
-</div>
+                <div className="flex flex-row sm:flex-col gap-2 justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowVoiceCloneModal({ provider: "hume", title: "Hume Character", voiceInputLabel: "Hume Config ID", voiceInputPlaceholder: "your-hume-config-id-here", voiceDescription: "Find this in your Hume playground in configurations" })}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4 flex-shrink-0" />
+                    Hume EVI4
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowVoiceCloneModal({ provider: "elevenlabs", title: "Eleven Labs Character", voiceInputLabel: "Eleven Labs Agent ID", voiceInputPlaceholder: "your-elevenlabs-agent-id-here", voiceDescription: "Find this in your Eleven Labs dashboard in agent settings" })}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4 flex-shrink-0" />
+                    Eleven Labs Agent
+                  </Button>
+                </div>
               </div>
 
             </div>
