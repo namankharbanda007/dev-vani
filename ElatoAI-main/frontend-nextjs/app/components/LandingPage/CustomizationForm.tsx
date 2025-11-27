@@ -51,7 +51,7 @@ export default function CustomizationForm() {
         <section className="w-full py-20 bg-gradient-to-b from-purple-50 to-white">
             <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
+                    <h2 className="text-3xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
                         How to Customize Your Friend
                     </h2>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -74,13 +74,13 @@ export default function CustomizationForm() {
                                     Select whether you want a Boy or Girl companion.
                                 </p>
 
-                                <div className="flex gap-4">
+                                <div className="flex flex-col sm:flex-row gap-4">
                                     <Button
                                         onClick={() => setGender("boy")}
                                         variant={gender === "boy" ? "default" : "outline"}
                                         className={`flex-1 py-6 text-lg rounded-xl ${gender === "boy"
-                                                ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
-                                                : "border-2 border-cyan-200 hover:bg-cyan-50"
+                                            ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+                                            : "border-2 border-cyan-200 hover:bg-cyan-50"
                                             }`}
                                     >
                                         Boy (Blue theme)
@@ -89,8 +89,8 @@ export default function CustomizationForm() {
                                         onClick={() => setGender("girl")}
                                         variant={gender === "girl" ? "default" : "outline"}
                                         className={`flex-1 py-6 text-lg rounded-xl ${gender === "girl"
-                                                ? "bg-gradient-to-r from-pink-500 to-red-600 text-white"
-                                                : "border-2 border-pink-200 hover:bg-pink-50"
+                                            ? "bg-gradient-to-r from-pink-500 to-red-600 text-white"
+                                            : "border-2 border-pink-200 hover:bg-pink-50"
                                             }`}
                                     >
                                         Girl (Pink theme)
@@ -223,8 +223,8 @@ export default function CustomizationForm() {
                                             key={hobby.id}
                                             onClick={() => toggleHobby(hobby.id)}
                                             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedHobbies.includes(hobby.id)
-                                                    ? hobby.color.replace("100", "200") + " ring-2 ring-offset-2 ring-green-400 scale-105"
-                                                    : hobby.color
+                                                ? hobby.color.replace("100", "200") + " ring-2 ring-offset-2 ring-green-400 scale-105"
+                                                : hobby.color
                                                 }`}
                                         >
                                             {hobby.label}
@@ -291,7 +291,7 @@ export default function CustomizationForm() {
                 {/* CTA */}
                 <div className="text-center mt-16">
                     <Link href="/home">
-                        <Button size="lg" className="px-12 py-6 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all">
+                        <Button size="lg" className="w-full sm:w-auto px-12 py-6 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all">
                             Start Creating Your Friend Now
                             <ChevronRight className="ml-2 h-5 w-5" />
                         </Button>

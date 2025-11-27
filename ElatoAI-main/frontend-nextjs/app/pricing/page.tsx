@@ -8,14 +8,14 @@ export default function PricingPage() {
             <main className="flex-1">
 
                 {/* Hero Section */}
-                <section className="w-full py-20 md:py-32 bg-gradient-to-br from-purple-100 via-pink-100 to-amber-100">
+                <section className="w-full py-12 md:py-32 bg-gradient-to-br from-purple-100 via-pink-100 to-amber-100">
                     <div className="container px-4 md:px-6 max-w-screen-xl mx-auto text-center">
                         <div className="inline-block mb-6">
                             <span className="bg-purple-500 text-white px-6 py-3 rounded-full text-base font-bold uppercase tracking-wide shadow-lg">
                                 ✨ Launching Soon
                             </span>
                         </div>
-                        <h1 className="text-5xl md:text-6xl font-bold font-lora text-transparent bg-clip-text bg-gradient-to-r from-purple-900 via-pink-800 to-amber-700 mb-6">
+                        <h1 className="text-4xl md:text-6xl font-bold font-lora text-transparent bg-clip-text bg-gradient-to-r from-purple-900 via-pink-800 to-amber-700 mb-6">
                             Simple, Transparent Pricing
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto">
@@ -25,7 +25,7 @@ export default function PricingPage() {
                 </section>
 
                 {/* Pricing Cards */}
-                <section className="w-full py-20">
+                <section className="w-full py-12 md:py-20">
                     <div className="container px-4 md:px-6 max-w-screen-xl mx-auto">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
@@ -172,7 +172,7 @@ export default function PricingPage() {
                 </section>
 
                 {/* FAQ Section */}
-                <section className="w-full py-20 bg-gray-50">
+                <section className="w-full py-12 md:py-20 bg-gray-50">
                     <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
                         <h2 className="text-4xl font-bold font-lora text-center text-gray-900 mb-12">
                             Pricing FAQs
@@ -204,16 +204,16 @@ export default function PricingPage() {
                 </section>
 
                 {/* CTA Section */}
-                <section className="w-full py-20 bg-gradient-to-br from-purple-900 to-pink-800">
+                <section className="w-full py-12 md:py-20 bg-gradient-to-br from-purple-900 to-pink-800">
                     <div className="container px-4 md:px-6 max-w-screen-lg mx-auto text-center">
-                        <h2 className="text-4xl md:text-5xl font-bold font-lora text-white mb-6">
+                        <h2 className="text-3xl md:text-5xl font-bold font-lora text-white mb-6">
                             Ready to Get Started?
                         </h2>
                         <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
                             Join the waitlist to be notified when SMART मूर्ति launches and get exclusive early-bird pricing!
                         </p>
                         <Link href="/">
-                            <Button size="lg" className="bg-white text-purple-900 hover:bg-purple-50 rounded-full shadow-xl px-12 py-6 text-lg">
+                            <Button size="lg" className="w-full sm:w-auto bg-white text-purple-900 hover:bg-purple-50 rounded-full shadow-xl px-12 py-6 text-lg">
                                 Back to Home
                                 <ChevronRight className="ml-2 h-5 w-5" />
                             </Button>

@@ -22,7 +22,7 @@ export default async function LandingPage() {
       <main className="flex-1">
 
         {/* Hero Section - The Split World */}
-        <section className="w-full py-16 md:py-24 bg-gradient-to-br from-[#FAF9F6] via-[#FFF8E7] to-[#FFFBEB] relative overflow-hidden">
+        <section className="w-full py-12 md:py-24 bg-gradient-to-br from-[#FAF9F6] via-[#FFF8E7] to-[#FFFBEB] relative overflow-hidden">
           {/* Background Decorative Elements */}
           <div className="absolute inset-0 opacity-30">
             <div className="absolute top-20 left-10 w-72 h-72 bg-purple-200 rounded-full blur-3xl"></div>
@@ -34,7 +34,7 @@ export default async function LandingPage() {
 
               {/* Brand */}
               <div className="flex flex-col items-center space-y-4">
-                <h1 className="text-4xl md:text-5xl font-bold font-luckiestGuy tracking-wider text-purple-900">
+                <h1 className="text-3xl md:text-5xl font-bold font-luckiestGuy tracking-wider text-purple-900">
                   SMART मूर्ति
                 </h1>
 
@@ -46,7 +46,7 @@ export default async function LandingPage() {
 
               {/* Main Headline - Emotional & Soulful */}
               <div className="text-center space-y-4 max-w-4xl">
-                <h2 className="text-5xl md:text-7xl font-bold font-lora text-transparent bg-clip-text bg-gradient-to-r from-purple-900 via-purple-700 to-amber-600 leading-tight">
+                <h2 className="text-4xl md:text-7xl font-bold font-lora text-transparent bg-clip-text bg-gradient-to-r from-purple-900 via-purple-700 to-amber-600 leading-tight">
                   Spirituality Meets Companionship
                 </h2>
                 <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed px-4">
@@ -143,7 +143,7 @@ export default async function LandingPage() {
         </section>
 
         {/* Lifestyle Showcase - Family Image */}
-        <section className="w-full py-20 bg-gradient-to-br from-purple-50 via-pink-50 to-amber-50">
+        <section className="w-full py-12 md:py-20 bg-gradient-to-br from-purple-50 via-pink-50 to-amber-50">
           <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
               {/* Left: Image */}
@@ -201,10 +201,10 @@ export default async function LandingPage() {
         </section>
 
         {/* Product Showcase - 3 Premium Cards */}
-        <section className="w-full py-20 bg-white">
+        <section className="w-full py-12 md:py-20 bg-white">
           <div className="container px-4 md:px-6 max-w-screen-xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
                 Choose Your Companion
               </h2>
               <p className="text-xl text-gray-600">
@@ -389,7 +389,7 @@ export default async function LandingPage() {
         </section>
 
         {/* Multilingual Support - Speaks Your Language */}
-        <section className="w-full py-20 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
+        <section className="w-full py-12 md:py-20 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
           <div className="container px-4 md:px-6 max-w-screen-xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
@@ -542,7 +542,7 @@ export default async function LandingPage() {
         <CustomizationForm />
 
         {/* How It Works - Icon-Based Steps */}
-        <section className="w-full py-20 bg-gradient-to-b from-white to-purple-50">
+        <section className="w-full py-12 md:py-20 bg-gradient-to-b from-white to-purple-50">
           <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
@@ -609,7 +609,7 @@ export default async function LandingPage() {
         </section>
 
         {/* Trust & Safety */}
-        <section className="w-full py-16 bg-gradient-to-br from-purple-900 to-purple-800">
+        <section className="w-full py-12 md:py-16 bg-gradient-to-br from-purple-900 to-purple-800">
           <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold font-lora text-white mb-4">

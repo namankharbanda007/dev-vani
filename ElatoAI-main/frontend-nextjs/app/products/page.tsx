@@ -9,9 +9,9 @@ export default function ProductsPage() {
             <main className="flex-1">
 
                 {/* Hero Section */}
-                <section className="w-full py-20 md:py-32 bg-gradient-to-br from-purple-100 via-pink-100 to-amber-100">
+                <section className="w-full py-12 md:py-32 bg-gradient-to-br from-purple-100 via-pink-100 to-amber-100">
                     <div className="container px-4 md:px-6 max-w-screen-xl mx-auto text-center">
-                        <h1 className="text-5xl md:text-6xl font-bold font-lora text-transparent bg-clip-text bg-gradient-to-r from-purple-900 via-pink-800 to-amber-700 mb-6">
+                        <h1 className="text-4xl md:text-6xl font-bold font-lora text-transparent bg-clip-text bg-gradient-to-r from-purple-900 via-pink-800 to-amber-700 mb-6">
                             Choose Your Perfect Companion
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto">
@@ -21,7 +21,7 @@ export default function ProductsPage() {
                 </section>
 
                 {/* Products Grid */}
-                <section className="w-full py-20">
+                <section className="w-full py-12 md:py-20">
                     <div className="container px-4 md:px-6 max-w-screen-xl mx-auto">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
@@ -182,16 +182,16 @@ export default function ProductsPage() {
                 </section>
 
                 {/* CTA Section */}
-                <section className="w-full py-20 bg-gradient-to-br from-purple-900 to-pink-800">
+                <section className="w-full py-12 md:py-20 bg-gradient-to-br from-purple-900 to-pink-800">
                     <div className="container px-4 md:px-6 max-w-screen-lg mx-auto text-center">
-                        <h2 className="text-4xl md:text-5xl font-bold font-lora text-white mb-6">
+                        <h2 className="text-3xl md:text-5xl font-bold font-lora text-white mb-6">
                             All Products Launching Soon
                         </h2>
                         <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
                             Be among the first to experience SMART मूर्ति. Sign up for early access and exclusive launch offers.
                         </p>
                         <Link href="/">
-                            <Button size="lg" className="bg-white text-purple-900 hover:bg-purple-50 rounded-full shadow-xl px-12 py-6 text-lg">
+                            <Button size="lg" className="w-full sm:w-auto bg-white text-purple-900 hover:bg-purple-50 rounded-full shadow-xl px-12 py-6 text-lg">
                                 Back to Home
                                 <ChevronRight className="ml-2 h-5 w-5" />
                             </Button>

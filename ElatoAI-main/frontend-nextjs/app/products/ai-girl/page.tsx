@@ -9,7 +9,7 @@ export default function AIGirlPage() {
             <main className="flex-1">
 
                 {/* Hero Section - Launching Soon */}
-                <section className="w-full py-20 md:py-32 bg-gradient-to-br from-pink-100 via-red-50 to-rose-50 relative overflow-hidden">
+                <section className="w-full py-12 md:py-32 bg-gradient-to-br from-pink-100 via-red-50 to-rose-50 relative overflow-hidden">
                     {/* Background Decorative */}
                     <div className="absolute inset-0 opacity-20">
                         <div className="absolute top-20 left-10 w-96 h-96 bg-pink-300 rounded-full blur-3xl"></div>
@@ -27,7 +27,7 @@ export default function AIGirlPage() {
                                     </span>
                                 </div>
 
-                                <h1 className="text-5xl md:text-6xl font-bold font-lora text-transparent bg-clip-text bg-gradient-to-r from-pink-900 via-red-700 to-rose-600 leading-tight">
+                                <h1 className="text-4xl md:text-6xl font-bold font-lora text-transparent bg-clip-text bg-gradient-to-r from-pink-900 via-red-700 to-rose-600 leading-tight">
                                     AI Girl Companion
                                 </h1>
 
@@ -88,7 +88,7 @@ export default function AIGirlPage() {
                 </section>
 
                 {/* Features Section */}
-                <section className="w-full py-20 bg-white">
+                <section className="w-full py-12 md:py-20 bg-white">
                     <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
                         <h2 className="text-4xl font-bold font-lora text-center text-gray-900 mb-12">
                             What Makes AI Girl Special
@@ -132,16 +132,16 @@ export default function AIGirlPage() {
                 </section>
 
                 {/* Coming Soon CTA */}
-                <section className="w-full py-20 bg-gradient-to-br from-pink-900 to-red-800">
+                <section className="w-full py-12 md:py-20 bg-gradient-to-br from-pink-900 to-red-800">
                     <div className="container px-4 md:px-6 max-w-screen-lg mx-auto text-center">
-                        <h2 className="text-4xl md:text-5xl font-bold font-lora text-white mb-6">
+                        <h2 className="text-3xl md:text-5xl font-bold font-lora text-white mb-6">
                             Launching Soon
                         </h2>
                         <p className="text-xl text-pink-100 mb-8 max-w-2xl mx-auto">
                             The AI Girl Companion will be available soon. Return to our homepage to explore our other AI companions.
                         </p>
                         <Link href="/">
-                            <Button size="lg" className="bg-white text-pink-900 hover:bg-pink-50 rounded-full shadow-xl px-12 py-6 text-lg">
+                            <Button size="lg" className="w-full sm:w-auto bg-white text-pink-900 hover:bg-pink-50 rounded-full shadow-xl px-12 py-6 text-lg">
                                 Explore All Products
                                 <ChevronRight className="ml-2 h-5 w-5" />
                             </Button>
