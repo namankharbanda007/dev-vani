@@ -43,71 +43,76 @@ const CharacterSection = ({
     }
 
     return (
-        <div className="flex flex-col gap-2 w-full">
-            <p className="text-sm text-gray-600 self-start flex flex-row items-center gap-2">
-                <span>{title}</span>
-            </p>
+        <div className="flex flex-col gap-4 w-full">
             <div className="w-full">
-                <div className="grid grid-cols-2 lg:grid-cols-4 md:gap-6 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredPersonalities.map((personality, index) => {
                         const isCurrentPersonality = personalityIdState === personality.personality_id;
                         return (
-                        <ModifyCharacterSheet
-                        key={personality.personality_id}
-                        openPersonality={personality}
-                        languageState={languageState}
-                        isCurrentPersonality={isCurrentPersonality}
-                        onPersonalityPicked={onPersonalityPicked}
-                        disableButtons={disableButtons}
-                    >
-                        <Card
-                            className={cn(
-                                "p-0 rounded-3xl cursor-pointer shadow-lg transition-all hover:scale-103 flex flex-col",
-                                personalityIdState === personality.personality_id
-                                    ? "border-primary border-2"
-                                    : "hover:border-primary/50"
-                            )}
-                            // onClick={() => onPersonalityPicked(personality)}
-                        >
-                            <CardContent className="flex-shrink-0 p-0 h-[160px] sm:h-[180px] relative">
-                                {personality.creator_id === null ? (
-                                    <Image
-                                        src={getPersonalityImageSrc(personality.key)}
-                                        alt={personality.key}
-                                        width={100}
-                                        height={180}
-                                    className="rounded-3xl rounded-br-none rounded-bl-none w-full h-full object-cover"
-                                />
-                                ) : (
-                                    <div className="flex flex-row items-center justify-center h-full">
-                                        <EmojiComponent personality={personality} />
-                                    </div>
-                                )}
-                                <Button
-                                    size="sm"
-                                    variant={isCurrentPersonality ? "default" : "outline"}
-                                    className={`absolute shadow-lg top-2 right-2 rounded-full h-9 w-9 p-0 ${isCurrentPersonality ? "bg-primary text-primary-foreground" : ""}`}
-                                    onClick={() => onPersonalityPicked(personality.personality_id!)}
-                                    aria-label={isCurrentPersonality ? "Deselect feature" : "Select feature"}
-                                >
-                                    {true ? (
-                                        <Check className="h-4 w-4" strokeWidth={3} />
-                                    ) : (
-                                        <CheckCircle className="h-4 w-4" strokeWidth={3} />
+                            <ModifyCharacterSheet
+                                key={personality.personality_id}
+                                openPersonality={personality}
+                                languageState={languageState}
+                                isCurrentPersonality={isCurrentPersonality}
+                                onPersonalityPicked={onPersonalityPicked}
+                                disableButtons={disableButtons}
+                            >
+                                <div
+                                    className={cn(
+                                        "group relative overflow-hidden rounded-3xl transition-all duration-300 cursor-pointer",
+                                        "bg-white/40 backdrop-blur-md border border-white/50 shadow-lg hover:shadow-2xl hover:-translate-y-1",
+                                        isCurrentPersonality ? "ring-2 ring-purple-500 ring-offset-2" : "hover:border-purple-300"
                                     )}
-                                </Button>
-                            </CardContent>
-                            <CardHeader className="flex-shrink-0 gap-0 px-4 py-2">
-                                <CardTitle className="font-semibold text-md flex flex-row items-center gap-2">
-                                    {personality.title}  
-                                </CardTitle>
-                                <CardDescription className="text-sm font-normal">
-                                    {personality.subtitle}
-                                </CardDescription>
-                            </CardHeader>
-                        </Card>
-                        </ModifyCharacterSheet>
-                    );
+                                >
+                                    {/* Card Content */}
+                                    <div className="relative aspect-[4/5] w-full overflow-hidden">
+                                        {personality.creator_id === null ? (
+                                            <Image
+                                                src={getPersonalityImageSrc(personality.key)}
+                                                alt={personality.key}
+                                                fill
+                                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                        ) : (
+                                            <div className="flex items-center justify-center h-full bg-gradient-to-br from-purple-100 to-amber-100">
+                                                <div className="transform transition-transform duration-300 group-hover:scale-110">
+                                                    <EmojiComponent personality={personality} />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Gradient Overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90" />
+
+                                        {/* Selection Indicator */}
+                                        <div className="absolute top-3 right-3 z-10">
+                                            <div className={cn(
+                                                "rounded-full p-2 transition-all duration-300",
+                                                isCurrentPersonality
+                                                    ? "bg-purple-600 text-white shadow-lg scale-100"
+                                                    : "bg-white/20 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+                                            )}>
+                                                {isCurrentPersonality ? (
+                                                    <Check className="h-4 w-4" strokeWidth={3} />
+                                                ) : (
+                                                    <CheckCircle className="h-4 w-4" />
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Text Content */}
+                                        <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+                                            <h3 className="font-lora font-bold text-xl mb-1 truncate shadow-sm">
+                                                {personality.title}
+                                            </h3>
+                                            <p className="text-sm text-gray-200 line-clamp-2 font-medium">
+                                                {personality.subtitle}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ModifyCharacterSheet>
+                        );
                     })}
                 </div>
             </div>

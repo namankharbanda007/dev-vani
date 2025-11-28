@@ -2,12 +2,11 @@
 
 import React, { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import HomePageSubtitles from "./../HomePageSubtitles";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Check, Volume2, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Volume2, Plus, Sparkles, User, Mic, Settings2 } from "lucide-react";
 import { createPersonality } from "@/db/personalities";
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from "@/components/ui/use-toast";
@@ -18,7 +17,7 @@ import EmojiComponent from "./EmojiComponent";
 import { PitchFactors } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import VoiceCloneModal from "./VoiceCloneModal";
-import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface SettingsDashboardProps {
   selectedUser: IUser;
@@ -41,12 +40,20 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+const steps = [
+  { id: 'identity', title: 'Identity', icon: User, description: 'Name & Personality' },
+  { id: 'voice', title: 'Voice', icon: Mic, description: 'Sound & Tone' },
+  { id: 'refine', title: 'Refine', icon: Settings2, description: 'Fine-tuning' },
+] as const;
+
+type Step = typeof steps[number]['id'];
+
 const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
   selectedUser,
 }) => {
   const supabase = createClient();
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState<'personality' | 'voice'>('personality');
+  const [currentStep, setCurrentStep] = useState<Step>('identity');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -63,106 +70,73 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
     }
   });
 
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof FormData | 'features', string>>>({});
   const [previewingVoice, setPreviewingVoice] = useState<string | null>(null);
-
-  const handleBlur = (field: keyof FormData | 'features') => {
-    // Mark the field as touched
-    setTouchedFields(prev => ({ ...prev, [field]: true }));
-
-    // Validate the field
-    if (field === 'features') {
-      validateField(field, formData.voiceCharacteristics.features);
-    } else {
-      validateField(field, formData[field] as string);
-    }
-  };
-
-  const validateField = (field: keyof FormData | 'features', value: string) => {
-    try {
-      if (field === 'features') {
-        formSchema.shape.voiceCharacteristics.shape.features.parse(value);
-      } else if (field === 'voiceCharacteristics') {
-        formSchema.shape.voiceCharacteristics.parse(value);
-      } else {
-        formSchema.shape[field].parse(value);
-      }
-      // Clear error if validation passes
-      setFormErrors(prev => ({ ...prev, [field]: undefined }));
-    } catch (error: unknown) {
-      if (error instanceof z.ZodError) {
-        const zodError = error as z.ZodError;
-        setFormErrors(prev => ({ ...prev, [field]: zodError.errors[0].message }));
-      }
-    }
-  };
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [showVoiceCloneModal, setShowVoiceCloneModal] = useState<{
+    provider: "elevenlabs" | "hume";
+    title: string;
+    voiceInputLabel: string;
+    voiceInputPlaceholder: string;
+    voiceDescription: string;
+  } | null>(null);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    const newFormData = { ...formData, [field]: value };
-    setFormData(newFormData);
-
-    // Only validate if the field has been touched before
-    if (touchedFields[field]) {
-      validateField(field, value);
+    setFormData({ ...formData, [field]: value });
+    if (formErrors[field]) {
+      setFormErrors({ ...formErrors, [field]: undefined });
     }
   };
 
   const handleVoiceCharacteristicChange = (characteristic: 'features' | 'emotion' | 'pitchFactor', value: string | number) => {
-    const newVoiceCharacteristics = {
-      ...formData.voiceCharacteristics,
-      [characteristic]: characteristic === 'pitchFactor' ? Number(value) : value
-    };
-
-    // Validate just this nested field
-    try {
-      if (characteristic === 'pitchFactor') {
-        formSchema.shape.voiceCharacteristics.shape.pitchFactor.parse(newVoiceCharacteristics[characteristic]);
-      } else {
-        formSchema.shape.voiceCharacteristics.shape[characteristic].parse(newVoiceCharacteristics[characteristic]);
-      }
-      // Clear error if validation passes
-      setFormErrors(prev => ({ ...prev, [characteristic]: undefined }));
-    } catch (error: unknown) {
-      if (error instanceof z.ZodError) {
-        const zodError = error as z.ZodError;
-        setFormErrors(prev => ({ ...prev, [characteristic]: zodError.errors[0].message }));
-      }
-    }
-
     setFormData({
       ...formData,
-      voiceCharacteristics: newVoiceCharacteristics
+      voiceCharacteristics: {
+        ...formData.voiceCharacteristics,
+        [characteristic]: characteristic === 'pitchFactor' ? Number(value) : value
+      }
     });
   };
 
+  const validateStep = (step: Step): boolean => {
+    const errors: Partial<Record<keyof FormData | 'features', string>> = {};
+    let isValid = true;
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    // Set submitting state to true
-    setIsSubmitting(true);
-
-    // Validate the entire form
-    const result = formSchema.safeParse(formData);
-    console.log(result);
-
-    if (!result.success) {
-      // Extract and set all validation errors
-      const errors: Partial<Record<keyof FormData | 'features', string>> = {};
-      result.error.errors.forEach(err => {
-        const path = err.path.join('.');
-        if (path === 'voiceCharacteristics.features') {
-          errors['features'] = err.message;
-        } else {
-          errors[err.path[0] as keyof FormData] = err.message;
-        }
-      });
-      setFormErrors(errors);
-      setIsSubmitting(false); // Reset submitting state
-      return;
+    if (step === 'identity') {
+      if (formData.title.length < 2) { errors.title = "Title must be at least 2 characters"; isValid = false; }
+      if (formData.description.length < 50) { errors.description = "Description must be at least 50 characters"; isValid = false; }
+      if (formData.prompt.length < 100) { errors.prompt = "Prompt must be at least 100 characters"; isValid = false; }
+      if (formData.firstMessagePrompt.length < 50) { errors.firstMessagePrompt = "First message must be at least 50 characters"; isValid = false; }
     }
 
+    if (step === 'voice') {
+      if (!formData.voice) { errors.voice = "Please select a voice"; isValid = false; }
+    }
+
+    if (step === 'refine') {
+      if (formData.voiceCharacteristics.features.length < 10) { errors.features = "Characteristics must be at least 10 characters"; isValid = false; }
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      if (currentStep === 'identity') setCurrentStep('voice');
+      else if (currentStep === 'voice') setCurrentStep('refine');
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep === 'refine') setCurrentStep('voice');
+    else if (currentStep === 'voice') setCurrentStep('identity');
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep('refine')) return;
+
+    setIsSubmitting(true);
     try {
       const personality = await createPersonality(supabase, selectedUser.user_id, {
         provider: formData.provider as ModelProvider,
@@ -182,403 +156,302 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
       });
 
       if (personality) {
-        toast({
-          title: "New AI Character created",
-          description: "Your character has been created!",
-          duration: 3000,
-        });
+        toast({ title: "Success!", description: "Your AI companion is ready." });
         router.push(`/home`);
       }
     } catch (error) {
       console.error("Error creating personality:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create your character. Please try again.",
-        variant: "destructive",
-        duration: 3000,
-      });
+      toast({ title: "Error", description: "Failed to create character.", variant: "destructive" });
     } finally {
-      setIsSubmitting(false); // Reset submitting state
+      setIsSubmitting(false);
     }
   };
 
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
-  const [showVoiceCloneModal, setShowVoiceCloneModal] = useState<{
-    provider: "elevenlabs" | "hume";
-    title: string;
-    voiceInputLabel: string;
-    voiceInputPlaceholder: string;
-    voiceDescription: string;
-  } | null>(null);
-
-
   const previewVoice = (voice: VoiceType) => {
     const { id, provider } = voice;
-
     if (provider === 'openai') {
-      // Stop any currently playing preview
       if (audioElement) {
         audioElement.pause();
         audioElement.currentTime = 0;
       }
-
-      const audioSampleUrl = `${r2UrlAudio}/${id}.wav`;
+      const audio = new Audio(`${r2UrlAudio}/${id}.wav`);
       setPreviewingVoice(id);
-
-      // Create and play audio element
-      const audio = new Audio(audioSampleUrl);
       setAudioElement(audio);
-
-      // Play the audio
-      audio.play().catch(error => {
-        console.error("Error playing audio:", error);
-        setPreviewingVoice(null);
-      });
-
-      // Reset the previewing state when audio ends
-      audio.onended = () => {
-        setPreviewingVoice(null);
-      };
-
-      // Fallback in case audio doesn't trigger onended
-      setTimeout(() => {
-        if (previewingVoice === id) {
-          setPreviewingVoice(null);
-        }
-      }, 10000); // 10 second fallback
+      audio.play().catch(() => setPreviewingVoice(null));
+      audio.onended = () => setPreviewingVoice(null);
     }
   }
 
-  const Heading = () => {
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-row gap-4 items-center sm:justify-normal justify-between max-w-screen-sm">
-          <div className="flex flex-row gap-4 items-center justify-between w-full">
-            <h1 className="text-3xl font-normal">Create your AI Character</h1>
-          </div>
-        </div>
-        {/* <HomePageSubtitles user={selectedUser} page="create" /> */}
-      </div>
-    );
-  };
-
   return (
-    <div className="overflow-hidden pb-2 w-full flex-auto flex flex-col pl-1 max-w-screen-sm">
-      <Heading />
+    <div className="flex flex-col w-full max-w-5xl mx-auto min-h-[calc(100vh-100px)] p-4 md:p-8">
+      {/* Header */}
+      <div className="mb-10 text-center space-y-4">
+        <h1 className="text-4xl md:text-5xl font-bold font-lora text-gray-900">
+          Create Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-amber-600">Companion</span>
+        </h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Design a unique personality that resonates with you.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6 mt-8 w-full pr-1">
-        {currentStep === 'personality' ?
-          <div className="space-y-4">
-            {/* Voice Picker */}
-            <div className="space-y-4">
-              <Label htmlFor="voice">Pick a voice</Label>
-              <p className="text-sm text-gray-500">
-                Click a voice to preview how it sounds.
-              </p>
+      {/* Stepper */}
+      <div className="flex justify-center mb-12">
+        <div className="flex items-center gap-4 md:gap-8">
+          {steps.map((step, idx) => {
+            const isActive = step.id === currentStep;
+            const isCompleted = steps.findIndex(s => s.id === currentStep) > idx;
+            const Icon = step.icon;
 
-              <div className="overflow-x-auto px-2">
-                <div className="flex gap-3 w-max py-2">
-                  {[...openaiVoices, ...geminiVoices].map((voice: VoiceType) => (
-                    <div
-                      key={voice.id}
-                      className={`relative rounded-xl border-2 p-4 transition-all cursor-pointer hover:scale-[1.02] hover:shadow-lg w-48 flex-shrink-0 ${formData.voice === voice.id
-                        ? `border-blue-500 shadow-lg ${voice.color} ring-2 ring-blue-200`
-                        : `border-gray-200 hover:border-gray-300 ${voice.color} hover:shadow-md`
-                        }`}
-                      onClick={() => {
-                        setFormData(prev => ({
-                          ...prev,
-                          provider: voice.provider as ModelProvider,
-                          voice: voice.id
-                        }));
-                        previewVoice(voice);
-                      }}
-                    >
-                      <div className="flex flex-col">
-                        <div className="flex flex-col items-center gap-3">
-                          <div className="text-3xl">
-                            <EmojiComponent emoji={voice.emoji} />
-                          </div>
-                          <div className="flex flex-col text-center">
-                            <span className="font-semibold text-gray-900">{voice.name}</span>
-                            <span className="text-xs text-gray-600 mt-1">{voice.description}</span>
-                            {/* <div className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium mt-2 ${voice.provider === 'openai' ? 'bg-emerald-500 text-white' : 'bg-purple-500 text-white'
-                              }`}>
-                              {voice.provider === 'openai' ? 'OpenAI' : 'Gemini'}
-                            </div> */}
-                          </div>
-                        </div>
-                        {previewingVoice === voice.id && (
-                          <div className="absolute top-3 right-3">
-                            <div className="animate-pulse text-blue-600 bg-white rounded-full p-2 shadow-lg">
-                              <Volume2 size={16} />
-                            </div>
-                          </div>
-                        )}
-                        {formData.voice === voice.id && (
-                          <div className="absolute -top-2 -right-2">
-                            <div className="bg-blue-500 text-white rounded-full p-1.5 shadow-lg">
-                              <Check size={12} />
-                            </div>
-                          </div>
-                        )}
+            return (
+              <div key={step.id} className="flex items-center gap-3">
+                <div className={cn(
+                  "flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300",
+                  isActive ? "bg-purple-600 text-white shadow-lg scale-110" :
+                    isCompleted ? "bg-green-500 text-white" : "bg-gray-100 text-gray-400"
+                )}>
+                  {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                </div>
+                <div className="hidden md:block">
+                  <p className={cn("font-semibold text-sm", isActive ? "text-purple-900" : "text-gray-500")}>
+                    {step.title}
+                  </p>
+                  <p className="text-xs text-gray-400">{step.description}</p>
+                </div>
+                {idx < steps.length - 1 && (
+                  <div className="w-12 h-0.5 bg-gray-200 mx-2 hidden md:block" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Content Card */}
+      <div className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-2xl rounded-3xl p-6 md:p-10 flex-1 flex flex-col">
+        <div className="flex-1">
+          {currentStep === 'identity' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold">Name</Label>
+                    <Input
+                      placeholder="e.g. Arya, The Wise Sage"
+                      value={formData.title}
+                      onChange={(e) => handleInputChange('title', e.target.value)}
+                      className="h-12 text-lg bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl"
+                    />
+                    {formErrors.title && <p className="text-red-500 text-sm">{formErrors.title}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold">Description</Label>
+                    <Textarea
+                      placeholder="A brief summary of who they are..."
+                      value={formData.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      className="min-h-[120px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>{formErrors.description && <span className="text-red-500">{formErrors.description}</span>}</span>
+                      <span>{formData.description.length}/200</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold">Core Personality (Prompt)</Label>
+                    <Textarea
+                      placeholder="Detailed instructions on how they should behave, think, and speak..."
+                      value={formData.prompt}
+                      onChange={(e) => handleInputChange('prompt', e.target.value)}
+                      className="min-h-[120px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>{formErrors.prompt && <span className="text-red-500">{formErrors.prompt}</span>}</span>
+                      <span>{formData.prompt.length}/1000</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold">First Message</Label>
+                    <Textarea
+                      placeholder="How they introduce themselves..."
+                      value={formData.firstMessagePrompt}
+                      onChange={(e) => handleInputChange('firstMessagePrompt', e.target.value)}
+                      className="min-h-[80px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>{formErrors.firstMessagePrompt && <span className="text-red-500">{formErrors.firstMessagePrompt}</span>}</span>
+                      <span>{formData.firstMessagePrompt.length}/150</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 'voice' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {[...openaiVoices, ...geminiVoices].map((voice: VoiceType) => (
+                  <div
+                    key={voice.id}
+                    onClick={() => {
+                      setFormData(prev => ({ ...prev, provider: voice.provider as ModelProvider, voice: voice.id }));
+                      previewVoice(voice);
+                    }}
+                    className={cn(
+                      "relative group cursor-pointer rounded-2xl p-4 transition-all duration-300 border-2",
+                      formData.voice === voice.id
+                        ? "border-purple-500 bg-purple-50 shadow-lg scale-105"
+                        : "border-transparent bg-white hover:border-purple-200 hover:shadow-md hover:-translate-y-1"
+                    )}
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="text-4xl transform transition-transform group-hover:scale-110">
+                        <EmojiComponent emoji={voice.emoji} />
+                      </div>
+                      <div className="text-center">
+                        <h3 className="font-bold text-gray-900">{voice.name}</h3>
+                        <p className="text-xs text-gray-500 line-clamp-1">{voice.description}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
 
-            {/* ElevenLabs Alternative */}
-            <div className="space-y-3 p-4 bg-yellow-100 rounded-lg border border-gray-200">
-              <div className="flex items-start sm:flex-row gap-4 flex-col justify-between">
-                <div>
-                  <Label className="text-sm font-medium">Creating an Eleven Labs or Hume Character?</Label>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Create Voice AI Characters with 11Labs Conversational AI Agents or Hume EVI4. You are responsible for obtaining proper consent and ensuring ethical use of all voice clones.
+                    {/* Playing Indicator */}
+                    {previewingVoice === voice.id && (
+                      <div className="absolute top-2 right-2 animate-pulse text-purple-600 bg-white rounded-full p-1.5 shadow-sm">
+                        <Volume2 size={14} />
+                      </div>
+                    )}
 
-                  </p>
-                </div>
-                <div className="flex flex-row sm:flex-col gap-2 justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowVoiceCloneModal({ provider: "hume", title: "Hume Character", voiceInputLabel: "Hume Config ID", voiceInputPlaceholder: "your-hume-config-id-here", voiceDescription: "Find this in your Hume playground in configurations" })}
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4 flex-shrink-0" />
-                    Hume EVI4
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowVoiceCloneModal({ provider: "elevenlabs", title: "Eleven Labs Character", voiceInputLabel: "Eleven Labs Agent ID", voiceInputPlaceholder: "your-elevenlabs-agent-id-here", voiceDescription: "Find this in your Eleven Labs dashboard in agent settings" })}
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4 flex-shrink-0" />
-                    Eleven Labs Agent
-                  </Button>
-                </div>
-              </div>
-
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                placeholder="AI Hulk"
-                value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                onBlur={() => handleBlur('title')}
-              />
-              <p className="text-sm flex justify-between">
-                <span className={formErrors.title ? "text-red-500" : "text-gray-500"}>
-                  {formErrors.title}
-                </span>
-                <span className="text-gray-500">{formData.title.length}/50</span>
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe what your AI character does and its personality..."
-                rows={2}
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                onBlur={() => handleBlur('description')} />
-              <p className="text-sm flex justify-between">
-                <span className={formErrors.description ? "text-red-500" : "text-gray-500"}>
-                  {formErrors.description}
-                </span>
-                <span className="text-gray-500">{formData.description.length}/200</span>
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="prompt">Prompt</Label>
-              <Textarea
-                id="prompt"
-                placeholder="Enter specific instructions for how your AI should respond..."
-                rows={4}
-                value={formData.prompt}
-                onChange={(e) => handleInputChange('prompt', e.target.value)}
-                onBlur={() => handleBlur('prompt')}
-              />
-              <p className="text-sm flex justify-between">
-                <span className={formErrors.prompt ? "text-red-500" : "text-gray-500"}>
-                  {formErrors.prompt}
-                </span>
-                <span className="text-gray-500">{formData.prompt.length}/1000</span>
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="firstMessagePrompt">First message prompt</Label>
-              <Textarea
-                id="firstMessagePrompt"
-                placeholder="How your AI character should respond in the first message to the user..."
-                rows={4}
-                value={formData.firstMessagePrompt}
-                onChange={(e) => handleInputChange('firstMessagePrompt', e.target.value)}
-                onBlur={() => handleBlur('firstMessagePrompt')}
-              />
-              <p className="text-sm flex justify-between">
-                <span className={formErrors.firstMessagePrompt ? "text-red-500" : "text-gray-500"}>
-                  {formErrors.firstMessagePrompt}
-                </span>
-                <span className="text-gray-500">{formData.firstMessagePrompt.length}/150</span>
-              </p>
-            </div>
-          </div> :
-          <div className="space-y-6">
-            {/* Pitch Slider */}
-            <div className="flex flex-col gap-4 -pt-6 pb-4">
-              <Label htmlFor="pitchFactor">Voice Pitch</Label>
-              <p className="text-sm text-gray-500">
-                Slide to adjust voice depth on your device
-              </p>
-
-              <div className="space-y-6">
-                <Slider
-                  id="pitchFactor"
-                  min={0.75}
-                  max={1.5}
-                  step={0.25}
-                  value={[formData.voiceCharacteristics.pitchFactor]}
-                  onValueChange={(value: number[]) => {
-                    handleVoiceCharacteristicChange('pitchFactor', value[0]);
-                  }}
-                  className="w-full"
-                />
-
-                <div className="flex justify-between text-sm">
-                  {PitchFactors.map((item, idx) => (
-                    <div key={idx} className="flex flex-col items-center gap-1">
-                      <EmojiComponent emoji={item.emoji} />
-                      <span className="font-medium">{item.label}</span>
-                      <span className="text-xs hidden sm:block text-gray-500">{item.desc}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-
-            {/* Voice Characteristics Textarea */}
-            <div className="space-y-2">
-              <Label htmlFor="voiceCharacteristics">Characteristics</Label>
-              <Textarea
-                id="voiceCharacteristics"
-                placeholder="e.g., Medium pitch, Normal speed, Clear voice"
-                className="w-full min-h-16"
-                rows={2}
-                value={formData.voiceCharacteristics.features}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    voiceCharacteristics: {
-                      ...prev.voiceCharacteristics,
-                      features: value,
-                    },
-                  }));
-                  if (touchedFields['features']) {
-                    validateField('features', value);
-                  }
-                }}
-                onBlur={() => handleBlur('features')}
-              />
-              <p className="text-sm flex justify-between">
-                <span className={formErrors.features ? 'text-red-500' : 'text-gray-500'}>
-                  {formErrors.features}
-                </span>
-                <span className="text-gray-500">
-                  {formData.voiceCharacteristics.features.length}/150
-                </span>
-              </p>
-            </div>
-
-            {/* Emotional Tone Picker */}
-            <div className="space-y-4 pb-2">
-              <Label className="block mb-2">Emotional Tone</Label>
-              <div className="grid grid-cols-3 gap-3">
-                {emotionOptions.map((emotion) => (
-                  <div
-                    key={emotion.value}
-                    className={`
-                  rounded-lg border p-3 cursor-pointer transition-all
-                  ${formData.voiceCharacteristics.emotion === emotion.value
-                        ? 'border-2 border-blue-500 shadow-sm ' + emotion.color
-                        : 'border-gray-200 hover:border-gray-300'
-                      }
-                `}
-                    onClick={() =>
-                      handleVoiceCharacteristicChange('emotion', emotion.value)
-                    }
-                  >
-                    <div className="flex flex-col items-center text-center">
-                      <EmojiComponent emoji={emotion.icon} />
-                      <span className="text-sm font-medium">{emotion.label}</span>
-                    </div>
+                    {/* Selected Indicator */}
+                    {formData.voice === voice.id && (
+                      <div className="absolute -top-2 -right-2 bg-purple-600 text-white rounded-full p-1 shadow-md">
+                        <Check size={12} />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        }
+              {formErrors.voice && <p className="text-red-500 text-center">{formErrors.voice}</p>}
 
-        {currentStep === 'personality' ? (
+              <div className="flex justify-center pt-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-2xl flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-amber-900 text-sm">Pro Tip</h4>
+                    <p className="text-amber-800 text-sm">Click on any voice card to hear a preview. Choose one that matches the personality you defined in the previous step.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 'refine' && (
+            <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="bg-white/50 rounded-2xl p-6 space-y-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-base font-semibold">Voice Pitch</Label>
+                    <span className="text-sm text-purple-600 font-medium">
+                      {PitchFactors.find(p => p.value === formData.voiceCharacteristics.pitchFactor)?.label || 'Normal'}
+                    </span>
+                  </div>
+                  <Slider
+                    min={0.75}
+                    max={1.5}
+                    step={0.25}
+                    value={[formData.voiceCharacteristics.pitchFactor]}
+                    onValueChange={(val) => handleVoiceCharacteristicChange('pitchFactor', val[0])}
+                    className="py-4"
+                  />
+                  <div className="flex justify-between text-xs text-gray-400 px-1">
+                    <span>Deep</span>
+                    <span>High</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Emotional Tone</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {emotionOptions.map((emotion) => (
+                      <div
+                        key={emotion.value}
+                        onClick={() => handleVoiceCharacteristicChange('emotion', emotion.value)}
+                        className={cn(
+                          "cursor-pointer rounded-xl border-2 p-3 transition-all text-center",
+                          formData.voiceCharacteristics.emotion === emotion.value
+                            ? "border-purple-500 bg-purple-50 text-purple-900"
+                            : "border-transparent bg-white hover:border-gray-200"
+                        )}
+                      >
+                        <div className="text-2xl mb-1"><EmojiComponent emoji={emotion.icon} /></div>
+                        <span className="text-sm font-medium">{emotion.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">Voice Characteristics</Label>
+                  <Textarea
+                    placeholder="e.g. Speaks slowly with a calm demeanor..."
+                    value={formData.voiceCharacteristics.features}
+                    onChange={(e) => handleInputChange('features' as any, e.target.value)} // Type cast for simplicity in this specific handler
+                    className="min-h-[100px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none"
+                  />
+                  {formErrors.features && <p className="text-red-500 text-sm">{formErrors.features}</p>}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Footer */}
+        <div className="flex justify-between items-center mt-10 pt-6 border-t border-gray-200/50">
           <Button
-            onClick={() => setCurrentStep('voice')}
-            className="ml-auto flex flex-row gap-2 items-center"
+            variant="ghost"
+            onClick={handleBack}
+            disabled={currentStep === 'identity'}
+            className="text-gray-500 hover:text-gray-900 hover:bg-gray-100/50"
           >
-            Voice Features <ArrowRight className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
-        ) : (
-          <div className="w-full flex justify-between">
+
+          {currentStep === 'refine' ? (
             <Button
-              variant="outline"
-              className="flex flex-row gap-2 items-center"
-              onClick={() => setCurrentStep('personality')}
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-purple-600 to-amber-600 hover:from-purple-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all rounded-full px-8 py-6 text-lg"
             >
-              <ArrowLeft className="w-4 h-4" /> Back
+              {isSubmitting ? "Creating..." : "Create Companion"}
+              {!isSubmitting && <Sparkles className="w-5 h-5 ml-2" />}
             </Button>
+          ) : (
             <Button
-              variant="default"
-              className="flex flex-row gap-2 items-center"
-              type="submit"
-              disabled={
-                isSubmitting ||
-                formData.title === '' ||
-                formData.description === '' ||
-                formData.prompt === '' ||
-                formData.voice === '' ||
-                formData.voiceCharacteristics.features === ''
-              }
+              onClick={handleNext}
+              className="bg-gray-900 hover:bg-gray-800 text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
             >
-              {isSubmitting ? "Creating..." : "Create"} {!isSubmitting && <Check className="w-4 h-4" />}
+              Next Step <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-          </div>
-        )}
-      </form>
+          )}
+        </div>
+      </div>
+
       <VoiceCloneModal
         isOpen={!!showVoiceCloneModal}
         onClose={() => setShowVoiceCloneModal(null)}
         selectedUser={selectedUser}
         onSuccess={() => {
-          // Optionally refresh personalities or show success message
-          toast({
-            title: "Success",
-            description: "Voice clone character added successfully!",
-          });
+          toast({ title: "Success", description: "Voice clone added!" });
           router.push('/home');
         }}
         voiceCloneModalProps={showVoiceCloneModal!}
       />
     </div>
-  )
+  );
 };
 
 export default SettingsDashboard;

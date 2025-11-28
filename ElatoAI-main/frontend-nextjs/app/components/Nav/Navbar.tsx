@@ -34,11 +34,12 @@ export function Navbar({
 
     return (
         <div
-            className={`backdrop-blur-[3px] flex-none flex items-center sticky top-0 z-50 transition-transform duration-300 h-[60px] ${isVisible ? "translate-y-0" : "-translate-y-full"
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"
                 }`}
         >
+            <div className="absolute inset-0 bg-white/70 backdrop-blur-md border-b border-white/20 shadow-sm"></div>
             <nav
-                className={`mx-auto w-full max-w-[1440px] px-4 flex items-center justify-between`}
+                className={`relative mx-auto w-full max-w-[1440px] px-6 h-[72px] flex items-center justify-between`}
             >
                 <LeftNavbarButtons user={user} />
                 <NavbarButtons user={user} isHome={isHome} />

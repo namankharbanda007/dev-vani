@@ -47,47 +47,62 @@ const Playground: React.FC<PlaygroundProps> = ({
     };
 
     return (
-        <div className="flex flex-col">
-            <div className="flex flex-col w-full gap-2">
-                <div className="flex flex-row items-center gap-4 sm:gap-8 justify-between">
-                    <div className="flex flex-row items-center gap-4 sm:gap-8">
-                        <h1 className="text-3xl font-normal">
-                            {"Playground"}
+        <div className="flex flex-col min-h-[calc(100vh-80px)] p-6 md:p-10 max-w-[1600px] mx-auto w-full">
+            <div className="flex flex-col w-full gap-8">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div className="space-y-2">
+                        <h1 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 tracking-tight">
+                            Welcome Back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-amber-600">Friend</span>
                         </h1>
-                        <div className="flex flex-col gap-8 items-center justify-center">
+                        <p className="text-lg text-gray-600 font-medium">
+                            Continue your spiritual journey or start a new conversation.
+                        </p>
+                    </div>
+
+                    {/* Active Conversation Area - Integrated */}
+                    <div className="glass-card p-1 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
                         <TranscriptProvider>
-      <EventProvider>
-        <App personalityIdState={personalityIdState} isDoctor={isDoctor} userId={currentUser.user_id} />
-      </EventProvider>
-    </TranscriptProvider>
-                        </div>
+                            <EventProvider>
+                                <App personalityIdState={personalityIdState} isDoctor={isDoctor} userId={currentUser.user_id} />
+                            </EventProvider>
+                        </TranscriptProvider>
                     </div>
                 </div>
 
-                <HomePageSubtitles
-                    user={currentUser}
-                    page="home"
-                    languageCode={'en-US'}
-                />
-                    <div className="flex flex-col gap-2">
+                {/* Subtitles / Status */}
+                <div className="w-full">
+                    <HomePageSubtitles
+                        user={currentUser}
+                        page="home"
+                        languageCode={'en-US'}
+                    />
+                </div>
+
+                {/* Personalities Grid */}
+                <div className="flex flex-col gap-6 mt-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-2xl font-bold text-gray-800 font-lora">Your Companions</h2>
                         <PersonalityFilters
                             setSelectedFilters={setSelectedFilters}
                             selectedFilters={selectedFilters}
                             languageState={'en-US'}
                             currentUser={currentUser}
                         />
-                        <UserPersonalities
-                            selectedFilters={selectedFilters}
-                            onPersonalityPicked={onPersonalityPicked}
-                            personalityIdState={personalityIdState}
-                            languageState={'en-US'}
-                            disableButtons={false}
-                            allPersonalities={isDoctor 
-                                ? allPersonalities.filter(p => p.is_story || p.is_doctor)
-                                : allPersonalities}                            
-                            myPersonalities={myPersonalities}
-                        />
                     </div>
+
+                    <UserPersonalities
+                        selectedFilters={selectedFilters}
+                        onPersonalityPicked={onPersonalityPicked}
+                        personalityIdState={personalityIdState}
+                        languageState={'en-US'}
+                        disableButtons={false}
+                        allPersonalities={isDoctor
+                            ? allPersonalities.filter(p => p.is_story || p.is_doctor)
+                            : allPersonalities}
+                        myPersonalities={myPersonalities}
+                    />
+                </div>
             </div>
         </div>
     );
