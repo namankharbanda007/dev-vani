@@ -3,17 +3,9 @@ import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { SubmitButton } from "./submit-button";
-import { Separator } from "@/components/ui/separator";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Sparkles } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import GoogleLoginButton from "../../components/GoogleLoginButton";
+
 import Image from "next/image";
 
 interface LoginProps {
@@ -23,16 +15,6 @@ interface LoginProps {
 export default async function Login({ searchParams }: LoginProps) {
   const toy_id = searchParams?.toy_id as string | undefined;
   const personality_id = searchParams?.personality_id as string | undefined;
-  const isGoogleOAuthEnabled = process.env.GOOGLE_OAUTH === "True";
-  // const supabase = createClient();
-
-  // const {
-  //     data: { user },
-  // } = await supabase.auth.getUser();
-
-  // if (user) {
-  //     return redirect("/home");
-  // }
 
   const signInOrSignUp = async (formData: FormData) => {
     "use server";
@@ -70,84 +52,99 @@ export default async function Login({ searchParams }: LoginProps) {
       return redirect(`/login?message=${signUpError.message}`);
     }
 
-    // if (process.env.NEXT_PUBLIC_ENV === "local") {
-    //   return redirect("/login?message=Sussessfully signed up");
-    // } else {
-    //   return redirect("/login?message=Check email to continue sign in process");
-    // }
-
     return redirect("/login?message=Check email to continue sign in process");
   };
 
   return (
-    <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
-      <Card className="shadow-md sm:bg-white bg-transparent shadow-none">
-        <CardHeader>
-          <CardTitle className="flex flex-row gap-1 items-center">
-            Login to Elato
-            <Sparkles size={20} fill="black" />
-          </CardTitle>
-          <CardDescription>
-            Login or sign up your account to continue
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          {/* <ToyPreview /> */}
+    <div className="flex min-h-screen w-full">
+      {/* Left Side - Image */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-purple-900">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 to-black/20 z-10" />
+        <Image
+          src="/login-hero.jpg"
+          alt="SMART मूर्ति Family"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute bottom-0 left-0 right-0 p-12 z-20 bg-gradient-to-t from-black/80 to-transparent text-white">
+          <h2 className="text-4xl font-bold font-lora mb-4">Spirituality Meets Companionship</h2>
+          <p className="text-lg text-gray-200 max-w-md">
+            Join thousands of families discovering the magic of AI-powered spiritual guidance and companionship.
+          </p>
+        </div>
+      </div>
 
-          {isGoogleOAuthEnabled && (
-            <GoogleLoginButton
-              toy_id={toy_id}
-              personality_id={personality_id}
-            />
-          )}
+      {/* Right Side - Login Form */}
+      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-white">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold font-luckiestGuy tracking-wider text-purple-900 mb-2">
+              SMART मूर्ति
+            </h1>
+            <p className="text-gray-600">
+              Welcome back! Please login to continue.
+            </p>
+          </div>
 
-           <Separator className="mt-2" />
-           <span className="text-sm text-gray-500">If you've got your DB running locally, you can login with: <br/><span className="font-bold">Email</span> admin@elatoai.com<br /><span className="font-bold">Password</span> admin</span>
-         
-          <form className="flex-1 flex flex-col w-full justify-center gap-4">
-            <Label className="text-md" htmlFor="email">
-              Email
-            </Label>
-            <input
-              className="rounded-md px-4 py-2 bg-inherit border"
-              name="email"
-              placeholder="you@example.com"
-              required
-            />
-            <Label className="text-md" htmlFor="email">
-              Password
-            </Label>
+          <div className="space-y-6">
+            <form className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  required
+                  className="h-12 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
 
-            <input
-              className="rounded-md px-4 py-2 bg-inherit border"
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              required
-            />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm font-medium text-purple-600 hover:text-purple-500"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  className="h-12 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
 
-            <Link
-              className="text-xs text-foreground underline"
-              href="/forgot-password"
-            >
-              Forgot Password?
+              <SubmitButton
+                formAction={signInOrSignUp}
+                className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                pendingText="Signing in..."
+              >
+                Sign In
+              </SubmitButton>
+
+              {searchParams?.message && (
+                <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm text-center">
+                  {searchParams.message}
+                </div>
+              )}
+            </form>
+          </div>
+
+          <p className="text-center text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link href="/login" className="font-bold text-purple-600 hover:text-purple-500">
+              Sign up
             </Link>
-
-            <SubmitButton
-              formAction={signInOrSignUp}
-              className="text-sm font-medium bg-gray-100 hover:bg-gray-50 dark:text-stone-900 border-[0.1px] rounded-md px-4 py-2 text-foreground my-2"
-              pendingText="Signing In..."
-            >
-              Continue with Email
-            </SubmitButton>
-            {searchParams?.message && (
-              <p className="p-4 rounded-md border bg-green-50 border-green-400 text-gray-900 text-center text-sm">
-                {searchParams.message}
-              </p>
-            )}
-          </form>
-        </CardContent>
-      </Card>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
