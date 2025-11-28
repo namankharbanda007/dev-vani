@@ -11,10 +11,10 @@ export const getOpenGraphMetadata = (title: string) => {
 };
 
 export const PitchFactors = [
-    { emoji: "🧟‍♂️", label: "Super Deep", desc: "Like Hulk" },
-    { emoji: "👤", label: "Normal", desc: "Regular voice" },
-    { emoji: "👧", label: "Higher", desc: "Kid-like voice" },
-    { emoji: "🐿️", label: "Squeaky", desc: "Like Alvin" },
+    { emoji: "🧟‍♂️", label: "Super Deep", desc: "Like Hulk", value: 0.75 },
+    { emoji: "👤", label: "Normal", desc: "Regular voice", value: 1.0 },
+    { emoji: "👧", label: "Higher", desc: "Kid-like voice", value: 1.25 },
+    { emoji: "🐿️", label: "Squeaky", desc: "Like Alvin", value: 1.5 },
 ];
 
 // code in the form: aabbccddeeff
