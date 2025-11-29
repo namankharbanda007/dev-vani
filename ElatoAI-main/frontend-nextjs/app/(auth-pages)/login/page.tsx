@@ -76,8 +76,8 @@ export default async function Login({ searchParams }: LoginProps) {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-white">
-        <div className="w-full max-w-md space-y-8">
+      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <div className="w-full max-w-md space-y-8 bg-white/70 backdrop-blur-lg p-8 rounded-3xl shadow-xl border border-white/50">
           <div className="text-center">
             <h1 className="text-4xl font-bold font-luckiestGuy tracking-wider text-purple-900 mb-2">
               SMART मूर्ति
@@ -90,23 +90,23 @@ export default async function Login({ searchParams }: LoginProps) {
           <div className="space-y-6">
             <form className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   placeholder="you@example.com"
                   required
-                  className="h-12 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                  className="h-12 rounded-xl bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 transition-all"
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
                   <Link
                     href="/forgot-password"
-                    className="text-sm font-medium text-purple-600 hover:text-purple-500"
+                    className="text-sm font-medium text-purple-600 hover:text-purple-500 transition-colors"
                   >
                     Forgot password?
                   </Link>
@@ -117,20 +117,20 @@ export default async function Login({ searchParams }: LoginProps) {
                   type="password"
                   placeholder="••••••••"
                   required
-                  className="h-12 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                  className="h-12 rounded-xl bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 transition-all"
                 />
               </div>
 
               <SubmitButton
                 formAction={signInOrSignUp}
-                className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
                 pendingText="Signing in..."
               >
                 Sign In
               </SubmitButton>
 
               {searchParams?.message && (
-                <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm text-center">
+                <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm text-center animate-in fade-in slide-in-from-top-2">
                   {searchParams.message}
                 </div>
               )}
@@ -139,7 +139,7 @@ export default async function Login({ searchParams }: LoginProps) {
 
           <p className="text-center text-sm text-gray-600">
             Don't have an account?{" "}
-            <Link href="/login" className="font-bold text-purple-600 hover:text-purple-500">
+            <Link href="/login" className="font-bold text-purple-600 hover:text-purple-500 transition-colors">
               Sign up
             </Link>
           </p>

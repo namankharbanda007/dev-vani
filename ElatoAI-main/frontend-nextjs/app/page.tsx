@@ -201,8 +201,9 @@ export default async function LandingPage() {
         </section>
 
         {/* Product Showcase - 3 Premium Cards */}
-        <section className="w-full py-12 md:py-20 bg-white">
-          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto">
+        <section className="w-full py-12 md:py-20 bg-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white via-purple-50/50 to-white pointer-events-none" />
+          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
                 Choose Your Companion
@@ -215,26 +216,26 @@ export default async function LandingPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
               {/* Card 1: Smart Pandit - Wisdom & Tradition */}
-              <div className="group relative bg-gradient-to-br from-amber-50 to-yellow-50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300 border-2 border-amber-200 hover:border-amber-400 transform hover:-translate-y-2">
+              <div className="group relative bg-white/60 backdrop-blur-xl rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-amber-100 hover:border-amber-300 transform hover:-translate-y-2">
                 {/* Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-yellow-400 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 to-yellow-400/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
 
                 <div className="relative z-10">
                   {/* Icon/Badge */}
                   <div className="flex justify-center mb-6">
-                    <div className="bg-gradient-to-br from-amber-400 to-yellow-500 p-4 rounded-full shadow-lg">
+                    <div className="bg-gradient-to-br from-amber-400 to-yellow-500 p-4 rounded-full shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <Sparkles className="h-8 w-8 text-white" />
                     </div>
                   </div>
 
                   {/* Image - Temple context */}
-                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden">
+                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
                     <Image
                       src="/products/smart-pandit-home.jpg"
                       alt="Smart Pandit in home temple"
                       width={200}
                       height={200}
-                      className="drop-shadow-xl object-cover rounded-2xl"
+                      className="object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
@@ -267,7 +268,7 @@ export default async function LandingPage() {
 
                   {/* CTA */}
                   <Link href="https://smartmurti.com/products" className="block">
-                    <Button className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-full shadow-lg">
+                    <Button className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all">
                       Learn More
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -276,23 +277,23 @@ export default async function LandingPage() {
               </div>
 
               {/* Card 2: AI Boy - Customizable Friendship */}
-              <div className="group relative bg-gradient-to-br from-cyan-50 to-blue-50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300 border-2 border-cyan-200 hover:border-cyan-400 transform hover:-translate-y-2">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity"></div>
+              <div className="group relative bg-white/60 backdrop-blur-xl rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-cyan-100 hover:border-cyan-300 transform hover:-translate-y-2">
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/10 to-blue-400/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
 
                 <div className="relative z-10">
                   <div className="flex justify-center mb-6">
-                    <div className="bg-gradient-to-br from-cyan-400 to-blue-500 p-4 rounded-full shadow-lg">
+                    <div className="bg-gradient-to-br from-cyan-400 to-blue-500 p-4 rounded-full shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <Users className="h-8 w-8 text-white" />
                     </div>
                   </div>
 
-                  <div className="flex justify-center mb-6">
+                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
                     <Image
                       src="/products/smart-boy-home.jpg"
                       alt="Smart Boy Companion"
                       width={200}
                       height={200}
-                      className="drop-shadow-xl rounded-2xl"
+                      className="object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
@@ -322,7 +323,7 @@ export default async function LandingPage() {
                   </ul>
 
                   <Link href="/home" className="block">
-                    <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-full shadow-lg">
+                    <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all">
                       Create Your Friend
                       <Heart className="ml-2 h-4 w-4" />
                     </Button>
@@ -331,23 +332,23 @@ export default async function LandingPage() {
               </div>
 
               {/* Card 3: AI Girl - The Listener */}
-              <div className="group relative bg-gradient-to-br from-pink-50 to-red-50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300 border-2 border-pink-200 hover:border-pink-400 transform hover:-translate-y-2">
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-red-400 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity"></div>
+              <div className="group relative bg-white/60 backdrop-blur-xl rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-pink-100 hover:border-pink-300 transform hover:-translate-y-2">
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-400/10 to-red-400/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
 
                 <div className="relative z-10">
                   <div className="flex justify-center mb-6">
-                    <div className="bg-gradient-to-br from-pink-400 to-red-500 p-4 rounded-full shadow-lg">
+                    <div className="bg-gradient-to-br from-pink-400 to-red-500 p-4 rounded-full shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <MessageCircle className="h-8 w-8 text-white" />
                     </div>
                   </div>
 
-                  <div className="flex justify-center mb-6">
+                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
                     <Image
                       src="/products/smart-girl-home.jpg"
                       alt="Smart Girl Companion"
                       width={200}
                       height={200}
-                      className="drop-shadow-xl rounded-2xl"
+                      className="object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
@@ -377,7 +378,7 @@ export default async function LandingPage() {
                   </ul>
 
                   <Link href="/home" className="block">
-                    <Button className="w-full bg-gradient-to-r from-pink-500 to-red-600 hover:from-pink-600 hover:to-red-700 text-white rounded-full shadow-lg">
+                    <Button className="w-full bg-gradient-to-r from-pink-500 to-red-600 hover:from-pink-600 hover:to-red-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all">
                       Create Your Friend
                       <Heart className="ml-2 h-4 w-4" />
                     </Button>
@@ -389,8 +390,14 @@ export default async function LandingPage() {
         </section>
 
         {/* Multilingual Support - Speaks Your Language */}
-        <section className="w-full py-12 md:py-20 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
-          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto">
+        <section className="w-full py-12 md:py-20 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 relative overflow-hidden">
+          {/* Decorative background elements */}
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div className="absolute -top-24 -left-24 w-96 h-96 bg-orange-200 rounded-full blur-3xl opacity-20"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-200 rounded-full blur-3xl opacity-20"></div>
+          </div>
+
+          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
                 Speaks Your Language, Understands Your Heart
@@ -402,9 +409,9 @@ export default async function LandingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               {/* Indian Languages */}
-              <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-orange-200">
+              <div className="bg-white/70 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-orange-100 hover:border-orange-200 transition-all hover:shadow-2xl">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="bg-gradient-to-br from-orange-500 to-amber-600 p-3 rounded-full">
+                  <div className="bg-gradient-to-br from-orange-500 to-amber-600 p-3 rounded-full shadow-md">
                     <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                     </svg>
@@ -464,9 +471,9 @@ export default async function LandingPage() {
               </div>
 
               {/* Global Languages */}
-              <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-blue-200">
+              <div className="bg-white/70 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-blue-100 hover:border-blue-200 transition-all hover:shadow-2xl">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="bg-gradient-to-br from-blue-500 to-cyan-600 p-3 rounded-full">
+                  <div className="bg-gradient-to-br from-blue-500 to-cyan-600 p-3 rounded-full shadow-md">
                     <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -527,7 +534,7 @@ export default async function LandingPage() {
             </div>
 
             {/* Bottom CTA */}
-            <div className="text-center bg-gradient-to-r from-orange-100 to-amber-100 rounded-2xl p-8 border-2 border-orange-200">
+            <div className="text-center bg-white/60 backdrop-blur-md rounded-2xl p-8 border border-orange-200 shadow-lg">
               <p className="text-2xl font-bold text-gray-900 mb-2">
                 🗣️ Speak in Your Mother Tongue
               </p>
@@ -558,7 +565,7 @@ export default async function LandingPage() {
               <div className="flex flex-col items-center text-center group">
                 <div className="relative mb-6">
                   <div className="absolute inset-0 bg-purple-200 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
-                  <div className="relative bg-gradient-to-br from-purple-500 to-purple-700 p-6 rounded-full shadow-xl">
+                  <div className="relative bg-gradient-to-br from-purple-500 to-purple-700 p-6 rounded-full shadow-xl transform group-hover:scale-110 transition-transform duration-300">
                     <Users className="h-12 w-12 text-white" />
                   </div>
                   <div className="absolute -top-2 -right-2 bg-white rounded-full px-3 py-1 shadow-lg">
@@ -575,7 +582,7 @@ export default async function LandingPage() {
               <div className="flex flex-col items-center text-center group">
                 <div className="relative mb-6">
                   <div className="absolute inset-0 bg-amber-200 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
-                  <div className="relative bg-gradient-to-br from-amber-500 to-yellow-600 p-6 rounded-full shadow-xl">
+                  <div className="relative bg-gradient-to-br from-amber-500 to-yellow-600 p-6 rounded-full shadow-xl transform group-hover:scale-110 transition-transform duration-300">
                     <Sparkles className="h-12 w-12 text-white" />
                   </div>
                   <div className="absolute -top-2 -right-2 bg-white rounded-full px-3 py-1 shadow-lg">
@@ -592,7 +599,7 @@ export default async function LandingPage() {
               <div className="flex flex-col items-center text-center group">
                 <div className="relative mb-6">
                   <div className="absolute inset-0 bg-pink-200 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
-                  <div className="relative bg-gradient-to-br from-pink-500 to-red-600 p-6 rounded-full shadow-xl">
+                  <div className="relative bg-gradient-to-br from-pink-500 to-red-600 p-6 rounded-full shadow-xl transform group-hover:scale-110 transition-transform duration-300">
                     <MessageCircle className="h-12 w-12 text-white" />
                   </div>
                   <div className="absolute -top-2 -right-2 bg-white rounded-full px-3 py-1 shadow-lg">
@@ -609,8 +616,14 @@ export default async function LandingPage() {
         </section>
 
         {/* Trust & Safety */}
-        <section className="w-full py-12 md:py-16 bg-gradient-to-br from-purple-900 to-purple-800">
-          <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
+        <section className="w-full py-12 md:py-16 bg-gradient-to-br from-purple-900 to-purple-800 relative overflow-hidden">
+          {/* Decorative background elements */}
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div className="absolute top-10 left-10 w-64 h-64 bg-purple-600 rounded-full blur-3xl opacity-30"></div>
+            <div className="absolute bottom-10 right-10 w-80 h-80 bg-indigo-600 rounded-full blur-3xl opacity-30"></div>
+          </div>
+
+          <div className="container px-4 md:px-6 max-w-screen-lg mx-auto relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold font-lora text-white mb-4">
                 Built on Trust & Privacy
@@ -622,7 +635,7 @@ export default async function LandingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Ad-Free */}
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all">
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all hover:-translate-y-1 shadow-lg">
                 <div className="flex flex-col items-center text-center">
                   <div className="bg-purple-500 p-4 rounded-full mb-4 shadow-lg">
                     <Shield className="h-8 w-8 text-white" />
@@ -635,7 +648,7 @@ export default async function LandingPage() {
               </div>
 
               {/* Privacy First */}
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all">
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all hover:-translate-y-1 shadow-lg">
                 <div className="flex flex-col items-center text-center">
                   <div className="bg-amber-500 p-4 rounded-full mb-4 shadow-lg">
                     <Heart className="h-8 w-8 text-white" />
@@ -648,7 +661,7 @@ export default async function LandingPage() {
               </div>
 
               {/* Hardware Presence */}
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all">
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all hover:-translate-y-1 shadow-lg">
                 <div className="flex flex-col items-center text-center">
                   <div className="bg-pink-500 p-4 rounded-full mb-4 shadow-lg">
                     <Zap className="h-8 w-8 text-white" />
