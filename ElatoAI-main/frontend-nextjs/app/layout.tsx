@@ -341,7 +341,7 @@ export default async function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 > */}
-                <main className="flex-grow mx-auto w-full flex flex-col">
+                <main className="flex-grow mx-auto w-full flex flex-col pt-[88px]">
                     <Navbar user={dbUser ?? null} />
                     {children}
                     <Footer />
