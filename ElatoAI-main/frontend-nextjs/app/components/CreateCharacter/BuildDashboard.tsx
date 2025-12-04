@@ -399,7 +399,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                   <Textarea
                     placeholder="e.g. Speaks slowly with a calm demeanor..."
                     value={formData.voiceCharacteristics.features}
-                    onChange={(e) => handleInputChange('features' as any, e.target.value)} // Type cast for simplicity in this specific handler
+                    onChange={(e) => handleVoiceCharacteristicChange('features', e.target.value)}
                     className="min-h-[100px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none"
                   />
                   {formErrors.features && <p className="text-red-500 text-sm">{formErrors.features}</p>}
