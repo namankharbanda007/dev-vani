@@ -327,6 +327,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                     )}
 
                     {/* Selected Indicator */}
+                    {/* Selected Indicator */}
                     {formData.voice === voice.id && (
                       <div className="absolute -top-2 -right-2 bg-purple-600 text-white rounded-full p-1 shadow-md">
                         <Check size={12} />
@@ -336,6 +337,50 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                 ))}
               </div>
               {formErrors.voice && <p className="text-red-500 text-center">{formErrors.voice}</p>}
+
+              {/* Advanced Voice Options */}
+              <div className="pt-8 border-t border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Advanced Voice Options</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                  <div
+                    onClick={() => setShowVoiceCloneModal({
+                      provider: "elevenlabs",
+                      title: "Eleven Labs Voice Clone",
+                      voiceInputLabel: "Voice ID",
+                      voiceInputPlaceholder: "Enter Eleven Labs Voice ID",
+                      voiceDescription: "Enter the Voice ID from your Eleven Labs dashboard."
+                    })}
+                    className="cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-white hover:to-purple-50 border border-gray-200 hover:border-purple-200 rounded-2xl p-4 flex items-center gap-4 transition-all hover:shadow-md group"
+                  >
+                    <div className="bg-white p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
+                      <span className="text-2xl">🧪</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900">Eleven Labs</h4>
+                      <p className="text-xs text-gray-500">Clone a voice using Eleven Labs ID</p>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => setShowVoiceCloneModal({
+                      provider: "hume",
+                      title: "Hume Voice Clone",
+                      voiceInputLabel: "Hume Config ID",
+                      voiceInputPlaceholder: "Enter Hume Config ID",
+                      voiceDescription: "Enter the Config ID from your Hume dashboard."
+                    })}
+                    className="cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-white hover:to-amber-50 border border-gray-200 hover:border-amber-200 rounded-2xl p-4 flex items-center gap-4 transition-all hover:shadow-md group"
+                  >
+                    <div className="bg-white p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
+                      <span className="text-2xl">🎭</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900">Hume AI</h4>
+                      <p className="text-xs text-gray-500">Use advanced emotional voices</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <div className="flex justify-center pt-4">
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-2xl flex items-start gap-3">
@@ -450,7 +495,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
         }}
         voiceCloneModalProps={showVoiceCloneModal!}
       />
-    </div>
+    </div >
   );
 };
 
