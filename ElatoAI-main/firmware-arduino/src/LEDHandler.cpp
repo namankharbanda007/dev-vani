@@ -35,25 +35,25 @@ void setStaticColor(StaticColor color)
     switch (color)
     {
     case StaticColor::RED:
-        colorMap = {LOW, HIGH, HIGH};
-        break;
-    case StaticColor::GREEN:
-        colorMap = {HIGH, LOW, HIGH};
-        break;
-    case StaticColor::BLUE:
-        colorMap = {HIGH, HIGH, LOW};
-        break;
-    case StaticColor::YELLOW:
-        colorMap = {LOW, LOW, HIGH};
-        break;
-    case StaticColor::MAGENTA:
-        colorMap = {LOW, HIGH, LOW};
-        break;
-    case StaticColor::CYAN:
         colorMap = {HIGH, LOW, LOW};
         break;
+    case StaticColor::GREEN:
+        colorMap = {LOW, HIGH, LOW};
+        break;
+    case StaticColor::BLUE:
+        colorMap = {LOW, LOW, HIGH};
+        break;
+    case StaticColor::YELLOW:
+        colorMap = {HIGH, HIGH, LOW};
+        break;
+    case StaticColor::MAGENTA:
+        colorMap = {HIGH, LOW, LOW};
+        break;
+    case StaticColor::CYAN:
+        colorMap = {LOW, HIGH, HIGH};
+        break;
     default:
-        colorMap = {HIGH, HIGH, HIGH};
+        colorMap = {LOW, LOW, LOW};
         break;
     }
 

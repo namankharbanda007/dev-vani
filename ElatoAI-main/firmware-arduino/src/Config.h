@@ -12,8 +12,8 @@
 // Pick one of the following (DEV_MODE, PROD_MODE, ELATO_MODE) , comment the rest
 // For ELATO_MODE, you will need to register your DIY Hardware on the Elato website
 
-#define DEV_MODE
-// #define PROD_MODE
+//#define DEV_MODE
+#define PROD_MODE
 // #define ELATO_MODE
 
 
@@ -72,7 +72,6 @@ extern const uint16_t backend_port;
 // I2S and Audio parameters
 extern const uint32_t SAMPLE_RATE;
 extern const uint32_t MIC_SAMPLE_RATE;
-
 extern const int BLUE_LED_PIN;
 extern const int RED_LED_PIN;
 extern const int GREEN_LED_PIN;
