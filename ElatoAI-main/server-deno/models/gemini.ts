@@ -111,7 +111,7 @@ export const connectToGemini = async (
 								buffer.buffer,
 								buffer.byteOffset,
 								buffer.byteLength /
-									Int16Array.BYTES_PER_ELEMENT,
+								Int16Array.BYTES_PER_ELEMENT,
 							);
 							return acc.concat(Array.from(intArray));
 						}
@@ -256,7 +256,7 @@ export const connectToGemini = async (
 				geminiSession?.sendRealtimeInput({
 					audio: {
 						data: base64Data,
-						mimeType: "audio/pcm;rate=24000", // Gemini expects 16kHz but 24kHz is fine
+						mimeType: "audio/pcm;rate=16000", // Firmware sends 16kHz
 					},
 				});
 			}
