@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { bhajans, Track } from './data';
 import BhajanPlayer from '../../components/BhajanPlayer';
-import { Play, Music, Heart, Share2 } from 'lucide-react';
+import { Play, Music, Share2 } from 'lucide-react';
 
 export default function BhajanPage() {
     const [currentTrack, setCurrentTrack] = useState<Track>(bhajans[0]);
@@ -101,10 +101,23 @@ export default function BhajanPage() {
                                 </div>
 
                                 <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button className="p-2 text-stone-400 hover:text-red-500 transition-colors">
-                                        <Heart size={18} />
-                                    </button>
-                                    <button className="p-2 text-stone-400 hover:text-orange-500 transition-colors">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (navigator.share) {
+                                                navigator.share({
+                                                    title: track.title,
+                                                    text: `Listen to ${track.title} by ${track.artist} on Divine Melodies`,
+                                                    url: window.location.href,
+                                                }).catch(console.error);
+                                            } else {
+                                                navigator.clipboard.writeText(`${window.location.href} - Listen to ${track.title}`);
+                                                alert('Link copied to clipboard!');
+                                            }
+                                        }}
+                                        className="p-2 text-stone-400 hover:text-orange-500 transition-colors"
+                                        title="Share"
+                                    >
                                         <Share2 size={18} />
                                     </button>
                                 </div>
