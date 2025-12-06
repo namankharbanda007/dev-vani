@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Music } from 'lucide-react';
 import { Track } from '../app/bhajan/data';
-import Image from 'next/image';
 
 interface BhajanPlayerProps {
     currentTrack: Track;
@@ -82,18 +81,9 @@ export default function BhajanPlayer({ currentTrack, isPlaying, onPlayPause, onN
                 {/* Track Info */}
                 <div className="flex items-center gap-4 w-full md:w-1/3">
                     <div className="relative w-14 h-14 rounded-lg overflow-hidden border-2 border-orange-400/50 shadow-lg shadow-orange-500/20">
-                        {currentTrack.cover ? (
-                            <Image
-                                src={currentTrack.cover}
-                                alt={currentTrack.title}
-                                fill
-                                className="object-cover"
-                            />
-                        ) : (
-                            <div className="w-full h-full bg-orange-800 flex items-center justify-center text-orange-200">
-                                <span className="text-xs">Om</span>
-                            </div>
-                        )}
+                        <div className="w-full h-full bg-orange-800 flex items-center justify-center text-orange-200">
+                            <Music size={24} />
+                        </div>
                     </div>
                     <div className="overflow-hidden">
                         <h3 className="text-orange-50 font-semibold truncate text-lg">{currentTrack.title}</h3>

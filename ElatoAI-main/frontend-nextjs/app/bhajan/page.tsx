@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { bhajans, Track } from './data';
 import BhajanPlayer from '../../components/BhajanPlayer';
 import { Play, Music, Heart, Share2 } from 'lucide-react';
-import Image from 'next/image';
 
 export default function BhajanPage() {
     const [currentTrack, setCurrentTrack] = useState<Track>(bhajans[0]);
@@ -56,8 +55,6 @@ export default function BhajanPage() {
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
 
-                {/* Featured / Currently Playing Highlight (Optional) */}
-
                 {/* Track List */}
                 <div className="bg-white/50 dark:bg-stone-900/50 backdrop-blur-md rounded-2xl border border-orange-200 dark:border-orange-900/30 shadow-xl overflow-hidden">
                     <div className="p-6 border-b border-orange-100 dark:border-orange-900/30 flex items-center justify-between">
@@ -85,13 +82,9 @@ export default function BhajanPage() {
                                 </div>
 
                                 <div className="relative w-12 h-12 rounded-lg overflow-hidden shadow-md flex-shrink-0">
-                                    {track.cover ? (
-                                        <Image src={track.cover} alt={track.title} fill className="object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full bg-orange-200 dark:bg-orange-800 flex items-center justify-center">
-                                            <Music size={20} className="text-orange-500 dark:text-orange-300" />
-                                        </div>
-                                    )}
+                                    <div className="w-full h-full bg-orange-200 dark:bg-orange-800 flex items-center justify-center">
+                                        <Music size={20} className="text-orange-500 dark:text-orange-300" />
+                                    </div>
                                 </div>
 
                                 <div className="flex-1 min-w-0">
