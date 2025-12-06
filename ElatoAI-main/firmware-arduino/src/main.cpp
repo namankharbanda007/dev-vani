@@ -4,6 +4,7 @@
 #include "WifiManager.h"
 #include <driver/touch_sensor.h>
 #include "Button.h"
+#include "Audio.h"
 
 #define TOUCH_THRESHOLD 28000
 #define REQUIRED_RELEASE_CHECKS                                                \
@@ -202,6 +203,9 @@ void setup() {
   btn->detachSingleClickEvent();
 #endif
 
+  // Setup Boot Button as input
+  pinMode(BOOT_BUTTON_PIN, INPUT_PULLUP);
+
   // Pin audio tasks to Core 1 (application core)
   xTaskCreatePinnedToCore(ledTask,    // Function
                           "LED Task", // Name
@@ -244,7 +248,39 @@ void setup() {
   setupWiFi();
 }
 
+void handleBootButton() {
+  static unsigned long lastPressTime = 0;
+  if (digitalRead(BOOT_BUTTON_PIN) == LOW) { // Active Low
+    if (millis() - lastPressTime > 1000) { // 1 second debounce
+      Serial.println("Boot button detected! Attempting to send command...");
+      
+      if (webSocket.isConnected()) {
+        JsonDocument doc;
+        doc["type"] = "action";
+        doc["command"] = "play_bhajan";
+        String jsonString;
+        serializeJson(doc, jsonString);
+        
+        Serial.println("Waiting for mutex...");
+        // Protect WebSocket access with mutex, with timeout
+        if (xSemaphoreTake(wsMutex, 1000 / portTICK_PERIOD_MS) == pdTRUE) {
+            Serial.println("Mutex taken. Sending message...");
+            webSocket.sendTXT(jsonString);
+            xSemaphoreGive(wsMutex);
+            Serial.println("Message sent. Mutex released.");
+        } else {
+            Serial.println("Failed to take mutex (timeout)!");
+        }
+      } else {
+        Serial.println("WebSocket not connected");
+      }
+      lastPressTime = millis();
+    }
+  }
+}
+
 void loop() {
+  handleBootButton();
   processSleepRequest();
   if (otaState == OTA_IN_PROGRESS) {
     loopOTA();

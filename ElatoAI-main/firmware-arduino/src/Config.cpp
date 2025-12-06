@@ -92,6 +92,7 @@ const int I2S_SD_OUT = 14;
 
 // Button Pin (matches your wiring)
 const gpio_num_t BUTTON_PIN = GPIO_NUM_45;
+const gpio_num_t BOOT_BUTTON_PIN = GPIO_NUM_0;
 
 // ----------------- SSL Certificates -----------------
 
