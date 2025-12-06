@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ArrowRight, Check, Volume2, Plus, Sparkles, User, Mic, Settings2 } from "lucide-react";
-import { createPersonality } from "@/db/personalities";
+import { createPersonality, updatePersonality } from "@/db/personalities";
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 interface SettingsDashboardProps {
   selectedUser: IUser;
   allLanguages: ILanguage[];
+  initialData?: IPersonality | null;
 }
 
 const formSchema = z.object({
@@ -50,6 +51,7 @@ type Step = typeof steps[number]['id'];
 
 const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
   selectedUser,
+  initialData
 }) => {
   const supabase = createClient();
   const router = useRouter();
@@ -57,16 +59,16 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
-    provider: 'openai' as ModelProvider,
-    title: '',
-    description: '',
-    prompt: '',
-    firstMessagePrompt: '',
-    voice: '',
+    provider: (initialData?.provider as ModelProvider) || 'openai',
+    title: initialData?.title || '',
+    description: initialData?.short_description || '',
+    prompt: initialData?.character_prompt || '',
+    firstMessagePrompt: initialData?.first_message_prompt || '',
+    voice: initialData?.oai_voice || '',
     voiceCharacteristics: {
-      features: '',
-      emotion: 'neutral',
-      pitchFactor: 1.0,
+      features: initialData?.voice_prompt?.split('\nThe voice should be ')[0] || '',
+      emotion: initialData?.voice_prompt?.split('\nThe voice should be ')[1] || 'neutral',
+      pitchFactor: initialData?.pitch_factor || 1.0,
     }
   });
 
@@ -138,7 +140,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
 
     setIsSubmitting(true);
     try {
-      const personality = await createPersonality(supabase, selectedUser.user_id, {
+      const personalityData = {
         provider: formData.provider as ModelProvider,
         title: formData.title,
         subtitle: "",
@@ -148,20 +150,27 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
         is_doctor: false,
         is_child_voice: false,
         is_story: false,
-        key: formData.title.toLowerCase().replace(/ /g, '_') + "_" + uuidv4(),
+        key: initialData ? initialData.key : formData.title.toLowerCase().replace(/ /g, '_') + "_" + uuidv4(),
         creator_id: selectedUser.user_id,
         short_description: formData.description,
         pitch_factor: formData.voiceCharacteristics.pitchFactor,
         first_message_prompt: formData.firstMessagePrompt
-      });
+      };
+
+      let personality;
+      if (initialData && initialData.personality_id) {
+        personality = await updatePersonality(supabase, initialData.personality_id, personalityData);
+      } else {
+        personality = await createPersonality(supabase, selectedUser.user_id, personalityData);
+      }
 
       if (personality) {
-        toast({ title: "Success!", description: "Your AI companion is ready." });
+        toast({ title: "Success!", description: initialData ? "Character updated successfully." : "Your AI companion is ready." });
         router.push(`/home`);
       }
     } catch (error) {
-      console.error("Error creating personality:", error);
-      toast({ title: "Error", description: "Failed to create character.", variant: "destructive" });
+      console.error("Error saving personality:", error);
+      toast({ title: "Error", description: "Failed to save character.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -187,7 +196,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
       {/* Header */}
       <div className="mb-10 text-center space-y-4">
         <h1 className="text-4xl md:text-5xl font-bold font-lora text-gray-900">
-          Create Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-amber-600">Companion</span>
+          {initialData ? "Edit Your " : "Create Your "} <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-amber-600">Companion</span>
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Design a unique personality that resonates with you.
@@ -471,7 +480,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
               disabled={isSubmitting}
               className="bg-gradient-to-r from-purple-600 to-amber-600 hover:from-purple-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all rounded-full px-8 py-6 text-lg"
             >
-              {isSubmitting ? "Creating..." : "Create Companion"}
+              {isSubmitting ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Companion" : "Create Companion")}
               {!isSubmitting && <Sparkles className="w-5 h-5 ml-2" />}
             </Button>
           ) : (

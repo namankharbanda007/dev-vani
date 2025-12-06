@@ -20,6 +20,25 @@ export const createPersonality = async (
     return data ? data[0] : null;
 };
 
+export const updatePersonality = async (
+    supabase: SupabaseClient,
+    personalityId: string,
+    updates: Partial<IPersonality>
+): Promise<IPersonality | null> => {
+    const { data, error } = await supabase
+        .from("personalities")
+        .update(updates)
+        .eq("personality_id", personalityId)
+        .select();
+
+    if (error) {
+        console.error("Error updating personality:", error);
+        throw error;
+    }
+
+    return data ? data[0] : null;
+};
+
 export const getPersonalityById = async (
     supabase: SupabaseClient,
     personalityId: string,
