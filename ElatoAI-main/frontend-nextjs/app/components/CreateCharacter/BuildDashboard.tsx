@@ -166,7 +166,10 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
       let personality;
       if (initialData && initialData.personality_id) {
         console.log("Updating existing personality:", initialData.personality_id);
-        personality = await updatePersonality(supabase, initialData.personality_id, personalityData);
+        // Exclude creator_id and key from updates to avoid RLS issues
+        const { creator_id, key, ...updateData } = personalityData;
+        console.log("Update payload (excluding immutable fields):", updateData);
+        personality = await updatePersonality(supabase, initialData.personality_id, updateData);
       } else {
         console.log("Creating new personality");
         personality = await createPersonality(supabase, selectedUser.user_id, personalityData);
