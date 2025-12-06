@@ -7,37 +7,64 @@ export interface Track {
     cover?: string; // Optional cover art URL
 }
 
+const covers = [
+    'https://images.unsplash.com/photo-1581888363372-2d1222477543?q=80&w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1623946633649-76e66f85233e?q=80&w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1563204886-368623419354?q=80&w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1598556885316-56a5242b3805?q=80&w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1604869515883-c95c2b33f7b5?q=80&w=200&auto=format&fit=crop'
+];
+
 export const bhajans: Track[] = [
-    {
-        id: '1',
-        title: 'Shri Hanuman Chalisa',
-        artist: 'Hariharan',
-        src: 'https://archive.org/download/HanumanChalisa_201406/Hanuman%20Chalisa.mp3', // Public domain/placeholder
-        duration: '9:45',
-        cover: 'https://images.unsplash.com/photo-1581888363372-2d1222477543?q=80&w=200&auto=format&fit=crop'
-    },
-    {
-        id: '2',
-        title: 'Achyutam Keshavam',
-        artist: 'Vikram Hazra',
-        src: 'https://archive.org/download/AchyutamKeshavam/Achyutam%20Keshavam.mp3',
-        duration: '5:30',
-        cover: 'https://images.unsplash.com/photo-1623946633649-76e66f85233e?q=80&w=200&auto=format&fit=crop'
-    },
-    {
-        id: '3',
-        title: 'Om Jai Jagdish Hare',
-        artist: 'Anuradha Paudwal',
-        src: 'https://archive.org/download/OmJaiJagdishHare_201606/Om%20Jai%20Jagdish%20Hare.mp3',
-        duration: '6:15',
-        cover: 'https://images.unsplash.com/photo-1563204886-368623419354?q=80&w=200&auto=format&fit=crop'
-    },
-    {
-        id: '4',
-        title: 'Raghupati Raghav Raja Ram',
-        artist: 'Various',
-        src: 'https://archive.org/download/RaghupatiRaghavRajaRam_201606/Raghupati%20Raghav%20Raja%20Ram.mp3',
-        duration: '4:20',
-        cover: 'https://images.unsplash.com/photo-1598556885316-56a5242b3805?q=80&w=200&auto=format&fit=crop'
-    }
+    { id: '1', title: 'Achyutam Keshavam', artist: 'Devotional', src: '/bhajans/Achyutam Keshavam.mp3', duration: '5:30', cover: covers[0] },
+    { id: '2', title: 'Aigiri Nandini', artist: 'Devotional', src: '/bhajans/Aigiri Nandini.mp3', duration: '4:00', cover: covers[1] },
+    { id: '3', title: 'Bhaj Le Ram', artist: 'Bhajan', src: '/bhajans/Bhaj Le Ram - Bhajan.mp3', duration: '4:30', cover: covers[2] },
+    { id: '4', title: 'Brahma Murari Surarchita Lingam', artist: 'Stotram', src: '/bhajans/Brahma Murari Surarchita Lingam.mp3', duration: '6:00', cover: covers[3] },
+    { id: '5', title: 'Devi Saraswati Vidya Dayini', artist: 'Vandana', src: '/bhajans/Devi Saraswati Vidya dayini saraswati vandana.mp3', duration: '3:45', cover: covers[4] },
+    { id: '6', title: 'Dhaak Beats from Kolkata', artist: 'Instrumental', src: '/bhajans/Dhaak beats from Kolkata - Durga Puja  Durga Pujo.mp3', duration: '2:30', cover: covers[0] },
+    { id: '7', title: 'Saraswati Vandana', artist: 'Devotional', src: '/bhajans/Embracing the Divine with Goddess Saraswati\'s Hymn  सरसवत वदन   परत कल  सरसवत वदन.mp3', duration: '5:00', cover: covers[1] },
+    { id: '8', title: 'Ganpati Bappa Emotional Arti', artist: 'Aarti', src: '/bhajans/Ganpati Bappa Emotional Arti _ Ganpati Bappa Morya _ गणपती बाप्पा मोरया...mp3', duration: '4:15', cover: covers[2] },
+    { id: '9', title: 'Gayatri Mantra Chants', artist: 'Mantra', src: '/bhajans/Gayatri Mantra chants-song.mp3', duration: '10:00', cover: covers[3] },
+    { id: '10', title: 'Gayatri Mantra Solo & Chorus', artist: 'Mantra', src: '/bhajans/Gayatri Mantra solo-and-chorus.mp3', duration: '3:00', cover: covers[4] },
+    { id: '11', title: 'Gayatri Mantra', artist: 'Mantra', src: '/bhajans/Gayatri Mantra.mp3', duration: '3:00', cover: covers[0] },
+    { id: '12', title: 'Gayatri Mantra Soothing', artist: 'Mantra', src: '/bhajans/Gayatri-mantra-v3-soothing-chanting.mp3', duration: '5:00', cover: covers[1] },
+    { id: '13', title: 'Hanuman Chalisa', artist: 'Chalisa', src: '/bhajans/Hanuman Chalisa.mp3', duration: '9:45', cover: covers[2] },
+    { id: '14', title: 'Har Har Bhole Shiv Shambhu', artist: 'Bhajan', src: '/bhajans/Har-Har-Bhole-Shiv-Shambhu-Bhajan.mp3', duration: '5:30', cover: covers[3] },
+    { id: '15', title: 'Haratanaya Sree', artist: 'Devotional', src: '/bhajans/Haratanaya_Sree.mp3', duration: '4:00', cover: covers[4] },
+    { id: '16', title: 'Jai Dev Jai Dev Lord Ganesha', artist: 'Aarti', src: '/bhajans/Jai Dev Jai Dev Lord Ganesha.weba', duration: '3:30', cover: covers[0] },
+    { id: '17', title: 'Jai Ganesha', artist: 'Bhajan', src: '/bhajans/Jai-Ganesha-Bhajan.mp3', duration: '4:30', cover: covers[1] },
+    { id: '18', title: 'Jhuthi Kaya Jhuthi Maya', artist: 'Bhajan', src: '/bhajans/Jhuthi_Kaya_Jhuthi_Maya.mp3', duration: '5:00', cover: covers[2] },
+    { id: '19', title: 'Karo Maan Ram Naam Raspaan', artist: 'Bhajan', src: '/bhajans/Karo maan ram naam raspaan.mp3', duration: '6:00', cover: covers[3] },
+    { id: '20', title: 'Laxmi Narayanam', artist: 'Devotional', src: '/bhajans/Laxmi Narayanam.mp3', duration: '5:30', cover: covers[4] },
+    { id: '21', title: 'Lord Krishna Flute', artist: 'Instrumental', src: '/bhajans/Lord Krishna Fluet.weba', duration: '3:00', cover: covers[0] },
+    { id: '22', title: 'Lord Shiva Music', artist: 'Instrumental', src: '/bhajans/Lord Shiva Music.mp3', duration: '4:00', cover: covers[1] },
+    { id: '23', title: 'Maa Laxmi Puja', artist: 'Puja', src: '/bhajans/Maa Laxmi Puja.mp3', duration: '2:30', cover: covers[2] },
+    { id: '24', title: 'Maa Tere Charno Mein', artist: 'Bhajan', src: '/bhajans/Maa tere charno mein.mp3', duration: '4:00', cover: covers[3] },
+    { id: '25', title: 'Mera Aapki Kripa Se', artist: 'Bhajan', src: '/bhajans/Mera Aapki Kripa Se.mp3', duration: '5:00', cover: covers[4] },
+    { id: '26', title: 'Mere Kirtan Mein Aao', artist: 'Kirtan', src: '/bhajans/Mere Kirtan mein Aao.mp3', duration: '4:30', cover: covers[0] },
+    { id: '27', title: 'Na Mein Meera', artist: 'Bhajan', src: '/bhajans/Na Mein Meera.mp3', duration: '6:00', cover: covers[1] },
+    { id: '28', title: 'Nand Lala Gopala', artist: 'Bhajan', src: '/bhajans/Nand Lala Gopala.mp3', duration: '4:00', cover: covers[2] },
+    { id: '29', title: 'Nand Ke Lal', artist: 'Bhajan', src: '/bhajans/Nand ke lal.mp3', duration: '3:30', cover: covers[3] },
+    { id: '30', title: 'Om Ganapataye Namo Namah', artist: 'Mantra', src: '/bhajans/Om Ganapataye Namo Namah 108 Times Ganpati MantraJaap 108 Ganesh mantra.mp3', duration: '15:00', cover: covers[4] },
+    { id: '31', title: 'Prem Krishna Jinka Naam Hai', artist: 'Bhajan', src: '/bhajans/Prem_KrishnaJinkaNaamHai.mp3', duration: '5:00', cover: covers[0] },
+    { id: '32', title: 'Prem Tera Sathi Ram', artist: 'Bhajan', src: '/bhajans/Prem_Tera_Sathi_Ram.mp3', duration: '6:00', cover: covers[1] },
+    { id: '33', title: 'Radha Dhud Rahi', artist: 'Bhajan', src: '/bhajans/Radha Dhud rahi.mp3', duration: '4:30', cover: covers[2] },
+    { id: '34', title: 'Shiva Tandav', artist: 'Stotram', src: '/bhajans/SHIVA TANDAV.mp3', duration: '3:00', cover: covers[3] },
+    { id: '35', title: 'Shiv Tandav Stotram', artist: 'Stotram', src: '/bhajans/Shiv tandav stotram.mp3', duration: '4:00', cover: covers[4] },
+    { id: '36', title: 'Shree Hanuman Chalisa', artist: 'Chalisa', src: '/bhajans/Shree Hanuman chalisa.mp3', duration: '9:45', cover: covers[0] },
+    { id: '37', title: 'Shree Mahalaxmi Chalisa', artist: 'Chalisa', src: '/bhajans/Shree Mahalaxmi Chalisa.mp3', duration: '12:00', cover: covers[1] },
+    { id: '38', title: 'Shree Raghuwar Ki Vanar Sena', artist: 'Bhajan', src: '/bhajans/Shree Raghuwar ki vanar sena  Jai Shree Ram.mp3', duration: '3:30', cover: covers[2] },
+    { id: '39', title: 'Tarak Mantra Ram Shree Ram', artist: 'Mantra', src: '/bhajans/Tarak Mantra RamShreeRam.mp3', duration: '4:00', cover: covers[3] },
+    { id: '40', title: 'Vande Matram', artist: 'Patriotic', src: '/bhajans/Vande Matram.weba', duration: '3:00', cover: covers[4] },
+    { id: '41', title: 'Veena Vadini Saraswati Vandana', artist: 'Vandana', src: '/bhajans/Veena Vadini Saraswati Vandana  #saraswativ.mp3', duration: '4:00', cover: covers[0] },
+    { id: '42', title: 'Bhakti Ki Jhankar', artist: 'Bhajan', src: '/bhajans/bhakti ki jhankar ur ke.mp3', duration: '3:30', cover: covers[1] },
+    { id: '43', title: 'Hame Bhakti Do Ma', artist: 'Bhajan', src: '/bhajans/hame-bhakti-do-ma-female-voice.mp3', duration: '3:00', cover: covers[2] },
+    { id: '44', title: 'Jagat Vandya Ma', artist: 'Bhajan', src: '/bhajans/jagat-vandya-ma.mp3', duration: '3:30', cover: covers[3] },
+    { id: '45', title: 'Meditative Krishna Chant', artist: 'Chant', src: '/bhajans/meditative krishna chant.mp3', duration: '5:00', cover: covers[4] },
+    { id: '46', title: 'Om Ram Ramaya Namah', artist: 'Mantra', src: '/bhajans/om-ram-ramaya-namah-.mp3', duration: '4:00', cover: covers[0] },
+    { id: '47', title: 'Radiant Vishnu Invocation', artist: 'Invocation', src: '/bhajans/radiant vishnu invocation.mp3', duration: '4:30', cover: covers[1] },
+    { id: '48', title: 'Shri Ram Chant', artist: 'Chant', src: '/bhajans/shri-ram-chant.mp3', duration: '5:00', cover: covers[2] },
+    { id: '49', title: 'Vandana Ke In Swaro Me', artist: 'Vandana', src: '/bhajans/vandana-ke-in-swaro-me.mp3', duration: '3:00', cover: covers[3] },
+    { id: '50', title: 'Devi Saraswati Vandana', artist: 'Vandana', src: '/bhajans/दव सरसवत वदन# Devi Saraswati Vandana bhakti.mp3', duration: '5:00', cover: covers[4] },
+    { id: '51', title: 'Om Gan Ganpataye Namo Namah', artist: 'Mantra', src: '/bhajans/ॐ ग गणपतय नम नम Om Gan Ganpataye Namo Namah  गणश मतर.mp3', duration: '5:00', cover: covers[0] },
 ];
