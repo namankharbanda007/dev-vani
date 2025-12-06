@@ -136,10 +136,15 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!validateStep('refine')) return;
+    console.log("handleSubmit called");
+    if (!validateStep('refine')) {
+      console.log("Validation failed");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
+      console.log("Preparing personality data...");
       const personalityData = {
         provider: formData.provider as ModelProvider,
         title: formData.title,
@@ -156,17 +161,25 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
         pitch_factor: formData.voiceCharacteristics.pitchFactor,
         first_message_prompt: formData.firstMessagePrompt
       };
+      console.log("Personality data prepared:", personalityData);
 
       let personality;
       if (initialData && initialData.personality_id) {
+        console.log("Updating existing personality:", initialData.personality_id);
         personality = await updatePersonality(supabase, initialData.personality_id, personalityData);
       } else {
+        console.log("Creating new personality");
         personality = await createPersonality(supabase, selectedUser.user_id, personalityData);
       }
+
+      console.log("Result from DB:", personality);
 
       if (personality) {
         toast({ title: "Success!", description: initialData ? "Character updated successfully." : "Your AI companion is ready." });
         router.push(`/home`);
+      } else {
+        console.error("No personality returned from DB operation");
+        toast({ title: "Error", description: "Operation failed silently.", variant: "destructive" });
       }
     } catch (error) {
       console.error("Error saving personality:", error);
