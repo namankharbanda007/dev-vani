@@ -166,9 +166,37 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
       let personality;
       if (initialData && initialData.personality_id) {
         console.log("Updating existing personality:", initialData.personality_id);
-        // Exclude creator_id and key from updates to avoid RLS issues
-        const { creator_id, key, ...updateData } = personalityData;
-        console.log("Update payload (excluding immutable fields):", updateData);
+
+        // Debug: Check user IDs
+        console.log("Current User ID:", selectedUser.user_id);
+        console.log("Creator ID:", initialData.creator_id);
+        if (selectedUser.user_id !== initialData.creator_id) {
+          console.error("User ID mismatch! You might not have permission to update this character.");
+        }
+
+        // Debug: Check visibility
+        const { data: checkData, error: checkError } = await supabase
+          .from("personalities")
+          .select("*")
+          .eq("personality_id", initialData.personality_id)
+          .single();
+        console.log("Visibility check - Data:", checkData, "Error:", checkError);
+
+        // Filter update payload to ONLY fields that should change
+        // Exclude system flags and immutable fields
+        const updateData = {
+          provider: personalityData.provider,
+          title: personalityData.title,
+          // subtitle: personalityData.subtitle, // Don't update subtitle for now
+          character_prompt: personalityData.character_prompt,
+          oai_voice: personalityData.oai_voice,
+          voice_prompt: personalityData.voice_prompt,
+          short_description: personalityData.short_description,
+          pitch_factor: personalityData.pitch_factor,
+          first_message_prompt: personalityData.first_message_prompt
+        };
+
+        console.log("Refined Update payload:", updateData);
         personality = await updatePersonality(supabase, initialData.personality_id, updateData);
       } else {
         console.log("Creating new personality");
