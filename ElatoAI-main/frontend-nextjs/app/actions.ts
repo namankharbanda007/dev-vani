@@ -216,12 +216,17 @@ export const updatePersonalityAction = async (
         .from("personalities")
         .update(allowedUpdates)
         .eq("personality_id", personalityId)
-        .select()
-        .single();
+        .select();
 
     if (error) {
         return { error: error.message };
     }
 
-    return { data };
+    if (!data || data.length === 0) {
+        return {
+            error: "Update rejected by database. This usually means an RLS (Row Level Security) policy for UPDATE is missing in Supabase. Please add a policy for the 'personalities' table allowing UPDATE where 'auth.uid() = creator_id'."
+        };
+    }
+
+    return { data: data[0] };
 };
