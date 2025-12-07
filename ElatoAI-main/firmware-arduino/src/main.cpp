@@ -244,12 +244,21 @@ void setup() {
                           0                         // Core 0 (protocol core)
   );
 
+  // Decrease priority of loopTask slightly if needed, but default 1 is usually fine.
+  // We do NOT want to starve the WiFi task (Core 0) or audio tasks (Core 1).
+  
   // WIFI
   setupWiFi();
 }
 
 void handleBootButton() {
   static unsigned long lastPressTime = 0;
+  
+  // Debug: Print raw state if low
+  if (digitalRead(BOOT_BUTTON_PIN) == LOW && millis() - lastPressTime > 500) {
+      Serial.printf("RAW BUTTON LOW DETECTED! millis=%lu\n", millis());
+  }
+
   if (digitalRead(BOOT_BUTTON_PIN) == LOW) { // Active Low
     if (millis() - lastPressTime > 1000) { // 1 second debounce
       Serial.println("Boot button detected! Attempting to send command...");
@@ -280,9 +289,17 @@ void handleBootButton() {
 }
 
 void loop() {
+  static unsigned long lastLogTime = 0;
+  if (millis() - lastLogTime > 1000) {
+      Serial.printf("Loop running. Device State: %d, Button State: %d\n", deviceState, digitalRead(BOOT_BUTTON_PIN));
+      lastLogTime = millis();
+  }
+
   handleBootButton();
   processSleepRequest();
   if (otaState == OTA_IN_PROGRESS) {
     loopOTA();
   }
+  // Essential to prevent starvation of other tasks on this core
+  vTaskDelay(20); 
 }
