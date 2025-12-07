@@ -173,3 +173,55 @@ export const isPremiumUser = async (userId: string) => {
     const dbUser = await getSimpleUserById(supabase, userId);
     return dbUser?.is_premium;
 };
+
+export const updatePersonalityAction = async (
+    personalityId: string,
+    updates: any
+) => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { error: "User not authenticated" };
+    }
+
+    // Verify ownership
+    const { data: existing, error: fetchError } = await supabase
+        .from("personalities")
+        .select("creator_id")
+        .eq("personality_id", personalityId)
+        .single();
+
+    if (fetchError || !existing) {
+        return { error: "Personality not found or access denied" };
+    }
+
+    if (existing.creator_id !== user.id) {
+        return { error: "Unauthorized: You do not own this character" };
+    }
+
+    // Filter updates
+    const allowedUpdates = {
+        title: updates.title,
+        character_prompt: updates.character_prompt,
+        oai_voice: updates.oai_voice,
+        voice_prompt: updates.voice_prompt,
+        short_description: updates.short_description,
+        pitch_factor: updates.pitch_factor,
+        first_message_prompt: updates.first_message_prompt,
+        provider: updates.provider
+    };
+
+    const { data, error } = await supabase
+        .from("personalities")
+        .update(allowedUpdates)
+        .eq("personality_id", personalityId)
+        .select()
+        .single();
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    return { data };
+};

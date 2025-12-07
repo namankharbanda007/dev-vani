@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
+import { updatePersonalityAction } from "@/app/actions";
 import { emotionOptions, geminiVoices, openaiVoices, r2UrlAudio } from "@/lib/data";
 import EmojiComponent from "./EmojiComponent";
 import { PitchFactors } from "@/lib/utils";
@@ -197,7 +198,15 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
         };
 
         console.log("Refined Update payload:", updateData);
-        personality = await updatePersonality(supabase, initialData.personality_id, updateData);
+        // Use Server Action to bypass potential client-side RLS issues
+        const result = await updatePersonalityAction(initialData.personality_id, updateData);
+        if (result.error) {
+          console.error("Server Action Error:", result.error);
+          toast({ title: "Error", description: result.error, variant: "destructive" });
+          setIsSubmitting(false);
+          return;
+        }
+        personality = result.data;
       } else {
         console.log("Creating new personality");
         personality = await createPersonality(supabase, selectedUser.user_id, personalityData);
