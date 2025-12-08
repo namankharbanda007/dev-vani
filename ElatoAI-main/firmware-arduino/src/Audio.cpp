@@ -21,6 +21,7 @@ int currentVolume = 70;
 float currentPitchFactor = 1.0f;
 const int CHANNELS = 1;         // Mono
 const int BITS_PER_SAMPLE = 16; // 16-bit audio
+bool isRawAudio = false;        // Flag to indicate raw PCM playback
 
 // AUDIO OUTPUT
 class BufferPrint : public Print {
@@ -77,6 +78,11 @@ void transitionToSpeaking() {
     vTaskDelay(50);
 
     i2sInputFlushScheduled = true;
+
+    // Flush audio buffer to prevent playing old garbage/static
+    while (audioBuffer.available() > 0) {
+        audioBuffer.read();
+    }
     
     deviceState = SPEAKING;
     digitalWrite(I2S_SD_OUT, HIGH);
@@ -246,7 +252,7 @@ void micTask(void *parameter) {
 void webSocketEvent(WStype_t type, const uint8_t *payload, size_t length)
 {
     // Basic debug header for every event
-    Serial.printf("[WSc][event] type=%d length=%u\n", (int)type, (unsigned)length);
+    // Serial.printf("[WSc][event] type=%d length=%u\n", (int)type, (unsigned)length);
     switch (type)
     {
     case WStype_DISCONNECTED:
@@ -332,7 +338,13 @@ void webSocketEvent(WStype_t type, const uint8_t *payload, size_t length)
                 deviceState = PROCESSING; 
             } else if (strcmp((char*)msg.c_str(), "RESPONSE.CREATED") == 0) {
                 Serial.println("Received RESPONSE.CREATED, transitioning to speaking");
+                isRawAudio = false; // Reset to Opus for Gemini
                 transitionToSpeaking();
+            } else if (strcmp((char*)msg.c_str(), "Playing Bhajan...") == 0) {
+                Serial.println("Received Playing Bhajan..., transitioning to speaking");
+                isRawAudio = true; // Use Raw PCM for Bhajan
+                transitionToSpeaking();
+            } else if (strcmp((char*)msg.c_str(), "SESSION.END") == 0) {
             } else if (strcmp((char*)msg.c_str(), "SESSION.END") == 0) {
                 Serial.println("Received SESSION.END, going to sleep");
                 sleepRequested = true;
@@ -348,9 +360,18 @@ void webSocketEvent(WStype_t type, const uint8_t *payload, size_t length)
         }
 
         // Otherwise process the audio data normally
-        size_t processed = opusDecoder.write(payload, length);
-        if (processed != length) {
-            Serial.printf("Warning: Only processed %d/%d bytes\n", processed, length);
+        if (isRawAudio) {
+            // Write raw PCM data directly to buffer
+            size_t written = audioBuffer.writeArray(payload, length);
+            if (written != length) {
+                 Serial.printf("Warning: Buffer full? Only wrote %d/%d bytes\n", written, length);
+            }
+        } else {
+            // Decode Opus data
+            size_t processed = opusDecoder.write(payload, length);
+            if (processed != length) {
+                Serial.printf("Warning: Only processed %d/%d bytes\n", processed, length);
+            }
         }
         break;
       }

@@ -275,6 +275,11 @@ void handleBootButton() {
         if (xSemaphoreTake(wsMutex, 1000 / portTICK_PERIOD_MS) == pdTRUE) {
             Serial.println("Mutex taken. Sending message...");
             webSocket.sendTXT(jsonString);
+            
+            // IMMEDIATE STOP: Stop the microphone by changing state
+            deviceState = PROCESSING;
+            Serial.println("Set state to PROCESSING (Mic Stopped)");
+            
             xSemaphoreGive(wsMutex);
             Serial.println("Message sent. Mutex released.");
         } else {
