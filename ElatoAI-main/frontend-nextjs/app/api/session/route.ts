@@ -62,9 +62,8 @@ ${chatHistory}
 USER'S CURRENT TIME IS: ${timestamp}
 
 LANGUAGE:
-You may talk in any language the user would like, but the default language is ${
-  user?.language?.name ?? "English"
-}.
+You may talk in any language the user would like, but the default language is ${user?.language?.name ?? "English"
+  }.
 `;
 
 const getStoryPromptTemplate = (user: IUser, chatHistory: string) => {
@@ -132,7 +131,7 @@ const createSystemPrompt = async (
 };
 
 export async function GET(request: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

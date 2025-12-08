@@ -21,28 +21,28 @@ export const metadata: Metadata = {
 const sidebarNavItems: SidebarNavItem[] = [
     {
         title: "Playground",
-            href: "/home",
-            icon: <Gamepad2 size={ICON_SIZE} />,
-        },
-        {
-            title: "Settings",
-            href: "/home/settings",
-            icon: <Settings size={ICON_SIZE} />,
-        },
-        {
-            title: "Create new",
-            href: "/home/create",
-            icon: <Plus size={ICON_SIZE+4} strokeWidth={2.5} />,
-            isPrimary: true,
-        },
-    ];
+        href: "/home",
+        icon: <Gamepad2 size={ICON_SIZE} />,
+    },
+    {
+        title: "Settings",
+        href: "/home/settings",
+        icon: <Settings size={ICON_SIZE} />,
+    },
+    {
+        title: "Create new",
+        href: "/home/create",
+        icon: <Plus size={ICON_SIZE + 4} strokeWidth={2.5} />,
+        isPrimary: true,
+    },
+];
 
 export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
         data: { user },

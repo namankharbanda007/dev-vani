@@ -16,7 +16,7 @@ export default async function Home({
 }: {
     searchParams: { [key: string]: string | string[] | undefined };
 }) {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
         data: { user },
