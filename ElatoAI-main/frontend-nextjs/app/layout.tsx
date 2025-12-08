@@ -32,6 +32,7 @@ const karla = Karla({
 import Script from "next/script";
 import { Navbar } from "./components/Nav/Navbar";
 import { getUserById } from "@/db/users";
+import AuthHashHandler from "./components/AuthHashHandler";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -341,6 +342,7 @@ export default async function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 > */}
+                <AuthHashHandler />
                 <main className="flex-grow mx-auto w-full flex flex-col pt-[44px]">
                     <Navbar user={dbUser ?? null} />
                     {children}
