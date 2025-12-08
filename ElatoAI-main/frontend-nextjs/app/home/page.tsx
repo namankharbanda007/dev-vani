@@ -16,7 +16,10 @@ export default async function Home() {
         data: { user },
     } = await supabase.auth.getUser();
 
+    console.log("Home Page: User check:", user ? "Found" : "Missing");
+
     if (!user) {
+        console.log("Home Page: Redirecting to login...");
         redirect("/login");
     }
 
