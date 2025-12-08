@@ -25,23 +25,18 @@ export default async function Login({ searchParams }: LoginProps) {
     const supabase = await createClient();
     console.log("Supabase client created. Attempting sign in...");
 
-    try {
-      // Try to sign in first
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      console.log("Sign in returned:", signInError ? "Error" : "Success");
+    // Try to sign in first
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    console.log("Sign in returned:", signInError ? "Error" : "Success");
 
 
-      // If sign in succeeds, redirect to home
-      if (!signInError) {
-        console.log("Redirecting to home...");
-        return redirect("/home");
-      }
-    } catch (err) {
-      console.error("CRASH during signInWithPassword:", err);
-      throw err;
+    // If sign in succeeds, redirect to home
+    if (!signInError) {
+      console.log("Redirecting to home...");
+      return redirect("/home");
     }
 
     // If sign in fails, try to sign up

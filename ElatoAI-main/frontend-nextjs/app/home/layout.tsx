@@ -55,7 +55,7 @@ export default async function RootLayout({
     const dbUser = await getUserById(supabase, user.id);
 
     if (!dbUser) {
-        redirect("/login");
+        redirect("/onboard");
     }
 
     const mobileNavItems = [
