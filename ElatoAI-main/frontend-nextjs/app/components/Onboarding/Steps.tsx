@@ -6,13 +6,15 @@ import React from "react";
 import GeneralUserForm from "../Settings/UserForm";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { updateUser } from "@/db/users";
+import { updateUser, createUser } from "@/db/users";
 import { Loader2 } from "lucide-react";
+import { User } from "@supabase/supabase-js";
 
 const Steps: React.FC<{
     selectedUser?: IUser;
     userId: string;
-}> = ({ selectedUser, userId }) => {
+    authUser?: User | null;
+}> = ({ selectedUser, userId, authUser }) => {
     const supabase = createClient();
     const router = useRouter();
     const [progress, setProgress] = React.useState(50);
@@ -26,29 +28,45 @@ const Steps: React.FC<{
 
     const CurrentForm = () => {
         if (step === 1) {
-        return (
-            <GeneralUserForm
-                selectedUser={selectedUser}
-                userId={userId}
-                onClickCallback={onClickFormCallback}
-                onSave={
-                    async (values, userType) => {
-                        await updateUser(
-                            supabase,
-                            {
-                            supervisee_age: values.supervisee_age,
-                            supervisee_name: values.supervisee_name,
-                            supervisee_persona: values.supervisee_persona,
-                            user_info: {
-                                user_type: userType,
-                                user_metadata: values,
-                            },  
-                        },
-                        userId);
-                }}
-                disabled={false}
-            />
-        );
+            return (
+                <GeneralUserForm
+                    selectedUser={selectedUser}
+                    userId={userId}
+                    onClickCallback={onClickFormCallback}
+                    onSave={
+                        async (values, userType) => {
+                            if (selectedUser) {
+                                await updateUser(
+                                    supabase,
+                                    {
+                                        supervisee_age: values.supervisee_age,
+                                        supervisee_name: values.supervisee_name,
+                                        supervisee_persona: values.supervisee_persona,
+                                        user_info: {
+                                            user_type: userType,
+                                            user_metadata: values,
+                                        },
+                                    },
+                                    userId);
+                            } else if (authUser) {
+                                await createUser(
+                                    supabase,
+                                    authUser,
+                                    {
+                                        supervisee_age: values.supervisee_age,
+                                        supervisee_name: values.supervisee_name,
+                                        supervisee_persona: values.supervisee_persona,
+                                        user_info: {
+                                            user_type: userType,
+                                            user_metadata: values,
+                                        },
+                                        personality_id: values.personality_id ?? "default", // Ensure personality_id is present
+                                    });
+                            }
+                        }}
+                    disabled={false}
+                />
+            );
         } else {
             return <Loader2 className="w-4 h-4 animate-spin" />;
         }

@@ -10,7 +10,7 @@ export default async function Home() {
 
     return (
         <div className="flex flex-col gap-2">
-            <Steps userId={user?.id ?? ""} />
+            <Steps userId={user?.id ?? ""} authUser={user} />
         </div>
     );
 }
