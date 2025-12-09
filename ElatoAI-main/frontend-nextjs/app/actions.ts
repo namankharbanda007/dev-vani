@@ -262,6 +262,22 @@ export const generateCharacterImageAction = async (prompt: string) => {
 
         if (!response.ok) {
             const errorText = await response.text();
+
+            // If model not found, try to list available models to help debug
+            if (response.status === 404) {
+                try {
+                    const listResponse = await fetch(
+                        `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+                    );
+                    const listData = await listResponse.json();
+                    const modelNames = listData.models ? listData.models.map((m: any) => m.name).join(", ") : "No models found";
+                    throw new Error(`Gemini Model 404. Your API Key has access to: ${modelNames}. Original error: ${errorText}`);
+                } catch (listError) {
+                    // Fallback if list models also fails
+                    throw new Error(`Gemini API Error: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+            }
+
             throw new Error(`Gemini API Error: ${response.status} ${response.statusText} - ${errorText}`);
         }
 
