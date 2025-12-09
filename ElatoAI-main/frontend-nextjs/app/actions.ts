@@ -272,9 +272,9 @@ export const generateCharacterImageAction = async (prompt: string) => {
                     const listData = await listResponse.json();
                     const modelNames = listData.models ? listData.models.map((m: any) => m.name).join(", ") : "No models found";
                     throw new Error(`Gemini Model 404. Your API Key has access to: ${modelNames}. Original error: ${errorText}`);
-                } catch (listError) {
-                    // Fallback if list models also fails
-                    throw new Error(`Gemini API Error: ${response.status} ${response.statusText} - ${errorText}`);
+                } catch (listError: any) {
+                    // Include listError in the message
+                    throw new Error(`Gemini API Error: ${response.status} ${response.statusText} - ${errorText} \nAlso failed to list models: ${listError.message}`);
                 }
             }
 
