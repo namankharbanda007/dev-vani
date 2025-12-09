@@ -131,7 +131,7 @@ const createSystemPrompt = async (
 };
 
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

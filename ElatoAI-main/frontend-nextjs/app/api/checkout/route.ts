@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
     console.log("foobar", quantity, color, free_shipping);
 
-    const supabase = await createClient();
+    const supabase = createClient();
     const {
         data: { session },
     } = await supabase.auth.getSession();

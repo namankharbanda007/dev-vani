@@ -56,12 +56,7 @@ export const getUserById = async (supabase: SupabaseClient, id: string) => {
         .single();
 
     if (error) {
-        // PGRST116 is the error code for "The result contains 0 rows"
-        // We want to return null in this case so the UI can redirect to onboarding
-        if (error.code !== "PGRST116") {
-            console.log("error in getUserById", error);
-        }
-        return null;
+        console.log("error in getUserById", error);
     }
 
     return data as IUser | undefined;

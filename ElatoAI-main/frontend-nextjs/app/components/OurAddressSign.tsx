@@ -3,7 +3,7 @@ const OurAddressSign = () => {
         <p>
             Akashdeep Deb, [
             <a
-                href="mailto:akadeb97@gmail.com"
+                href="mailto:akash@elatoai.com"
                 className="text-blue-400 underline"
             >
                 akadeb97@gmail.com

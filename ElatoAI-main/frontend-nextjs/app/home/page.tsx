@@ -10,16 +10,13 @@ export const revalidate = 0; // disable cache for this route
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
-    console.log("Home Page: User check:", user ? "Found" : "Missing");
-
     if (!user) {
-        console.log("Home Page: Redirecting to login...");
         redirect("/login");
     }
 

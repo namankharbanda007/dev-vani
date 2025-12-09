@@ -2,7 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import Steps from "../components/Onboarding/Steps";
 
 export default async function Home() {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     const {
         data: { user },
@@ -10,7 +10,7 @@ export default async function Home() {
 
     return (
         <div className="flex flex-col gap-2">
-            <Steps userId={user?.id ?? ""} authUser={user} />
+            <Steps userId={user?.id ?? ""} />
         </div>
     );
 }

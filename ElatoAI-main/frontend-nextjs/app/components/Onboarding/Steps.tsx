@@ -6,15 +6,13 @@ import React from "react";
 import GeneralUserForm from "../Settings/UserForm";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { updateUser, createUser } from "@/db/users";
+import { updateUser } from "@/db/users";
 import { Loader2 } from "lucide-react";
-import { User } from "@supabase/supabase-js";
 
 const Steps: React.FC<{
     selectedUser?: IUser;
     userId: string;
-    authUser?: User | null;
-}> = ({ selectedUser, userId, authUser }) => {
+}> = ({ selectedUser, userId }) => {
     const supabase = createClient();
     const router = useRouter();
     const [progress, setProgress] = React.useState(50);
@@ -35,34 +33,18 @@ const Steps: React.FC<{
                     onClickCallback={onClickFormCallback}
                     onSave={
                         async (values, userType) => {
-                            if (selectedUser) {
-                                await updateUser(
-                                    supabase,
-                                    {
-                                        supervisee_age: values.supervisee_age,
-                                        supervisee_name: values.supervisee_name,
-                                        supervisee_persona: values.supervisee_persona,
-                                        user_info: {
-                                            user_type: userType,
-                                            user_metadata: values,
-                                        },
+                            await updateUser(
+                                supabase,
+                                {
+                                    supervisee_age: values.supervisee_age,
+                                    supervisee_name: values.supervisee_name,
+                                    supervisee_persona: values.supervisee_persona,
+                                    user_info: {
+                                        user_type: userType,
+                                        user_metadata: values,
                                     },
-                                    userId);
-                            } else if (authUser) {
-                                await createUser(
-                                    supabase,
-                                    authUser,
-                                    {
-                                        supervisee_age: values.supervisee_age,
-                                        supervisee_name: values.supervisee_name,
-                                        supervisee_persona: values.supervisee_persona,
-                                        user_info: {
-                                            user_type: userType,
-                                            user_metadata: values,
-                                        },
-                                        personality_id: values.personality_id ?? "default", // Ensure personality_id is present
-                                    });
-                            }
+                                },
+                                userId);
                         }}
                     disabled={false}
                 />

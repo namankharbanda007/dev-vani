@@ -42,7 +42,7 @@ export default async function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     const {
         data: { user },
@@ -55,7 +55,7 @@ export default async function RootLayout({
     const dbUser = await getUserById(supabase, user.id);
 
     if (!dbUser) {
-        redirect("/onboard");
+        redirect("/login");
     }
 
     const mobileNavItems = [

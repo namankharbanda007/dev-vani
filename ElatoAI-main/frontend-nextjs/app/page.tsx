@@ -12,7 +12,7 @@ import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
 import { kickstarterLink } from "@/lib/data";
 
 export default async function LandingPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const allPersonalities = await getAllPersonalities(supabase);
   const adultPersonalities = allPersonalities.filter((personality) => !personality.is_story && !personality.is_child_voice);

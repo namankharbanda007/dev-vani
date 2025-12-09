@@ -8,7 +8,7 @@ import { addUserToDevice, dbCheckUserCode } from "@/db/devices";
 import { getSimpleUserById } from "@/db/users";
 
 export async function deleteUserApiKey(userId: string) {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { error } = await supabase.from("api_keys").delete().eq(
         "user_id",
         userId,
@@ -19,7 +19,7 @@ export async function deleteUserApiKey(userId: string) {
 export const signInAction = async (formData: FormData) => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    const supabase = await createClient();
+    const supabase = createClient();
 
     const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -35,7 +35,7 @@ export const signInAction = async (formData: FormData) => {
 
 export const forgotPasswordAction = async (formData: FormData) => {
     const email = formData.get("email")?.toString();
-    const supabase = await createClient();
+    const supabase = createClient();
     const origin = headers().get("origin");
     const callbackUrl = formData.get("callbackUrl")?.toString();
 
@@ -73,7 +73,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
@@ -110,7 +110,7 @@ export const resetPasswordAction = async (formData: FormData) => {
 };
 
 export const signOutAction = async () => {
-    const supabase = await createClient();
+    const supabase = createClient();
     await supabase.auth.signOut();
     return redirect("/login");
 };
@@ -123,7 +123,7 @@ export const connectUserToDevice = async (
     userId: string,
     userDeviceCode: string,
 ) => {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     const isCodeValid = await dbCheckUserCode(supabase, userDeviceCode.trim());
     if (!isCodeValid) {
@@ -169,7 +169,7 @@ export const fetchGithubStars = async (repo: string) => {
 };
 
 export const isPremiumUser = async (userId: string) => {
-    const supabase = await createClient();
+    const supabase = createClient();
     const dbUser = await getSimpleUserById(supabase, userId);
     return dbUser?.is_premium;
 };
@@ -178,7 +178,7 @@ export const updatePersonalityAction = async (
     personalityId: string,
     updates: any
 ) => {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
