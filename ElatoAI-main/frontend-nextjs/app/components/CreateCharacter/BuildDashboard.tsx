@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Check, Volume2, Plus, Sparkles, User, Mic, Settings2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Volume2, Plus, Sparkles, User, Mic, Settings2, Image as ImageIcon, Upload, Smile } from "lucide-react";
 import { createPersonality, updatePersonality } from "@/db/personalities";
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from "@/components/ui/use-toast";
@@ -15,6 +15,8 @@ import { z } from "zod";
 import { updatePersonalityAction } from "@/app/actions";
 import { emotionOptions, geminiVoices, openaiVoices, r2UrlAudio } from "@/lib/data";
 import EmojiComponent from "./EmojiComponent";
+import ImageUpload from "./ImageUpload";
+import ImageGenerator from "./ImageGenerator";
 import { PitchFactors } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import VoiceCloneModal from "./VoiceCloneModal";
@@ -76,6 +78,12 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof FormData | 'features', string>>>({});
   const [previewingVoice, setPreviewingVoice] = useState<string | null>(null);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+
+  // Image handling state
+  const isInitialImage = initialData?.subtitle && initialData.subtitle.startsWith('http');
+  const [customImageUrl, setCustomImageUrl] = useState<string | null>(isInitialImage ? initialData.subtitle : null);
+  const [imageSource, setImageSource] = useState<'emoji' | 'upload' | 'generate'>(isInitialImage ? 'upload' : 'emoji'); // Default to upload if url exists, otherwise emoji
+
   const [showVoiceCloneModal, setShowVoiceCloneModal] = useState<{
     provider: "elevenlabs" | "hume";
     title: string;
@@ -149,7 +157,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
       const personalityData = {
         provider: formData.provider as ModelProvider,
         title: formData.title,
-        subtitle: "",
+        subtitle: imageSource === 'emoji' ? "" : (customImageUrl || ""), // Use custom image URL only if not using emoji
         character_prompt: formData.prompt,
         oai_voice: formData.voice as OaiVoice,
         voice_prompt: formData.voiceCharacteristics.features + "\nThe voice should be " + formData.voiceCharacteristics.emotion,
@@ -188,7 +196,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
         const updateData = {
           provider: personalityData.provider,
           title: personalityData.title,
-          // subtitle: personalityData.subtitle, // Don't update subtitle for now
+          subtitle: personalityData.subtitle, // Update subtitle with image URL
           character_prompt: personalityData.character_prompt,
           oai_voice: personalityData.oai_voice,
           voice_prompt: personalityData.voice_prompt,
@@ -351,6 +359,94 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                   </div>
                 </div>
               </div>
+
+
+              {/* Character Appearance Section */}
+              <div className="md:col-span-2 pt-6 border-t border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Character Appearance</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Source Selection */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium text-gray-700">Image Source</Label>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => setImageSource('emoji')}
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                          imageSource === 'emoji'
+                            ? "border-purple-500 bg-purple-50 text-purple-900 font-medium"
+                            : "border-gray-200 hover:border-purple-200"
+                        )}
+                      >
+                        <div className="bg-white p-2 rounded-lg shadow-sm">
+                          <Smile className="w-5 h-5 text-amber-500" />
+                        </div>
+                        <span>Use Voice Emoji</span>
+                      </button>
+                      <button
+                        onClick={() => setImageSource('upload')}
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                          imageSource === 'upload'
+                            ? "border-purple-500 bg-purple-50 text-purple-900 font-medium"
+                            : "border-gray-200 hover:border-purple-200"
+                        )}
+                      >
+                        <div className="bg-white p-2 rounded-lg shadow-sm">
+                          <Upload className="w-5 h-5 text-blue-500" />
+                        </div>
+                        <span>Upload Image</span>
+                      </button>
+                      <button
+                        onClick={() => setImageSource('generate')}
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                          imageSource === 'generate'
+                            ? "border-purple-500 bg-purple-50 text-purple-900 font-medium"
+                            : "border-gray-200 hover:border-purple-200"
+                        )}
+                      >
+                        <div className="bg-white p-2 rounded-lg shadow-sm">
+                          <Sparkles className="w-5 h-5 text-purple-500" />
+                        </div>
+                        <span>Generate with AI</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Content Area */}
+                  <div className="md:col-span-2 bg-gray-50/50 rounded-2xl p-6 border border-gray-100">
+                    {imageSource === 'emoji' && (
+                      <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
+                        <div className="text-6xl animate-bounce">
+                          {/* Find the emoji for the currently selected voice */}
+                          <EmojiComponent emoji={
+                            ([...openaiVoices, ...geminiVoices].find(v => v.id === formData.voice))?.emoji || "🤖"
+                          } />
+                        </div>
+                        <p className="text-gray-500 text-sm max-w-xs">
+                          The character will be represented by the emoji associated with their voice. You can change the voice in the next step.
+                        </p>
+                      </div>
+                    )}
+
+                    {imageSource === 'upload' && (
+                      <ImageUpload
+                        onImageSelected={(url) => setCustomImageUrl(url)}
+                        currentImage={customImageUrl}
+                      />
+                    )}
+
+                    {imageSource === 'generate' && (
+                      <ImageGenerator
+                        onImageGenerated={(url) => setCustomImageUrl(url)}
+                        initialPrompt={formData.description}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
 

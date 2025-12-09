@@ -74,10 +74,19 @@ const CharacterSection = ({
                                                 className="object-cover transition-transform duration-500 group-hover:scale-110"
                                             />
                                         ) : (
-                                            <div className="flex items-center justify-center h-full bg-gradient-to-br from-purple-100 to-amber-100">
-                                                <div className="transform transition-transform duration-300 group-hover:scale-110">
-                                                    <EmojiComponent personality={personality} />
-                                                </div>
+                                            <div className="flex items-center justify-center h-full bg-gradient-to-br from-purple-100 to-amber-100 relative">
+                                                {personality.subtitle && personality.subtitle.startsWith('http') ? (
+                                                    <Image
+                                                        src={personality.subtitle}
+                                                        alt={personality.title}
+                                                        fill
+                                                        className="object-cover transform transition-transform duration-300 group-hover:scale-110"
+                                                    />
+                                                ) : (
+                                                    <div className="transform transition-transform duration-300 group-hover:scale-110">
+                                                        <EmojiComponent personality={personality} />
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 
