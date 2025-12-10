@@ -449,10 +449,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
               userText={userText}
               setUserText={setUserText}
               onSendMessage={handleSendTextMessage}
-              canSend={
-                sessionStatus === "CONNECTED" &&
-                dcRef.current?.readyState === "open"
-              }
+              canSend={false}
               personality={personality}
               userId={userId}
               isDoctor={isDoctor}
