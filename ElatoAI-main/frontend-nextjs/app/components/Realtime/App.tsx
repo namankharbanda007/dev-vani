@@ -138,7 +138,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
         if (!sessionData.gemini_api_key) {
           setSessionStatus("DISCONNECTED");
           toast({
-            description: "Gemini API Key missing or invalid.",
+            description: "Connection configuration invalid.",
             variant: "destructive"
           });
           return;
@@ -159,7 +159,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
 
         geminiDisconnectRef.current = geminiConnection.disconnect;
         setSessionStatus("CONNECTED");
-        toast({ description: "Connected to Gemini" });
+        toast({ description: "Connected" });
 
       } else {
         // OpenAI Logic
