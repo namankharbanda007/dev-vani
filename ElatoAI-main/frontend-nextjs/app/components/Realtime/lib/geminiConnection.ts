@@ -97,8 +97,7 @@ export async function createGeminiConnection(
         ws = new WebSocket(url);
 
         // Audio Context Setup (Input & Output)
-        // Note: Do NOT force sampleRate in constructor as it might fail on some hardware.
-        // We will read audioContext.sampleRate and resample if needed.
+        // Note: We will read audioContext.sampleRate and resample if needed.
         audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
         console.log(`AudioContext Sample Rate: ${audioContext.sampleRate}`);
@@ -122,7 +121,7 @@ export async function createGeminiConnection(
                 const inputData = event.data; // Float32Array at audioContext.sampleRate
 
                 // Resample to 16000 if necessary
-                const resampledData = axiosResample(inputData, audioContext!.sampleRate, 16000);
+                const resampledData = resampleAudio(inputData, audioContext!.sampleRate, 16000);
 
                 const pcm16 = floatTo16BitPCM(resampledData);
                 const base64Audio = arrayBufferToBase64(pcm16);
@@ -154,6 +153,10 @@ export async function createGeminiConnection(
                                 prebuilt_voice_config: {
                                     voice_name: voice || "Fenrir"
                                 }
+                            },
+                            voice_activity_detection: {
+                                start_of_speech_threshold: "0.6",
+                                end_of_speech_threshold: "0.5"
                             }
                         }
                     },
@@ -194,11 +197,6 @@ export async function createGeminiConnection(
     } catch (error) {
         console.error("Failed to create Gemini connection", error);
         throw error;
-    }
-
-    // Helper alias to solve strict mode issue with recursion if needed or just use the function above
-    function axiosResample(audioData: Float32Array, sourceSampleRate: number, targetSampleRate: number): Float32Array {
-        return resampleAudio(audioData, sourceSampleRate, targetSampleRate);
     }
 
     function playAudioChunk(audioData: Float32Array) {
