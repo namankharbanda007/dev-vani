@@ -15,11 +15,33 @@ class PCMProcessor extends AudioWorkletProcessor {
 registerProcessor('pcm-processor', PCMProcessor);
 `;
 
+/**
+ * Resamples audio data from a source sample rate to a target sample rate.
+ * Uses linear interpolation.
+ */
+function resampleAudio(audioData: Float32Array, sourceSampleRate: number, targetSampleRate: number): Float32Array {
+    if (sourceSampleRate === targetSampleRate) return audioData;
+
+    const ratio = sourceSampleRate / targetSampleRate;
+    const newLength = Math.round(audioData.length / ratio);
+    const result = new Float32Array(newLength);
+
+    for (let i = 0; i < newLength; i++) {
+        const index = i * ratio;
+        const low = Math.floor(index);
+        const high = Math.min(Math.ceil(index), audioData.length - 1);
+        const weight = index - low;
+        result[i] = audioData[low] * (1 - weight) + audioData[high] * weight;
+    }
+    return result;
+}
+
 function floatTo16BitPCM(float32Array: Float32Array) {
     const buffer = new ArrayBuffer(float32Array.length * 2);
     const view = new DataView(buffer);
     for (let i = 0; i < float32Array.length; i++) {
         let s = Math.max(-1, Math.min(1, float32Array[i]));
+        // Simple clipping
         view.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
     }
     return buffer;
@@ -75,16 +97,19 @@ export async function createGeminiConnection(
         ws = new WebSocket(url);
 
         // Audio Context Setup (Input & Output)
-        audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
-            sampleRate: 24000,
-        });
+        // Note: Do NOT force sampleRate in constructor as it might fail on some hardware.
+        // We will read audioContext.sampleRate and resample if needed.
+        audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+        console.log(`AudioContext Sample Rate: ${audioContext.sampleRate}`);
 
         await audioContext.audioWorklet.addModule('data:text/javascript;base64,' + btoa(workletCode));
 
-        // Input: 16kHz Mono
+        // Input 
         mediaStream = await navigator.mediaDevices.getUserMedia({
             audio: {
                 channelCount: 1,
+                // Ideally we request 16k, but browser might ignore
                 sampleRate: 16000,
             },
         });
@@ -94,7 +119,12 @@ export async function createGeminiConnection(
 
         workletNode.port.onmessage = (event) => {
             if (ws && ws.readyState === WebSocket.OPEN) {
-                const pcm16 = floatTo16BitPCM(event.data);
+                const inputData = event.data; // Float32Array at audioContext.sampleRate
+
+                // Resample to 16000 if necessary
+                const resampledData = axiosResample(inputData, audioContext!.sampleRate, 16000);
+
+                const pcm16 = floatTo16BitPCM(resampledData);
                 const base64Audio = arrayBufferToBase64(pcm16);
 
                 ws.send(JSON.stringify({
@@ -113,7 +143,7 @@ export async function createGeminiConnection(
         // WebSocket Event Handlers
         ws.onopen = () => {
             console.log("Gemini WebSocket Connected");
-            // Send Initial Setup
+            // Send Initial Setup with VAD Tuning
             const setupMessage = {
                 setup: {
                     model: MODEL,
@@ -164,6 +194,11 @@ export async function createGeminiConnection(
     } catch (error) {
         console.error("Failed to create Gemini connection", error);
         throw error;
+    }
+
+    // Helper alias to solve strict mode issue with recursion if needed or just use the function above
+    function axiosResample(audioData: Float32Array, sourceSampleRate: number, targetSampleRate: number): Float32Array {
+        return resampleAudio(audioData, sourceSampleRate, targetSampleRate);
     }
 
     function playAudioChunk(audioData: Float32Array) {
