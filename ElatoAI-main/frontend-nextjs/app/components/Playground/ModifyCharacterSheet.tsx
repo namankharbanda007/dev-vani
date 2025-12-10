@@ -106,7 +106,16 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
         return (
             <div className="container mx-auto p-4 max-w-4xl">
                 <div className="flex flex-col items-center gap-6">
-                    {isPersonalCharacter ? (
+                    {isPersonalCharacter && openPersonality.subtitle && openPersonality.subtitle.startsWith('http') ? (
+                        <div className="relative w-full h-[300px] sm:h-[400px]">
+                            <Image
+                                src={openPersonality.subtitle}
+                                alt={openPersonality.title}
+                                className="rounded-lg object-top sm:object-center object-cover"
+                                fill
+                            />
+                        </div>
+                    ) : isPersonalCharacter ? (
                         <div className="relative w-full h-[100px] sm:h-[200px] flex items-center justify-center">
                             <EmojiComponent personality={openPersonality} size={100} />
                         </div>
@@ -136,9 +145,11 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
                             </h3>
                         </div>
 
-                        <p className="text-gray-400">
-                            {openPersonality.subtitle}
-                        </p>
+                        {!openPersonality.subtitle?.startsWith('http') && (
+                            <p className="text-gray-400">
+                                {openPersonality.subtitle}
+                            </p>
+                        )}
                         <p className="text-gray-600">
                             {openPersonality.short_description}
                         </p>
