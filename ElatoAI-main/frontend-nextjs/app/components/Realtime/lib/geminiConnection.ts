@@ -142,7 +142,7 @@ export async function createGeminiConnection(
         // WebSocket Event Handlers
         ws.onopen = () => {
             console.log("Gemini WebSocket Connected");
-            // Send Initial Setup with VAD Tuning
+            // Send Initial Setup
             const setupMessage = {
                 setup: {
                     model: MODEL,
@@ -153,10 +153,6 @@ export async function createGeminiConnection(
                                 prebuilt_voice_config: {
                                     voice_name: voice || "Fenrir"
                                 }
-                            },
-                            voice_activity_detection: {
-                                start_of_speech_threshold: "0.6",
-                                end_of_speech_threshold: "0.5"
                             }
                         }
                     },
