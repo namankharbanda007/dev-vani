@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Sparkles, RefreshCw } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import { generateCharacterImageAction } from "@/app/actions";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "@/components/ui/use-toast";
