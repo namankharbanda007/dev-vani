@@ -13,10 +13,17 @@ interface ImageGeneratorProps {
 }
 
 const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated, initialPrompt }) => {
+    // Determine prompt from props if available
     const [prompt, setPrompt] = useState(initialPrompt || "");
     const [isGenerating, setIsGenerating] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const supabase = createClient();
+
+    // Update prompt if prop changes (e.g. user edits description)
+    React.useEffect(() => {
+        if (initialPrompt) {
+            setPrompt(initialPrompt);
+        }
+    }, [initialPrompt]);
 
     const handleGenerate = async () => {
         if (!prompt) return;
@@ -43,6 +50,11 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated, initi
 
             // Upload to Supabase 
             // (Reusing the same logic as upload, assumes bucket exists)
+            // Note: Since we don't have direct access to Supabase client here without context or hook,
+            // we assume the usage is correct or we should refactor upload logic to a utility.
+            // Wait, this component ALREADY had createClient() so it's fine.
+            const supabase = createClient();
+
             const fileName = `generated_${Math.random().toString(36).substring(2)}_${Date.now()}.jpg`;
             const { error: uploadError } = await supabase.storage
                 .from('character-images')
@@ -67,35 +79,49 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated, initi
     };
 
     return (
-        <div className="space-y-4">
-            <div className="flex gap-2">
-                <Textarea
-                    placeholder="Describe your character's appearance..."
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    className="min-h-[80px] bg-white/50 border-gray-200 resize-none"
-                />
-            </div>
-            <Button
-                onClick={handleGenerate}
-                disabled={isGenerating || !prompt.length}
-                className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
-            >
-                {isGenerating ? (
-                    <>
-                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Generating...
-                    </>
-                ) : (
-                    <>
-                        <Sparkles className="mr-2 h-4 w-4" /> Generate Image
-                    </>
-                )}
-            </Button>
-
-            {previewUrl && (
-                <div className="mt-4 border-2 border-purple-100 rounded-xl overflow-hidden shadow-sm">
+        <div className="space-y-4 w-full h-full flex flex-col items-center justify-center">
+            {previewUrl ? (
+                <div className="relative group w-full h-64 rounded-xl overflow-hidden shadow-sm border-2 border-purple-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={previewUrl} alt="Generated" className="w-full h-auto object-cover" />
+                    <img src={previewUrl} alt="Generated" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button
+                            onClick={handleGenerate}
+                            disabled={isGenerating}
+                            variant="secondary"
+                            className="bg-white/90 hover:bg-white text-gray-900"
+                        >
+                            <RefreshCw className={cn("mr-2 h-4 w-4", isGenerating && "animate-spin")} />
+                            Regenerate
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center text-center p-6 space-y-4 bg-purple-50 rounded-2xl border border-purple-100 w-full h-64">
+                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+                        <Sparkles className="h-8 w-8" />
+                    </div>
+                    <div className="space-y-1">
+                        <h3 className="font-semibold text-gray-900">AI Appearance</h3>
+                        <p className="text-xs text-gray-500 max-w-[200px] mx-auto">
+                            Generate a unique look based on your character's description.
+                        </p>
+                    </div>
+                    <Button
+                        onClick={handleGenerate}
+                        disabled={isGenerating || !prompt}
+                        className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md rounded-full px-6"
+                    >
+                        {isGenerating ? (
+                            <>
+                                <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Creating Magic...
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles className="mr-2 h-4 w-4" /> Generate Look
+                            </>
+                        )}
+                    </Button>
                 </div>
             )}
         </div>
