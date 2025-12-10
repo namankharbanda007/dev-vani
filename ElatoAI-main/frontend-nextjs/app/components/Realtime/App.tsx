@@ -17,6 +17,7 @@ import { useHandleServerEvent } from "./hooks/useHandleServerEvent";
 
 // Utilities
 import { createRealtimeConnection } from "./lib/realtimeConnection";
+import { createGeminiConnection } from "./lib/geminiConnection";
 import { toast } from "@/components/ui/use-toast";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Transcript from "./components/Transcript";
@@ -41,13 +42,13 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
   const [selectedAgentConfigSet, setSelectedAgentConfigSet] =
     useState<AgentConfig[] | null>(null);
 
-    const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
-    const [userText, setUserText] = useState<string>("");
+  const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
+  const [userText, setUserText] = useState<string>("");
 
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const [personality, setPersonality] = useState<IPersonality | null>(null);
-  
+
   useEffect(() => {
     const fetchPersonality = async () => {
       if (personalityIdState) {
@@ -55,7 +56,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
         setPersonality(personalityData);
       }
     };
-    
+
     fetchPersonality();
   }, [personalityIdState, supabase]);
 
@@ -63,6 +64,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
   const [dataChannel, setDataChannel] = useState<RTCDataChannel | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
+  const geminiDisconnectRef = useRef<(() => void) | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const [sessionStatus, setSessionStatus] =
     useState<SessionStatus>("DISCONNECTED");
@@ -79,14 +81,19 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
       logClientEvent(eventObj, eventNameSuffix);
       dcRef.current.send(JSON.stringify(eventObj));
     } else {
-      logClientEvent(
-        { attemptedEvent: eventObj.type },
-        "error.data_channel_not_open"
-      );
-      console.error(
-        "Failed to send message - no data channel available",
-        eventObj
-      );
+      // For Gemini, we might not use this same event structure or data channel
+      // But if we wanted to support it, we'd wrap it.
+      // For now, logging error defaults to OAI logic.
+      if (personality?.provider !== 'gemini') {
+        logClientEvent(
+          { attemptedEvent: eventObj.type },
+          "error.data_channel_not_open"
+        );
+        console.error(
+          "Failed to send message - no data channel available",
+          eventObj
+        );
+      }
     }
   };
 
@@ -110,22 +117,12 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     }
   }, [sessionStatus]);
 
-  const fetchEphemeralKey = async (): Promise<string | null> => {
+  const fetchSessionData = async (): Promise<any> => {
     logClientEvent({ url: "/session" }, "fetch_session_token_request");
     const tokenResponse = await fetch("/api/session");
     const data = await tokenResponse.json();
     logServerEvent(data, "fetch_session_token_response");
-
-    if (!data.client_secret?.value) {
-      logClientEvent(data, "error.no_ephemeral_key");
-      setSessionStatus("DISCONNECTED");
-      toast({
-        description: "Your API key is likely invalid. Please add it to your env variables.",
-      });
-      return null;
-    }
-
-    return data.client_secret.value;
+    return data;
   };
 
   const connectToRealtime = async () => {
@@ -133,44 +130,86 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     setSessionStatus("CONNECTING");
 
     try {
-      const EPHEMERAL_KEY = await fetchEphemeralKey();
-      if (!EPHEMERAL_KEY) {
-        return;
+      const sessionData = await fetchSessionData();
+
+      if (personality?.provider === 'gemini') {
+        if (!sessionData.gemini_api_key) {
+          setSessionStatus("DISCONNECTED");
+          toast({
+            description: "Gemini API Key missing or invalid.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        const geminiConnection = await createGeminiConnection(
+          sessionData.gemini_api_key,
+          sessionData.system_prompt || "",
+          sessionData.voice, // mapped voice
+          (event) => {
+            // Handle remote events from Gemini if needed
+            // For minimal implementation, we might just log
+            console.log("Gemini Event:", event);
+          }
+        );
+
+        geminiDisconnectRef.current = geminiConnection.disconnect;
+        setSessionStatus("CONNECTED");
+        toast({ description: "Connected to Gemini" });
+
+      } else {
+        // OpenAI Logic
+        if (!sessionData.client_secret?.value) {
+          logClientEvent(sessionData, "error.no_ephemeral_key");
+          setSessionStatus("DISCONNECTED");
+          toast({
+            description: "Your API key is likely invalid. Please add it to your env variables.",
+          });
+          return;
+        }
+
+        const EPHEMERAL_KEY = sessionData.client_secret.value;
+
+        if (!audioElementRef.current) {
+          audioElementRef.current = document.createElement("audio");
+        }
+        audioElementRef.current.autoplay = isAudioPlaybackEnabled;
+
+        const { pc, dc } = await createRealtimeConnection(
+          EPHEMERAL_KEY,
+          audioElementRef
+        );
+        pcRef.current = pc;
+        dcRef.current = dc;
+
+        dc.addEventListener("open", () => {
+          logClientEvent({}, "data_channel.open");
+        });
+        dc.addEventListener("close", () => {
+          logClientEvent({}, "data_channel.close");
+        });
+        dc.addEventListener("error", (err: any) => {
+          logClientEvent({ error: err }, "data_channel.error");
+        });
+        dc.addEventListener("message", (e: MessageEvent) => {
+          handleServerEventRef.current(JSON.parse(e.data));
+        });
+
+        setDataChannel(dc);
       }
-
-      if (!audioElementRef.current) {
-        audioElementRef.current = document.createElement("audio");
-      }
-      audioElementRef.current.autoplay = isAudioPlaybackEnabled;
-
-      const { pc, dc } = await createRealtimeConnection(
-        EPHEMERAL_KEY,
-        audioElementRef
-      );
-      pcRef.current = pc;
-      dcRef.current = dc;
-
-      dc.addEventListener("open", () => {
-        logClientEvent({}, "data_channel.open");
-      });
-      dc.addEventListener("close", () => {
-        logClientEvent({}, "data_channel.close");
-      });
-      dc.addEventListener("error", (err: any) => {
-        logClientEvent({ error: err }, "data_channel.error");
-      });
-      dc.addEventListener("message", (e: MessageEvent) => {
-        handleServerEventRef.current(JSON.parse(e.data));
-      });
-
-      setDataChannel(dc);
     } catch (err) {
       console.error("Error connecting to realtime:", err);
       setSessionStatus("DISCONNECTED");
+      toast({ description: "Failed to connect", variant: "destructive" });
     }
   };
 
   const disconnectFromRealtime = () => {
+    if (geminiDisconnectRef.current) {
+      geminiDisconnectRef.current();
+      geminiDisconnectRef.current = null;
+    }
+
     if (pcRef.current) {
       pcRef.current.getSenders().forEach((sender) => {
         if (sender.track) {
@@ -212,8 +251,8 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
 
   const createFirstMessage = () => {
     return personality?.first_message_prompt
-    ? `Always start the conversation following these instructions from the user: ${personality?.first_message_prompt}`
-    : "The user is initiating a new chat here. Say something!";
+      ? `Always start the conversation following these instructions from the user: ${personality?.first_message_prompt}`
+      : "The user is initiating a new chat here. Say something!";
   }
 
   const updateSession = (shouldTriggerResponse: boolean = false) => {
@@ -229,12 +268,12 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     const turnDetection = isPTTActive
       ? null
       : {
-          type: "server_vad",
-          threshold: 0.5,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 200,
-          create_response: true,
-        };
+        type: "server_vad",
+        threshold: 0.5,
+        prefix_padding_ms: 300,
+        silence_duration_ms: 200,
+        create_response: true,
+      };
 
     const tools = currentAgent?.tools || [];
 
@@ -362,7 +401,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
 
   const handleSheetOpenChange = (open: boolean) => {
     setIsSheetOpen(open);
-    
+
     // If sheet is closed, disconnect
     if (!open && (sessionStatus === "CONNECTED" || sessionStatus === "CONNECTING")) {
       disconnectFromRealtime();
@@ -374,39 +413,39 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     return null;
   }
 
-  return   <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
+  return <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
     <div className="inline-block">
-       <BottomToolbar
+      <BottomToolbar
         sessionStatus={sessionStatus}
         onToggleConnection={onToggleConnection}
         isDoctor={isDoctor}
         personality={personality}
       />
     </div>
-  <SheetContent 
-    side={isMobile ? "bottom" : "right"} 
-    className="h-[80vh] md:h-full p-0"
-    style={{ maxWidth: isMobile ? "100%" : "50%" }}
-  >
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-hidden">
-        <Transcript
-          userText={userText}
-          setUserText={setUserText}
-          onSendMessage={handleSendTextMessage}
-          canSend={
-            sessionStatus === "CONNECTED" &&
-            dcRef.current?.readyState === "open"
-          }
-          personality={personality}
-          userId={userId}
-          isDoctor={isDoctor}
-          supabase={supabase}
-        />
+    <SheetContent
+      side={isMobile ? "bottom" : "right"}
+      className="h-[80vh] md:h-full p-0"
+      style={{ maxWidth: isMobile ? "100%" : "50%" }}
+    >
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-hidden">
+          <Transcript
+            userText={userText}
+            setUserText={setUserText}
+            onSendMessage={handleSendTextMessage}
+            canSend={
+              sessionStatus === "CONNECTED" &&
+              dcRef.current?.readyState === "open"
+            }
+            personality={personality}
+            userId={userId}
+            isDoctor={isDoctor}
+            supabase={supabase}
+          />
+        </div>
       </div>
-    </div>
-  </SheetContent>
-</Sheet>
+    </SheetContent>
+  </Sheet>
 }
 
 export default App;

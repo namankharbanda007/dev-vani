@@ -144,11 +144,26 @@ export async function GET(request: NextRequest) {
   }
 
   const openAiApiKey = process.env.OPENAI_API_KEY;
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+
   const systemPrompt = await createSystemPrompt({
     user: dbUser,
     supabase,
     timestamp: new Date().toISOString(),
   });
+
+  // If the user's personality provider is Gemini, we simply return the key and the system prompt.
+  // The client will handle the WebSocket connection.
+  if (dbUser.personality?.provider === 'gemini') {
+    if (!geminiApiKey) {
+      return NextResponse.json({ error: "Gemini API Key not configured" }, { status: 500 });
+    }
+    return NextResponse.json({
+      gemini_api_key: geminiApiKey,
+      system_prompt: systemPrompt,
+      voice: dbUser.personality.oai_voice // Assuming we map this to a Gemini voice config client-side or here
+    });
+  }
 
   try {
     const response = await fetch(
@@ -160,7 +175,7 @@ export async function GET(request: NextRequest) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini-realtime-preview-2024-12-17",
+          model: "gpt-4o-realtime-preview-2024-12-17",
           instructions: systemPrompt,
           voice: dbUser.personality?.oai_voice ?? "ballad",
         }),
