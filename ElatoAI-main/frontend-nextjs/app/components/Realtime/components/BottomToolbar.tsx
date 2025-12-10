@@ -38,7 +38,7 @@ function BottomToolbar({
     return "Doctor chat";
   }
 
-  const isDisabled = isConnecting || personality.provider === "gemini";
+  const isDisabled = isConnecting;
 
   function getConnectionButtonClasses() {
     const baseClasses = "text-white text-base p-2 w-fit rounded-full shadow-lg flex flex-row items-center justify-center gap-2 px-4";
@@ -74,7 +74,7 @@ function BottomToolbar({
           </TooltipTrigger>
           {isDisabled && (
             <TooltipContent>
-              {personality.provider === "gemini" ? <p>Talk to your AI companion on your SMART मूर्ति device.</p> : <p>Add an API key in Settings to chat with your AI character.</p>}
+              <p>Connecting...</p>
             </TooltipContent>
           )}
         </Tooltip>
