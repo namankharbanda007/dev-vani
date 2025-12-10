@@ -1,0 +1,40 @@
+import React from "react";
+import ActiveCallAvatar from "./ActiveCallAvatar";
+
+interface ActiveCallViewProps {
+    personality: any;
+    state: "listening" | "speaking" | "idle" | "connecting";
+}
+
+const ActiveCallView: React.FC<ActiveCallViewProps> = ({ personality, state }) => {
+    return (
+        <div className="flex flex-col items-center justify-center h-full w-full bg-gradient-to-b from-gray-900 to-black text-white relative overflow-hidden">
+
+            {/* Background Ambient Effect (Optional) */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black opacity-50 z-0 pointer-events-none" />
+
+            {/* Main Content */}
+            <div className="z-10 flex flex-col items-center gap-8">
+
+                {/* Status Text (Optional) */}
+                <div className="text-gray-400 text-sm tracking-widest uppercase opacity-70">
+                    {state === 'connecting' && "Connecting..."}
+                    {state === 'listening' && "Listening..."}
+                    {state === 'speaking' && "Speaking..."}
+                    {state === 'idle' && "Interactive"}
+                </div>
+
+                {/* Avatar with Aura */}
+                <ActiveCallAvatar personality={personality} state={state} />
+
+                {/* Character Title */}
+                <h2 className="text-2xl font-light tracking-wide text-white/90 mt-4">
+                    {personality.title}
+                </h2>
+            </div>
+
+        </div>
+    );
+};
+
+export default ActiveCallView;

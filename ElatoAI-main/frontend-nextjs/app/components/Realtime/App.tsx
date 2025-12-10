@@ -21,6 +21,7 @@ import { createGeminiConnection } from "./lib/geminiConnection";
 import { toast } from "@/components/ui/use-toast";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Transcript from "./components/Transcript";
+import ActiveCallView from "./components/ActiveCallView"; // Import new view
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { getPersonalityById } from "@/db/personalities";
 import { createClient } from "@/utils/supabase/client";
@@ -44,6 +45,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
 
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
   const [userText, setUserText] = useState<string>("");
+  const [isAgentSpeaking, setIsAgentSpeaking] = useState<boolean>(false); // New state
 
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -148,8 +150,10 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
           sessionData.voice, // mapped voice
           (event) => {
             // Handle remote events from Gemini if needed
-            // For minimal implementation, we might just log
             console.log("Gemini Event:", event);
+          },
+          (speaking) => {
+            setIsAgentSpeaking(speaking);
           }
         );
 
@@ -223,6 +227,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     setDataChannel(null);
     setSessionStatus("DISCONNECTED");
     setIsPTTUserSpeaking(false);
+    setIsAgentSpeaking(false);
 
     logClientEvent({}, "disconnected");
   };
@@ -413,6 +418,11 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     return null;
   }
 
+  // Determine ACTIVE CALL STATE
+  const activeCallState = sessionStatus === 'CONNECTING' ? 'connecting'
+    : isAgentSpeaking ? 'speaking'
+      : 'listening';
+
   return <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
     <div className="inline-block">
       <BottomToolbar
@@ -427,21 +437,28 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
       className="h-[80vh] md:h-full p-0"
       style={{ maxWidth: isMobile ? "100%" : "50%" }}
     >
-      <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-hidden">
-          <Transcript
-            userText={userText}
-            setUserText={setUserText}
-            onSendMessage={handleSendTextMessage}
-            canSend={
-              sessionStatus === "CONNECTED" &&
-              dcRef.current?.readyState === "open"
-            }
-            personality={personality}
-            userId={userId}
-            isDoctor={isDoctor}
-            supabase={supabase}
-          />
+      <div className="flex flex-col h-full bg-black">
+        <div className="flex-1 overflow-hidden relative">
+          {sessionStatus === "CONNECTED" || sessionStatus === "CONNECTING" ? (
+            <ActiveCallView
+              personality={personality}
+              state={activeCallState}
+            />
+          ) : (
+            <Transcript
+              userText={userText}
+              setUserText={setUserText}
+              onSendMessage={handleSendTextMessage}
+              canSend={
+                sessionStatus === "CONNECTED" &&
+                dcRef.current?.readyState === "open"
+              }
+              personality={personality}
+              userId={userId}
+              isDoctor={isDoctor}
+              supabase={supabase}
+            />
+          )}
         </div>
       </div>
     </SheetContent>

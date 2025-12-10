@@ -1,5 +1,56 @@
 import { RefObject } from "react";
 
+// Helpers
+const workletCode = `
+class PCMProcessor extends AudioWorkletProcessor {
+    process(inputs, outputs, parameters) {
+        const input = inputs[0];
+        if (input.length > 0) {
+            const channelData = input[0]; // Mono
+            this.port.postMessage(channelData);
+        }
+        return true;
+    }
+}
+registerProcessor('pcm-processor', PCMProcessor);
+`;
+
+function floatTo16BitPCM(float32Array: Float32Array) {
+    const buffer = new ArrayBuffer(float32Array.length * 2);
+    const view = new DataView(buffer);
+    for (let i = 0; i < float32Array.length; i++) {
+        let s = Math.max(-1, Math.min(1, float32Array[i]));
+        view.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    }
+    return buffer;
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+}
+
+function base64ToFloat32(base64: string) {
+    const binary = window.atob(base64);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    // PCM 16 LE to Float32
+    const int16Array = new Int16Array(bytes.buffer);
+    const float32Array = new Float32Array(int16Array.length);
+    for (let i = 0; i < int16Array.length; i++) {
+        float32Array[i] = int16Array[i] / 32768.0;
+    }
+    return float32Array;
+}
+
 // Gemini Multimodal Live API Configuration
 const HOST = "generativelanguage.googleapis.com";
 const URI = `wss://${HOST}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
@@ -9,13 +60,15 @@ export async function createGeminiConnection(
     apiKey: string,
     systemPrompt: string,
     voice: string,
-    onRemoteEvent: (event: any) => void
+    onRemoteEvent: (event: any) => void,
+    onSpeakingStateChange?: (isSpeaking: boolean) => void
 ) {
     let ws: WebSocket | null = null;
     let audioContext: AudioContext | null = null;
     let mediaStream: MediaStream | null = null;
     let workletNode: AudioWorkletNode | null = null;
     let nextStartTime = 0;
+    let speakingTimeout: NodeJS.Timeout | null = null;
 
     try {
         const url = `${URI}?key=${apiKey}`;
@@ -116,6 +169,15 @@ export async function createGeminiConnection(
     function playAudioChunk(audioData: Float32Array) {
         if (!audioContext) return;
 
+        // Notify speaking state
+        if (onSpeakingStateChange) {
+            onSpeakingStateChange(true);
+            if (speakingTimeout) clearTimeout(speakingTimeout);
+            speakingTimeout = setTimeout(() => {
+                onSpeakingStateChange(false);
+            }, 1000); // 1s hangover
+        }
+
         // Gemini output is 24kHz typically
         const buffer = audioContext.createBuffer(1, audioData.length, 24000);
         buffer.getChannelData(0).set(audioData);
@@ -141,55 +203,4 @@ export async function createGeminiConnection(
             workletNode?.disconnect();
         }
     };
-}
-
-// Helpers
-const workletCode = `
-class PCMProcessor extends AudioWorkletProcessor {
-    process(inputs, outputs, parameters) {
-        const input = inputs[0];
-        if (input.length > 0) {
-            const channelData = input[0]; // Mono
-            this.port.postMessage(channelData);
-        }
-        return true;
-    }
-}
-registerProcessor('pcm-processor', PCMProcessor);
-`;
-
-function floatTo16BitPCM(float32Array: Float32Array) {
-    const buffer = new ArrayBuffer(float32Array.length * 2);
-    const view = new DataView(buffer);
-    for (let i = 0; i < float32Array.length; i++) {
-        let s = Math.max(-1, Math.min(1, float32Array[i]));
-        view.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-    }
-    return buffer;
-}
-
-function arrayBufferToBase64(buffer: ArrayBuffer) {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-}
-
-function base64ToFloat32(base64: string) {
-    const binary = window.atob(base64);
-    const len = binary.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binary.charCodeAt(i);
-    }
-    // PCM 16 LE to Float32
-    const int16Array = new Int16Array(bytes.buffer);
-    const float32Array = new Float32Array(int16Array.length);
-    for (let i = 0; i < int16Array.length; i++) {
-        float32Array[i] = int16Array[i] / 32768.0;
-    }
-    return float32Array;
 }
