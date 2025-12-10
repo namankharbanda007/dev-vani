@@ -62,7 +62,7 @@ const CharacterSection = ({
     });
 
     const handleSaveImage = async () => {
-        if (!editingPersonality || !newImageUrl) return;
+        if (!editingPersonality || !editingPersonality.personality_id || !newImageUrl) return;
 
         setIsSaving(true);
         try {
