@@ -132,6 +132,8 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
 
     // Create AudioContext synchronously to capture user gesture
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    // Resume immediately to prevent browser suspension policy blocking
+    void audioContext.resume();
 
     setSessionStatus("CONNECTING");
 
