@@ -79,6 +79,7 @@ const URI = `wss://${HOST}/ws/google.ai.generativelanguage.v1alpha.GenerativeSer
 const MODEL = "models/gemini-2.5-flash-native-audio-preview-09-2025";
 
 export async function createGeminiConnection(
+    audioContext: AudioContext,
     apiKey: string,
     systemPrompt: string,
     voice: string,
@@ -86,7 +87,6 @@ export async function createGeminiConnection(
     onSpeakingStateChange?: (isSpeaking: boolean) => void
 ) {
     let ws: WebSocket | null = null;
-    let audioContext: AudioContext | null = null;
     let mediaStream: MediaStream | null = null;
     let workletNode: AudioWorkletNode | null = null;
     let nextStartTime = 0;
@@ -96,9 +96,8 @@ export async function createGeminiConnection(
         const url = `${URI}?key=${apiKey}`;
         ws = new WebSocket(url);
 
-        // Audio Context Setup (Input & Output)
-        // Note: We will read audioContext.sampleRate and resample if needed.
-        audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        // Resume context just in case (e.g. if it was created long ago)
+        await audioContext.resume();
 
         console.log(`AudioContext Sample Rate: ${audioContext.sampleRate}`);
 
@@ -226,6 +225,10 @@ export async function createGeminiConnection(
         disconnect: () => {
             ws?.close();
             mediaStream?.getTracks().forEach(track => track.stop());
+            // Do NOT close audioContext here if it is shared (or passed in)
+            // But since we created it specifically for this session in App.tsx, closing it IS fine.
+            // However, normally the caller manages the context if they pass it in.
+            // Let's close it to be safe and clean up, assuming a new one is created per session.
             if (audioContext && audioContext.state !== 'closed') {
                 audioContext.close();
             }

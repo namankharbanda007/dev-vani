@@ -129,6 +129,10 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
 
   const connectToRealtime = async () => {
     if (sessionStatus !== "DISCONNECTED") return;
+
+    // Create AudioContext synchronously to capture user gesture
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
     setSessionStatus("CONNECTING");
 
     try {
@@ -136,6 +140,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
 
       if (personality?.provider === 'gemini') {
         if (!sessionData.gemini_api_key) {
+          audioContext.close(); // Clean up if failing
           setSessionStatus("DISCONNECTED");
           toast({
             description: "Connection configuration invalid.",
@@ -145,6 +150,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
         }
 
         const geminiConnection = await createGeminiConnection(
+          audioContext, // Pass the context created with user gesture
           sessionData.gemini_api_key,
           sessionData.system_prompt || "",
           sessionData.voice, // mapped voice
