@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Home, Sparkle, ChevronDown, Dog, Bird, Hop, Plus, Blocks, Gamepad2, Link } from "lucide-react";
+import { Home, Sparkle, ChevronDown, Dog, Bird, Hop, Plus, Blocks, Gamepad2 } from "lucide-react";
 import {
     DropdownMenuSeparator,
     DropdownMenu,
@@ -36,16 +36,14 @@ export default function LeftNavbarButtons({ user }: LeftNavbarButtonsProps) {
     return (
         <div className="flex flex-row gap-4 sm:gap-10 items-center">
             <Button
-                variant="outline"
-                className="flex flex-row gap-2 items-center px-4 py-2 rounded-lg"
+                variant="ghost"
+                className="flex flex-row gap-2 items-center px-2 hover:bg-transparent"
                 asChild
                 aria-label="Go to Home page"
                 title="Click to go to Home page"
             >
                 <a href="https://www.smartmurti.com">
-                    <Link size={18} className="mr-1" />
-                    <span className="text-md font-normal mr-1">World's First</span>
-                    <p className="flex items-center font-luckiestGuy tracking-widest text-xl mt-1">
+                    <p className="flex items-center font-luckiestGuy tracking-widest text-2xl">
                         <span>SMART मूर्ति</span>
                     </p>
                 </a>
