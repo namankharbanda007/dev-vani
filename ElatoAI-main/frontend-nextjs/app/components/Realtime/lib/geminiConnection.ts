@@ -76,7 +76,7 @@ function base64ToFloat32(base64: string) {
 // Gemini Multimodal Live API Configuration
 const HOST = "generativelanguage.googleapis.com";
 const URI = `wss://${HOST}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
-const MODEL = "models/gemini-2.5-flash-native-audio-preview-09-2025";
+const MODEL = "models/gemini-2.5-flash-native-audio-preview-12-2025";
 
 export async function createGeminiConnection(
     audioContext: AudioContext,

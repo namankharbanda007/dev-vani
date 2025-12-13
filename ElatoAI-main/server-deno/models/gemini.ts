@@ -25,7 +25,7 @@ export const connectToGemini = async (
 
 	// Initialize Google GenAI
 	const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-	const model = "gemini-2.5-flash-native-audio-preview-09-2025";
+	const model = "gemini-2.5-flash-native-audio-preview-12-2025";
 	const config: LiveConnectConfig = {
 		responseModalities: [Modality.AUDIO],
 		systemInstruction: systemPrompt,
@@ -277,5 +277,11 @@ export const connectToGemini = async (
 			connectionPcmFile.close();
 			console.log("Closed debug audio file.");
 		}
+	});
+	// Custom event to stop AI processing (e.g., for play_bhajan)
+	ws.on("stop_ai", async () => {
+		console.log("Received stop_ai event. Closing Gemini session.");
+		await geminiSession?.close();
+		geminiSession = null; // This breaks the while(geminiSession) loop
 	});
 };

@@ -19,9 +19,10 @@ extern unsigned long speakingStartTime;
 extern int currentVolume;
 extern const int CHANNELS;         // Mono
 extern const int BITS_PER_SAMPLE; // 16-bit audio
+// extern volatile bool isRawAudio;  // Removed
 
 // AUDIO OUTPUT
-constexpr size_t AUDIO_BUFFER_SIZE = 1024 * 10;     // total bytes in the buffer
+constexpr size_t AUDIO_BUFFER_SIZE = 1024 * 16;     // 16KB buffer (~0.33s)
 constexpr size_t AUDIO_CHUNK_SIZE  = 1024;         // ideal read/write chunk size
 extern OpusAudioDecoder opusDecoder;
 extern BufferRTOS<uint8_t> audioBuffer;
