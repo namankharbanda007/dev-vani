@@ -97,49 +97,35 @@ export async function createGeminiConnection(
         const url = `${URI}?key=${apiKey}`;
         ws = new WebSocket(url);
 
-        // Resume context just in case (e.g. if it was created long ago)
-        await audioContext.resume();
+        // Define helpers inside to access closure variables
+        function playAudioChunk(audioData: Float32Array) {
+            if (!audioContext) return;
 
-        console.log(`AudioContext Sample Rate: ${audioContext.sampleRate}`);
-
-        await audioContext.audioWorklet.addModule('data:text/javascript;base64,' + btoa(workletCode));
-
-        // Input 
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                channelCount: 1,
-                // Ideally we request 16k, but browser might ignore
-                sampleRate: 16000,
-            },
-        });
-
-        const source = audioContext.createMediaStreamSource(mediaStream);
-        workletNode = new AudioWorkletNode(audioContext, 'pcm-processor');
-
-        workletNode.port.onmessage = (event) => {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                const inputData = event.data; // Float32Array at audioContext.sampleRate
-
-                // Resample to 16000 if necessary
-                const resampledData = resampleAudio(inputData, audioContext!.sampleRate, 16000);
-
-                const pcm16 = floatTo16BitPCM(resampledData);
-                const base64Audio = arrayBufferToBase64(pcm16);
-
-                ws.send(JSON.stringify({
-                    realtime_input: {
-                        media_chunks: [{
-                            mime_type: "audio/pcm",
-                            data: base64Audio
-                        }]
-                    }
-                }));
+            // Notify speaking state
+            if (onSpeakingStateChange) {
+                onSpeakingStateChange(true);
+                if (speakingTimeout) clearTimeout(speakingTimeout);
+                speakingTimeout = setTimeout(() => {
+                    onSpeakingStateChange(false);
+                }, 1000); // 1s hangover
             }
-        };
 
-        source.connect(workletNode);
+            // Gemini output is 24kHz typically
+            const buffer = audioContext.createBuffer(1, audioData.length, 24000);
+            buffer.getChannelData(0).set(audioData);
 
-        // WebSocket Event Handlers
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+
+            if (nextStartTime < audioContext.currentTime) {
+                nextStartTime = audioContext.currentTime;
+            }
+            source.start(nextStartTime);
+            nextStartTime += buffer.duration;
+        }
+
+        // Event Handlers - Assigned IMMEDIATELY
         ws.onopen = () => {
             console.log("Gemini WebSocket Connected");
             // Send Initial Setup
@@ -204,36 +190,52 @@ export async function createGeminiConnection(
         ws.onerror = (err) => console.error("Gemini WS Error", err);
         ws.onclose = () => console.log("Gemini WS Closed");
 
+        // Now perform async audio setup
+        // Resume context just in case (e.g. if it was created long ago)
+        await audioContext.resume();
+
+        console.log(`AudioContext Sample Rate: ${audioContext.sampleRate}`);
+
+        await audioContext.audioWorklet.addModule('data:text/javascript;base64,' + btoa(workletCode));
+
+        // Input 
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                channelCount: 1,
+                // Ideally we request 16k, but browser might ignore
+                sampleRate: 16000,
+            },
+        });
+
+        const source = audioContext.createMediaStreamSource(mediaStream);
+        workletNode = new AudioWorkletNode(audioContext, 'pcm-processor');
+
+        workletNode.port.onmessage = (event) => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const inputData = event.data; // Float32Array at audioContext.sampleRate
+
+                // Resample to 16000 if necessary
+                const resampledData = resampleAudio(inputData, audioContext!.sampleRate, 16000);
+
+                const pcm16 = floatTo16BitPCM(resampledData);
+                const base64Audio = arrayBufferToBase64(pcm16);
+
+                ws.send(JSON.stringify({
+                    realtime_input: {
+                        media_chunks: [{
+                            mime_type: "audio/pcm",
+                            data: base64Audio
+                        }]
+                    }
+                }));
+            }
+        };
+
+        source.connect(workletNode);
+
     } catch (error) {
         console.error("Failed to create Gemini connection", error);
         throw error;
-    }
-
-    function playAudioChunk(audioData: Float32Array) {
-        if (!audioContext) return;
-
-        // Notify speaking state
-        if (onSpeakingStateChange) {
-            onSpeakingStateChange(true);
-            if (speakingTimeout) clearTimeout(speakingTimeout);
-            speakingTimeout = setTimeout(() => {
-                onSpeakingStateChange(false);
-            }, 1000); // 1s hangover
-        }
-
-        // Gemini output is 24kHz typically
-        const buffer = audioContext.createBuffer(1, audioData.length, 24000);
-        buffer.getChannelData(0).set(audioData);
-
-        const source = audioContext.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioContext.destination);
-
-        if (nextStartTime < audioContext.currentTime) {
-            nextStartTime = audioContext.currentTime;
-        }
-        source.start(nextStartTime);
-        nextStartTime += buffer.duration;
     }
 
     function sendTextMessage(text: string) {

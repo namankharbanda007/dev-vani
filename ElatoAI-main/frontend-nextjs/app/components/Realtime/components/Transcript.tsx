@@ -29,7 +29,7 @@ function Transcript({
   personality,
   userId,
   isDoctor,
-  supabase, 
+  supabase,
 }: TranscriptProps) {
   const { transcriptItems, toggleTranscriptItemExpand } = useTranscript();
   const transcriptRef = useRef<HTMLDivElement | null>(null);
@@ -58,22 +58,22 @@ function Transcript({
 
       // if (hasNewMessage && transcriptItems.length > 0) {
       //   const newestMessage = transcriptItems[transcriptItems.length - 1];
-        
+
       //   // Do something with the newest message
       //   console.log("New message received:", newestMessage);
-        
+
       //   if (newestMessage.status === "DONE" && newestMessage.type === "MESSAGE") {
       //     dbInsertTranscriptItem(supabase, newestMessage, userId, personality.key, isDoctor);
       //   }
       // }
-      
+
       // If a message was updated, find which one(s)
       if (hasUpdatedMessage) {
         transcriptItems.forEach((newItem, index) => {
           const oldItem = prevLogs[index];
           if (oldItem && (newItem.title !== oldItem.title || newItem.data !== oldItem.data)) {
             console.log("Message updated:", newItem);
-            
+
             if (newItem.type === "MESSAGE" && newItem.role === "user") {
               dbInsertTranscriptItem(supabase, newItem, userId, personality.key, isDoctor);
             }
@@ -93,17 +93,17 @@ function Transcript({
   }, [canSend]);
 
   return (
-<div className="flex flex-col h-full bg-white rounded-xl">
+    <div className="flex flex-col h-full bg-white rounded-xl">
       {/* Fixed Personality header */}
       <div className="sticky top-0 p-4 border-b border-gray-200 flex items-center bg-white">
-      <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden mr-3">
+        <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden mr-3">
           {personality.key && (
             personality.creator_id === null ? (
-              <Image 
-                src={getPersonalityImageSrc(personality.key)} 
-                alt={personality.title} 
-                width={48} 
-                height={48} 
+              <Image
+                src={getPersonalityImageSrc(personality.key)}
+                alt={personality.title}
+                width={48}
+                height={48}
                 className="object-cover w-full h-full"
               />
             ) : (
@@ -113,9 +113,11 @@ function Transcript({
             )
           )}
         </div>
-        <div className="flex-1">
-          <h2 className="font-medium text-lg">{personality.title}</h2>
-          <p className="text-sm text-gray-500">{personality.subtitle}</p>
+        <div className="flex-1 min-w-0">
+          <h2 className="font-medium text-lg truncate">{personality.title}</h2>
+          {!personality.subtitle?.startsWith("http") && (
+            <p className="text-sm text-gray-500 truncate">{personality.subtitle}</p>
+          )}
         </div>
         {/* <button
           onClick={handleCopyTranscript}
@@ -125,8 +127,8 @@ function Transcript({
         </button> */}
       </div>
 
-    {/* Transcript */}
- <div 
+      {/* Transcript */}
+      <div
         ref={transcriptRef}
         className="flex-1 overflow-y-auto p-4 flex flex-col gap-y-3"
       >
@@ -140,9 +142,8 @@ function Transcript({
           if (type === "MESSAGE") {
             const isUser = role === "user";
             const containerClasses = `flex ${isUser ? "justify-end" : "justify-start"} mb-2`;
-            const bubbleClasses = `max-w-[80%] p-3 rounded-xl ${
-              isUser ? "bg-blue-400 text-white" : "bg-yellow-100 text-gray-800"
-            } border-2 ${isUser ? "border-blue-500" : "border-yellow-200"} shadow-sm`;
+            const bubbleClasses = `max-w-[80%] p-3 rounded-xl ${isUser ? "bg-blue-400 text-white" : "bg-yellow-100 text-gray-800"
+              } border-2 ${isUser ? "border-blue-500" : "border-yellow-200"} shadow-sm`;
             const isBracketedMessage = title.startsWith("[") && title.endsWith("]");
             const messageStyle = isBracketedMessage ? "italic text-gray-400 text-md" : "text-md font-medium";
             const displayTitle = isBracketedMessage ? title.slice(1, -1) : title;
@@ -161,7 +162,7 @@ function Transcript({
         })}
       </div>
 
-    {/* 
+      {/* 
     <div className="sticky bottom-0 left-0 right-0 p-3 flex items-center gap-x-2 border-t border-gray-200 bg-gray-50 shadow-md">
         <input
           ref={inputRef}
@@ -184,7 +185,7 @@ function Transcript({
           <ArrowRight size={20} />
         </button>
       </div> */}
-  </div>
+    </div>
   );
 }
 
