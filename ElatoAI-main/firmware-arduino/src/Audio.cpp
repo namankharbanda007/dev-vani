@@ -21,8 +21,6 @@ int currentVolume = 70;
 float currentPitchFactor = 1.0f;
 const int CHANNELS = 1;         // Mono
 const int BITS_PER_SAMPLE = 16; // 16-bit audio
-volatile bool flushAudioBuffer = false;
-// volatile bool isRawAudio = false; // Removed: All audio is now Opus
 
 // AUDIO OUTPUT
 class BufferPrint : public Print {
@@ -79,12 +77,8 @@ void transitionToSpeaking() {
     vTaskDelay(50);
 
     i2sInputFlushScheduled = true;
-
-    // Signal audio task to flush buffer (Thread Safe)
-    flushAudioBuffer = true;
     
     deviceState = SPEAKING;
-    scheduleListeningRestart = false; // Prevent skipping audio
     digitalWrite(I2S_SD_OUT, HIGH);
     speakingStartTime = millis();
     
@@ -128,7 +122,6 @@ void audioStreamTask(void *parameter) {
     xSemaphoreGive(wsMutex);
 
     audioBuffer.setReadMaxWait(0);
-    audioBuffer.setWriteMaxWait(0); // Prevent network task from blocking if buffer full (Drop frames instead of crash)
     
     queue.begin();
 
@@ -155,22 +148,7 @@ void audioStreamTask(void *parameter) {
     vcfgPitch.allow_boost = true;
     volumePitch.begin(vcfgPitch);
 
-
     while (1) {
-        // Safe buffer flushing (Consumer Thread)
-        if (flushAudioBuffer) {
-             flushAudioBuffer = false;
-             // Read until empty manually since queue.read() is slow/one-byte
-             while (audioBuffer.available() > 0) {
-                 audioBuffer.read(); // Direct read is safe here as this is the only consumer thread
-             }
-             i2s.flush();
-             volume.flush();
-             volumePitch.flush();
-             queue.flush();
-             Serial.println("DEBUG: Audio Buffer Flushed safely.");
-        }
-
         if ( i2sOutputFlushScheduled) {
             i2sOutputFlushScheduled = false;
             i2s.flush();
@@ -178,8 +156,6 @@ void audioStreamTask(void *parameter) {
             volumePitch.flush();
             queue.flush();
         }
-
-
 
         if (webSocket.isConnected() && deviceState == SPEAKING) {
             if (currentPitchFactor != 1.0f) {
@@ -270,7 +246,7 @@ void micTask(void *parameter) {
 void webSocketEvent(WStype_t type, const uint8_t *payload, size_t length)
 {
     // Basic debug header for every event
-    // Serial.printf("[WSc][event] type=%d length=%u\n", (int)type, (unsigned)length);
+    Serial.printf("[WSc][event] type=%d length=%u\n", (int)type, (unsigned)length);
     switch (type)
     {
     case WStype_DISCONNECTED:
@@ -356,14 +332,7 @@ void webSocketEvent(WStype_t type, const uint8_t *payload, size_t length)
                 deviceState = PROCESSING; 
             } else if (strcmp((char*)msg.c_str(), "RESPONSE.CREATED") == 0) {
                 Serial.println("Received RESPONSE.CREATED, transitioning to speaking");
-                // isRawAudio = false; // Removed
                 transitionToSpeaking();
-            } else if (strcmp((char*)msg.c_str(), "Playing Bhajan...") == 0) {
-                Serial.println("Received Playing Bhajan...");
-                currentPitchFactor = 1.0f; // Force normal speed (bypass pitch shifter)
-                transitionToSpeaking();
-                Serial.printf("DEBUG: State is now %d (SPEAKING)\n", deviceState);
-            } else if (strcmp((char*)msg.c_str(), "SESSION.END") == 0) {
             } else if (strcmp((char*)msg.c_str(), "SESSION.END") == 0) {
                 Serial.println("Received SESSION.END, going to sleep");
                 sleepRequested = true;
@@ -379,8 +348,6 @@ void webSocketEvent(WStype_t type, const uint8_t *payload, size_t length)
         }
 
         // Otherwise process the audio data normally
-        // Otherwise process the audio data normally
-        // Always Decode Opus data (Server now sends Opus for Bhajan too)
         size_t processed = opusDecoder.write(payload, length);
         if (processed != length) {
             Serial.printf("Warning: Only processed %d/%d bytes\n", processed, length);

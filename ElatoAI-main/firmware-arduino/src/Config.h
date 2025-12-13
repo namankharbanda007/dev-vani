@@ -77,7 +77,6 @@ extern const int RED_LED_PIN;
 extern const int GREEN_LED_PIN;
 
 extern const gpio_num_t BUTTON_PIN;
-extern const gpio_num_t BOOT_BUTTON_PIN;
 
 // I2S Microphone pins
 extern const int I2S_SD;

@@ -4,7 +4,6 @@
 #include "WifiManager.h"
 #include <driver/touch_sensor.h>
 #include "Button.h"
-#include "Audio.h"
 
 #define TOUCH_THRESHOLD 28000
 #define REQUIRED_RELEASE_CHECKS                                                \
@@ -203,9 +202,6 @@ void setup() {
   btn->detachSingleClickEvent();
 #endif
 
-  // Setup Boot Button as input
-  pinMode(BOOT_BUTTON_PIN, INPUT_PULLUP);
-
   // Pin audio tasks to Core 1 (application core)
   xTaskCreatePinnedToCore(ledTask,    // Function
                           "LED Task", // Name
@@ -244,67 +240,13 @@ void setup() {
                           0                         // Core 0 (protocol core)
   );
 
-  // Decrease priority of loopTask slightly if needed, but default 1 is usually fine.
-  // We do NOT want to starve the WiFi task (Core 0) or audio tasks (Core 1).
-  
   // WIFI
   setupWiFi();
 }
 
-void handleBootButton() {
-  static unsigned long lastPressTime = 0;
-  
-  // Debug: Print raw state if low
-  if (digitalRead(BOOT_BUTTON_PIN) == LOW && millis() - lastPressTime > 500) {
-      Serial.printf("RAW BUTTON LOW DETECTED! millis=%lu\n", millis());
-  }
-
-  if (digitalRead(BOOT_BUTTON_PIN) == LOW) { // Active Low
-    if (millis() - lastPressTime > 1000) { // 1 second debounce
-      Serial.println("Boot button detected! Attempting to send command...");
-      
-      if (webSocket.isConnected()) {
-        JsonDocument doc;
-        doc["type"] = "action";
-        doc["command"] = "play_bhajan";
-        String jsonString;
-        serializeJson(doc, jsonString);
-        
-        Serial.println("Waiting for mutex...");
-        // Protect WebSocket access with mutex, with timeout
-        if (xSemaphoreTake(wsMutex, 1000 / portTICK_PERIOD_MS) == pdTRUE) {
-            Serial.println("Mutex taken. Sending message...");
-            webSocket.sendTXT(jsonString);
-            
-            // IMMEDIATE STOP: Stop the microphone by changing state
-            deviceState = PROCESSING;
-            Serial.println("Set state to PROCESSING (Mic Stopped)");
-            
-            xSemaphoreGive(wsMutex);
-            Serial.println("Message sent. Mutex released.");
-        } else {
-            Serial.println("Failed to take mutex (timeout)!");
-        }
-      } else {
-        Serial.println("WebSocket not connected");
-      }
-      lastPressTime = millis();
-    }
-  }
-}
-
 void loop() {
-  static unsigned long lastLogTime = 0;
-  if (millis() - lastLogTime > 1000) {
-      Serial.printf("Loop running. Device State: %d, Button State: %d\n", deviceState, digitalRead(BOOT_BUTTON_PIN));
-      lastLogTime = millis();
-  }
-
-  handleBootButton();
   processSleepRequest();
   if (otaState == OTA_IN_PROGRESS) {
     loopOTA();
   }
-  // Essential to prevent starvation of other tasks on this core
-  vTaskDelay(20); 
 }
