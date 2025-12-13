@@ -151,11 +151,17 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
           return;
         }
 
+        // Generate the initial system instructions or greeting
+        const firstMsg = isDoctor
+          ? "Ask the doctor if everything is good and how you can help them and their patient."
+          : createFirstMessage();
+
         const geminiConnection = await createGeminiConnection(
           audioContext, // Pass the context created with user gesture
           sessionData.gemini_api_key,
           sessionData.system_prompt || "",
           sessionData.voice, // mapped voice
+          firstMsg,       // Pass initial message to trigger greeting
           (event) => {
             // Handle remote events from Gemini if needed
             console.log("Gemini Event:", event);
@@ -168,6 +174,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
         geminiDisconnectRef.current = geminiConnection.disconnect;
         setSessionStatus("CONNECTED");
         toast({ description: "Connected" });
+
 
       } else {
         // OpenAI Logic

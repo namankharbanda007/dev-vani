@@ -83,6 +83,7 @@ export async function createGeminiConnection(
     apiKey: string,
     systemPrompt: string,
     voice: string,
+    initialMessage: string,
     onRemoteEvent: (event: any) => void,
     onSpeakingStateChange?: (isSpeaking: boolean) => void
 ) {
@@ -162,6 +163,20 @@ export async function createGeminiConnection(
             };
             if (ws) {
                 ws.send(JSON.stringify(setupMessage));
+
+                // Send Initial Message if provided
+                if (initialMessage) {
+                    const msg = {
+                        client_content: {
+                            turns: [{
+                                role: "user",
+                                parts: [{ text: initialMessage }]
+                            }],
+                            turn_complete: true
+                        }
+                    };
+                    ws.send(JSON.stringify(msg));
+                }
             }
         };
 
@@ -221,18 +236,30 @@ export async function createGeminiConnection(
         nextStartTime += buffer.duration;
     }
 
+    function sendTextMessage(text: string) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            const message = {
+                client_content: {
+                    turns: [{
+                        role: "user",
+                        parts: [{ text: text }]
+                    }],
+                    turn_complete: true
+                }
+            };
+            ws.send(JSON.stringify(message));
+        }
+    }
+
     return {
         disconnect: () => {
             ws?.close();
             mediaStream?.getTracks().forEach(track => track.stop());
-            // Do NOT close audioContext here if it is shared (or passed in)
-            // But since we created it specifically for this session in App.tsx, closing it IS fine.
-            // However, normally the caller manages the context if they pass it in.
-            // Let's close it to be safe and clean up, assuming a new one is created per session.
             if (audioContext && audioContext.state !== 'closed') {
                 audioContext.close();
             }
             workletNode?.disconnect();
-        }
+        },
+        sendTextMessage
     };
 }
