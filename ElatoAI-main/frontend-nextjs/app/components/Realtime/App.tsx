@@ -20,7 +20,7 @@ import { createRealtimeConnection } from "./lib/realtimeConnection";
 import { createGeminiConnection } from "./lib/geminiConnection";
 import { toast } from "@/components/ui/use-toast";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import Transcript from "./components/Transcript";
+
 import ActiveCallView from "./components/ActiveCallView"; // Import new view
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { getPersonalityById } from "@/db/personalities";
@@ -44,7 +44,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     useState<AgentConfig[] | null>(null);
 
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
-  const [userText, setUserText] = useState<string>("");
+
   const [isAgentSpeaking, setIsAgentSpeaking] = useState<boolean>(false); // New state
 
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -355,25 +355,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     );
   };
 
-  const handleSendTextMessage = () => {
-    if (!userText.trim()) return;
-    cancelAssistantSpeech();
 
-    sendClientEvent(
-      {
-        type: "conversation.item.create",
-        item: {
-          type: "message",
-          role: "user",
-          content: [{ type: "input_text", text: userText.trim() }],
-        },
-      },
-      "(send user text message)"
-    );
-    setUserText("");
-
-    sendClientEvent({ type: "response.create" }, "trigger response");
-  };
 
   useEffect(() => {
     const storedPushToTalkUI = localStorage.getItem("pushToTalkUI");
@@ -436,7 +418,8 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
   // Determine ACTIVE CALL STATE
   const activeCallState = sessionStatus === 'CONNECTING' ? 'connecting'
     : isAgentSpeaking ? 'speaking'
-      : 'listening';
+      : sessionStatus === 'CONNECTED' ? 'listening'
+        : 'idle';
 
   return <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
     <div className="inline-block">
@@ -454,23 +437,10 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     >
       <div className="flex flex-col h-full bg-black">
         <div className="flex-1 overflow-hidden relative">
-          {sessionStatus === "CONNECTED" || sessionStatus === "CONNECTING" ? (
-            <ActiveCallView
-              personality={personality}
-              state={activeCallState}
-            />
-          ) : (
-            <Transcript
-              userText={userText}
-              setUserText={setUserText}
-              onSendMessage={handleSendTextMessage}
-              canSend={false}
-              personality={personality}
-              userId={userId}
-              isDoctor={isDoctor}
-              supabase={supabase}
-            />
-          )}
+          <ActiveCallView
+            personality={personality}
+            state={activeCallState}
+          />
         </div>
       </div>
     </SheetContent>
