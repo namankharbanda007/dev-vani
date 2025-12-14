@@ -84,54 +84,55 @@ const AppSettings: React.FC<AppSettingsProps> = ({
                 user_info: {
                     user_type: userType,
                     user_metadata: values,
-                },  
+                },
             },
             userId);
-            toast({
-                description: "Your prefereces have been saved!",
-            });
+        toast({
+            description: "Your prefereces have been saved!",
+        });
     }
 
     return (
-        <>
+        <div className="glass-card p-8 rounded-3xl shadow-xl border border-white/50 bg-white/40 backdrop-blur-md max-w-4xl mx-auto">
             <GeneralUserForm
-                    selectedUser={selectedUser}
-                    userId={selectedUser.user_id}
-                    heading={heading}
-                    onSave={onSave}
-                    onClickCallback={() => handleSave()}
-                />
+                selectedUser={selectedUser}
+                userId={selectedUser.user_id}
+                heading={heading}
+                onSave={onSave}
+                onClickCallback={() => handleSave()}
+            />
 
-            <div className="space-y-4 max-w-screen-sm mt-12">
-                <h2 className="text-lg font-semibold border-b border-gray-200 pb-2">
-                    Device settings
+            <div className="space-y-6 mt-12 pt-8 border-t border-gray-200/50">
+                <h2 className="text-xl font-bold font-lora text-gray-800 flex items-center gap-2">
+                    Device Settings
                 </h2>
                 {skipDeviceRegistration && <div className="flex flex-col text-purple-500 text-xs gap-2">You don't need to register your device because NEXT_PUBLIC_SKIP_DEVICE_REGISTRATION is set to True.</div>}
                 <div className="flex flex-col gap-6">
-                <div className="flex flex-col gap-2">
-                    <div className="flex flex-row items-center gap-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                    Register your device
-                    </Label>
-                        <div 
-                            className={`rounded-full flex-shrink-0 h-2 w-2 ${
-                                isConnected ? 'bg-green-500' : 'bg-amber-500'
-                            }`} 
-                        />    
+                    <div className="flex flex-col gap-3">
+                        <div className="flex flex-row items-center gap-2">
+                            <Label className="text-sm font-medium text-gray-700">
+                                Register your device
+                            </Label>
+                            <div
+                                className={`rounded-full flex-shrink-0 h-2 w-2 ${isConnected ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-amber-500'
+                                    }`}
+                            />
 
                         </div>
 
-                        <div className="flex flex-row items-center gap-2 mt-2">
+                        <div className="flex flex-row items-center gap-3 mt-1">
                             <Input
                                 value={deviceCode}
                                 disabled={isConnected || skipDeviceRegistration}
                                 onChange={(e) => setDeviceCode(e.target.value)}
                                 placeholder={isConnected ? "**********" : "Enter your device code"}
                                 maxLength={100}
+                                className="bg-white/50 border-gray-200 focus:ring-purple-500 rounded-xl"
                             />
                             <Button
                                 size="sm"
-                                variant="outline"
+                                variant={isConnected ? "outline" : "default"}
+                                className={isConnected ? "" : "bg-purple-600 hover:bg-purple-700 text-white rounded-xl"}
                                 disabled={isConnected || skipDeviceRegistration}
                                 onClick={async () => {
                                     const result = await connectUserToDevice(selectedUser.user_id, deviceCode);
@@ -141,17 +142,17 @@ const AppSettings: React.FC<AppSettingsProps> = ({
                                     checkIfUserHasDevice();
                                 }}
                             >
-                                Register
+                                {isConnected ? "Linked" : "Register"}
                             </Button>
                         </div>
-                        <p className="text-xs text-gray-400">
-                            {isConnected ? <span className="font-medium text-gray-800">Registered!</span> :
+                        <p className="text-xs text-gray-500 pl-1">
+                            {isConnected ? <span className="font-medium text-green-600">Successfully registered!</span> :
                                 error ? <span className="text-red-500">{error}.</span> :
-                                "Enter your device code to register it."
-                        }
+                                    "Enter the code displayed on your device screen."
+                            }
                         </p>
-                </div>
-                    <div className="flex flex-col gap-2 mt-2">
+                    </div>
+                    <div className="flex flex-col gap-3">
                         <Label className="text-sm font-medium text-gray-700">
                             Logged in as
                         </Label>
@@ -159,46 +160,46 @@ const AppSettings: React.FC<AppSettingsProps> = ({
                             // autoFocus
                             disabled
                             value={selectedUser?.email}
-                            className="max-w-screen-sm h-10 bg-white"
+                            className="bg-gray-50/50 border-gray-200 text-gray-600 rounded-xl"
                             autoComplete="on"
                             style={{
                                 fontSize: 16,
                             }}
                         />
                     </div>
-                    {isConnected && <div className="flex flex-col gap-4 mt-6">
-                        <Label className="text-sm font-medium text-gray-700">
-                            Device volume
+                    {isConnected && <div className="flex flex-col gap-4 mt-2 p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
+                        <Label className="text-sm font-medium text-gray-800">
+                            Device Volume
                         </Label>
-                        <div className="flex flex-row gap-2 items-center flex-nowrap">
+                        <div className="flex flex-row gap-4 items-center flex-nowrap">
                             <Slider
                                 value={volume}
                                 onValueChange={updateVolume}
-                                className="sm:w-1/2"
+                                className="flex-1"
                                 defaultValue={[50]}
                                 max={100}
                                 min={1}
                                 step={1}
                             />
-                            <p className="text-gray-500 text-sm">{volume}%</p>
+                            <span className="text-purple-700 font-bold bg-white px-2 py-1 rounded-lg text-sm w-12 text-center">{volume}%</span>
                         </div>
                     </div>}
-            <form
-                            action={signOutAction}
-                        className="flex flex-row justify-between mt-4"
+                    <form
+                        action={signOutAction}
+                        className="flex flex-row justify-end mt-8"
                     >
                         <Button
-                            variant="destructive_outline"
-                            size="sm"
-                            className="font-medium flex flex-row items-center rounded-full gap-2 "
+                            variant="destructive"
+                            size="default"
+                            className="font-medium flex flex-row items-center rounded-xl gap-2 shadow-sm hover:shadow-md transition-all px-6"
                         >
-                            <LogOut size={18} strokeWidth={2} />
-                            <span>Logout</span>
-                            </Button>
-                        </form>
+                            <LogOut size={16} strokeWidth={2} />
+                            <span>Sign Out</span>
+                        </Button>
+                    </form>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

@@ -82,7 +82,9 @@ const Playground: React.FC<PlaygroundProps> = ({
                 {/* Personalities Grid */}
                 <div className="flex flex-col gap-6 mt-4">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-bold text-gray-800 font-lora">Your Companions</h2>
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-2xl font-bold text-gray-800 font-lora">Your Avatars</h2>
+                        </div>
                         <PersonalityFilters
                             setSelectedFilters={setSelectedFilters}
                             selectedFilters={selectedFilters}

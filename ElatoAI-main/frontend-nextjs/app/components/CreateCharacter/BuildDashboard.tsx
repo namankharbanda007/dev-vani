@@ -257,7 +257,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
       {/* Header */}
       <div className="mb-10 text-center space-y-4">
         <h1 className="text-4xl md:text-5xl font-bold font-lora text-gray-900">
-          {initialData ? "Edit Your " : "Create Your "} <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-amber-600">Companion</span>
+          {initialData ? "Edit Your " : "Create Your "} <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-amber-600">Avatar</span>
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Design a unique personality that resonates with you.
@@ -554,7 +554,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
               disabled={isSubmitting}
               className="bg-gradient-to-r from-purple-600 to-amber-600 hover:from-purple-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all rounded-full px-8 py-6 text-lg"
             >
-              {isSubmitting ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Companion" : "Create Companion")}
+              {isSubmitting ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Avatar" : "Create Avatar")}
               {!isSubmitting && <Sparkles className="w-5 h-5 ml-2" />}
             </Button>
           ) : (

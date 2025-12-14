@@ -51,12 +51,15 @@
 
 @layer utilities {
     .scrollbar-hide {
-        -ms-overflow-style: none; /* IE and Edge */
-        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
     }
 
     .scrollbar-hide::-webkit-scrollbar {
-        display: none; /* Chrome, Safari and Opera */
+        display: none;
+        /* Chrome, Safari and Opera */
     }
 }
 
@@ -64,6 +67,7 @@
     * {
         @apply border-border;
     }
+
     body {
         @apply bg-background text-foreground;
     }
@@ -83,8 +87,20 @@
 
 .text-stroke-black {
     -webkit-text-stroke-color: black;
-  }
-  
-  .text-stroke-2 {
+}
+
+.text-stroke-2 {
     -webkit-text-stroke-width: 1px;
-  }
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.dark .glass-card {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}

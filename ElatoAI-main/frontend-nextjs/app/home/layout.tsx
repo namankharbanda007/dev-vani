@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { SidebarNav } from "../components/Nav/SidebarNavItems";
-import { Gamepad2, Plus, PlusCircle, Settings } from "lucide-react";
+import { Gamepad2, Plus, PlusCircle, Settings, Users } from "lucide-react";
 import { Metadata } from "next";
 import { getOpenGraphMetadata } from "@/lib/utils";
 import { MobileNav } from "../components/Nav/MobileNav";
@@ -20,9 +20,9 @@ export const metadata: Metadata = {
 
 const sidebarNavItems: SidebarNavItem[] = [
     {
-        title: "Playground",
+        title: "Avatars",
         href: "/home",
-        icon: <Gamepad2 size={ICON_SIZE} />,
+        icon: <Users size={ICON_SIZE} />,
     },
     {
         title: "Settings",
