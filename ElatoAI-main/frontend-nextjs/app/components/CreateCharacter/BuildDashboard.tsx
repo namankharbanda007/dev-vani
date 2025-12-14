@@ -386,7 +386,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
 
           {currentStep === 'voice' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {[...openaiVoices, ...geminiVoices].map((voice: VoiceType) => {
                   const isSelected = formData.voice === voice.id;
                   const isPlaying = previewingVoice === voice.id;
@@ -399,56 +399,54 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                         previewVoice(voice);
                       }}
                       className={cn(
-                        "relative group cursor-pointer rounded-2xl p-4 transition-all duration-300 overflow-hidden",
+                        "relative group cursor-pointer rounded-[32px] p-6 transition-all duration-300 overflow-hidden aspect-square flex flex-col items-center justify-center",
+                        "shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
                         isSelected
-                          ? "ring-2 ring-purple-500 bg-white shadow-xl scale-[1.02]"
-                          : "bg-white/60 hover:bg-white border border-transparent hover:border-purple-200 hover:shadow-lg hover:-translate-y-1"
+                          ? "ring-4 ring-white shadow-xl scale-[1.02]"
+                          : "hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]",
+                        voice.color
                       )}
                     >
-                      {/* Background Gradient for subtle color */}
+                      {/* Metallic sheen overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/40 via-transparent to-black/5 opacity-50" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent opacity-30" />
+
+                      {/* Icon Container */}
                       <div className={cn(
-                        "absolute inset-0 opacity-0 transition-opacity duration-300",
-                        isSelected ? "opacity-10" : "group-hover:opacity-5",
-                        voice.color.replace('bg-', 'bg-gradient-to-br from-white to-')
-                      )} />
-
-                      <div className="relative flex flex-col items-center gap-4 z-10">
-                        {/* Icon Container */}
-                        <div className={cn(
-                          "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
-                          isSelected ? "bg-purple-100 text-purple-600" : "bg-gray-100 text-gray-500 group-hover:bg-purple-50 group-hover:text-purple-500"
-                        )}>
-                          {isPlaying ? (
-                            <div className="flex items-end gap-[2px] h-5 pb-1">
-                              <span className="w-1 bg-current animate-[bounce_1s_infinite] h-3 rounded-full"></span>
-                              <span className="w-1 bg-current animate-[bounce_1.2s_infinite] h-5 rounded-full"></span>
-                              <span className="w-1 bg-current animate-[bounce_0.8s_infinite] h-4 rounded-full"></span>
-                            </div>
-                          ) : (
-                            <div className={cn("transition-transform duration-300", isSelected ? "scale-110" : "group-hover:scale-110")}>
-                              {isSelected ? <Volume2 size={24} /> : <span className="text-2xl">▶</span>}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="text-center w-full">
-                          <h3 className={cn(
-                            "font-bold text-sm mb-1 truncate px-1",
-                            isSelected ? "text-purple-900" : "text-gray-900"
-                          )}>
-                            {voice.name}
-                          </h3>
-                          <p className="text-xs text-gray-500 line-clamp-1 px-1 opacity-80">
-                            {voice.description}
-                          </p>
-                        </div>
+                        "relative w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 shadow-inner",
+                        "bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-sm border border-white/40",
+                        isPlaying ? "scale-105" : (isSelected ? "scale-110" : "group-hover:scale-105")
+                      )}>
+                        {isPlaying ? (
+                          <div className="flex items-center gap-[3px] h-6">
+                            <span className="w-1 bg-gray-800 animate-[bounce_1s_infinite] h-3 rounded-full"></span>
+                            <span className="w-1 bg-gray-800 animate-[bounce_1.2s_infinite] h-5 rounded-full"></span>
+                            <span className="w-1 bg-gray-800 animate-[bounce_0.8s_infinite] h-4 rounded-full"></span>
+                            <span className="w-1 bg-gray-800 animate-[bounce_1s_infinite] h-3 rounded-full"></span>
+                          </div>
+                        ) : (
+                          <div className="text-gray-700/80">
+                            <span className="block w-[2px] h-4 bg-current rounded-full absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                            <span className="block w-[2px] h-6 bg-current rounded-full absolute left-[calc(50%-6px)] top-1/2 -translate-y-1/2" />
+                            <span className="block w-[2px] h-6 bg-current rounded-full absolute left-[calc(50%+4px)] top-1/2 -translate-y-1/2" />
+                            <span className="block w-[2px] h-3 bg-current rounded-full absolute left-[calc(50%-10px)] top-1/2 -translate-y-1/2" />
+                            <span className="block w-[2px] h-3 bg-current rounded-full absolute left-[calc(50%+8px)] top-1/2 -translate-y-1/2" />
+                          </div>
+                        )}
                       </div>
 
-                      {/* Selected Indicator Badge */}
+                      <div className="relative text-center z-10 w-full px-2">
+                        <h3 className="font-bold text-gray-900 text-lg mb-1 truncate drop-shadow-sm">
+                          {voice.name}
+                        </h3>
+                        <p className="text-xs font-medium text-gray-700/90 line-clamp-1 truncate drop-shadow-sm">
+                          {voice.description}
+                        </p>
+                      </div>
+
+                      {/* Selection Ring (External) */}
                       {isSelected && (
-                        <div className="absolute top-2 right-2 bg-purple-600 text-white rounded-full p-1 shadow-md animate-in zoom-in spin-in-180 duration-300">
-                          <Check size={10} strokeWidth={3} />
-                        </div>
+                        <div className="absolute inset-0 rounded-[32px] border-4 border-white pointer-events-none" />
                       )}
                     </div>
                   );
