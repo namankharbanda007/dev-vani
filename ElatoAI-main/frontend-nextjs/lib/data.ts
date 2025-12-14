@@ -45,7 +45,6 @@ export const openaiVoices: VoiceType[] = [
         name: "Alloy",
         description: "Neutral and balanced",
         color: "bg-blue-100",
-        emoji: "🧑",
         provider: "openai",
     },
     {
@@ -53,7 +52,6 @@ export const openaiVoices: VoiceType[] = [
         name: "Echo",
         description: "Warm and melodic",
         color: "bg-purple-100",
-        emoji: "👩‍🎤",
         provider: "openai",
     },
     {
@@ -61,7 +59,6 @@ export const openaiVoices: VoiceType[] = [
         name: "Shimmer",
         description: "Clear and bright",
         color: "bg-cyan-100",
-        emoji: "👱‍♀️",
         provider: "openai",
     },
     {
@@ -69,7 +66,6 @@ export const openaiVoices: VoiceType[] = [
         name: "Ash",
         description: "Soft and thoughtful",
         color: "bg-gray-100",
-        emoji: "🧔",
         provider: "openai",
     },
     {
@@ -77,7 +73,6 @@ export const openaiVoices: VoiceType[] = [
         name: "Ballad",
         description: "Melodic and emotive",
         color: "bg-indigo-100",
-        emoji: "🎭",
         provider: "openai",
     },
     {
@@ -85,7 +80,6 @@ export const openaiVoices: VoiceType[] = [
         name: "Coral",
         description: "Warm and friendly",
         color: "bg-orange-100",
-        emoji: "👩",
         provider: "openai",
     },
     {
@@ -93,7 +87,6 @@ export const openaiVoices: VoiceType[] = [
         name: "Sage",
         description: "Wise and measured",
         color: "bg-green-100",
-        emoji: "🧓",
         provider: "openai",
     },
     {
@@ -101,7 +94,6 @@ export const openaiVoices: VoiceType[] = [
         name: "Verse",
         description: "Poetic and expressive",
         color: "bg-rose-100",
-        emoji: "👨‍🎨",
         provider: "openai",
     },
 ];

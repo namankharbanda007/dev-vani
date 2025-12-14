@@ -105,7 +105,6 @@ declare global {
             name: string;
             description: string;
             color: string;
-            emoji?: string;
         }
         | {
             provider: "gemini";
@@ -113,7 +112,6 @@ declare global {
             name: string;
             description: string;
             color: string;
-            emoji?: string;
         };
 
     type ModelProvider = "openai" | "gemini" | "elevenlabs" | "hume";

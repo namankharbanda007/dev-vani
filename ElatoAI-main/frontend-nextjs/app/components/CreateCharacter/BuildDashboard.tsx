@@ -387,46 +387,72 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
           {currentStep === 'voice' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {[...openaiVoices, ...geminiVoices].map((voice: VoiceType) => (
-                  <div
-                    key={voice.id}
-                    onClick={() => {
-                      setFormData(prev => ({ ...prev, provider: voice.provider as ModelProvider, voice: voice.id }));
-                      previewVoice(voice);
-                    }}
-                    className={cn(
-                      "relative group cursor-pointer rounded-2xl p-4 transition-all duration-300 border-2",
-                      formData.voice === voice.id
-                        ? "border-purple-500 bg-purple-50 shadow-lg scale-105"
-                        : "border-transparent bg-white hover:border-purple-200 hover:shadow-md hover:-translate-y-1"
-                    )}
-                  >
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="text-4xl transform transition-transform group-hover:scale-110">
-                        <EmojiComponent emoji={voice.emoji} />
+                {[...openaiVoices, ...geminiVoices].map((voice: VoiceType) => {
+                  const isSelected = formData.voice === voice.id;
+                  const isPlaying = previewingVoice === voice.id;
+
+                  return (
+                    <div
+                      key={voice.id}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, provider: voice.provider as ModelProvider, voice: voice.id }));
+                        previewVoice(voice);
+                      }}
+                      className={cn(
+                        "relative group cursor-pointer rounded-2xl p-4 transition-all duration-300 overflow-hidden",
+                        isSelected
+                          ? "ring-2 ring-purple-500 bg-white shadow-xl scale-[1.02]"
+                          : "bg-white/60 hover:bg-white border border-transparent hover:border-purple-200 hover:shadow-lg hover:-translate-y-1"
+                      )}
+                    >
+                      {/* Background Gradient for subtle color */}
+                      <div className={cn(
+                        "absolute inset-0 opacity-0 transition-opacity duration-300",
+                        isSelected ? "opacity-10" : "group-hover:opacity-5",
+                        voice.color.replace('bg-', 'bg-gradient-to-br from-white to-')
+                      )} />
+
+                      <div className="relative flex flex-col items-center gap-4 z-10">
+                        {/* Icon Container */}
+                        <div className={cn(
+                          "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
+                          isSelected ? "bg-purple-100 text-purple-600" : "bg-gray-100 text-gray-500 group-hover:bg-purple-50 group-hover:text-purple-500"
+                        )}>
+                          {isPlaying ? (
+                            <div className="flex items-end gap-[2px] h-5 pb-1">
+                              <span className="w-1 bg-current animate-[bounce_1s_infinite] h-3 rounded-full"></span>
+                              <span className="w-1 bg-current animate-[bounce_1.2s_infinite] h-5 rounded-full"></span>
+                              <span className="w-1 bg-current animate-[bounce_0.8s_infinite] h-4 rounded-full"></span>
+                            </div>
+                          ) : (
+                            <div className={cn("transition-transform duration-300", isSelected ? "scale-110" : "group-hover:scale-110")}>
+                              {isSelected ? <Volume2 size={24} /> : <span className="text-2xl">▶</span>}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="text-center w-full">
+                          <h3 className={cn(
+                            "font-bold text-sm mb-1 truncate px-1",
+                            isSelected ? "text-purple-900" : "text-gray-900"
+                          )}>
+                            {voice.name}
+                          </h3>
+                          <p className="text-xs text-gray-500 line-clamp-1 px-1 opacity-80">
+                            {voice.description}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <h3 className="font-bold text-gray-900">{voice.name}</h3>
-                        <p className="text-xs text-gray-500 line-clamp-1">{voice.description}</p>
-                      </div>
+
+                      {/* Selected Indicator Badge */}
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 bg-purple-600 text-white rounded-full p-1 shadow-md animate-in zoom-in spin-in-180 duration-300">
+                          <Check size={10} strokeWidth={3} />
+                        </div>
+                      )}
                     </div>
-
-                    {/* Playing Indicator */}
-                    {previewingVoice === voice.id && (
-                      <div className="absolute top-2 right-2 animate-pulse text-purple-600 bg-white rounded-full p-1.5 shadow-sm">
-                        <Volume2 size={14} />
-                      </div>
-                    )}
-
-                    {/* Selected Indicator */}
-                    {/* Selected Indicator */}
-                    {formData.voice === voice.id && (
-                      <div className="absolute -top-2 -right-2 bg-purple-600 text-white rounded-full p-1 shadow-md">
-                        <Check size={12} />
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               {formErrors.voice && <p className="text-red-500 text-center">{formErrors.voice}</p>}
 
