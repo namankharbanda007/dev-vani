@@ -415,20 +415,20 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                       {/* Icon Container - The "Knob" */}
                       <div className={cn(
                         "relative w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-all duration-300",
-                        "bg-gradient-to-b from-gray-50 to-gray-300",
-                        "shadow-[0_4px_6px_-1px_rgba(0,0,0,0.2),_0_2px_4px_-1px_rgba(0,0,0,0.1),_inset_0_1px_0_rgba(255,255,255,0.8)]",
-                        "border border-white/60",
+                        "bg-gradient-to-b from-slate-200 to-slate-400",
+                        "shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_-2px_4px_rgba(0,0,0,0.2),inset_0_2px_4px_rgba(255,255,255,0.8)]",
+                        "border border-white/40",
                         isPlaying ? "scale-105" : (isSelected ? "scale-110" : "group-hover:scale-105")
                       )}>
                         {isPlaying ? (
                           <div className="flex items-center gap-[3px] h-5">
-                            <span className="w-[3px] bg-gray-900 animate-[bounce_1s_infinite] h-2 rounded-full"></span>
-                            <span className="w-[3px] bg-gray-900 animate-[bounce_1.2s_infinite] h-4 rounded-full"></span>
-                            <span className="w-[3px] bg-gray-900 animate-[bounce_0.8s_infinite] h-3 rounded-full"></span>
+                            <span className="w-[3px] bg-white animate-[bounce_1s_infinite] h-2 rounded-full drop-shadow-sm"></span>
+                            <span className="w-[3px] bg-white animate-[bounce_1.2s_infinite] h-4 rounded-full drop-shadow-sm"></span>
+                            <span className="w-[3px] bg-white animate-[bounce_0.8s_infinite] h-3 rounded-full drop-shadow-sm"></span>
                           </div>
                         ) : (
-                          <div className="text-gray-900/80">
-                            <Volume2 size={20} className="drop-shadow-sm" />
+                          <div className="text-white drop-shadow-md">
+                            <Volume2 size={20} strokeWidth={2.5} />
                           </div>
                         )}
                       </div>
