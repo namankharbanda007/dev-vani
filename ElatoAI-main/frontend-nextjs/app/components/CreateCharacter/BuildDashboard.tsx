@@ -385,7 +385,8 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
           )}
 
           {currentStep === 'voice' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight ml-2">Select Your Voice Companion</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {[...openaiVoices, ...geminiVoices].map((voice: VoiceType) => {
                   const isSelected = formData.voice === voice.id;
@@ -414,19 +415,19 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                       {/* Icon Container - The "Knob" */}
                       <div className={cn(
                         "relative w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-all duration-300",
-                        "bg-gradient-to-b from-gray-100 to-gray-300",
-                        "shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_2px_4px_rgba(0,0,0,0.1),0_8px_16px_rgba(0,0,0,0.1)]",
-                        "border border-white/40",
+                        "bg-gradient-to-b from-gray-50 to-gray-300",
+                        "shadow-[0_4px_6px_-1px_rgba(0,0,0,0.2),_0_2px_4px_-1px_rgba(0,0,0,0.1),_inset_0_1px_0_rgba(255,255,255,0.8)]",
+                        "border border-white/60",
                         isPlaying ? "scale-105" : (isSelected ? "scale-110" : "group-hover:scale-105")
                       )}>
                         {isPlaying ? (
                           <div className="flex items-center gap-[3px] h-5">
-                            <span className="w-[3px] bg-gray-700 animate-[bounce_1s_infinite] h-2 rounded-full"></span>
-                            <span className="w-[3px] bg-gray-700 animate-[bounce_1.2s_infinite] h-4 rounded-full"></span>
-                            <span className="w-[3px] bg-gray-700 animate-[bounce_0.8s_infinite] h-3 rounded-full"></span>
+                            <span className="w-[3px] bg-gray-900 animate-[bounce_1s_infinite] h-2 rounded-full"></span>
+                            <span className="w-[3px] bg-gray-900 animate-[bounce_1.2s_infinite] h-4 rounded-full"></span>
+                            <span className="w-[3px] bg-gray-900 animate-[bounce_0.8s_infinite] h-3 rounded-full"></span>
                           </div>
                         ) : (
-                          <div className="text-gray-600">
+                          <div className="text-gray-900/80">
                             <Volume2 size={20} className="drop-shadow-sm" />
                           </div>
                         )}
