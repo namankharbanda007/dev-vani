@@ -239,12 +239,21 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
 
   const previewVoice = (voice: VoiceType) => {
     const { id, provider } = voice;
+
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+    }
+
+    let audioUrl = '';
     if (provider === 'openai') {
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.currentTime = 0;
-      }
-      const audio = new Audio(`${r2UrlAudio}/${id}.wav`);
+      audioUrl = `${r2UrlAudio}/${id}.wav`;
+    } else if (provider === 'gemini') {
+      audioUrl = `/Voices/${id}.wav`;
+    }
+
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
       setPreviewingVoice(id);
       setAudioElement(audio);
       audio.play().catch(() => setPreviewingVoice(null));

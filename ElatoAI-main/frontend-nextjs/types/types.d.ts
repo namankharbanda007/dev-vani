@@ -72,7 +72,7 @@ declare global {
             user_metadata: IBusinessMetadata;
         };
 
-    interface IBusinessMetadata {}
+    interface IBusinessMetadata { }
 
     interface IDoctorMetadata {
         doctor_name: string;
@@ -82,7 +82,7 @@ declare global {
         hospital_layout: string;
     }
 
-    interface IUserMetadata {}
+    interface IUserMetadata { }
 
     type Role = "user" | "assistant" | "doctor";
 
@@ -119,36 +119,37 @@ declare global {
     type ModelProvider = "openai" | "gemini" | "elevenlabs" | "hume";
 
     type GeminiVoice =
-        | "Zephyr"
-        | "Puck"
-        | "Charon"
-        | "Kore"
-        | "Fenrir"
-        | "Leda"
-        | "Orus"
-        | "Aoede"
-        | "Callirrhoe"
-        | "Autonoe"
-        | "Enceladus"
-        | "Iapetus"
-        | "Umbriel"
-        | "Algieba"
-        | "Despina"
-        | "Erinome"
-        | "Algenib"
-        | "Rasalgethi"
-        | "Laomedeia"
-        | "Achernar"
-        | "Alnilam"
-        | "Schedar"
-        | "Gacrux"
-        | "Pulcherrima"
-        | "Achird"
-        | "Zubenelgenubi"
-        | "Vindemiatrix"
-        | "Sadachbia"
-        | "Sadaltager"
-        | "Sulafat";
+        | "priya"
+        | "Bunty"
+        | "Tau ji"
+        | "daddi maa"
+        | "shera"
+        | "anjali"
+        | "viram"
+        | "Priyanka"
+        | "simran"
+        | "Mrs. Kulkarni (The Strict Teacher)"
+        | "rocky"
+        | "dj lucky"
+        | "baba anteryami"
+        | "Advocate Mehta"
+        | "chutki the cute kid"
+        | "Sweta -The News Reporter"
+        | "prakash"
+        | "Dada ji"
+        | "Bhabhi ji"
+        | "kaal"
+        | "Robot chacha"
+        | "Robotic inspector"
+        | "mr.patel"
+        | "Chandramukhi"
+        | "shanaya-fashion artist"
+        | "aarav"
+        | "jugaad laal- salesman"
+        | "Warden Madam (The Hostel Warden)"
+        | "Rooh (The Mystery)"
+        | "Guddu comedian comentater"
+        | "sustram";
 
     type OaiVoice =
         | "ash"
@@ -257,4 +258,4 @@ declare global {
     }
 }
 
-export {}; // This is necessary to make this file a module and avoid TypeScript errors.
+export { }; // This is necessary to make this file a module and avoid TypeScript errors.
