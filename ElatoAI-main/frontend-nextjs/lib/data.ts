@@ -44,56 +44,56 @@ export const openaiVoices: VoiceType[] = [
         id: "alloy",
         name: "Alloy",
         description: "Neutral and balanced",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#e2e8f0_0%,_#94a3b8_50%,_#475569_100%)]", // Silver
+        color: "radial-gradient(circle at 50% 0%, #e2e8f0 0%, #94a3b8 50%, #475569 100%)", // Silver
         provider: "openai",
     },
     {
         id: "echo",
         name: "Echo",
         description: "Warm and melodic",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#bae6fd_0%,_#38bdf8_50%,_#0369a1_100%)]", // Blue Steel
+        color: "radial-gradient(circle at 50% 0%, #bae6fd 0%, #38bdf8 50%, #0369a1 100%)", // Blue Steel
         provider: "openai",
     },
     {
         id: "shimmer",
         name: "Shimmer",
         description: "Clear and bright",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fafafa_0%,_#e2e8f0_50%,_#94a3b8_100%)]", // Pearl
+        color: "radial-gradient(circle at 50% 0%, #fafafa 0%, #e2e8f0 50%, #94a3b8 100%)", // Pearl
         provider: "openai",
     },
     {
         id: "ash",
         name: "Ash",
         description: "Soft and thoughtful",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#d6d3d1_0%,_#a8a29e_50%,_#57534e_100%)]", // Ash Gray
+        color: "radial-gradient(circle at 50% 0%, #d6d3d1 0%, #a8a29e 50%, #57534e 100%)", // Ash Gray
         provider: "openai",
     },
     {
         id: "ballad",
         name: "Ballad",
         description: "Melodic and emotive",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#5eead4_0%,_#14b8a6_50%,_#0f766e_100%)]", // Teal
+        color: "radial-gradient(circle at 50% 0%, #5eead4 0%, #14b8a6 50%, #0f766e 100%)", // Teal
         provider: "openai",
     },
     {
         id: "coral",
         name: "Coral",
         description: "Warm and friendly",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fca5a5_0%,_#f43f5e_50%,_#be123c_100%)]", // Coral Red
+        color: "radial-gradient(circle at 50% 0%, #fca5a5 0%, #f43f5e 50%, #be123c 100%)", // Coral Red
         provider: "openai",
     },
     {
         id: "sage",
         name: "Sage",
         description: "Wise and measured",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#86efac_0%,_#22c55e_50%,_#15803d_100%)]", // Sage Green
+        color: "radial-gradient(circle at 50% 0%, #86efac 0%, #22c55e 50%, #15803d 100%)", // Sage Green
         provider: "openai",
     },
     {
         id: "verse",
         name: "Verse",
         description: "Poetic and expressive",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#d8b4fe_0%,_#a855f7_50%,_#7e22ce_100%)]", // Purple
+        color: "radial-gradient(circle at 50% 0%, #d8b4fe 0%, #a855f7 50%, #7e22ce 100%)", // Purple
         provider: "openai",
     },
 ];
@@ -103,217 +103,217 @@ export const geminiVoices: VoiceType[] = [
         id: "priya",
         name: "priya",
         description: "Bright",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fef08a_0%,_#eab308_50%,_#854d0e_100%)]", // Bright Yellow/Gold
+        color: "radial-gradient(circle at 50% 0%, #fef08a 0%, #eab308 50%, #854d0e 100%)", // Yellow/Gold
         provider: "gemini",
     },
     {
         id: "Bunty",
         name: "Bunty",
         description: "Upbeat",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fdba74_0%,_#f97316_50%,_#9a3412_100%)]", // Vibrant Orange
+        color: "radial-gradient(circle at 50% 0%, #fdba74 0%, #f97316 50%, #9a3412 100%)", // Orange
         provider: "gemini",
     },
     {
         id: "Tau ji",
         name: "Tau ji",
         description: "Informative",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#d6d3d1_0%,_#78716c_50%,_#44403c_100%)]", // Deep Bronze/Brown
+        color: "radial-gradient(circle at 50% 0%, #d6d3d1 0%, #78716c 50%, #44403c 100%)", // Bronze
         provider: "gemini",
     },
     {
         id: "daddi maa",
         name: "daddi maa",
         description: "Firm",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fca5a5_0%,_#ef4444_50%,_#991b1b_100%)]", // Deep Red
+        color: "radial-gradient(circle at 50% 0%, #fca5a5 0%, #ef4444 50%, #991b1b 100%)", // Deep Red
         provider: "gemini",
     },
     {
         id: "shera",
         name: "shera",
         description: "Excitable",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fde047_0%,_#eab308_50%,_#a16207_100%)]", // Rich Gold
+        color: "radial-gradient(circle at 50% 0%, #fde047 0%, #eab308 50%, #a16207 100%)", // Rich Gold
         provider: "gemini",
     },
     {
         id: "anjali",
         name: "anjali",
         description: "Youthful",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#f5d0fe_0%,_#d946ef_50%,_#86198f_100%)]", // Magenta
+        color: "radial-gradient(circle at 50% 0%, #f5d0fe 0%, #d946ef 50%, #86198f 100%)", // Magenta
         provider: "gemini",
     },
     {
         id: "viram",
         name: "viram",
         description: "Firm",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#7dd3fc_0%,_#2563eb_50%,_#1e3a8a_100%)]", // Deep Royal Blue
+        color: "radial-gradient(circle at 50% 0%, #7dd3fc 0%, #2563eb 50%, #1e3a8a 100%)", // Deep Blue
         provider: "gemini",
     },
     {
         id: "Priyanka",
         name: "Priyanka",
         description: "Breezy",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#bae6fd_0%,_#38bdf8_50%,_#0369a1_100%)]", // Sky Blue
+        color: "radial-gradient(circle at 50% 0%, #bae6fd 0%, #38bdf8 50%, #0369a1 100%)", // Sky Blue
         provider: "gemini",
     },
     {
         id: "simran",
         name: "simran",
         description: "Easy-going",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#86efac_0%,_#22c55e_50%,_#15803d_100%)]", // Green
+        color: "radial-gradient(circle at 50% 0%, #86efac 0%, #22c55e 50%, #15803d 100%)", // Green
         provider: "gemini",
     },
     {
         id: "Mrs. Kulkarni (The Strict Teacher)",
         name: "Mrs. Kulkarni (The Strict Teacher)",
         description: "Bright",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fcd34d_0%,_#f59e0b_50%,_#b45309_100%)]", // Amber
+        color: "radial-gradient(circle at 50% 0%, #fcd34d 0%, #f59e0b 50%, #b45309 100%)", // Amber
         provider: "gemini",
     },
     {
         id: "rocky",
         name: "rocky",
         description: "Breathy",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#67e8f9_0%,_#06b6d4_50%,_#155e75_100%)]", // Cyan
+        color: "radial-gradient(circle at 50% 0%, #67e8f9 0%, #06b6d4 50%, #155e75 100%)", // Cyan
         provider: "gemini",
     },
     {
         id: "dj lucky",
         name: "dj lucky",
         description: "Clear",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#f3f4f6_0%,_#9ca3af_50%,_#4b5563_100%)]", // Gray
+        color: "radial-gradient(circle at 50% 0%, #f3f4f6 0%, #9ca3af 50%, #4b5563 100%)", // Gray
         provider: "gemini",
     },
     {
         id: "baba anteryami",
         name: "baba anteryami",
         description: "Easy-going",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#6ee7b7_0%,_#10b981_50%,_#047857_100%)]", // Emerald
+        color: "radial-gradient(circle at 50% 0%, #6ee7b7 0%, #10b981 50%, #047857 100%)", // Emerald
         provider: "gemini",
     },
     {
         id: "Advocate Mehta",
         name: "Advocate Mehta",
         description: "Smooth",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#c4b5fd_0%,_#8b5cf6_50%,_#5b21b6_100%)]", // Violet
+        color: "radial-gradient(circle at 50% 0%, #c4b5fd 0%, #8b5cf6 50%, #5b21b6 100%)", // Violet
         provider: "gemini",
     },
     {
         id: "chutki the cute kid",
         name: "chutki the cute kid",
         description: "Smooth",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#d8b4fe_0%,_#a855f7_50%,_#7e22ce_100%)]", // Purple
+        color: "radial-gradient(circle at 50% 0%, #d8b4fe 0%, #a855f7 50%, #7e22ce 100%)", // Purple
         provider: "gemini",
     },
     {
         id: "Sweta -The News Reporter",
         name: "Sweta -The News Reporter",
         description: "Clear",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#e5e5e5_0%,_#a3a3a3_50%,_#525252_100%)]", // Neutral
+        color: "radial-gradient(circle at 50% 0%, #e5e5e5 0%, #a3a3a3 50%, #525252 100%)", // Neutral
         provider: "gemini",
     },
     {
         id: "prakash",
         name: "prakash",
         description: "Gravelly",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#d6d3d1_0%,_#78716c_50%,_#44403c_100%)]", // Stone
+        color: "radial-gradient(circle at 50% 0%, #d6d3d1 0%, #78716c 50%, #44403c 100%)", // Stone
         provider: "gemini",
     },
     {
         id: "Dada ji",
         name: "Dada ji",
         description: "Informative",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#a5b4fc_0%,_#6366f1_50%,_#312e81_100%)]", // Indigo
+        color: "radial-gradient(circle at 50% 0%, #a5b4fc 0%, #6366f1 50%, #312e81 100%)", // Indigo
         provider: "gemini",
     },
     {
         id: "Bhabhi ji",
         name: "Bhabhi ji",
         description: "Upbeat",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#bef264_0%,_#84cc16_50%,_#3f6212_100%)]", // Lime
+        color: "radial-gradient(circle at 50% 0%, #bef264 0%, #84cc16 50%, #3f6212 100%)", // Lime
         provider: "gemini",
     },
     {
         id: "kaal",
         name: "kaal",
         description: "Soft",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fda4af_0%,_#f43f5e_50%,_#be123c_100%)]", // Rose
+        color: "radial-gradient(circle at 50% 0%, #fda4af 0%, #f43f5e 50%, #be123c 100%)", // Rose
         provider: "gemini",
     },
     {
         id: "Robot chacha",
         name: "Robot chacha",
         description: "Firm",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#e4e4e7_0%,_#a1a1aa_50%,_#52525b_100%)]", // Zinc
+        color: "radial-gradient(circle at 50% 0%, #e4e4e7 0%, #a1a1aa 50%, #52525b 100%)", // Zinc
         provider: "gemini",
     },
     {
         id: "Robotic inspector",
         name: "Robotic inspector",
         description: "Even",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#5eead4_0%,_#14b8a6_50%,_#0f766e_100%)]", // Teal
+        color: "radial-gradient(circle at 50% 0%, #5eead4 0%, #14b8a6 50%, #0f766e 100%)", // Teal
         provider: "gemini",
     },
     {
         id: "mr.patel",
         name: "mr.patel",
         description: "Even",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#2dd4bf_0%,_#0d9488_50%,_#115e59_100%)]", // Teal
+        color: "radial-gradient(circle at 50% 0%, #2dd4bf 0%, #0d9488 50%, #115e59 100%)", // Teal
         provider: "gemini",
     },
     {
         id: "Chandramukhi",
         name: "Chandramukhi",
         description: "Mature",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fdba74_0%,_#f97316_50%,_#9a3412_100%)]", // Orange
+        color: "radial-gradient(circle at 50% 0%, #fdba74 0%, #f97316 50%, #9a3412 100%)", // Orange
         provider: "gemini",
     },
     {
         id: "shanaya-fashion artist",
         name: "shanaya-fashion artist",
         description: "Forward",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#f0abfc_0%,_#e879f9_50%,_#a21caf_100%)]", // Fuchsia
+        color: "radial-gradient(circle at 50% 0%, #f0abfc 0%, #e879f9 50%, #a21caf 100%)", // Fuchsia
         provider: "gemini",
     },
     {
         id: "aarav",
         name: "aarav",
         description: "Friendly",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fde047_0%,_#eab308_50%,_#854d0e_100%)]", // Yellow
+        color: "radial-gradient(circle at 50% 0%, #fde047 0%, #eab308 50%, #854d0e 100%)", // Yellow
         provider: "gemini",
     },
     {
         id: "jugaad laal- salesman",
         name: "jugaad laal- salesman",
         description: "Casual",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fdba74_0%,_#f97316_50%,_#c2410c_100%)]", // Orange
+        color: "radial-gradient(circle at 50% 0%, #fdba74 0%, #f97316 50%, #c2410c 100%)", // Orange
         provider: "gemini",
     },
     {
         id: "Warden Madam (The Hostel Warden)",
         name: "Warden Madam (The Hostel Warden)",
         description: "Gentle",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#86efac_0%,_#22c55e_50%,_#14532d_100%)]", // Green
+        color: "radial-gradient(circle at 50% 0%, #86efac 0%, #22c55e 50%, #14532d 100%)", // Green
         provider: "gemini",
     },
     {
         id: "Rooh (The Mystery)",
         name: "Rooh (The Mystery)",
         description: "Lively",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fca5a5_0%,_#f87171_50%,_#991b1b_100%)]", // Red
+        color: "radial-gradient(circle at 50% 0%, #fca5a5 0%, #f87171 50%, #991b1b 100%)", // Red
         provider: "gemini",
     },
     {
         id: "Guddu comedian comentater",
         name: "Guddu comedian comentater",
         description: "Knowledgeable",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#93c5fd_0%,_#3b82f6_50%,_#1e3a8a_100%)]", // Blue
+        color: "radial-gradient(circle at 50% 0%, #93c5fd 0%, #3b82f6 50%, #1e3a8a 100%)", // Blue
         provider: "gemini",
     },
     {
         id: "sustram",
         name: "sustram",
         description: "Warm",
-        color: "bg-[radial-gradient(circle_at_50%_0%,_#fdba74_0%,_#f97316_50%,_#9a3412_100%)]", // Orange
+        color: "radial-gradient(circle at 50% 0%, #fdba74 0%, #f97316 50%, #9a3412 100%)", // Orange
         provider: "gemini",
     },
 ];

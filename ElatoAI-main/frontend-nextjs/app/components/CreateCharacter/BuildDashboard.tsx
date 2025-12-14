@@ -401,12 +401,12 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                       }}
                       className={cn(
                         "relative group cursor-pointer rounded-[24px] p-5 transition-all duration-300 overflow-hidden aspect-square flex flex-col items-center justify-center",
-                        "shadow-[0_4px_20px_rgb(0,0,0,0.06)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]",
+                        "shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]",
                         isSelected
                           ? "ring-4 ring-white shadow-2xl scale-[1.02]"
-                          : "hover:scale-[1.02]",
-                        voice.color
+                          : "hover:scale-[1.02]"
                       )}
+                      style={{ background: voice.color }}
                     >
                       {/* Metallic sheen overlay */}
                       <div className="absolute inset-0 bg-gradient-to-tr from-white/40 via-transparent to-black/5 opacity-50" />
