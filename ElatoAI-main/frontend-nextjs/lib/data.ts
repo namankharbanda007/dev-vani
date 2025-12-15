@@ -36,6 +36,9 @@ export const userFormNameLabel = "Your Name";
 export const FREE_LIMIT_SECONDS = 3600; // 1 hour
 export const PREMIUM_LIMIT_SECONDS = 36000; // 10 hours
 
+export const DEVICE_COST = 55;
+export const ORIGINAL_COST = 111;
+
 export const SUBSCRIPTION_COST = 10;
 
 export const openaiVoices: VoiceType[] = [
