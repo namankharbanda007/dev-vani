@@ -43,6 +43,7 @@ declare global {
         supervisee_persona: string;
         supervisee_age: number;
         session_time: number;
+        last_session_reset: string | null;
         user_info: UserInfo;
 
         // personality

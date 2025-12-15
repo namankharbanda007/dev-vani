@@ -32,11 +32,6 @@ export const userFormAgeDescription =
     "Users under 13 years old must have a parent or guardian to setup Smartmurti.";
 export const userFormNameLabel = "Your Name";
 
-export const INITIAL_CREDITS = 50;
-export const SECONDS_PER_CREDIT = (30 * 60) / INITIAL_CREDITS; // 30 minutes equals 50 credits
-
-export const DEVICE_COST = 55;
-export const ORIGINAL_COST = 111;
 export const SUBSCRIPTION_COST = 10;
 
 export const openaiVoices: VoiceType[] = [
