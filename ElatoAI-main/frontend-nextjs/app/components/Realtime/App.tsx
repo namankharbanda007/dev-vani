@@ -119,6 +119,54 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     }
   }, [sessionStatus]);
 
+  // Usage Tracking Heartbeat
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (sessionStatus === "CONNECTED") {
+      // 1. Initial check (optional, but good to catch limit immediately)
+      // For now we just start tracking.
+
+      const UPDATE_INTERVAL_MS = 10000; // Update every 10 seconds
+      let lastUpdate = Date.now();
+
+      intervalId = setInterval(async () => {
+        const now = Date.now();
+        const deltaSeconds = Math.floor((now - lastUpdate) / 1000);
+        lastUpdate = now;
+
+        if (deltaSeconds > 0) {
+          try {
+            const response = await fetch("/api/user/usage", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ seconds: deltaSeconds }),
+            });
+
+            if (!response.ok) {
+              const data = await response.json();
+              if (response.status === 403) { // Limit exceeded
+                console.warn("Usage limit exceeded, disconnecting...");
+                toast({
+                  title: "Limit Reached",
+                  description: data.message || "You have reached your monthly usage limit.",
+                  variant: "destructive",
+                });
+                disconnectFromRealtime();
+              }
+            }
+          } catch (err) {
+            console.error("Failed to report usage:", err);
+          }
+        }
+      }, UPDATE_INTERVAL_MS);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [sessionStatus]);
+
   const fetchSessionData = async (): Promise<any> => {
     logClientEvent({ url: "/session" }, "fetch_session_token_request");
     const tokenResponse = await fetch("/api/session");
