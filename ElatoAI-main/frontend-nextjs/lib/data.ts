@@ -32,6 +32,10 @@ export const userFormAgeDescription =
     "Users under 13 years old must have a parent or guardian to setup Smartmurti.";
 export const userFormNameLabel = "Your Name";
 
+
+export const FREE_LIMIT_SECONDS = 3600; // 1 hour
+export const PREMIUM_LIMIT_SECONDS = 36000; // 10 hours
+
 export const SUBSCRIPTION_COST = 10;
 
 export const openaiVoices: VoiceType[] = [

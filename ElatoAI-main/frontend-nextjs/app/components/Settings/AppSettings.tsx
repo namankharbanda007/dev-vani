@@ -14,6 +14,7 @@ import { createClient } from "@/utils/supabase/client";
 import React, { useCallback } from "react";
 import { doesUserHaveADevice, updateDevice } from "@/db/devices";
 import { useToast } from "@/components/ui/use-toast";
+import UsageStats from "./UsageStats";
 
 interface AppSettingsProps {
     selectedUser: IUser;
@@ -101,6 +102,10 @@ const AppSettings: React.FC<AppSettingsProps> = ({
                 onSave={onSave}
                 onClickCallback={() => handleSave()}
             />
+
+            <div className="mt-8">
+                <UsageStats user={selectedUser} />
+            </div>
 
             <div className="space-y-6 mt-12 pt-8 border-t border-gray-200/50">
                 <h2 className="text-xl font-bold font-lora text-gray-800 flex items-center gap-2">
