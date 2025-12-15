@@ -35,6 +35,12 @@ export default async function Home() {
     }
 
     const dbUser = await getUserById(supabase, user!.id);
+
+    // If user exists but hasn't completed onboarding (missing supervisee_name), redirect to onboard
+    if (dbUser && !dbUser.supervisee_name) {
+        redirect("/onboard");
+    }
+
     const allPersonalities = await getAllPersonalities(supabase);
     const myPersonalities = await getMyPersonalities(supabase, user?.id ?? "");
 
