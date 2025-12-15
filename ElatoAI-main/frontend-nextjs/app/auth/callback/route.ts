@@ -26,17 +26,28 @@ export async function GET(request: Request) {
         // console.log("user+++++", user);
 
         if (user) {
-            // console.log("user+++++2", user);
+            console.log("Auth callback - user authenticated:", user.id, user.email);
             const userExists = await doesUserExist(supabase, user);
+            console.log("Auth callback - userExists:", userExists);
+
             if (!userExists) {
                 // Create user if they don't exist
-                await createUser(supabase, user, {
+                console.log("Auth callback - creating new user in database");
+                const createError = await createUser(supabase, user, {
                     language_code: "en-US",
                     personality_id:
                         user?.user_metadata?.personality_id ??
                         defaultPersonalityId,
                 });
 
+                if (createError) {
+                    console.error("Auth callback - failed to create user:", createError);
+                    return NextResponse.redirect(
+                        `${origin}/login?error=${encodeURIComponent("Failed to create user account. Please try again or contact support.")}`
+                    );
+                }
+
+                console.log("Auth callback - user created successfully, redirecting to onboard");
                 return NextResponse.redirect(`${origin}/onboard`);
             }
         }

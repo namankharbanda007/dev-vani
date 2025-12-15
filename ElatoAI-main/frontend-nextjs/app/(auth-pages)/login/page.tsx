@@ -129,9 +129,12 @@ export default async function Login({ searchParams }: LoginProps) {
                 Sign In
               </SubmitButton>
 
-              {searchParams?.message && (
-                <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm text-center animate-in fade-in slide-in-from-top-2">
-                  {searchParams.message}
+              {(searchParams?.message || searchParams?.error) && (
+                <div className={`p-4 rounded-xl border text-sm text-center animate-in fade-in slide-in-from-top-2 ${searchParams?.error
+                    ? 'bg-red-50 border-red-100 text-red-600'
+                    : 'bg-amber-50 border-amber-100 text-amber-700'
+                  }`}>
+                  {searchParams?.error || searchParams?.message}
                 </div>
               )}
             </form>
