@@ -1,13 +1,13 @@
 import { type SupabaseClient, type User } from "@supabase/supabase-js";
-import { PostgrestError } from "@supabase/supabase-js";
 
 export const createUser = async (
     supabase: SupabaseClient,
     user: User,
     userProps: Partial<IUser>,
-): Promise<PostgrestError | null> => {
-    console.log("Creating user in database:", user.id, user.email);
+) => {
+    // console.log("creating user", user, userProps);
 
+    //   return ;
     const { error } = await supabase.from("users").insert([
         {
             user_id: user.id,
@@ -25,12 +25,8 @@ export const createUser = async (
     ]);
 
     if (error) {
-        console.error("Error creating user in database:", error);
-        return error;
+        // console.log("error", error);
     }
-
-    console.log("User created successfully in database:", user.id);
-    return null;
 };
 
 export const getSimpleUserById = async (
