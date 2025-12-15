@@ -28,7 +28,7 @@ volatile bool sleepRequested = false;
  * 
  * Smartmurti SETUP:
  *   - WebSocket: talkedge.deno.dev (port 443)
- *   - Backend: https://www.Smartmurtiai.com (port 3000)
+ *   - Backend: https://www.www.Smartmurti.com (port 3000)
  *   - Uses pre-configured SSL certificates (set in Config.cpp)
  */
 

@@ -7,7 +7,7 @@
 <div align="center">
 <h3>
 
-[🚀 Kickstarter (launching soon!)](https://www.kickstarter.com/projects/Smartmurtiai/Smartmurti-make-toys-talk-with-ai-voices) | [🏠 Homepage](https://Smartmurtiai.com/) 
+[🚀 Kickstarter (launching soon!)](https://www.kickstarter.com/projects/Smartmurtiai/Smartmurti-make-toys-talk-with-ai-voices) | [🏠 Homepage](https://www.Smartmurti.com/) 
 
 </h3>
 </div>
@@ -111,7 +111,7 @@ supabase start # This starts your local Supabase server with the default migrati
 
 ([See the Frontend README](frontend-nextjs/README.md)) 
 
-From the `frontend-nextjs` directory, run the following commands. (**Login creds:** Email: `admin@Smartmurtiai.com`, Password: `admin`)
+From the `frontend-nextjs` directory, run the following commands. (**Login creds:** Email: `admin@www.Smartmurti.com`, Password: `admin`)
 ```bash
 cd frontend-nextjs
 npm install
@@ -127,7 +127,7 @@ npm run dev
 
 4. **Choose edge server option (FREE USAGE)**
 
-- **Smartmurti MODE:** Got your own ESP32 DIY hardware device? We offer a fully hosted server for free for up to 30 minutes per month. Register your device on the [settings page](https://www.Smartmurtiai.com/home/settings/device) and it will automatically connect to our edge server. Check out our [Pricing page](https://www.Smartmurtiai.com/#pricing) for more details.
+- **Smartmurti MODE:** Got your own ESP32 DIY hardware device? We offer a fully hosted server for free for up to 30 minutes per month. Register your device on the [settings page](https://www.www.Smartmurti.com/home/settings/device) and it will automatically connect to our edge server. Check out our [Pricing page](https://www.www.Smartmurti.com/#pricing) for more details.
 
 - **DEV MODE:** Alternatively, you can run your own edge server locally by following the instructions below and in the [Deno server README](server-deno/README.md).
 
@@ -328,6 +328,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 </div>
 
 
-**Check out our hardware offerings at [Smartmurti AI Products](https://www.Smartmurtiai.com/). If you find this project interesting or useful, support us by starring this project on GitHub. ⭐**
+**Check out our hardware offerings at [Smartmurti AI Products](https://www.www.Smartmurti.com/). If you find this project interesting or useful, support us by starring this project on GitHub. ⭐**
 
 ---
