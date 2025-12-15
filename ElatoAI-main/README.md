@@ -1,5 +1,5 @@
-<a href="https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices" target="_blank">
- <img src="assets/ks.png" alt="Elato Logo" width="100%">
+<a href="https://www.kickstarter.com/projects/Smartmurtiai/Smartmurti-make-toys-talk-with-ai-voices" target="_blank">
+ <img src="assets/ks.png" alt="Smartmurti Logo" width="100%">
 </a>
 
 <br />
@@ -7,7 +7,7 @@
 <div align="center">
 <h3>
 
-[🚀 Kickstarter (launching soon!)](https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices) | [🏠 Homepage](https://elatoai.com/) 
+[🚀 Kickstarter (launching soon!)](https://www.kickstarter.com/projects/Smartmurtiai/Smartmurti-make-toys-talk-with-ai-voices) | [🏠 Homepage](https://Smartmurtiai.com/) 
 
 </h3>
 </div>
@@ -15,22 +15,22 @@
 <br />
 
 
-# 👾 ElatoAI: Realtime Speech AI Agents for ESP32
+# 👾 SmartmurtiAI: Realtime Speech AI Agents for ESP32
 
 Realtime AI Speech powered by SoTA AI voice models like **OpenAI Realtime API**, **Eleven Labs AI Agents**, **Gemini Live API**, **Hume AI EVI-4**, on ESP32, with Secure WebSockets, and Deno Edge Functions for >15-minute uninterrupted conversations globally.
 
 <div align="center" style="margin: 20px 0;">
-  <!-- <a href="https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices" target="_blank">
-    <img src="https://img.shields.io/badge/Kickstarter_Pre_Launch-white?style=for-the-badge&logo=kickstarter" alt="Elato Kickstarter Prelaunch" style="margin: 0 10px;">
+  <!-- <a href="https://www.kickstarter.com/projects/Smartmurtiai/Smartmurti-make-toys-talk-with-ai-voices" target="_blank">
+    <img src="https://img.shields.io/badge/Kickstarter_Pre_Launch-white?style=for-the-badge&logo=kickstarter" alt="Smartmurti Kickstarter Prelaunch" style="margin: 0 10px;">
   </a> -->
-    <a href="https://cookbook.openai.com/examples/voice_solutions/running_realtime_api_speech_on_esp32_arduino_edge_runtime_elatoai" target="_blank">
+    <a href="https://cookbook.openai.com/examples/voice_solutions/running_realtime_api_speech_on_esp32_arduino_edge_runtime_Smartmurtiai" target="_blank">
   <img src="https://img.shields.io/badge/OpenAI-Cookbook-violet?style=for-the-badge&logo=openai&logoColor=white&labelColor=black" alt="OpenAI" style="margin: 0 10px;">
 </a>
   <a href="https://news.ycombinator.com/item?id=43762409" target="_blank">
     <img src="https://img.shields.io/badge/Hacker_News_Launch-white?style=for-the-badge&logo=ycombinator" alt="Hacker News Launch" style="margin: 0 10px;">
   </a>
 
-  <a href="https://blog.adafruit.com/2025/05/06/elatoai-realtime-speech-ai-agents-for-esp32/" target="_blank">
+  <a href="https://blog.adafruit.com/2025/05/06/Smartmurtiai-realtime-speech-ai-agents-for-esp32/" target="_blank">
     <img src="https://img.shields.io/badge/Adafruit-Product-red?style=for-the-badge&logo=adafruit" alt="Adafruit" style="margin: 0 10px;">
   </a>
 </div>
@@ -63,7 +63,7 @@ Realtime AI Speech powered by SoTA AI voice models like **OpenAI Realtime API**,
 
 <div align="center">
     <a href="https://www.youtube.com/watch?v=o1eIAwVll5I" target="_blank">
-    <img src="https://raw.githubusercontent.com/akdeb/ElatoAI/refs/heads/main/assets/thumbnail.png" alt="Elato AI Demo Video" width="100%" style="border-radius:10px" />
+    <img src="https://raw.githubusercontent.com/akdeb/SmartmurtiAI/refs/heads/main/assets/thumbnail.png" alt="Smartmurti AI Demo Video" width="100%" style="border-radius:10px" />
   </a>
 </div>
 
@@ -75,7 +75,7 @@ Video links: [OpenAI Demo](https://youtu.be/o1eIAwVll5I) | [Gemini Demo](https:/
 
 ## `📱 App Design`
 
-Control your ESP32 AI device from your phone with the Elato AI webapp.
+Control your ESP32 AI device from your phone with the Smartmurti AI webapp.
 
 <img src="assets/mockups.png" alt="App Screenshots" width="100%">
 
@@ -96,7 +96,7 @@ Control your ESP32 AI device from your phone with the Elato AI webapp.
 1. **Clone the repository**
 
 ```bash
-git clone git@github.com:akdeb/ElatoAI.git
+git clone git@github.com:akdeb/SmartmurtiAI.git
 ```
 
 2. **Start Supabase**
@@ -111,7 +111,7 @@ supabase start # This starts your local Supabase server with the default migrati
 
 ([See the Frontend README](frontend-nextjs/README.md)) 
 
-From the `frontend-nextjs` directory, run the following commands. (**Login creds:** Email: `admin@elatoai.com`, Password: `admin`)
+From the `frontend-nextjs` directory, run the following commands. (**Login creds:** Email: `admin@Smartmurtiai.com`, Password: `admin`)
 ```bash
 cd frontend-nextjs
 npm install
@@ -127,7 +127,7 @@ npm run dev
 
 4. **Choose edge server option (FREE USAGE)**
 
-- **ELATO MODE:** Got your own ESP32 DIY hardware device? We offer a fully hosted server for free for up to 30 minutes per month. Register your device on the [settings page](https://www.elatoai.com/home/settings/device) and it will automatically connect to our edge server. Check out our [Pricing page](https://www.elatoai.com/#pricing) for more details.
+- **Smartmurti MODE:** Got your own ESP32 DIY hardware device? We offer a fully hosted server for free for up to 30 minutes per month. Register your device on the [settings page](https://www.Smartmurtiai.com/home/settings/device) and it will automatically connect to our edge server. Check out our [Pricing page](https://www.Smartmurtiai.com/#pricing) for more details.
 
 - **DEV MODE:** Alternatively, you can run your own edge server locally by following the instructions below and in the [Deno server README](server-deno/README.md).
 
@@ -160,7 +160,7 @@ In `Config.cpp` set `ws_server` and `backend_server` to your local IP address. R
 
 7. **Setup the ESP32 Device Wifi**
 
-Build and upload the firmware to your ESP32 device. The ESP32 should open an `ELATO-DEVICE` captive portal to connect to Wifi. Connect to it and go to `http://192.168.4.1` to configure the device wifi.
+Build and upload the firmware to your ESP32 device. The ESP32 should open an `Smartmurti-DEVICE` captive portal to connect to Wifi. Connect to it and go to `http://192.168.4.1` to configure the device wifi.
 
 8. **Turn on your device**
 
@@ -168,7 +168,7 @@ Once your Wifi credentials are configured, turn the device off and on again and 
 
 ## `Project Architecture`
 
-ElatoAI consists of three main components:
+SmartmurtiAI consists of three main components:
 
 1. **Frontend Client** (`Next.js` hosted on Vercel) - to create and talk to your AI agents and 'send' it to your ESP32 device
 2. **Edge Server Functions** (`Deno` running on Deno/Supabase Edge) - to handle the websocket connections from the ESP32 device and the LLM Provider API calls
@@ -241,7 +241,7 @@ flowchart TD
 
 ```mermaid
 graph TD
-  repo[ElatoAI]
+  repo[SmartmurtiAI]
   repo --> frontend[Frontend Vercel NextJS]
   repo --> deno[Deno Edge Function]
   repo --> esp32[ESP32 Arduino Client]
@@ -328,6 +328,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 </div>
 
 
-**Check out our hardware offerings at [Elato AI Products](https://www.elatoai.com/). If you find this project interesting or useful, support us by starring this project on GitHub. ⭐**
+**Check out our hardware offerings at [Smartmurti AI Products](https://www.Smartmurtiai.com/). If you find this project interesting or useful, support us by starring this project on GitHub. ⭐**
 
 ---

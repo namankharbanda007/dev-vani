@@ -9,7 +9,7 @@
 2. **Agent Configuration**
    - Create an agent in the Eleven Labs dashboard
    - Copy the agent ID
-   - On the Elato UI, Click `+ Create new` and create an Eleven Labs character with a `title` and the `agentId` 
+   - On the Smartmurti UI, Click `+ Create new` and create an Eleven Labs character with a `title` and the `agentId` 
 
 ## How it Works
 

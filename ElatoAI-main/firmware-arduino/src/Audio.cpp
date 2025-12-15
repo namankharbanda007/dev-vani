@@ -410,7 +410,7 @@ void websocketSetup(const String& server_domain, int port, const String& path)
     Serial.println("[WSc] Using non-SSL begin() (DEV_MODE)");
     webSocket.begin(server_domain.c_str(), port, path.c_str());
     #else
-    Serial.println("[WSc] Using SSL beginSslWithCA() (PROD/ELATO)");
+    Serial.println("[WSc] Using SSL beginSslWithCA() (PROD/Smartmurti)");
     webSocket.beginSslWithCA(server_domain.c_str(), port, path.c_str(), CA_cert);
     #endif
 

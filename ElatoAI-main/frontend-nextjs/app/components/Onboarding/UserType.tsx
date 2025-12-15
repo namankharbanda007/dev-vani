@@ -21,7 +21,7 @@ const UserTypes: IUserType[] = [
     {
         type: "user",
         name: "Personal user",
-        title: "You are looking to use Elato for personal use",
+        title: "You are looking to use Smartmurti for personal use",
         icon: <User />,
     },
     {
@@ -52,15 +52,13 @@ const UserType: React.FC<{
                 {UserTypes.map((userType) => (
                     <Card
                         key={userType.type}
-                        className={`relative overflow-hidden transition-all ${
-                            userType.disabled
+                        className={`relative overflow-hidden transition-all ${userType.disabled
                                 ? "opacity-50 cursor-not-allowed"
                                 : "hover:shadow-lg cursor-pointer"
-                        } ${
-                            selectedType === userType.type
+                            } ${selectedType === userType.type
                                 ? "ring-2 ring-primary"
                                 : ""
-                        }`}
+                            }`}
                         onClick={() => {
                             onPickType(userType);
                         }}

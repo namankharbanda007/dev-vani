@@ -4,7 +4,7 @@ If you are ready to launch your next AI venture that helps people in a meaningfu
 
 ## How to deploy
 
-1. Elato consists of 4 main parts: 
+1. Smartmurti consists of 4 main parts: 
 	1. the database hosted on supabase, 
 	2. the frontend that runs with NextJS, 
 	3. the server that runs on Deno edge functions and 

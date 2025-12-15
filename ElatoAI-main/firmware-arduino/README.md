@@ -1,6 +1,6 @@
 # ESP32 WebSocket Audio Client
 
-This firmware turns your ESP32 device into a WebSocket audio client for Elato, enabling real-time conversations with AI characters.
+This firmware turns your ESP32 device into a WebSocket audio client for Smartmurti, enabling real-time conversations with AI characters.
 
 ## Hardware Setup
 
@@ -67,7 +67,7 @@ We store the following data in Non-Volatile Storage (NVS) on the ESP32:
 ## First-Time Setup
 
 1. Power on your ESP32
-2. Connect to the "Elato device" WiFi network from your phone/computer
+2. Connect to the "Smartmurti device" WiFi network from your phone/computer
 3. A configuration portal will open (or navigate to 192.168.4.1)
 4. Enter your home WiFi credentials
 5. The device will restart and connect to your WiFi

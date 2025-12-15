@@ -6,11 +6,11 @@ export const paymentLink = "https://buy.stripe.com/bIY0033Dc7LB28o9AJ";
 export const devkitPaymentLink = "https://buy.stripe.com/fZefZ12z82rh3cseV5";
 
 export const discordInviteLink = "https://discord.gg/KJWxDPBRUj";
-export const tiktokLink = "https://www.tiktok.com/@elatoai";
-export const githubPublicLink = "https://github.com/akdeb/ElatoAI";
+export const tiktokLink = "https://www.tiktok.com/@Smartmurtiai";
+export const githubPublicLink = "https://github.com/akdeb/SmartmurtiAI";
 export const businessDemoLink = "https://vimeo.com/1141098837";
 export const feedbackFormLink = "https://forms.gle/2QmukEG2FXNwBdee7";
-export const kickstarterLink = "https://www.kickstarter.com/projects/elatoai/elato-make-toys-talk-with-ai-voices";
+export const kickstarterLink = "https://www.kickstarter.com/projects/Smartmurtiai/Smartmurti-make-toys-talk-with-ai-voices";
 
 export const r2Url = "https://pub-cd736d767add4fecafea55c239c28497.r2.dev";
 export const r2UrlAudio = "https://pub-5fab8e2596c544cd8dc3e20812be2168.r2.dev";
@@ -29,7 +29,7 @@ export const userFormPersonaPlaceholder =
     "Don't get me started on the guitar...I love to shred it like Hendrix. I also like a good challenge. Challenge me to be better and I'll rise to the occasion.";
 export const userFormAgeLabel = "Your Age";
 export const userFormAgeDescription =
-    "Users under 13 years old must have a parent or guardian to setup Elato.";
+    "Users under 13 years old must have a parent or guardian to setup Smartmurti.";
 export const userFormNameLabel = "Your Name";
 
 export const INITIAL_CREDITS = 50;

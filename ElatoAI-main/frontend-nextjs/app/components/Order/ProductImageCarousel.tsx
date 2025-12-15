@@ -10,32 +10,32 @@ import Image from "next/image";
 const images = [
     {
         src: "/products/box43.png",
-        alt: "Elato Device - white",
+        alt: "Smartmurti Device - white",
         objectFit: "contain",
     },
     // {
     //     src: "/products/multi3.png",
-    //     alt: "Elato Device Decomposition",
+    //     alt: "Smartmurti Device Decomposition",
     //     objectFit: "contain",
     // },
     {
         src: "/products/multi3.png",
-        alt: "Elato Device - gray",
+        alt: "Smartmurti Device - gray",
         objectFit: "contain",
     },
     {
         src: "/products/multi2.png",
-        alt: "Elato Device - black",
+        alt: "Smartmurti Device - black",
         objectFit: "contain",
     },
     // {
     //     src: "/products/orange.jpg",
-    //     alt: "Elato AI Device",
+    //     alt: "Smartmurti AI Device",
     //     objectFit: "contain",
     // },
     // {
     //     src: "/products/multi_black.jpg",
-    //     alt: "Elato Device Decomposition",
+    //     alt: "Smartmurti Device Decomposition",
     //     objectFit: "contain",
     // },
     // {

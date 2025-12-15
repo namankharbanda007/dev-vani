@@ -8,9 +8,9 @@ bool factory_reset_status = false;
 volatile bool sleepRequested = false;
 
 /**
- * Configuration for Elato Firmware
+ * Configuration for Smartmurti Firmware
  * 
- * DEVELOPMENT vs PRODUCTION vs ELATO SETUP:
+ * DEVELOPMENT vs PRODUCTION vs Smartmurti SETUP:
  * --------------------------------
  * 1. Define `DEV_MODE` in your config.h file to use local development servers
  * 2. `DEV_MODE` requires updating the IP addresses to your local network IP
@@ -26,9 +26,9 @@ volatile bool sleepRequested = false;
  *   - Backend: <your-vercel-backend-server> (port 3000)
  *   - Use your own SSL certificates (set in Config.cpp)
  * 
- * ELATO SETUP:
+ * Smartmurti SETUP:
  *   - WebSocket: talkedge.deno.dev (port 443)
- *   - Backend: https://www.elatoai.com (port 3000)
+ *   - Backend: https://www.Smartmurtiai.com (port 3000)
  *   - Uses pre-configured SSL certificates (set in Config.cpp)
  */
 
@@ -49,8 +49,8 @@ const char *ws_path = "/";
 const char *backend_server = "dev-vani.vercel.app"; // like www.facebook.com or facebook.vercel.app
 const uint16_t backend_port = 3000;
 
-#elif defined(ELATO_MODE)
-// ELATO
+#elif defined(Smartmurti_MODE)
+// Smartmurti
 const char *ws_server = "talkedge.deno.dev";
 const uint16_t ws_port = 443;
 const char *ws_path = "/";
@@ -168,7 +168,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 -----END CERTIFICATE-----
 )EOF";
 
-#elif defined(ELATO_MODE)
+#elif defined(Smartmurti_MODE)
 
 const char *Vercel_CA_cert = R"EOF(
 -----BEGIN CERTIFICATE-----

@@ -1,4 +1,4 @@
-# [WIP] Here are some use cases for the Elato AI device
+# [WIP] Here are some use cases for the Smartmurti AI device
 
 <img src="./../assets/usecases.png" alt="Build Custom AI Toys" width="40%">
 

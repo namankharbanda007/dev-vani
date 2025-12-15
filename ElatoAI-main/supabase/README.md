@@ -18,7 +18,7 @@
 2. **Start Supabase locally**
    ```bash
    # Navigate to your project
-   cd ElatoAI
+   cd SmartmurtiAI
    
    # Start Supabase local development
    supabase start

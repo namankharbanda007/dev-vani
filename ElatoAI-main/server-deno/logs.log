@@ -9,7 +9,7 @@ data [
     supervisee_name: "Tom",
     supervisee_persona: "Tom loves playing guitar and enjoys watching Agadmator",
     supervisee_age: 10,
-    email: "admin@elatoai.com",
+    email: "admin@Smartmurtiai.com",
     session_time: 0,
     avatar_url: "",
     personality_id: "1842ec2b-96b1-4349-8c82-e9756ef6c00e",

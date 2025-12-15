@@ -9,12 +9,12 @@
 #include <WebSocketsClient.h>
 
 // ---------- CHOOSE YOUR MODE ----------
-// Pick one of the following (DEV_MODE, PROD_MODE, ELATO_MODE) , comment the rest
-// For ELATO_MODE, you will need to register your DIY Hardware on the Elato website
+// Pick one of the following (DEV_MODE, PROD_MODE, Smartmurti_MODE) , comment the rest
+// For Smartmurti_MODE, you will need to register your DIY Hardware on the Smartmurti website
 
 //#define DEV_MODE
 #define PROD_MODE
-// #define ELATO_MODE
+// #define Smartmurti_MODE
 
 
 // ---------- Touch mode ----------
