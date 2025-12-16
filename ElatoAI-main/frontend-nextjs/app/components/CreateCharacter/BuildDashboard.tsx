@@ -271,7 +271,8 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
     if (provider === 'openai') {
       audioUrl = `${r2UrlAudio}/${id}.wav`;
     } else if (provider === 'gemini') {
-      audioUrl = `/Voices/${id}.wav`;
+      // Use voice.name which matches the filename in /public/Voices/
+      audioUrl = `/Voices/${voice.name}.wav`;
     }
 
     if (audioUrl) {
@@ -659,8 +660,8 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-              {[...openaiVoices, ...geminiVoices].map((voice: any) => {
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {geminiVoices.map((voice: any) => {
                 const isSelected = formData.voice === voice.id;
                 const isPlaying = previewingVoice === voice.id;
 
@@ -669,62 +670,46 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                     key={voice.name}
                     onClick={() => {
                       setFormData(prev => ({ ...prev, provider: voice.provider as ModelProvider, voice: voice.id }));
-                      const audioSrc = voice.provider === 'gemini' ? voice.name : voice.id;
                       previewVoice(voice);
                     }}
                     className={cn(
-                      "relative group cursor-pointer rounded-[24px] p-5 transition-all duration-300 overflow-hidden aspect-square flex flex-col items-center justify-center",
-                      "shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]",
+                      "cursor-pointer relative group rounded-2xl p-4 border-2 transition-all duration-300 flex flex-col items-center justify-between gap-2 h-auto aspect-square",
                       isSelected
-                        ? "ring-4 ring-amber-400 shadow-2xl scale-[1.02]"
-                        : "hover:scale-[1.02]"
+                        ? "bg-amber-50 border-amber-500 shadow-md scale-105"
+                        : "bg-white border-amber-100 hover:border-amber-300 hover:shadow-sm hover:scale-105"
                     )}
-                    style={{ background: voice.color }}
                   >
-                    {/* Metallic sheen overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/40 via-transparent to-black/5 opacity-50" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent opacity-30" />
-
-                    {/* Icon Container - The "Knob" */}
                     <div className={cn(
-                      "relative w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-all duration-300",
-                      "bg-gradient-to-b from-slate-200 to-slate-400",
-                      "shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_-2px_4px_rgba(0,0,0,0.2),inset_0_2px_4px_rgba(255,255,255,0.8)]",
-                      "border border-white/40",
-                      isPlaying ? "scale-105" : (isSelected ? "scale-110" : "group-hover:scale-105")
+                      "w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300",
+                      isSelected
+                        ? "bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg scale-110"
+                        : "bg-amber-50 text-amber-600 group-hover:bg-amber-100 group-hover:scale-105"
                     )}>
                       {isPlaying ? (
-                        <div className="flex items-center gap-[3px] h-5">
-                          <span className="w-[3px] bg-white animate-[bounce_1s_infinite] h-2 rounded-full drop-shadow-sm"></span>
-                          <span className="w-[3px] bg-white animate-[bounce_1.2s_infinite] h-4 rounded-full drop-shadow-sm"></span>
-                          <span className="w-[3px] bg-white animate-[bounce_0.8s_infinite] h-3 rounded-full drop-shadow-sm"></span>
+                        <div className="flex items-center gap-[3px] h-4">
+                          <span className="w-[3px] bg-white animate-[bounce_1s_infinite] h-2 rounded-full"></span>
+                          <span className="w-[3px] bg-white animate-[bounce_1.2s_infinite] h-4 rounded-full"></span>
+                          <span className="w-[3px] bg-white animate-[bounce_0.8s_infinite] h-2 rounded-full"></span>
                         </div>
                       ) : (
-                        <div className="text-white drop-shadow-md">
-                          <Volume2 size={20} strokeWidth={2.5} />
-                        </div>
+                        <Volume2 className="w-7 h-7" />
                       )}
                     </div>
 
-                    <div className="relative text-center z-10 w-full px-1">
+                    <div className="text-center w-full mt-2">
                       <h3 className={cn(
-                        "font-bold text-lg mb-0.5 truncate drop-shadow-md tracking-tight",
-                        isSelected ? "text-gray-900" : "text-gray-900"
+                        "font-bold text-sm mb-1 truncate capitalize",
+                        isSelected ? "text-amber-900" : "text-gray-900"
                       )}>
                         {voice.name}
                       </h3>
                       <p className={cn(
-                        "text-[11px] font-medium tracking-wide line-clamp-1 truncate drop-shadow-sm opacity-80",
-                        isSelected ? "text-gray-800" : "text-gray-700"
+                        "text-[10px] font-medium leading-tight line-clamp-2",
+                        isSelected ? "text-amber-700/80" : "text-gray-400"
                       )}>
                         {voice.description}
                       </p>
                     </div>
-
-                    {/* Selection Ring (External) */}
-                    {isSelected && (
-                      <div className="absolute inset-0 rounded-[24px] border-[5px] border-white/90 pointer-events-none" />
-                    )}
                   </div>
                 );
               })}
