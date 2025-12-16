@@ -7,7 +7,7 @@ import PremiumBadge from "../PremiumBadge";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname } from "next/navigation";
 import GetInTouchButton from "../GetInTouch";
-import { CalendarCheck } from "lucide-react";
+import { CalendarCheck, Users, Settings, Plus } from "lucide-react";
 
 interface NavbarButtonsProps {
     user: IUser | null;
@@ -19,6 +19,7 @@ const NavbarButtons: React.FC<NavbarButtonsProps> = ({
     isHome,
 }) => {
     const isMobile = useMediaQuery("(max-width: 768px)");
+    const pathname = usePathname();
 
     return (
         <div
@@ -26,7 +27,38 @@ const NavbarButtons: React.FC<NavbarButtonsProps> = ({
                 } items-center font-bold text-sm `}
         >
             {isHome && user && (
-                <div>
+                <div className="flex flex-row gap-4 items-center mr-4">
+                    {!isMobile && (
+                        <>
+                            <Link href="/home" passHref>
+                                <Button
+                                    variant="ghost"
+                                    className={`flex flex-row gap-2 items-center ${pathname === "/home" ? "text-primary" : "text-muted-foreground"}`}
+                                >
+                                    <Users size={20} />
+                                    <span>Avatars</span>
+                                </Button>
+                            </Link>
+                            <Link href="/home/settings" passHref>
+                                <Button
+                                    variant="ghost"
+                                    className={`flex flex-row gap-2 items-center ${pathname === "/home/settings" ? "text-primary" : "text-muted-foreground"}`}
+                                >
+                                    <Settings size={20} />
+                                    <span>Settings</span>
+                                </Button>
+                            </Link>
+                            <Link href="/home/create" passHref>
+                                <Button
+                                    variant="ghost"
+                                    className={`flex flex-row gap-2 items-center ${pathname === "/home/create" ? "text-primary" : "text-muted-foreground"}`}
+                                >
+                                    <Plus size={20} />
+                                    <span>Create New</span>
+                                </Button>
+                            </Link>
+                        </>
+                    )}
                     <PremiumBadge currentUserId={user.user_id} />
                 </div>
             )}
