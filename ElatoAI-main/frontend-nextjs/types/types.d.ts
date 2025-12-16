@@ -83,7 +83,12 @@ declare global {
         hospital_layout: string;
     }
 
-    interface IUserMetadata { }
+    interface IUserMetadata {
+        birth_place?: string;
+        birth_time?: string;
+        birth_date?: string;
+        rashi?: string;
+    }
 
     type Role = "user" | "assistant" | "doctor";
 

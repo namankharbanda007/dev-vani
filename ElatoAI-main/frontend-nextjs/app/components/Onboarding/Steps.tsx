@@ -27,30 +27,32 @@ const Steps: React.FC<{
     const CurrentForm = () => {
         if (step === 1) {
             return (
-                <GeneralUserForm
-                    selectedUser={selectedUser}
-                    userId={userId}
-                    onClickCallback={onClickFormCallback}
-                    onSave={
-                        async (values, userType) => {
-                            await updateUser(
-                                supabase,
-                                {
-                                    supervisee_age: values.supervisee_age,
-                                    supervisee_name: values.supervisee_name,
-                                    supervisee_persona: values.supervisee_persona,
-                                    user_info: {
-                                        user_type: userType,
-                                        user_metadata: values,
+                <div className="bg-white/60 backdrop-blur-md border border-white/50 rounded-3xl p-6 shadow-xl">
+                    <GeneralUserForm
+                        selectedUser={selectedUser}
+                        userId={userId}
+                        onClickCallback={onClickFormCallback}
+                        onSave={
+                            async (values, userType) => {
+                                await updateUser(
+                                    supabase,
+                                    {
+                                        supervisee_age: values.supervisee_age,
+                                        supervisee_name: values.supervisee_name,
+                                        supervisee_persona: values.supervisee_persona,
+                                        user_info: {
+                                            user_type: userType,
+                                            user_metadata: values,
+                                        },
                                     },
-                                },
-                                userId);
-                        }}
-                    disabled={false}
-                />
+                                    userId);
+                            }}
+                        disabled={false}
+                    />
+                </div>
             );
         } else {
-            return <Loader2 className="w-4 h-4 animate-spin" />;
+            return <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto" />;
         }
     };
 
@@ -60,17 +62,28 @@ const Steps: React.FC<{
 
     if (step === 1) {
         {
-            heading = "Hello there!";
+            heading = "👋 Hello there!";
             subHeading =
-                "With the following details we will be able to personalize your Smartmurti experience.";
+                "Let's personalize your experience with some basic details.";
         }
     }
 
     return (
-        <div className="max-w-lg flex-auto flex flex-col gap-2 px-1 font-quicksand ">
-            <Progress value={progress} className="bg-amber-200" />
-            <p className="text-3xl font-bold mt-5">{heading}</p>
-            <p className="text-md text-gray-500 font-medium">{subHeading}</p>
+        <div className="max-w-xl flex-auto flex flex-col gap-6 px-1 font-quicksand mx-auto py-10">
+            <div className="space-y-2 text-center">
+                <Progress value={progress} className="h-3 bg-gray-100/50 [&>div]:bg-gradient-to-r [&>div]:from-purple-500 [&>div]:to-amber-500" />
+                <p className="text-xs font-semibold text-amber-600 uppercase tracking-widest pt-2">Step {step} of 2</p>
+            </div>
+
+            <div className="text-center space-y-2 mb-4">
+                <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 via-pink-600 to-amber-600 font-lora">
+                    {heading}
+                </h1>
+                <p className="text-lg text-gray-600 font-medium max-w-md mx-auto leading-relaxed">
+                    {subHeading}
+                </p>
+            </div>
+
             <CurrentForm />
         </div>
     );
