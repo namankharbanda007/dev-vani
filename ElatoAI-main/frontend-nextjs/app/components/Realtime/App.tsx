@@ -216,6 +216,11 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
           },
           (speaking) => {
             setIsAgentSpeaking(speaking);
+          },
+          () => {
+            console.log("Gemini connection disconnected");
+            setSessionStatus("DISCONNECTED");
+            toast({ description: "Connection lost", variant: "destructive" });
           }
         );
 

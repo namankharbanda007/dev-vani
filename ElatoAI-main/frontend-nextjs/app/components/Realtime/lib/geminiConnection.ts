@@ -85,7 +85,8 @@ export async function createGeminiConnection(
     voice: string,
     initialMessage: string,
     onRemoteEvent: (event: any) => void,
-    onSpeakingStateChange?: (isSpeaking: boolean) => void
+    onSpeakingStateChange?: (isSpeaking: boolean) => void,
+    onDisconnect?: () => void
 ) {
     let ws: WebSocket | null = null;
     let mediaStream: MediaStream | null = null;
@@ -94,6 +95,24 @@ export async function createGeminiConnection(
     let speakingTimeout: NodeJS.Timeout | null = null;
 
     try {
+        // 1. Setup Audio Context & Mic Permissions FIRST (prevents WS timeout while waiting)
+        await audioContext.resume();
+        console.log(`AudioContext Sample Rate: ${audioContext.sampleRate}`);
+
+        try {
+            await audioContext.audioWorklet.addModule('data:text/javascript;base64,' + btoa(workletCode));
+        } catch (e) {
+            console.warn("Worklet might already be added or failed:", e);
+        }
+
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                channelCount: 1,
+                sampleRate: 16000,
+            },
+        });
+
+        // 2. Connect to WebSocket
         const url = `${URI}?key=${apiKey}`;
         ws = new WebSocket(url);
 
@@ -188,25 +207,12 @@ export async function createGeminiConnection(
         };
 
         ws.onerror = (err) => console.error("Gemini WS Error", err);
-        ws.onclose = () => console.log("Gemini WS Closed");
+        ws.onclose = () => {
+            console.log("Gemini WS Closed");
+            if (onDisconnect) onDisconnect();
+        };
 
-        // Now perform async audio setup
-        // Resume context just in case (e.g. if it was created long ago)
-        await audioContext.resume();
-
-        console.log(`AudioContext Sample Rate: ${audioContext.sampleRate}`);
-
-        await audioContext.audioWorklet.addModule('data:text/javascript;base64,' + btoa(workletCode));
-
-        // Input 
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                channelCount: 1,
-                // Ideally we request 16k, but browser might ignore
-                sampleRate: 16000,
-            },
-        });
-
+        // 3. Audio Processing Setup
         const source = audioContext.createMediaStreamSource(mediaStream);
         workletNode = new AudioWorkletNode(audioContext, 'pcm-processor');
 
@@ -235,6 +241,8 @@ export async function createGeminiConnection(
 
     } catch (error) {
         console.error("Failed to create Gemini connection", error);
+        // Ensure cleanup if we fail during setup
+        mediaStream?.getTracks().forEach(track => track.stop());
         throw error;
     }
 
