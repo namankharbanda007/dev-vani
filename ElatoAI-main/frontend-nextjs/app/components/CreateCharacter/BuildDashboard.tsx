@@ -578,10 +578,34 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
 
                   return (
                     <div
-                      key={voice.id}
+                      key={voice.name}
                       onClick={() => {
                         setFormData(prev => ({ ...prev, provider: voice.provider as ModelProvider, voice: voice.id }));
-                        previewVoice(voice);
+                        // For Gemini, use the name (display name) for audio lookup since we renamed the files.
+                        // For OpenAI, use the id.
+                        const audioSrc = voice.provider === 'gemini' ? voice.name : voice.id;
+                        if (voice.provider === 'openai') {
+                          if (audioElement) {
+                            audioElement.pause();
+                            audioElement.currentTime = 0;
+                          }
+                          const audio = new Audio(`${r2UrlAudio}/${voice.id}.wav`);
+                          setPreviewingVoice(voice.id);
+                          setAudioElement(audio);
+                          audio.play().catch(() => setPreviewingVoice(null));
+                          audio.onended = () => setPreviewingVoice(null);
+                        } else {
+                          // Gemini local preview logic
+                          if (audioElement) {
+                            audioElement.pause();
+                            audioElement.currentTime = 0;
+                          }
+                          const audio = new Audio(`/Voices/${voice.name}.wav`);
+                          setPreviewingVoice(voice.id);
+                          setAudioElement(audio);
+                          audio.play().catch(() => setPreviewingVoice(null));
+                          audio.onended = () => setPreviewingVoice(null);
+                        }
                       }}
                       className={cn(
                         "relative group cursor-pointer rounded-[24px] p-5 transition-all duration-300 overflow-hidden aspect-square flex flex-col items-center justify-center",
