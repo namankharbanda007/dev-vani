@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { SidebarNav } from "../components/Nav/SidebarNavItems";
-import { Gamepad2, Plus, PlusCircle, Settings, Users } from "lucide-react";
+import { Gamepad2, Plus, PlusCircle, Settings, Users, Music } from "lucide-react";
 import { Metadata } from "next";
 import { getOpenGraphMetadata } from "@/lib/utils";
 import { MobileNav } from "../components/Nav/MobileNav";
@@ -61,7 +61,11 @@ export default async function RootLayout({
     const mobileNavItems = [
         sidebarNavItems[0], // Playground
         sidebarNavItems[2], // Create
-        sidebarNavItems[1], // Settings
+        {
+            title: "Bhajan",
+            href: "/bhajan",
+            icon: <Music size={ICON_SIZE} />,
+        },
     ];
 
     return (

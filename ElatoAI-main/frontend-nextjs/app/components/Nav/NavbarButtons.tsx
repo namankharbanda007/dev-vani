@@ -7,7 +7,7 @@ import PremiumBadge from "../PremiumBadge";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname } from "next/navigation";
 import GetInTouchButton from "../GetInTouch";
-import { CalendarCheck, Users, Settings, Plus } from "lucide-react";
+import { CalendarCheck, Users, Settings, Plus, Music } from "lucide-react";
 
 interface NavbarButtonsProps {
     user: IUser | null;
@@ -37,6 +37,15 @@ const NavbarButtons: React.FC<NavbarButtonsProps> = ({
                                 >
                                     <Users size={20} />
                                     <span>Avatars</span>
+                                </Button>
+                            </Link>
+                            <Link href="/bhajan" passHref>
+                                <Button
+                                    variant="ghost"
+                                    className={`flex flex-row gap-2 items-center ${pathname === "/bhajan" ? "text-primary" : "text-muted-foreground"}`}
+                                >
+                                    <Music size={20} />
+                                    <span>Bhajan</span>
                                 </Button>
                             </Link>
                             <Link href="/home/settings" passHref>
