@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Check, Volume2, Plus, Sparkles, User, Mic, Settings2, Image as ImageIcon, Upload, Smile } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Volume2, Plus, Sparkles, User, Mic, Settings2, Image as ImageIcon, Upload, Smile, BrainCircuit } from "lucide-react";
 import { createPersonality, updatePersonality } from "@/db/personalities";
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from "@/components/ui/use-toast";
@@ -35,7 +35,7 @@ const formSchema = z.object({
   provider: z.enum(["openai", "gemini"]),
   title: z.string().min(2, "Minimum 2 characters").max(50, "Maximum 50 characters"),
   description: z.string().min(50, "Minimum 50 characters").max(200, "Maximum 200 characters"),
-  prompt: z.string().min(100, "Minimum 100 characters").max(1000, "Maximum 1000 characters"),
+  prompt: z.string().min(100, "Minimum 100 characters").max(2000, "Maximum 2000 characters"),
   firstMessagePrompt: z.string().min(50, "Minimum 50 characters").max(150, "Maximum 150 characters"),
   voice: z.string().min(1, "Voice selection is required"),
   voiceCharacteristics: z.object({
@@ -48,12 +48,22 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const steps = [
-  { id: 'identity', title: 'Identity', icon: User, description: 'Name & Personality' },
+  { id: 'identity', title: 'Identity', icon: User, description: 'Name & Look' },
+  { id: 'personality', title: 'Personality', icon: BrainCircuit, description: 'Core Traits' },
   { id: 'voice', title: 'Voice', icon: Mic, description: 'Sound & Tone' },
   { id: 'refine', title: 'Refine', icon: Settings2, description: 'Fine-tuning' },
 ] as const;
 
 type Step = typeof steps[number]['id'];
+
+// Minimal type definition for voice if not globally available
+interface VoiceType {
+  id: string;
+  name: string;
+  provider: string;
+  description?: string;
+  color?: string;
+}
 
 const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
   selectedUser,
@@ -155,10 +165,13 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
     if (step === 'identity') {
       if (formData.title.length < 2) { errors.title = "Title must be at least 2 characters"; isValid = false; }
       if (formData.description.length < 50) { errors.description = "Description must be at least 50 characters"; isValid = false; }
+    }
 
-      // If interactive mode, maybe valid fields? But ultimately we check the generated prompt length.
-      if (formData.prompt.length < 100) { errors.prompt = "Prompt/Personality is too short. Please add more details."; isValid = false; }
-      if (formData.firstMessagePrompt.length < 50) { errors.firstMessagePrompt = "First message must be at least 50 characters"; isValid = false; }
+    if (step === 'personality') {
+      if (interactiveMode) {
+        if (!characterAttributes.gender) { /* optionally warn */ }
+      }
+      if (formData.prompt.length < 50) { errors.prompt = "Personality is too short."; isValid = false; }
     }
 
     if (step === 'voice') {
@@ -166,7 +179,8 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
     }
 
     if (step === 'refine') {
-      if (formData.voiceCharacteristics.features.length < 10) { errors.features = "Characteristics must be at least 10 characters"; isValid = false; }
+      if (formData.firstMessagePrompt.length < 50) { errors.firstMessagePrompt = "First message must be at least 50 characters"; isValid = false; }
+      // Speaking Style is part of attributes now, so prompt check covers it implicitly or we can check specific field
     }
 
     setFormErrors(errors);
@@ -175,30 +189,29 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      if (currentStep === 'identity') setCurrentStep('voice');
+      if (currentStep === 'identity') setCurrentStep('personality');
+      else if (currentStep === 'personality') setCurrentStep('voice');
       else if (currentStep === 'voice') setCurrentStep('refine');
     }
   };
 
   const handleBack = () => {
     if (currentStep === 'refine') setCurrentStep('voice');
-    else if (currentStep === 'voice') setCurrentStep('identity');
+    else if (currentStep === 'voice') setCurrentStep('personality');
+    else if (currentStep === 'personality') setCurrentStep('identity');
   };
 
   const handleSubmit = async () => {
-    console.log("handleSubmit called");
     if (!validateStep('refine')) {
-      console.log("Validation failed");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      console.log("Preparing personality data...");
       const personalityData = {
         provider: formData.provider as ModelProvider,
         title: formData.title,
-        subtitle: customImageUrl || "", // Use custom image URL if available
+        subtitle: customImageUrl || "",
         character_prompt: formData.prompt,
         oai_voice: formData.voice as OaiVoice,
         voice_prompt: formData.voiceCharacteristics.features + "\nThe voice should be " + formData.voiceCharacteristics.emotion,
@@ -211,33 +224,17 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
         pitch_factor: formData.voiceCharacteristics.pitchFactor,
         first_message_prompt: formData.firstMessagePrompt
       };
-      console.log("Personality data prepared:", personalityData);
 
       let personality;
       if (initialData && initialData.personality_id) {
-        console.log("Updating existing personality:", initialData.personality_id);
-
-        // Debug: Check user IDs
-        console.log("Current User ID:", selectedUser.user_id);
-        console.log("Creator ID:", initialData.creator_id);
         if (selectedUser.user_id !== initialData.creator_id) {
-          console.error("User ID mismatch! You might not have permission to update this character.");
+          console.error("User ID mismatch!");
         }
 
-        // Debug: Check visibility
-        const { data: checkData, error: checkError } = await supabase
-          .from("personalities")
-          .select("*")
-          .eq("personality_id", initialData.personality_id)
-          .single();
-        console.log("Visibility check - Data:", checkData, "Error:", checkError);
-
-        // Filter update payload to ONLY fields that should change
-        // Exclude system flags and immutable fields
         const updateData = {
           provider: personalityData.provider,
           title: personalityData.title,
-          subtitle: personalityData.subtitle, // Update subtitle with image URL
+          subtitle: personalityData.subtitle,
           character_prompt: personalityData.character_prompt,
           oai_voice: personalityData.oai_voice,
           voice_prompt: personalityData.voice_prompt,
@@ -246,28 +243,21 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
           first_message_prompt: personalityData.first_message_prompt
         };
 
-        console.log("Refined Update payload:", updateData);
-        // Use Server Action to bypass potential client-side RLS issues
         const result = await updatePersonalityAction(initialData.personality_id, updateData);
         if (result.error) {
-          console.error("Server Action Error:", result.error);
           toast({ title: "Error", description: result.error, variant: "destructive" });
           setIsSubmitting(false);
           return;
         }
         personality = result.data;
       } else {
-        console.log("Creating new personality");
         personality = await createPersonality(supabase, selectedUser.user_id, personalityData);
       }
-
-      console.log("Result from DB:", personality);
 
       if (personality) {
         toast({ title: "Success!", description: initialData ? "Character updated successfully." : "Your AI companion is ready." });
         router.push(`/home`);
       } else {
-        console.error("No personality returned from DB operation");
         toast({ title: "Error", description: "Operation failed silently.", variant: "destructive" });
       }
     } catch (error) {
@@ -278,7 +268,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
     }
   };
 
-  const previewVoice = (voice: VoiceType) => {
+  const previewVoice = (voice: any) => {
     const { id, provider } = voice;
 
     if (audioElement) {
@@ -352,7 +342,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
           {currentStep === 'identity' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="space-y-2">
                     <Label className="text-base font-semibold">Name</Label>
                     <Input
@@ -365,7 +355,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-base font-semibold">Description</Label>
+                    <Label className="text-base font-semibold">Description (Short)</Label>
                     <Textarea
                       placeholder="A brief summary of who they are..."
                       value={formData.description}
@@ -379,191 +369,202 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex flex-row justify-between items-center mb-2">
-                      <Label className="text-base font-semibold">Core Personality</Label>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 font-medium">{interactiveMode ? "Builder Mode" : "Raw Prompt Mode"}</span>
-                        <Switch
-                          checked={interactiveMode}
-                          onCheckedChange={setInteractiveMode}
-                        />
-                      </div>
-                    </div>
-
-                    {interactiveMode ? (
-                      <div className="bg-gradient-to-br from-blue-50/50 to-purple-50/50 border border-blue-100 rounded-xl p-5 space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                        {/* Basic Info Row */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1.5">
-                            <Label className="text-sm font-medium text-gray-700">Gender</Label>
-                            <Select value={characterAttributes.gender} onValueChange={(val) => handleAttributeChange('gender', val)}>
-                              <SelectTrigger className="bg-white/80 border-gray-200"><SelectValue placeholder="Select" /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Male">Male</SelectItem>
-                                <SelectItem value="Female">Female</SelectItem>
-                                <SelectItem value="Non-binary">Non-binary</SelectItem>
-                                <SelectItem value="Robot/AI">Robot/AI</SelectItem>
-                                <SelectItem value="Other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label className="text-sm font-medium text-gray-700">Age</Label>
-                            <Input
-                              placeholder="e.g. 25, Ancient"
-                              value={characterAttributes.age}
-                              onChange={(e) => handleAttributeChange('age', e.target.value)}
-                              className="bg-white/80 border-gray-200"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Personality Traits Row */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1.5">
-                            <Label className="text-sm font-medium text-gray-700">Maturity</Label>
-                            <Select value={characterAttributes.maturity} onValueChange={(val) => handleAttributeChange('maturity', val)}>
-                              <SelectTrigger className="bg-white/80 border-gray-200"><SelectValue placeholder="Select" /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Childish">Childish</SelectItem>
-                                <SelectItem value="Teenager-like">Teenager-like</SelectItem>
-                                <SelectItem value="Mature">Mature</SelectItem>
-                                <SelectItem value="Wise/Elderly">Wise/Elderly</SelectItem>
-                                <SelectItem value="Reckless">Reckless</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label className="text-sm font-medium text-gray-700">Behaviour</Label>
-                            <Select value={characterAttributes.behaviour} onValueChange={(val) => handleAttributeChange('behaviour', val)}>
-                              <SelectTrigger className="bg-white/80 border-gray-200"><SelectValue placeholder="Select" /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Cheerful">Cheerful</SelectItem>
-                                <SelectItem value="Gloomy">Gloomy</SelectItem>
-                                <SelectItem value="Energetic">Energetic</SelectItem>
-                                <SelectItem value="Lazy">Lazy</SelectItem>
-                                <SelectItem value="Strict">Strict</SelectItem>
-                                <SelectItem value="Friendly">Friendly</SelectItem>
-                                <SelectItem value="Flirty">Flirty</SelectItem>
-                                <SelectItem value="Professional">Professional</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        {/* Location & Job Row */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1.5">
-                            <Label className="text-sm font-medium text-gray-700">Location</Label>
-                            <Input
-                              placeholder="e.g. New York, Mars"
-                              value={characterAttributes.location}
-                              onChange={(e) => handleAttributeChange('location', e.target.value)}
-                              className="bg-white/80 border-gray-200"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label className="text-sm font-medium text-gray-700">Education/Job</Label>
-                            <Input
-                              placeholder="e.g. PhD, Chef"
-                              value={characterAttributes.education}
-                              onChange={(e) => handleAttributeChange('education', e.target.value)}
-                              className="bg-white/80 border-gray-200"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Text Areas */}
-                        <div className="space-y-3">
-                          <div className="space-y-1.5">
-                            <Label className="text-sm font-medium text-gray-700">Backstory</Label>
-                            <Textarea
-                              placeholder="Brief history..."
-                              value={characterAttributes.backstory}
-                              onChange={(e) => handleAttributeChange('backstory', e.target.value)}
-                              className="bg-white/80 border-gray-200 min-h-[60px]"
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                              <Label className="text-sm font-medium text-gray-700">Hobbies</Label>
-                              <Input placeholder="e.g. Gaming, Cooking" value={characterAttributes.hobbies} onChange={e => handleAttributeChange('hobbies', e.target.value)} className="bg-white/80" />
-                            </div>
-                            <div className="space-y-1.5">
-                              <Label className="text-sm font-medium text-gray-700">Relation to User</Label>
-                              <Input placeholder="e.g. Friend, Teacher" value={characterAttributes.relation} onChange={e => handleAttributeChange('relation', e.target.value)} className="bg-white/80" />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                              <Label className="text-sm font-medium text-gray-700">Pet Peeves</Label>
-                              <Input placeholder="e.g. Loud noises" value={characterAttributes.petPeeves} onChange={e => handleAttributeChange('petPeeves', e.target.value)} className="bg-white/80" />
-                            </div>
-                            <div className="space-y-1.5">
-                              <Label className="text-sm font-medium text-gray-700">Flaws</Label>
-                              <Input placeholder="e.g. Clumsy" value={characterAttributes.flaws} onChange={e => handleAttributeChange('flaws', e.target.value)} className="bg-white/80" />
-                            </div>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <Label className="text-sm font-medium text-gray-700">Speaking Style / Language (Critical)</Label>
-                            <Textarea
-                              placeholder="e.g. Uses Gen-Z slang, stutters when nervous, speaks very fast..."
-                              value={characterAttributes.language}
-                              onChange={(e) => handleAttributeChange('language', e.target.value)}
-                              className="bg-white/80 border-gray-200 min-h-[60px]"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <Textarea
-                          placeholder="Detailed instructions on how they should behave, think, and speak..."
-                          value={formData.prompt}
-                          onChange={(e) => handleInputChange('prompt', e.target.value)}
-                          className="min-h-[300px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none font-mono text-sm"
-                        />
-                        <p className="text-xs text-gray-400 italic">Advanced Mode: You are editing the raw system prompt directly.</p>
-                      </>
-                    )}
-
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>{formErrors.prompt && <span className="text-red-500">{formErrors.prompt}</span>}</span>
-                      <span>{formData.prompt.length}/2000</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-base font-semibold">First Message</Label>
-                    <Textarea
-                      placeholder="How they introduce themselves..."
-                      value={formData.firstMessagePrompt}
-                      onChange={(e) => handleInputChange('firstMessagePrompt', e.target.value)}
-                      className="min-h-[80px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none"
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">Avatar Appearance</Label>
+                  <div className="bg-gray-50/50 rounded-2xl p-6 border border-gray-100 h-full min-h-[300px] flex flex-col justify-center">
+                    <ImageGenerator
+                      onImageGenerated={(url) => setCustomImageUrl(url)}
+                      initialPrompt={`${formData.title}. ${formData.description}`}
                     />
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>{formErrors.firstMessagePrompt && <span className="text-red-500">{formErrors.firstMessagePrompt}</span>}</span>
-                      <span>{formData.firstMessagePrompt.length}/150</span>
-                    </div>
                   </div>
                 </div>
               </div>
+            </div>
+          )}
 
+          {currentStep === 'personality' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-amber-600">Core Personality</h2>
+                <p className="text-gray-500 mt-2">Define who they are, deep down.</p>
+              </div>
 
-              {/* Character Appearance Section */}
-              <div className="md:col-span-2 pt-6 border-t border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Character Appearance</h3>
-                {/* Content Area */}
-                <div className="md:col-span-3 bg-gray-50/50 rounded-2xl p-6 border border-gray-100">
-                  <ImageGenerator
-                    onImageGenerated={(url) => setCustomImageUrl(url)}
-                    initialPrompt={`${formData.title}. ${formData.description}`}
+              <div className="flex flex-row justify-end items-center mb-4">
+                <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">
+                  <span className="text-xs text-gray-500 font-medium">{interactiveMode ? "Builder Mode" : "Raw Prompt Mode"}</span>
+                  <Switch
+                    checked={interactiveMode}
+                    onCheckedChange={setInteractiveMode}
                   />
                 </div>
+              </div>
+
+              {interactiveMode ? (
+                <div className="grid grid-cols-1 gap-8">
+                  {/* Gender Selection - Big Cards */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold text-gray-800">Gender Identity</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                      {['Male', 'Female', 'Non-binary', 'Robot/AI', 'Other'].map((g) => (
+                        <div
+                          key={g}
+                          onClick={() => handleAttributeChange('gender', g)}
+                          className={cn(
+                            "cursor-pointer flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200",
+                            characterAttributes.gender === g
+                              ? "border-purple-500 bg-purple-50 text-purple-900 shadow-md"
+                              : "border-gray-100 bg-white hover:border-purple-200 text-gray-600"
+                          )}
+                        >
+                          <span className="text-sm font-medium">{g}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Maturity Slider */}
+                  <div className="space-y-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex justify-between items-center">
+                      <Label className="text-base font-semibold text-gray-800">Maturity Level</Label>
+                      <span className="text-sm font-bold text-purple-600">{characterAttributes.maturity || "Select"}</span>
+                    </div>
+                    <div className="px-2">
+                      <Slider
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={[
+                          characterAttributes.maturity === "Childish" ? 1 :
+                            characterAttributes.maturity === "Teenager-like" ? 2 :
+                              characterAttributes.maturity === "Reckless" ? 3 :
+                                characterAttributes.maturity === "Mature" ? 4 :
+                                  characterAttributes.maturity === "Wise/Elderly" ? 5 : 3
+                        ]}
+                        onValueChange={(val) => {
+                          const map = ["", "Childish", "Teenager-like", "Reckless", "Mature", "Wise/Elderly"];
+                          handleAttributeChange('maturity', map[val[0]]);
+                        }}
+                        className="py-4"
+                      />
+                      <div className="flex justify-between text-xs text-gray-400 font-medium pt-1">
+                        <span>Childish</span>
+                        <span>Teen</span>
+                        <span>Reckless</span>
+                        <span>Mature</span>
+                        <span>Wise</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Behaviour Chips */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold text-gray-800">Core Behaviour</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {['Cheerful', 'Gloomy', 'Energetic', 'Lazy', 'Strict', 'Friendly', 'Flirty', 'Professional', 'Sarcastic', 'Shy', 'Confident'].map((b) => (
+                        <div
+                          key={b}
+                          onClick={() => handleAttributeChange('behaviour', b)}
+                          className={cn(
+                            "cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border",
+                            characterAttributes.behaviour === b
+                              ? "bg-gradient-to-r from-purple-600 to-amber-600 text-white border-transparent shadow-lg scale-105"
+                              : "bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:bg-purple-50"
+                          )}
+                        >
+                          {b}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Grid Inputs for Specifics */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-gray-700">Age</Label>
+                      <Input
+                        value={characterAttributes.age}
+                        onChange={(e) => handleAttributeChange('age', e.target.value)}
+                        placeholder="e.g. 24, Eternal"
+                        className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-gray-700">Education / Occupation</Label>
+                      <Input
+                        value={characterAttributes.education}
+                        onChange={(e) => handleAttributeChange('education', e.target.value)}
+                        placeholder="e.g. High School, Doctor"
+                        className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-gray-700">Location</Label>
+                      <Input
+                        value={characterAttributes.location}
+                        onChange={(e) => handleAttributeChange('location', e.target.value)}
+                        placeholder="e.g. Tokyo, Digital Void"
+                        className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-gray-700">Relationship to User</Label>
+                      <Input
+                        value={characterAttributes.relation}
+                        onChange={(e) => handleAttributeChange('relation', e.target.value)}
+                        placeholder="e.g. Best Friend, Rival"
+                        className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Hobbies & Backstory - Detailed Cards */}
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+                      <Label className="text-sm font-semibold text-gray-700">Hobbies & Interests</Label>
+                      <Input
+                        value={characterAttributes.hobbies}
+                        onChange={(e) => handleAttributeChange('hobbies', e.target.value)}
+                        placeholder="What do they do for fun?"
+                        className="border-0 bg-gray-50 focus:ring-0 rounded-xl px-0"
+                      />
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+                      <Label className="text-sm font-semibold text-gray-700">Backstory</Label>
+                      <Textarea
+                        value={characterAttributes.backstory}
+                        onChange={(e) => handleAttributeChange('backstory', e.target.value)}
+                        placeholder="Where did they come from? What defines their past?"
+                        className="border-0 bg-gray-50 focus:ring-0 rounded-xl resize-none min-h-[60px] px-0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-gray-700">Pet Peeves</Label>
+                      <Input value={characterAttributes.petPeeves} onChange={(e) => handleAttributeChange('petPeeves', e.target.value)} className="bg-white/50" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-gray-700">Flaws</Label>
+                      <Input value={characterAttributes.flaws} onChange={(e) => handleAttributeChange('flaws', e.target.value)} className="bg-white/50" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Textarea
+                    placeholder="Detailed instructions on how they should behave, think, and speak..."
+                    value={formData.prompt}
+                    onChange={(e) => handleInputChange('prompt', e.target.value)}
+                    className="min-h-[400px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none font-mono text-sm"
+                  />
+                  <p className="text-xs text-gray-400 italic mt-2">Advanced Mode: You are editing the raw system prompt directly.</p>
+                </>
+              )}
+
+              <div className="flex justify-between text-xs text-gray-500 mt-4">
+                <span>{formErrors.prompt && <span className="text-red-500">{formErrors.prompt}</span>}</span>
+                <span>{formData.prompt.length}/2000</span>
               </div>
             </div>
           )}
@@ -572,7 +573,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <h2 className="text-3xl font-bold text-gray-900 tracking-tight ml-2">Select Your Voice Companion</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {[...openaiVoices, ...geminiVoices].map((voice: VoiceType) => {
+                {[...openaiVoices, ...geminiVoices].map((voice: any) => {
                   const isSelected = formData.voice === voice.id;
                   const isPlaying = previewingVoice === voice.id;
 
@@ -581,31 +582,8 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                       key={voice.name}
                       onClick={() => {
                         setFormData(prev => ({ ...prev, provider: voice.provider as ModelProvider, voice: voice.id }));
-                        // For Gemini, use the name (display name) for audio lookup since we renamed the files.
-                        // For OpenAI, use the id.
                         const audioSrc = voice.provider === 'gemini' ? voice.name : voice.id;
-                        if (voice.provider === 'openai') {
-                          if (audioElement) {
-                            audioElement.pause();
-                            audioElement.currentTime = 0;
-                          }
-                          const audio = new Audio(`${r2UrlAudio}/${voice.id}.wav`);
-                          setPreviewingVoice(voice.id);
-                          setAudioElement(audio);
-                          audio.play().catch(() => setPreviewingVoice(null));
-                          audio.onended = () => setPreviewingVoice(null);
-                        } else {
-                          // Gemini local preview logic
-                          if (audioElement) {
-                            audioElement.pause();
-                            audioElement.currentTime = 0;
-                          }
-                          const audio = new Audio(`/Voices/${voice.name}.wav`);
-                          setPreviewingVoice(voice.id);
-                          setAudioElement(audio);
-                          audio.play().catch(() => setPreviewingVoice(null));
-                          audio.onended = () => setPreviewingVoice(null);
-                        }
+                        previewVoice(voice);
                       }}
                       className={cn(
                         "relative group cursor-pointer rounded-[24px] p-5 transition-all duration-300 overflow-hidden aspect-square flex flex-col items-center justify-center",
@@ -767,16 +745,32 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-base font-semibold">Voice Characteristics</Label>
+                {/* Speaking Style moved here */}
+                <div className="space-y-2 pt-6 border-t border-gray-100">
+                  <Label className="text-base font-semibold">Speaking Style / Language (Critical)</Label>
+                  <p className="text-sm text-gray-500 mb-2">How do they sound? Use this to add accent, slang, or speech impediments.</p>
                   <Textarea
-                    placeholder="e.g. Speaks slowly with a calm demeanor..."
-                    value={formData.voiceCharacteristics.features}
-                    onChange={(e) => handleVoiceCharacteristicChange('features', e.target.value)}
-                    className="min-h-[100px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none"
+                    placeholder="e.g. Uses Gen-Z slang, stutters when nervous, speaks very fast..."
+                    value={characterAttributes.language}
+                    onChange={(e) => handleAttributeChange('language', e.target.value)}
+                    className="bg-white/80 border-gray-200 min-h-[80px]"
                   />
-                  {formErrors.features && <p className="text-red-500 text-sm">{formErrors.features}</p>}
                 </div>
+
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">First Message</Label>
+                  <Textarea
+                    placeholder="How they introduce themselves..."
+                    value={formData.firstMessagePrompt}
+                    onChange={(e) => handleInputChange('firstMessagePrompt', e.target.value)}
+                    className="min-h-[80px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>{formErrors.firstMessagePrompt && <span className="text-red-500">{formErrors.firstMessagePrompt}</span>}</span>
+                    <span>{formData.firstMessagePrompt.length}/150</span>
+                  </div>
+                </div>
+
               </div>
             </div>
           )}
@@ -823,7 +817,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
         }}
         voiceCloneModalProps={showVoiceCloneModal!}
       />
-    </div >
+    </div>
   );
 };
 
