@@ -2,7 +2,7 @@ import { createUser, doesUserExist, getUserById } from "@/db/users";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import Playground from "../components/Playground/PlaygroundComponent";
-import { defaultPersonalityId, defaultToyId } from "@/lib/data";
+import { defaultPersonalityId, defaultToyId, HIDDEN_PERSONALITIES } from "@/lib/data";
 import { getAllPersonalities, getMyPersonalities } from "@/db/personalities";
 
 
@@ -41,7 +41,9 @@ export default async function Home() {
         redirect("/onboard");
     }
 
-    const allPersonalities = await getAllPersonalities(supabase);
+    const rawPersonalities = await getAllPersonalities(supabase);
+    // Filter out hidden personalities
+    const allPersonalities = rawPersonalities.filter(p => !HIDDEN_PERSONALITIES.includes(p.title));
     const myPersonalities = await getMyPersonalities(supabase, user?.id ?? "");
 
     return (
