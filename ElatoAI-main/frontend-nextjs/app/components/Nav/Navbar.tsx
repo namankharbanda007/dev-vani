@@ -14,7 +14,8 @@ export function Navbar({
     const [isVisible, setIsVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
     const isMobile = useMediaQuery("(max-width: 768px)");
-    const isHome = usePathname().includes("/home");
+    const pathname = usePathname();
+    const isHome = pathname.includes("/home") || pathname.includes("/bhajan");
     const isProduct = usePathname().includes("/products");
 
     useEffect(() => {
