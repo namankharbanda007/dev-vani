@@ -303,17 +303,39 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
             const isCompleted = steps.findIndex(s => s.id === currentStep) > idx;
             const Icon = step.icon;
 
+            // Determine color based on step ID
+            const activeColorClass =
+              step.id === 'identity' ? "bg-cyan-600 text-white shadow-lg scale-110" :
+                step.id === 'personality' ? "bg-purple-600 text-white shadow-lg scale-110" :
+                  step.id === 'voice' ? "bg-amber-600 text-white shadow-lg scale-110" :
+                    step.id === 'refine' ? "bg-green-600 text-white shadow-lg scale-110" : "bg-purple-600 text-white";
+
+            const activeTextClass =
+              step.id === 'identity' ? "text-cyan-900" :
+                step.id === 'personality' ? "text-purple-900" :
+                  step.id === 'voice' ? "text-amber-900" :
+                    step.id === 'refine' ? "text-green-900" : "text-purple-900";
+
+            // Completed color logic - maybe all green, or match their specific theme?
+            // Let's match specific theme for completed as well for a vibrant look
+            const completedColorClass =
+              step.id === 'identity' ? "bg-cyan-500 text-white" :
+                step.id === 'personality' ? "bg-purple-500 text-white" :
+                  step.id === 'voice' ? "bg-amber-500 text-white" :
+                    step.id === 'refine' ? "bg-green-500 text-white" : "bg-green-500 text-white";
+
+
             return (
               <div key={step.id} className="flex items-center gap-3">
                 <div className={cn(
                   "flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300",
-                  isActive ? "bg-purple-600 text-white shadow-lg scale-110" :
-                    isCompleted ? "bg-green-500 text-white" : "bg-gray-100 text-gray-400"
+                  isActive ? activeColorClass :
+                    isCompleted ? completedColorClass : "bg-gray-100 text-gray-400"
                 )}>
                   {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                 </div>
                 <div className="hidden md:block">
-                  <p className={cn("font-semibold text-sm", isActive ? "text-purple-900" : "text-gray-500")}>
+                  <p className={cn("font-semibold text-sm", isActive ? activeTextClass : "text-gray-500")}>
                     {step.title}
                   </p>
                   <p className="text-xs text-gray-400">{step.description}</p>
@@ -394,6 +416,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                         <ImageUpload
                           onImageSelected={(url) => setCustomImageUrl(url)}
                           currentImage={customImageUrl}
+                          theme="cyan"
                         />
                       </div>
                     </TabsContent>
@@ -499,14 +522,31 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
 
               {/* Grid Inputs for Specifics */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-purple-900">Age</Label>
-                  <Input
-                    value={characterAttributes.age}
-                    onChange={(e) => handleAttributeChange('age', e.target.value)}
-                    placeholder="e.g. 24, Eternal"
-                    className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
+                <div className="space-y-4 bg-white/60 p-6 rounded-2xl border-2 border-purple-100 shadow-sm relative">
+                  <div className="flex justify-between items-center mb-2">
+                    <Label className="text-base font-semibold text-purple-900">Age</Label>
+                    <span className="text-sm font-bold text-purple-600 bg-purple-100 px-3 py-1 rounded-full">
+                      {characterAttributes.age ? (isNaN(Number(characterAttributes.age)) ? characterAttributes.age :
+                        Number(characterAttributes.age) <= 2 ? "Infant" :
+                          Number(characterAttributes.age) <= 12 ? "Child" :
+                            Number(characterAttributes.age) <= 24 ? "Gen-Z" :
+                              Number(characterAttributes.age) <= 40 ? "Millennial" :
+                                Number(characterAttributes.age) <= 60 ? "Gen-X" : "Ancient"
+                      ) : "Select"} ({characterAttributes.age || 0})
+                    </span>
+                  </div>
+                  <Slider
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[Number(characterAttributes.age) || 24]}
+                    onValueChange={(val) => handleAttributeChange('age', val[0].toString())}
+                    className="py-4"
                   />
+                  <div className="flex justify-between text-xs text-purple-400 font-medium px-1">
+                    <span>0</span>
+                    <span>100</span>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold text-purple-900">Education / Occupation</Label>
@@ -539,13 +579,40 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
 
               {/* Hobbies & Backstory - Detailed Cards */}
               <div className="grid grid-cols-1 gap-4">
-                <div className="bg-white/80 p-5 rounded-2xl border-2 border-purple-100 shadow-sm space-y-3">
+                <div className="bg-white/80 p-5 rounded-2xl border-2 border-purple-100 shadow-sm space-y-4">
                   <Label className="text-sm font-semibold text-purple-900">Hobbies & Interests</Label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {['🎮 Gaming', '📚 Reading', '🎨 Art', '🎵 Music', '💻 Tech', '⚽ Sports', '🍳 Cooking', '✈️ Travel', '🐸 Meme Lord', '💼 Workaholic'].map((hobby) => (
+                      <button
+                        key={hobby}
+                        onClick={() => {
+                          const current = characterAttributes.hobbies || "";
+                          const hobbyText = hobby.split(' ')[1]; // Extract just the word if needed, or keep emoji. Let's keep full.
+                          // Actually user might want just comma separated values to prompt.
+                          // Let's toggle presence in string.
+                          const parts = current.split(',').map(s => s.trim()).filter(Boolean);
+                          if (parts.includes(hobby)) {
+                            handleAttributeChange('hobbies', parts.filter(p => p !== hobby).join(', '));
+                          } else {
+                            handleAttributeChange('hobbies', [...parts, hobby].join(', '));
+                          }
+                        }}
+                        className={cn(
+                          "px-3 py-1.5 rounded-full text-sm font-medium border transition-all",
+                          (characterAttributes.hobbies || "").includes(hobby)
+                            ? "bg-purple-100 text-purple-700 border-purple-300"
+                            : "bg-white text-gray-600 border-gray-200 hover:border-purple-200"
+                        )}
+                      >
+                        {hobby}
+                      </button>
+                    ))}
+                  </div>
                   <Input
                     value={characterAttributes.hobbies}
                     onChange={(e) => handleAttributeChange('hobbies', e.target.value)}
-                    placeholder="What do they do for fun?"
-                    className="border-0 bg-transparent focus:ring-0 px-0 text-base placeholder:text-gray-400"
+                    placeholder="Add specific hobbies..."
+                    className="bg-transparent border-0 border-b-2 border-purple-100 rounded-none focus:ring-0 px-0 text-base placeholder:text-gray-400 focus:border-purple-400"
                   />
                 </div>
                 <div className="bg-white/80 p-5 rounded-2xl border-2 border-purple-100 shadow-sm space-y-3">
@@ -664,49 +731,10 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
             </div>
             {formErrors.voice && <p className="text-red-500 text-center">{formErrors.voice}</p>}
 
-            {/* Advanced Voice Options */}
-            <div className="pt-8 border-t border-gray-100">
+            {/* <div className="pt-8 border-t border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Advanced Voice Options</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                <div
-                  onClick={() => setShowVoiceCloneModal({
-                    provider: "elevenlabs",
-                    title: "Eleven Labs Voice Clone",
-                    voiceInputLabel: "Voice ID",
-                    voiceInputPlaceholder: "Enter Eleven Labs Voice ID",
-                    voiceDescription: "Enter the Voice ID from your Eleven Labs dashboard."
-                  })}
-                  className="cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-white hover:to-purple-50 border border-gray-200 hover:border-purple-200 rounded-2xl p-4 flex items-center gap-4 transition-all hover:shadow-md group"
-                >
-                  <div className="bg-white p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                    <span className="text-2xl">🧪</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">Eleven Labs</h4>
-                    <p className="text-xs text-gray-500">Clone a voice using Eleven Labs ID</p>
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => setShowVoiceCloneModal({
-                    provider: "hume",
-                    title: "Hume Voice Clone",
-                    voiceInputLabel: "Hume Config ID",
-                    voiceInputPlaceholder: "Enter Hume Config ID",
-                    voiceDescription: "Enter the Config ID from your Hume dashboard."
-                  })}
-                  className="cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-white hover:to-amber-50 border border-gray-200 hover:border-amber-200 rounded-2xl p-4 flex items-center gap-4 transition-all hover:shadow-md group"
-                >
-                  <div className="bg-white p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                    <span className="text-2xl">🎭</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">Hume AI</h4>
-                    <p className="text-xs text-gray-500">Use advanced emotional voices</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+               ... Hidden per user request ...
+            </div> */}
 
             <div className="flex justify-center pt-4">
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-2xl flex items-start gap-3">

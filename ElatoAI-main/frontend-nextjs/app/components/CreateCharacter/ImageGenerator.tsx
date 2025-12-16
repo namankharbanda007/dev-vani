@@ -80,7 +80,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated, initi
     return (
         <div className="space-y-4 w-full h-full flex flex-col items-center justify-center">
             {previewUrl ? (
-                <div className="relative group w-full h-64 rounded-xl overflow-hidden shadow-sm border-2 border-purple-100">
+                <div className="relative group w-full h-64 rounded-xl overflow-hidden shadow-sm border-2 border-cyan-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={previewUrl} alt="Generated" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -96,8 +96,8 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated, initi
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center text-center p-6 space-y-4 bg-purple-50 rounded-2xl border border-purple-100 w-full h-64">
-                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+                <div className="flex flex-col items-center justify-center text-center p-6 space-y-4 bg-cyan-50/50 rounded-2xl border border-cyan-100 w-full h-64">
+                    <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center text-cyan-600">
                         <Sparkles className="h-8 w-8" />
                     </div>
                     <div className="space-y-1">
@@ -109,7 +109,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated, initi
                     <Button
                         onClick={handleGenerate}
                         disabled={isGenerating || !prompt}
-                        className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md rounded-full px-6"
+                        className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md rounded-full px-6"
                     >
                         {isGenerating ? (
                             <>

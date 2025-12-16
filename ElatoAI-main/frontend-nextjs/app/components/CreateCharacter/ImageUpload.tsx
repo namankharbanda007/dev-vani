@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
 
 interface ImageUploadProps {
     onImageSelected: (url: string) => void;
     currentImage?: string | null;
+    theme?: 'purple' | 'cyan';
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected, currentImage }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected, currentImage, theme = 'purple' }) => {
     const [isUploading, setIsUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(currentImage || null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,10 +73,30 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected, currentImage
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
+    const themeStyles = {
+        purple: {
+            border: "hover:border-purple-500 hover:bg-purple-50",
+            iconBg: "bg-purple-100",
+            iconColor: "text-purple-600",
+            text: "text-purple-600"
+        },
+        cyan: {
+            border: "hover:border-cyan-500 hover:bg-cyan-50",
+            iconBg: "bg-cyan-100",
+            iconColor: "text-cyan-600",
+            text: "text-cyan-600"
+        }
+    };
+
+    const currentTheme = themeStyles[theme || 'purple'];
+
     return (
         <div className="space-y-4">
             <div
-                className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-colors h-64 relative"
+                className={cn(
+                    "border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors h-64 relative",
+                    currentTheme.border
+                )}
                 onClick={() => fileInputRef.current?.click()}
             >
                 {previewUrl ? (
@@ -95,8 +117,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected, currentImage
                     </div>
                 ) : (
                     <>
-                        <div className="bg-purple-100 p-4 rounded-full mb-3">
-                            <Upload className="w-8 h-8 text-purple-600" />
+                        <div className={cn("p-4 rounded-full mb-3", currentTheme.iconBg)}>
+                            <Upload className={cn("w-8 h-8", currentTheme.iconColor)} />
                         </div>
                         <p className="text-sm font-medium text-gray-700">Click to upload an image</p>
                         <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
@@ -110,7 +132,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected, currentImage
                     className="hidden"
                 />
             </div>
-            {isUploading && <p className="text-xs text-center text-purple-600 animate-pulse">Uploading...</p>}
+            {isUploading && <p className={cn("text-xs text-center animate-pulse", currentTheme.text)}>Uploading...</p>}
         </div>
     );
 };
