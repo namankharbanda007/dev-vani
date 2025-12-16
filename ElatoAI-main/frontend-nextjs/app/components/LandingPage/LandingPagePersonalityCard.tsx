@@ -19,11 +19,11 @@ const LandingPagePersonalityCard = ({
             className={cn(
                 "p-0 rounded-full cursor-pointer sm:min-w-[180px] min-w-[120px] border-none shadow-none bg-transparent transition-all hover:scale-103 flex flex-col"
             )}
-            // onClick={() => onPersonalityPicked(personality)}
+        // onClick={() => onPersonalityPicked(personality)}
         >
             <CardContent className="flex-shrink-0 p-0 sm:h-[180px] h-[120px]">
                 <Image
-                    src={getPersonalityImageSrc(personality.key)}
+                    src={personality.subtitle && personality.subtitle.startsWith('http') ? personality.subtitle : getPersonalityImageSrc(personality.key)}
                     alt={personality.key}
                     width={180}
                     height={140}

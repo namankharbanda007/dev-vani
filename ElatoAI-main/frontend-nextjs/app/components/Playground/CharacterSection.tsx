@@ -115,7 +115,14 @@ const CharacterSection = ({
                                     >
                                         {/* Card Content */}
                                         <div className="relative aspect-[4/5] w-full overflow-hidden">
-                                            {personality.creator_id === null ? (
+                                            {personality.subtitle && personality.subtitle.startsWith('http') ? (
+                                                <Image
+                                                    src={personality.subtitle}
+                                                    alt={personality.title}
+                                                    fill
+                                                    className="object-cover transform transition-transform duration-300 group-hover:scale-110"
+                                                />
+                                            ) : personality.creator_id === null ? (
                                                 <Image
                                                     src={getPersonalityImageSrc(personality.key)}
                                                     alt={personality.key}
@@ -124,18 +131,9 @@ const CharacterSection = ({
                                                 />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full bg-gradient-to-br from-purple-100 to-amber-100 relative">
-                                                    {personality.subtitle && personality.subtitle.startsWith('http') ? (
-                                                        <Image
-                                                            src={personality.subtitle}
-                                                            alt={personality.title}
-                                                            fill
-                                                            className="object-cover transform transition-transform duration-300 group-hover:scale-110"
-                                                        />
-                                                    ) : (
-                                                        <div className="transform transition-transform duration-300 group-hover:scale-110">
-                                                            <EmojiComponent personality={personality} />
-                                                        </div>
-                                                    )}
+                                                    <div className="transform transition-transform duration-300 group-hover:scale-110">
+                                                        <EmojiComponent personality={personality} />
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -169,6 +167,7 @@ const CharacterSection = ({
                                             </div>
                                         </div>
                                     </div>
+
                                 </ModifyCharacterSheet>
 
                                 {/* Edit Image Button (Outside Sheet Trigger) */}
@@ -190,7 +189,7 @@ const CharacterSection = ({
                         );
                     })}
                 </div>
-            </div>
+            </div >
 
             <Dialog open={!!editingPersonality} onOpenChange={(open) => !open && setEditingPersonality(null)}>
                 <DialogContent className="sm:max-w-md">
@@ -212,7 +211,7 @@ const CharacterSection = ({
                     </div>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     );
 };
 
