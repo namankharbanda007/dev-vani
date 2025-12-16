@@ -106,7 +106,7 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
         return (
             <div className="container mx-auto p-4 max-w-4xl">
                 <div className="flex flex-col items-center gap-6">
-                    {isPersonalCharacter && openPersonality.subtitle && openPersonality.subtitle.startsWith('http') ? (
+                    {openPersonality.subtitle && openPersonality.subtitle.startsWith('http') ? (
                         <div className="relative w-full h-[300px] sm:h-[400px]">
                             <Image
                                 src={openPersonality.subtitle}
