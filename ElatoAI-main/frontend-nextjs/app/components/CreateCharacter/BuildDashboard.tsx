@@ -326,33 +326,46 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
         </div>
       </div>
 
-      {/* Content Card */}
-      <div className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-2xl rounded-3xl p-6 md:p-10 flex-1 flex flex-col">
-        <div className="flex-1">
+      {/* Content Card - Removing the single card wrapper to allow individual colored steps */}
+      <div className="flex-1 flex flex-col">
           {currentStep === 'identity' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-6 md:p-10 border-2 border-cyan-100 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <div className="flex flex-col md:flex-row gap-6 items-start mb-8">
+                  <div className="flex-shrink-0">
+                      <div className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg">
+                          1
+                      </div>
+                  </div>
+                  <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Identity & Appearance</h3>
+                      <p className="text-gray-700 leading-relaxed">
+                          Give your friend a name and a face.
+                      </p>
+                  </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <Label className="text-base font-semibold">Name</Label>
+                    <Label className="text-base font-semibold text-cyan-900">Name</Label>
                     <Input
                       placeholder="e.g. Arya, The Wise Sage"
                       value={formData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
-                      className="h-12 text-lg bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl"
+                      className="h-12 text-lg bg-white border-2 border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500/20 rounded-xl"
                     />
                     {formErrors.title && <p className="text-red-500 text-sm">{formErrors.title}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-base font-semibold">Description (Short)</Label>
+                    <Label className="text-base font-semibold text-cyan-900">Description (Short)</Label>
                     <Textarea
                       placeholder="A brief summary of who they are..."
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}
-                      className="min-h-[120px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none"
+                      className="min-h-[120px] bg-white border-2 border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500/20 rounded-xl resize-none"
                     />
-                    <div className="flex justify-between text-xs text-gray-500">
+                    <div className="flex justify-between text-xs text-cyan-700 font-medium">
                       <span>{formErrors.description && <span className="text-red-500">{formErrors.description}</span>}</span>
                       <span>{formData.description.length}/200</span>
                     </div>
@@ -360,8 +373,8 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-base font-semibold">Avatar Appearance</Label>
-                  <div className="bg-gray-50/50 rounded-2xl p-6 border border-gray-100 h-full min-h-[300px] flex flex-col justify-center">
+                  <Label className="text-base font-semibold text-cyan-900">Avatar Appearance</Label>
+                  <div className="bg-white/50 rounded-2xl p-6 border-2 border-cyan-100 h-full min-h-[300px] flex flex-col justify-center">
                     <ImageGenerator
                       onImageGenerated={(url) => setCustomImageUrl(url)}
                       initialPrompt={`${formData.title}. ${formData.description}`}
@@ -373,39 +386,47 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
           )}
 
           {currentStep === 'personality' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-amber-600">Core Personality</h2>
-                <p className="text-gray-500 mt-2">Define who they are, deep down.</p>
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 md:p-10 border-2 border-purple-100 shadow-xl animate-in fade-in slide-in-from-right-8 duration-500">
+              <div className="flex flex-col md:flex-row gap-6 items-start mb-8">
+                  <div className="flex-shrink-0">
+                      <div className="bg-gradient-to-br from-purple-500 to-pink-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg">
+                          2
+                      </div>
+                  </div>
+                  <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Core Personality</h3>
+                      <p className="text-gray-700 leading-relaxed">
+                          Define who they are, deep down.
+                      </p>
+                  </div>
               </div>
-
 
               <div className="grid grid-cols-1 gap-8">
                 {/* Gender Selection - Big Cards */}
                 <div className="space-y-3">
-                  <Label className="text-base font-semibold text-gray-800">Gender Identity</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                    {['Male', 'Female', 'Non-binary', 'Robot/AI', 'Other'].map((g) => (
+                  <Label className="text-base font-semibold text-purple-900">Gender Identity</Label>
+                  <div className="grid grid-cols-2 gap-4 max-w-lg">
+                    {['Male', 'Female'].map((g) => (
                       <div
                         key={g}
                         onClick={() => handleAttributeChange('gender', g)}
                         className={cn(
-                          "cursor-pointer flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200",
+                          "cursor-pointer flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all duration-200",
                           characterAttributes.gender === g
-                            ? "border-purple-500 bg-purple-50 text-purple-900 shadow-md"
-                            : "border-gray-100 bg-white hover:border-purple-200 text-gray-600"
+                            ? "border-purple-500 bg-purple-100 text-purple-900 shadow-md scale-105"
+                            : "border-purple-100 bg-white/80 hover:border-purple-300 text-gray-600 hover:bg-purple-50"
                         )}
                       >
-                        <span className="text-sm font-medium">{g}</span>
+                        <span className="text-lg font-bold">{g}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Maturity Slider */}
-                <div className="space-y-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="space-y-4 bg-white/60 p-6 rounded-2xl border-2 border-purple-100 shadow-sm">
                   <div className="flex justify-between items-center">
-                    <Label className="text-base font-semibold text-gray-800">Maturity Level</Label>
+                    <Label className="text-base font-semibold text-purple-900">Maturity Level</Label>
                     <span className="text-sm font-bold text-purple-600">{characterAttributes.maturity || "Select"}</span>
                   </div>
                   <div className="px-2">
@@ -426,7 +447,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                       }}
                       className="py-4"
                     />
-                    <div className="flex justify-between text-xs text-gray-400 font-medium pt-1">
+                    <div className="flex justify-between text-xs text-purple-700 font-medium pt-1">
                       <span>Childish</span>
                       <span>Teen</span>
                       <span>Reckless</span>
@@ -438,7 +459,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
 
                 {/* Behaviour Chips */}
                 <div className="space-y-3">
-                  <Label className="text-base font-semibold text-gray-800">Core Behaviour</Label>
+                  <Label className="text-base font-semibold text-purple-900">Core Behaviour</Label>
                   <div className="flex flex-wrap gap-2">
                     {['Cheerful', 'Gloomy', 'Energetic', 'Lazy', 'Strict', 'Friendly', 'Flirty', 'Professional', 'Sarcastic', 'Shy', 'Confident'].map((b) => (
                       <div
@@ -447,8 +468,8 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                         className={cn(
                           "cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border",
                           characterAttributes.behaviour === b
-                            ? "bg-gradient-to-r from-purple-600 to-amber-600 text-white border-transparent shadow-lg scale-105"
-                            : "bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:bg-purple-50"
+                            ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent shadow-lg scale-105"
+                            : "bg-white text-gray-600 border-purple-100 hover:border-purple-300 hover:bg-purple-50"
                         )}
                       >
                         {b}
@@ -460,73 +481,73 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                 {/* Grid Inputs for Specifics */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Age</Label>
+                    <Label className="text-sm font-semibold text-purple-900">Age</Label>
                     <Input
                       value={characterAttributes.age}
                       onChange={(e) => handleAttributeChange('age', e.target.value)}
                       placeholder="e.g. 24, Eternal"
-                      className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                      className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Education / Occupation</Label>
+                    <Label className="text-sm font-semibold text-purple-900">Education / Occupation</Label>
                     <Input
                       value={characterAttributes.education}
                       onChange={(e) => handleAttributeChange('education', e.target.value)}
                       placeholder="e.g. High School, Doctor"
-                      className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                      className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Location</Label>
+                    <Label className="text-sm font-semibold text-purple-900">Location</Label>
                     <Input
                       value={characterAttributes.location}
                       onChange={(e) => handleAttributeChange('location', e.target.value)}
                       placeholder="e.g. Tokyo, Digital Void"
-                      className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                      className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Relationship to User</Label>
+                    <Label className="text-sm font-semibold text-purple-900">Relationship to User</Label>
                     <Input
                       value={characterAttributes.relation}
                       onChange={(e) => handleAttributeChange('relation', e.target.value)}
                       placeholder="e.g. Best Friend, Rival"
-                      className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                      className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
                     />
                   </div>
                 </div>
 
                 {/* Hobbies & Backstory - Detailed Cards */}
                 <div className="grid grid-cols-1 gap-4">
-                  <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                    <Label className="text-sm font-semibold text-gray-700">Hobbies & Interests</Label>
+                  <div className="bg-white/80 p-5 rounded-2xl border-2 border-purple-100 shadow-sm space-y-3">
+                    <Label className="text-sm font-semibold text-purple-900">Hobbies & Interests</Label>
                     <Input
                       value={characterAttributes.hobbies}
                       onChange={(e) => handleAttributeChange('hobbies', e.target.value)}
                       placeholder="What do they do for fun?"
-                      className="border-0 bg-gray-50 focus:ring-0 rounded-xl px-0"
+                      className="border-0 bg-transparent focus:ring-0 px-0 text-base placeholder:text-gray-400"
                     />
                   </div>
-                  <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                    <Label className="text-sm font-semibold text-gray-700">Backstory</Label>
+                  <div className="bg-white/80 p-5 rounded-2xl border-2 border-purple-100 shadow-sm space-y-3">
+                    <Label className="text-sm font-semibold text-purple-900">Backstory</Label>
                     <Textarea
                       value={characterAttributes.backstory}
                       onChange={(e) => handleAttributeChange('backstory', e.target.value)}
                       placeholder="Where did they come from? What defines their past?"
-                      className="border-0 bg-gray-50 focus:ring-0 rounded-xl resize-none min-h-[60px] px-0"
+                      className="border-0 bg-transparent focus:ring-0 resize-none min-h-[80px] px-0 text-base placeholder:text-gray-400"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Pet Peeves</Label>
-                    <Input value={characterAttributes.petPeeves} onChange={(e) => handleAttributeChange('petPeeves', e.target.value)} className="bg-white/50" />
+                    <Label className="text-sm font-semibold text-purple-900">Pet Peeves</Label>
+                    <Input value={characterAttributes.petPeeves} onChange={(e) => handleAttributeChange('petPeeves', e.target.value)} className="bg-white/80 border-2 border-purple-100 rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Flaws</Label>
-                    <Input value={characterAttributes.flaws} onChange={(e) => handleAttributeChange('flaws', e.target.value)} className="bg-white/50" />
+                    <Label className="text-sm font-semibold text-purple-900">Flaws</Label>
+                    <Input value={characterAttributes.flaws} onChange={(e) => handleAttributeChange('flaws', e.target.value)} className="bg-white/80 border-2 border-purple-100 rounded-xl" />
                   </div>
                 </div>
               </div>
@@ -537,8 +558,21 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
           )}
 
           {currentStep === 'voice' && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight ml-2">Select Your Voice Companion</h2>
+            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl p-6 md:p-10 border-2 border-amber-100 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex flex-col md:flex-row gap-6 items-start mb-8">
+                  <div className="flex-shrink-0">
+                      <div className="bg-gradient-to-br from-amber-500 to-yellow-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg">
+                          3
+                      </div>
+                  </div>
+                  <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Select Your Voice Companion</h3>
+                      <p className="text-gray-700 leading-relaxed">
+                          Choose a voice that resonates with you.
+                      </p>
+                  </div>
+              </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {[...openaiVoices, ...geminiVoices].map((voice: any) => {
                   const isSelected = formData.voice === voice.id;
@@ -556,7 +590,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                         "relative group cursor-pointer rounded-[24px] p-5 transition-all duration-300 overflow-hidden aspect-square flex flex-col items-center justify-center",
                         "shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]",
                         isSelected
-                          ? "ring-4 ring-white shadow-2xl scale-[1.02]"
+                          ? "ring-4 ring-amber-400 shadow-2xl scale-[1.02]"
                           : "hover:scale-[1.02]"
                       )}
                       style={{ background: voice.color }}
@@ -668,73 +702,92 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
           )}
 
           {currentStep === 'refine' && (
-            <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-white/50 rounded-2xl p-6 space-y-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <Label className="text-base font-semibold">Voice Pitch</Label>
-                    <span className="text-sm text-purple-600 font-medium">
-                      {PitchFactors.find(p => p.value === formData.voiceCharacteristics.pitchFactor)?.label || 'Normal'}
-                    </span>
-                  </div>
-                  <Slider
-                    min={0.75}
-                    max={1.5}
-                    step={0.25}
-                    value={[formData.voiceCharacteristics.pitchFactor]}
-                    onValueChange={(val) => handleVoiceCharacteristicChange('pitchFactor', val[0])}
-                    className="py-4"
-                  />
-                  <div className="flex justify-between text-xs text-gray-400 px-1">
-                    <span>Deep</span>
-                    <span>High</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Label className="text-base font-semibold">Emotional Tone</Label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {emotionOptions.map((emotion) => (
-                      <div
-                        key={emotion.value}
-                        onClick={() => handleVoiceCharacteristicChange('emotion', emotion.value)}
-                        className={cn(
-                          "cursor-pointer rounded-xl border-2 p-3 transition-all text-center",
-                          formData.voiceCharacteristics.emotion === emotion.value
-                            ? "border-purple-500 bg-purple-50 text-purple-900"
-                            : "border-transparent bg-white hover:border-gray-200"
-                        )}
-                      >
-                        <div className="text-2xl mb-1"><EmojiComponent emoji={emotion.icon} /></div>
-                        <span className="text-sm font-medium">{emotion.label}</span>
+            <div className="bg-gradient-to-br from-green-50 to-teal-50 rounded-2xl p-6 md:p-10 border-2 border-green-100 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <div className="flex flex-col md:flex-row gap-6 items-start mb-8">
+                  <div className="flex-shrink-0">
+                      <div className="bg-gradient-to-br from-green-500 to-teal-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg">
+                          4
                       </div>
-                    ))}
+                  </div>
+                  <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Refine & Tune</h3>
+                      <p className="text-gray-700 leading-relaxed">
+                          Fine-tune the voice and speaking style.
+                      </p>
+                  </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-8">
+                <div className="bg-white/60 rounded-2xl p-6 border-2 border-green-100 space-y-6 shadow-sm">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <Label className="text-base font-semibold text-green-900">Voice Pitch</Label>
+                      <span className="text-sm text-green-700 font-medium">
+                        {PitchFactors.find(p => p.value === formData.voiceCharacteristics.pitchFactor)?.label || 'Normal'}
+                      </span>
+                    </div>
+                    <Slider
+                      min={0.75}
+                      max={1.5}
+                      step={0.25}
+                      value={[formData.voiceCharacteristics.pitchFactor]}
+                      onValueChange={(val) => handleVoiceCharacteristicChange('pitchFactor', val[0])}
+                      className="py-4"
+                    />
+                    <div className="flex justify-between text-xs text-green-700 px-1">
+                      <span>Deep</span>
+                      <span>High</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold text-green-900">Emotional Tone</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {emotionOptions.map((emotion) => (
+                        <div
+                          key={emotion.value}
+                          onClick={() => handleVoiceCharacteristicChange('emotion', emotion.value)}
+                          className={cn(
+                            "cursor-pointer rounded-xl border-2 p-3 transition-all text-center",
+                            formData.voiceCharacteristics.emotion === emotion.value
+                              ? "border-green-500 bg-green-50 text-green-900 scale-105 shadow-sm"
+                              : "border-gray-100 bg-white hover:border-green-200"
+                          )}
+                        >
+                          <div className="text-2xl mb-1"><EmojiComponent emoji={emotion.icon} /></div>
+                          <span className="text-sm font-medium">{emotion.label}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Speaking Style moved here */}
-                <div className="space-y-2 pt-6 border-t border-gray-100">
-                  <Label className="text-base font-semibold">Speaking Style / Language (Critical)</Label>
-                  <p className="text-sm text-gray-500 mb-2">How do they sound? Use this to add accent, slang, or speech impediments.</p>
-                  <Textarea
-                    placeholder="e.g. Uses Gen-Z slang, stutters when nervous, speaks very fast..."
-                    value={characterAttributes.language}
-                    onChange={(e) => handleAttributeChange('language', e.target.value)}
-                    className="bg-white/80 border-gray-200 min-h-[80px]"
-                  />
+                <div className="bg-white/60 rounded-2xl p-6 border-2 border-green-100 space-y-4 shadow-sm">
+                   <div className="space-y-2">
+                    <Label className="text-base font-semibold text-green-900">Speaking Style / Language (Critical)</Label>
+                    <p className="text-sm text-gray-500 mb-2">How do they sound? Use this to add accent, slang, or speech impediments.</p>
+                    <Textarea
+                      placeholder="e.g. Uses Gen-Z slang, stutters when nervous, speaks very fast..."
+                      value={characterAttributes.language}
+                      onChange={(e) => handleAttributeChange('language', e.target.value)}
+                      className="bg-white border-2 border-green-100 min-h-[80px] focus:border-green-400 rounded-xl"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-base font-semibold">First Message</Label>
-                  <Textarea
-                    placeholder="How they introduce themselves..."
-                    value={formData.firstMessagePrompt}
-                    onChange={(e) => handleInputChange('firstMessagePrompt', e.target.value)}
-                    className="min-h-[80px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>{formErrors.firstMessagePrompt && <span className="text-red-500">{formErrors.firstMessagePrompt}</span>}</span>
-                    <span>{formData.firstMessagePrompt.length}/150</span>
+                <div className="bg-white/60 rounded-2xl p-6 border-2 border-green-100 space-y-4 shadow-sm">
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold text-green-900">First Message</Label>
+                    <Textarea
+                      placeholder="How they introduce themselves..."
+                      value={formData.firstMessagePrompt}
+                      onChange={(e) => handleInputChange('firstMessagePrompt', e.target.value)}
+                      className="min-h-[80px] bg-white border-2 border-green-100 focus:border-green-400 rounded-xl resize-none"
+                    />
+                    <div className="flex justify-between text-xs text-green-700">
+                      <span>{formErrors.firstMessagePrompt && <span className="text-red-500">{formErrors.firstMessagePrompt}</span>}</span>
+                      <span>{formData.firstMessagePrompt.length}/150</span>
+                    </div>
                   </div>
                 </div>
 
@@ -784,7 +837,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
         }}
         voiceCloneModalProps={showVoiceCloneModal!}
       />
-    </div>
+    </div >
   );
 };
 
