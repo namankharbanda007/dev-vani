@@ -23,7 +23,7 @@ import VoiceCloneModal from "./VoiceCloneModal";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CharacterAttributes, generateCharacterPrompt, initialCharacterAttributes, parseCharacterPrompt } from "@/lib/promptUtils";
-import { Switch } from "@/components/ui/switch";
+
 
 interface SettingsDashboardProps {
   selectedUser: IUser;
@@ -88,8 +88,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
     }
   });
 
-  /* New State for Interactive Mode */
-  const [interactiveMode, setInteractiveMode] = useState(true);
+  /* State */
   const [characterAttributes, setCharacterAttributes] = useState<CharacterAttributes>(initialCharacterAttributes);
 
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof FormData | keyof CharacterAttributes | 'features', string>>>({});
@@ -102,27 +101,21 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
       const parsedAttrs = parseCharacterPrompt(initialData.character_prompt);
       if (parsedAttrs) {
         setCharacterAttributes(parsedAttrs);
-        setInteractiveMode(true);
-      } else {
-        // If we can't parse it (user wrote custom prompt), switch to raw mode
-        setInteractiveMode(false);
       }
     }
   }, [initialData]);
 
   // Effect to generate prompt when attributes change
   React.useEffect(() => {
-    if (interactiveMode) {
-      const generatedPrompt = generateCharacterPrompt(formData.title, characterAttributes);
-      setFormData(prev => {
-        // Avoid infinite loop if prompt hasn't actually changed
-        if (prev.prompt !== generatedPrompt) {
-          return { ...prev, prompt: generatedPrompt };
-        }
-        return prev;
-      });
-    }
-  }, [interactiveMode, characterAttributes, formData.title]);
+    const generatedPrompt = generateCharacterPrompt(formData.title, characterAttributes);
+    setFormData(prev => {
+      // Avoid infinite loop if prompt hasn't actually changed
+      if (prev.prompt !== generatedPrompt) {
+        return { ...prev, prompt: generatedPrompt };
+      }
+      return prev;
+    });
+  }, [characterAttributes, formData.title]);
 
   const handleAttributeChange = (field: keyof CharacterAttributes, value: string) => {
     setCharacterAttributes(prev => ({ ...prev, [field]: value }));
@@ -168,9 +161,6 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
     }
 
     if (step === 'personality') {
-      if (interactiveMode) {
-        if (!characterAttributes.gender) { /* optionally warn */ }
-      }
       if (formData.prompt.length < 50) { errors.prompt = "Personality is too short."; isValid = false; }
     }
 
@@ -389,182 +379,159 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                 <p className="text-gray-500 mt-2">Define who they are, deep down.</p>
               </div>
 
-              <div className="flex flex-row justify-end items-center mb-4">
-                <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">
-                  <span className="text-xs text-gray-500 font-medium">{interactiveMode ? "Builder Mode" : "Raw Prompt Mode"}</span>
-                  <Switch
-                    checked={interactiveMode}
-                    onCheckedChange={setInteractiveMode}
-                  />
+
+              <div className="grid grid-cols-1 gap-8">
+                {/* Gender Selection - Big Cards */}
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold text-gray-800">Gender Identity</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    {['Male', 'Female', 'Non-binary', 'Robot/AI', 'Other'].map((g) => (
+                      <div
+                        key={g}
+                        onClick={() => handleAttributeChange('gender', g)}
+                        className={cn(
+                          "cursor-pointer flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200",
+                          characterAttributes.gender === g
+                            ? "border-purple-500 bg-purple-50 text-purple-900 shadow-md"
+                            : "border-gray-100 bg-white hover:border-purple-200 text-gray-600"
+                        )}
+                      >
+                        <span className="text-sm font-medium">{g}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Maturity Slider */}
+                <div className="space-y-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-base font-semibold text-gray-800">Maturity Level</Label>
+                    <span className="text-sm font-bold text-purple-600">{characterAttributes.maturity || "Select"}</span>
+                  </div>
+                  <div className="px-2">
+                    <Slider
+                      min={1}
+                      max={5}
+                      step={1}
+                      value={[
+                        characterAttributes.maturity === "Childish" ? 1 :
+                          characterAttributes.maturity === "Teenager-like" ? 2 :
+                            characterAttributes.maturity === "Reckless" ? 3 :
+                              characterAttributes.maturity === "Mature" ? 4 :
+                                characterAttributes.maturity === "Wise/Elderly" ? 5 : 3
+                      ]}
+                      onValueChange={(val) => {
+                        const map = ["", "Childish", "Teenager-like", "Reckless", "Mature", "Wise/Elderly"];
+                        handleAttributeChange('maturity', map[val[0]]);
+                      }}
+                      className="py-4"
+                    />
+                    <div className="flex justify-between text-xs text-gray-400 font-medium pt-1">
+                      <span>Childish</span>
+                      <span>Teen</span>
+                      <span>Reckless</span>
+                      <span>Mature</span>
+                      <span>Wise</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Behaviour Chips */}
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold text-gray-800">Core Behaviour</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Cheerful', 'Gloomy', 'Energetic', 'Lazy', 'Strict', 'Friendly', 'Flirty', 'Professional', 'Sarcastic', 'Shy', 'Confident'].map((b) => (
+                      <div
+                        key={b}
+                        onClick={() => handleAttributeChange('behaviour', b)}
+                        className={cn(
+                          "cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border",
+                          characterAttributes.behaviour === b
+                            ? "bg-gradient-to-r from-purple-600 to-amber-600 text-white border-transparent shadow-lg scale-105"
+                            : "bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:bg-purple-50"
+                        )}
+                      >
+                        {b}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Grid Inputs for Specifics */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-gray-700">Age</Label>
+                    <Input
+                      value={characterAttributes.age}
+                      onChange={(e) => handleAttributeChange('age', e.target.value)}
+                      placeholder="e.g. 24, Eternal"
+                      className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-gray-700">Education / Occupation</Label>
+                    <Input
+                      value={characterAttributes.education}
+                      onChange={(e) => handleAttributeChange('education', e.target.value)}
+                      placeholder="e.g. High School, Doctor"
+                      className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-gray-700">Location</Label>
+                    <Input
+                      value={characterAttributes.location}
+                      onChange={(e) => handleAttributeChange('location', e.target.value)}
+                      placeholder="e.g. Tokyo, Digital Void"
+                      className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-gray-700">Relationship to User</Label>
+                    <Input
+                      value={characterAttributes.relation}
+                      onChange={(e) => handleAttributeChange('relation', e.target.value)}
+                      placeholder="e.g. Best Friend, Rival"
+                      className="bg-white/50 border-gray-200 focus:bg-white transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Hobbies & Backstory - Detailed Cards */}
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+                    <Label className="text-sm font-semibold text-gray-700">Hobbies & Interests</Label>
+                    <Input
+                      value={characterAttributes.hobbies}
+                      onChange={(e) => handleAttributeChange('hobbies', e.target.value)}
+                      placeholder="What do they do for fun?"
+                      className="border-0 bg-gray-50 focus:ring-0 rounded-xl px-0"
+                    />
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+                    <Label className="text-sm font-semibold text-gray-700">Backstory</Label>
+                    <Textarea
+                      value={characterAttributes.backstory}
+                      onChange={(e) => handleAttributeChange('backstory', e.target.value)}
+                      placeholder="Where did they come from? What defines their past?"
+                      className="border-0 bg-gray-50 focus:ring-0 rounded-xl resize-none min-h-[60px] px-0"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-gray-700">Pet Peeves</Label>
+                    <Input value={characterAttributes.petPeeves} onChange={(e) => handleAttributeChange('petPeeves', e.target.value)} className="bg-white/50" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-gray-700">Flaws</Label>
+                    <Input value={characterAttributes.flaws} onChange={(e) => handleAttributeChange('flaws', e.target.value)} className="bg-white/50" />
+                  </div>
                 </div>
               </div>
-
-              {interactiveMode ? (
-                <div className="grid grid-cols-1 gap-8">
-                  {/* Gender Selection - Big Cards */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold text-gray-800">Gender Identity</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                      {['Male', 'Female', 'Non-binary', 'Robot/AI', 'Other'].map((g) => (
-                        <div
-                          key={g}
-                          onClick={() => handleAttributeChange('gender', g)}
-                          className={cn(
-                            "cursor-pointer flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200",
-                            characterAttributes.gender === g
-                              ? "border-purple-500 bg-purple-50 text-purple-900 shadow-md"
-                              : "border-gray-100 bg-white hover:border-purple-200 text-gray-600"
-                          )}
-                        >
-                          <span className="text-sm font-medium">{g}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Maturity Slider */}
-                  <div className="space-y-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                    <div className="flex justify-between items-center">
-                      <Label className="text-base font-semibold text-gray-800">Maturity Level</Label>
-                      <span className="text-sm font-bold text-purple-600">{characterAttributes.maturity || "Select"}</span>
-                    </div>
-                    <div className="px-2">
-                      <Slider
-                        min={1}
-                        max={5}
-                        step={1}
-                        value={[
-                          characterAttributes.maturity === "Childish" ? 1 :
-                            characterAttributes.maturity === "Teenager-like" ? 2 :
-                              characterAttributes.maturity === "Reckless" ? 3 :
-                                characterAttributes.maturity === "Mature" ? 4 :
-                                  characterAttributes.maturity === "Wise/Elderly" ? 5 : 3
-                        ]}
-                        onValueChange={(val) => {
-                          const map = ["", "Childish", "Teenager-like", "Reckless", "Mature", "Wise/Elderly"];
-                          handleAttributeChange('maturity', map[val[0]]);
-                        }}
-                        className="py-4"
-                      />
-                      <div className="flex justify-between text-xs text-gray-400 font-medium pt-1">
-                        <span>Childish</span>
-                        <span>Teen</span>
-                        <span>Reckless</span>
-                        <span>Mature</span>
-                        <span>Wise</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Behaviour Chips */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold text-gray-800">Core Behaviour</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {['Cheerful', 'Gloomy', 'Energetic', 'Lazy', 'Strict', 'Friendly', 'Flirty', 'Professional', 'Sarcastic', 'Shy', 'Confident'].map((b) => (
-                        <div
-                          key={b}
-                          onClick={() => handleAttributeChange('behaviour', b)}
-                          className={cn(
-                            "cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border",
-                            characterAttributes.behaviour === b
-                              ? "bg-gradient-to-r from-purple-600 to-amber-600 text-white border-transparent shadow-lg scale-105"
-                              : "bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:bg-purple-50"
-                          )}
-                        >
-                          {b}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Grid Inputs for Specifics */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">Age</Label>
-                      <Input
-                        value={characterAttributes.age}
-                        onChange={(e) => handleAttributeChange('age', e.target.value)}
-                        placeholder="e.g. 24, Eternal"
-                        className="bg-white/50 border-gray-200 focus:bg-white transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">Education / Occupation</Label>
-                      <Input
-                        value={characterAttributes.education}
-                        onChange={(e) => handleAttributeChange('education', e.target.value)}
-                        placeholder="e.g. High School, Doctor"
-                        className="bg-white/50 border-gray-200 focus:bg-white transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">Location</Label>
-                      <Input
-                        value={characterAttributes.location}
-                        onChange={(e) => handleAttributeChange('location', e.target.value)}
-                        placeholder="e.g. Tokyo, Digital Void"
-                        className="bg-white/50 border-gray-200 focus:bg-white transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">Relationship to User</Label>
-                      <Input
-                        value={characterAttributes.relation}
-                        onChange={(e) => handleAttributeChange('relation', e.target.value)}
-                        placeholder="e.g. Best Friend, Rival"
-                        className="bg-white/50 border-gray-200 focus:bg-white transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Hobbies & Backstory - Detailed Cards */}
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                      <Label className="text-sm font-semibold text-gray-700">Hobbies & Interests</Label>
-                      <Input
-                        value={characterAttributes.hobbies}
-                        onChange={(e) => handleAttributeChange('hobbies', e.target.value)}
-                        placeholder="What do they do for fun?"
-                        className="border-0 bg-gray-50 focus:ring-0 rounded-xl px-0"
-                      />
-                    </div>
-                    <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                      <Label className="text-sm font-semibold text-gray-700">Backstory</Label>
-                      <Textarea
-                        value={characterAttributes.backstory}
-                        onChange={(e) => handleAttributeChange('backstory', e.target.value)}
-                        placeholder="Where did they come from? What defines their past?"
-                        className="border-0 bg-gray-50 focus:ring-0 rounded-xl resize-none min-h-[60px] px-0"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">Pet Peeves</Label>
-                      <Input value={characterAttributes.petPeeves} onChange={(e) => handleAttributeChange('petPeeves', e.target.value)} className="bg-white/50" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">Flaws</Label>
-                      <Input value={characterAttributes.flaws} onChange={(e) => handleAttributeChange('flaws', e.target.value)} className="bg-white/50" />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <Textarea
-                    placeholder="Detailed instructions on how they should behave, think, and speak..."
-                    value={formData.prompt}
-                    onChange={(e) => handleInputChange('prompt', e.target.value)}
-                    className="min-h-[400px] bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 rounded-xl resize-none font-mono text-sm"
-                  />
-                  <p className="text-xs text-gray-400 italic mt-2">Advanced Mode: You are editing the raw system prompt directly.</p>
-                </>
-              )}
-
-              <div className="flex justify-between text-xs text-gray-500 mt-4">
-                <span>{formErrors.prompt && <span className="text-red-500">{formErrors.prompt}</span>}</span>
-                <span>{formData.prompt.length}/2000</span>
+              <div className="mt-4">
+                {formErrors.prompt && <span className="text-red-500 text-sm font-medium">{formErrors.prompt}</span>}
               </div>
             </div>
           )}
