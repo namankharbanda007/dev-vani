@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: token,
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(payload),
         });
@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
 
         const response = await fetch(`${API_BASE_URL}/task/${taskId}`, {
             headers: {
-                Authorization: token,
+                Authorization: `Bearer ${token}`,
             },
         });
 
