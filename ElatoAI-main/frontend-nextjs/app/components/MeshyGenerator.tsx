@@ -159,7 +159,10 @@ export default function MeshyGenerator() {
                             // Use reported progress if available, otherwise fake it
                             const reportedProgress = data.progress || 0;
                             // Map Meshy progress (0-100) to our state
-                            setProgress(Math.max(reportedProgress, (prev: number) => (prev < 90 ? prev + 5 : prev)));
+                            setProgress((prev) => {
+                                const internalProgress = prev < 90 ? prev + 5 : prev;
+                                return Math.max(reportedProgress, internalProgress);
+                            });
                         }
                     }
                 } catch (e) {
