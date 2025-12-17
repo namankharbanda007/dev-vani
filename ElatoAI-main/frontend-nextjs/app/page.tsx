@@ -10,7 +10,7 @@ import CustomizationForm from "./components/LandingPage/CustomizationForm";
 import Image from "next/image";
 import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
 import { kickstarterLink } from "@/lib/data";
-import MeshyGenerator from "./components/MeshyGenerator";
+import HitemGenerator from "./components/HitemGenerator";
 
 export default async function LandingPage() {
   const supabase = createClient();

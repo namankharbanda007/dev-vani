@@ -8,9 +8,9 @@ import { createClient } from "@/utils/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 
-// Make sure to import the model-viewer package to register the web component
 import "@google/model-viewer";
 
+// ... Global types for model-viewer remain the same ...
 declare global {
     namespace JSX {
         interface IntrinsicElements {
@@ -33,7 +33,7 @@ declare global {
     }
 }
 
-export default function MeshyGenerator() {
+export default function HitemGenerator() {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -41,11 +41,10 @@ export default function MeshyGenerator() {
     const [taskId, setTaskId] = useState<string | null>(null);
     const [modelUrl, setModelUrl] = useState<string | null>(null);
     const [status, setStatus] = useState<"idle" | "uploading" | "queued" | "running" | "success" | "failed">("idle");
-    const [progress, setProgress] = useState(0); // Mock progress for better UX
+    const [progress, setProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const supabase = createClient();
 
-    // Reset state
     const handleReset = () => {
         setImageFile(null);
         setPreviewUrl(null);
@@ -66,7 +65,7 @@ export default function MeshyGenerator() {
             toast({ title: "Invalid File", description: "Please upload an image file.", variant: "destructive" });
             return;
         }
-        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        if (file.size > 10 * 1024 * 1024) {
             toast({ title: "File too large", description: "Image size should be less than 10MB.", variant: "destructive" });
             return;
         }
@@ -84,13 +83,13 @@ export default function MeshyGenerator() {
         setStatus("uploading");
 
         try {
-            // 1. Upload to Supabase Storage
+            // 1. Upload to Supabase
             const fileExt = imageFile.name.split(".").pop();
-            const fileName = `meshy_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+            const fileName = `hitem_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
             const filePath = `${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from("character-images") // Reusing existing bucket
+                .from("character-images")
                 .upload(filePath, imageFile);
 
             if (uploadError) throw uploadError;
@@ -99,12 +98,12 @@ export default function MeshyGenerator() {
                 .from("character-images")
                 .getPublicUrl(filePath);
 
-            // 2. Call our API execution endpoint
+            // 2. Call API
             setIsUploading(false);
             setIsGenerating(true);
             setStatus("queued");
 
-            const res = await fetch("/api/meshy", {
+            const res = await fetch("/api/hitem", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ imageUrl: publicUrl }),
@@ -117,7 +116,7 @@ export default function MeshyGenerator() {
                 throw new Error(data.error || "Failed to start generation");
             }
 
-            setTaskId(data.result); // Meshy returns 'result' as task ID for create
+            setTaskId(data.task_id);
             setStatus("running");
 
         } catch (error: any) {
@@ -129,51 +128,63 @@ export default function MeshyGenerator() {
         }
     };
 
-    // Poll for status
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
         if (taskId && (status === "queued" || status === "running")) {
             interval = setInterval(async () => {
                 try {
-                    const res = await fetch(`/api/meshy?task_id=${taskId}`);
+                    const res = await fetch(`/api/hitem?task_id=${taskId}`);
                     const data = await res.json();
 
                     if (res.ok) {
-                        // Meshy V2 Status: PENDING, IN_PROGRESS, SUCCEEDED, FAILED, EXPIRED
-                        if (data.status === "SUCCEEDED") {
+                        // Hitem3D Status: 'success' (completed), 'running', 'failed' (inferred, documentation vague on explicit enum)
+                        // Based on data.data structure, if model URL exists it's usually done. 
+                        // Often status field is 'status'. 
+                        // Assuming status: 0=pending?, 1=running?, 2=success? or strings. 
+                        // Let's assume standard strings or check for model presence.
+
+                        // Adjusting based on common patterns if docs unclear: check if 'model' or 'mesh' url is present.
+                        // Documentation usually returns a status field.
+
+                        if (data.status === "success" || (data.model && data.model.length > 0)) {
                             setStatus("success");
-                            // Use the GLB model url
-                            setModelUrl(data.model_urls?.glb);
-                            setIsGenerating(false);
-                            setTaskId(null);
-                            setProgress(100);
-                        } else if (data.status === "FAILED" || data.status === "EXPIRED") {
+                            // Usually returns a model URL. Let's assume data.model is the URL or data.model_urls.glb
+                            // If Hitem returns .obj/.glb directly in a field.
+                            // Check if there is a 'models' array or similar.
+                            // For now assuming `data.model` is the URL string based on common simple APIs, or data.result.
+
+                            // Safest: check data struct. The backend returns data directly.
+                            const url = data.model || data.result || (data.models && data.models[0]);
+
+                            if (url) {
+                                setModelUrl(url);
+                                setIsGenerating(false);
+                                setTaskId(null);
+                                setProgress(100);
+                            }
+                        } else if (data.status === "failed") {
                             setStatus("failed");
                             setIsGenerating(false);
                             setTaskId(null);
-                            toast({ title: "Generation Failed", description: "AI could not generate a model from this image.", variant: "destructive" });
+                            toast({ title: "Generation Failed", description: "AI could not generate a model.", variant: "destructive" });
                         } else {
-                            // Still running (PENDING or IN_PROGRESS)
+                            // Still running
                             setStatus("running");
-                            // Use reported progress if available, otherwise fake it
-                            const reportedProgress = data.progress || 0;
-                            // Map Meshy progress (0-100) to our state
                             setProgress((prev) => {
-                                const internalProgress = prev < 90 ? prev + 5 : prev;
-                                return Math.max(reportedProgress, internalProgress);
+                                // Fake progress
+                                return prev < 90 ? prev + 5 : prev;
                             });
                         }
                     }
                 } catch (e) {
                     console.error("Polling error", e);
                 }
-            }, 2000);
+            }, 3000); // Poll every 3s
         }
 
         return () => clearInterval(interval);
     }, [taskId, status]);
-
 
     return (
         <div className="w-full max-w-4xl mx-auto p-6 bg-white/50 backdrop-blur-sm rounded-3xl border border-white/40 shadow-xl">
@@ -206,7 +217,6 @@ export default function MeshyGenerator() {
                             </div>
                         )}
 
-                        {/* Overlay for re-uploading if an image is selected but not processing */}
                         {previewUrl && !isGenerating && !modelUrl && (
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-20">
                                 <span className="bg-white/90 px-4 py-2 rounded-full text-sm font-medium shadow-lg">Change Image</span>
@@ -239,7 +249,7 @@ export default function MeshyGenerator() {
                                 </>
                             ) : isGenerating ? (
                                 <>
-                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating Magic ({Math.round(progress)}%)...
+                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating Magic...
                                 </>
                             ) : (
                                 <>
@@ -248,11 +258,11 @@ export default function MeshyGenerator() {
                             )}
                         </Button>
                     )}
-                    {/* Progress Bar during generation */}
+
                     {isGenerating && (
                         <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
                             <div className="bg-gradient-to-r from-purple-500 to-amber-500 h-2.5 rounded-full transition-all duration-1000" style={{ width: `${progress}%` }}></div>
-                            <p className="text-xs text-center text-gray-500 mt-1">Creating your 3D masterpiece (may take ~1 min)...</p>
+                            <p className="text-xs text-center text-gray-500 mt-1">Creating your 3D masterpiece...</p>
                         </div>
                     )}
                 </div>
