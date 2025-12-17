@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const MESHY_API_KEY = process.env.MESHY_API_KEY;
-const API_BASE_URL = "https://api.meshy.ai/v2/image-to-3d";
+const API_BASE_URL = "https://api.meshy.ai/openapi/v1/image-to-3d";
 
 export async function POST(req: NextRequest) {
     if (!MESHY_API_KEY) {
