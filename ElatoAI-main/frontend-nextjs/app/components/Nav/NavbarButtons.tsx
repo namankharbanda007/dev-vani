@@ -7,7 +7,7 @@ import PremiumBadge from "../PremiumBadge";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname } from "next/navigation";
 import GetInTouchButton from "../GetInTouch";
-import { CalendarCheck, Users, Settings, Plus, Music } from "lucide-react";
+import { CalendarCheck, Users, Settings, Plus, Music, CreditCard } from "lucide-react";
 
 interface NavbarButtonsProps {
     user: IUser | null;
@@ -73,15 +73,15 @@ const NavbarButtons: React.FC<NavbarButtonsProps> = ({
             )}
 
             {!isHome && !isMobile && (
-                <Link href={businessDemoLink} passHref tabIndex={-1}>
+                <Link href="/pricing" passHref tabIndex={-1}>
                     <Button
                         size="sm"
                         variant="secondary"
                         className="flex flex-row gap-2 items-center rounded-full bg-nav-bar focus:shadow-none focus-visible:shadow-none"
                     >
-                        <CalendarCheck size={20} />
+                        <CreditCard size={20} />
                         <span className="hidden sm:flex font-normal">
-                            Business demo
+                            Pricing
                         </span>
                     </Button>
                 </Link>

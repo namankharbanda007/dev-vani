@@ -11,6 +11,7 @@ import {
     Blocks,
     Gamepad2,
     Cpu,
+    CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -121,12 +122,12 @@ export function NavbarDropdownMenu({ user }: NavbarMenuButtonProps) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                         <Link
-                            href={businessDemoLink}
+                            href="/pricing"
                             passHref
                             className="flex flex-row gap-2 w-full"
                         >
-                            <CalendarCheck size={ICON_SIZE} />
-                            <span>Business Demo</span>
+                            <CreditCard size={ICON_SIZE} />
+                            <span>Pricing</span>
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuGroup>

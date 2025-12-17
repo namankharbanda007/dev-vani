@@ -10,7 +10,7 @@
     font-weight: bold;
     line-height: 1;
     padding: 1px;
-    transform: translate(-4px, -4px);
+    /* transform: translate(-4px, -4px); */
     outline: 2px solid transparent;
     outline-offset: 5px;
     border-radius: 9999px;

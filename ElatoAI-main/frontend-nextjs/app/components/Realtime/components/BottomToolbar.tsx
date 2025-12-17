@@ -30,7 +30,7 @@ function BottomToolbar({
   function getConnectionButtonLabel() {
     if (isConnected) return "Disconnect";
     if (isConnecting) return "Connecting...";
-    return "Talk";
+    return "Connect now";
   }
 
   function getConnectionButtonLabelForDoctor() {
