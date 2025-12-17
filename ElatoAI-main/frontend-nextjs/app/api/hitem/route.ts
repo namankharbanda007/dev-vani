@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 // We expect these in .env.local
 const HITEM_ACCESS_KEY = process.env.HITEM_ACCESS_KEY;
 const HITEM_SECRET_KEY = process.env.HITEM_SECRET_KEY;
-const API_BASE_URL = "https://www.hitem3d.ai/api/v1";
+// Updated Base URL based on documentation
+const API_BASE_URL = "https://api.hitem3d.ai/open-api/v1";
 
 // Helper to get a token
 async function getToken() {
@@ -12,6 +13,7 @@ async function getToken() {
         throw new Error("Hitem3D Credentials not configured");
     }
 
+    // Try /token endpoint (deduced from flow)
     const response = await fetch(`${API_BASE_URL}/token`, {
         method: "POST",
         headers: {
@@ -23,7 +25,14 @@ async function getToken() {
         }),
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+        data = JSON.parse(text);
+    } catch (e) {
+        console.error("Hitem3D Token Parse Error. Response:", text.substring(0, 200));
+        throw new Error("Invalid response from Hitem3D Auth");
+    }
 
     if (!response.ok || data.code !== 0) {
         console.error("Hitem3D Token Error:", data);
@@ -44,15 +53,14 @@ export async function POST(req: NextRequest) {
 
         const token = await getToken();
 
-        // Create Task
-        // Documentation suggests 'images' is an array for image_to_model
+        // Create Task - API Endpoint updated to /submit-task based on references, or /task
+        // Trying /submit-task as seen in python examples
         const payload = {
-            type: "image_to_model", // Assuming this is the correct type from general API usage
+            type: "image_to_model",
             images: [imageUrl],
-            // Optional defaults could go here
         };
 
-        const response = await fetch(`${API_BASE_URL}/task`, {
+        const response = await fetch(`${API_BASE_URL}/submit-task`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -61,7 +69,15 @@ export async function POST(req: NextRequest) {
             body: JSON.stringify(payload),
         });
 
-        const data = await response.json();
+        const text = await response.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error("Hitem3D Task Parse Error:", text.substring(0, 200));
+            // Retry strategy or specific error could go here, but for now reporting context
+            return NextResponse.json({ error: "Invalid API response from Hitem3D Task" }, { status: 502 });
+        }
 
         if (!response.ok || data.code !== 0) {
             console.error("Hitem3D Create Task Error:", data);
@@ -99,7 +115,14 @@ export async function GET(req: NextRequest) {
             },
         });
 
-        const data = await response.json();
+        const text = await response.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error("Hitem3D Get Task Parse Error:", text.substring(0, 200));
+            return NextResponse.json({ error: "Invalid API response from Hitem3D Status" }, { status: 502 });
+        }
 
         if (!response.ok || data.code !== 0) {
             console.error("Hitem3D Get Task Error:", data);
@@ -109,7 +132,7 @@ export async function GET(req: NextRequest) {
             }, { status: response.status || 500 });
         }
 
-        return NextResponse.json(data.data); // Return the task data directly
+        return NextResponse.json(data.data);
 
     } catch (error: any) {
         console.error("Hitem Route Get Error:", error);
