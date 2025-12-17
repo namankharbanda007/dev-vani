@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { SessionStatus } from "@/app/components/Realtime/types";
+import RetroButton from "./RetroButton";
 import { Paperclip, PhoneCall, Play, Stethoscope } from "lucide-react";
 import { Loader2, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -61,16 +62,16 @@ function BottomToolbar({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
+            <RetroButton
               onClick={() => {
                 onToggleConnection();
               }}
-              className={getConnectionButtonClasses()}
+              className={getConnectionButtonClasses().replace("text-base p-2 w-fit rounded-full shadow-lg flex flex-row items-center justify-center gap-2 px-4", "")} // Remove base classes that might conflict or duplicate
               disabled={isDisabled}
+              icon={getConnectionButtonIcon()}
             >
-              {getConnectionButtonIcon()}
               {isDoctor ? getConnectionButtonLabelForDoctor() : getConnectionButtonLabel()}
-            </button>
+            </RetroButton>
           </TooltipTrigger>
           {isDisabled && (
             <TooltipContent>
