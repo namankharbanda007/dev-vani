@@ -55,20 +55,26 @@ export async function POST(req: NextRequest) {
 
         const token = await getToken();
 
-        // Create Task - API Endpoint updated to /submit-task based on references, or /task
-        // Trying /submit-task as seen in python examples
-        const payload = {
-            type: "image_to_model",
-            images: [imageUrl],
-        };
+        // Download the image first
+        const imageResponse = await fetch(imageUrl);
+        if (!imageResponse.ok) {
+            throw new Error(`Failed to download image from Supabase: ${imageResponse.statusText}`);
+        }
+        const imageBlob = await imageResponse.blob();
+
+        // Create FormData
+        const formData = new FormData();
+        // Append file - explicit filename and type usually helps APIs
+        formData.append("images", imageBlob, "input_image.png");
+        formData.append("type", "image_to_model");
 
         const response = await fetch(`${API_BASE_URL}/submit-task`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                // Do NOT set Content-Type here; fetch sets it with boundary for FormData
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(payload),
+            body: formData,
         });
 
         const text = await response.text();
