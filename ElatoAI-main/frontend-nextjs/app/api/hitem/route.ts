@@ -100,7 +100,17 @@ export async function POST(req: NextRequest) {
             }, { status: response.status !== 200 ? response.status : 400 });
         }
 
-        return NextResponse.json({ task_id: data.data.id });
+        const returnedId = data.data?.id || data.data?.task_id || data.data?.taskId || data.id || data.taskId;
+
+        if (!returnedId) {
+            console.error("Hitem3D POST Task ID missing in response:", data);
+            return NextResponse.json({
+                error: "Task ID missing in upstream response",
+                details: data
+            }, { status: 502 });
+        }
+
+        return NextResponse.json({ task_id: returnedId });
 
     } catch (error: any) {
         console.error("Hitem Route Post Error:", error);
@@ -145,7 +155,17 @@ export async function GET(req: NextRequest) {
             }, { status: response.status !== 200 ? response.status : 400 });
         }
 
-        return NextResponse.json(data.data);
+        const returnedId = data.data?.id || data.data?.task_id || data.data?.taskId || data.id || data.taskId;
+
+        if (!returnedId) {
+            console.error("Hitem3D Task ID missing in response:", data);
+            return NextResponse.json({
+                error: "Task ID missing in upstream response",
+                details: data
+            }, { status: 502 });
+        }
+
+        return NextResponse.json({ task_id: returnedId });
 
     } catch (error: any) {
         console.error("Hitem Route Get Error:", error);
