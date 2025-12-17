@@ -3,6 +3,7 @@ import { SessionStatus } from "@/app/components/Realtime/types";
 import { Paperclip, PhoneCall, Play, Stethoscope } from "lucide-react";
 import { Loader2, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import styles from "./BottomToolbar.module.css";
 
 interface BottomToolbarProps {
   sessionStatus: SessionStatus;
@@ -61,16 +62,33 @@ function BottomToolbar({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={() => {
-                onToggleConnection();
-              }}
-              className={getConnectionButtonClasses()}
-              disabled={isDisabled}
-            >
-              {getConnectionButtonIcon()}
-              {isDoctor ? getConnectionButtonLabelForDoctor() : getConnectionButtonLabel()}
-            </button>
+            {(!isConnected && !isDisabled) ? (
+              <button
+                onClick={() => {
+                  onToggleConnection();
+                }}
+                className={styles.button}
+                disabled={isDisabled}
+              >
+                <div>
+                  <span>
+                    {getConnectionButtonIcon()}
+                    {isDoctor ? getConnectionButtonLabelForDoctor() : getConnectionButtonLabel()}
+                  </span>
+                </div>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  onToggleConnection();
+                }}
+                className={getConnectionButtonClasses()}
+                disabled={isDisabled}
+              >
+                {getConnectionButtonIcon()}
+                {isDoctor ? getConnectionButtonLabelForDoctor() : getConnectionButtonLabel()}
+              </button>
+            )}
           </TooltipTrigger>
           {isDisabled && (
             <TooltipContent>
