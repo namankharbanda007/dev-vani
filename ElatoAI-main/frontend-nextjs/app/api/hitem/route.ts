@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid API response from Hitem3D Task" }, { status: 502 });
         }
 
-        if (!response.ok || data.code !== 0) {
+        if (!response.ok || (data.code !== 0 && data.code !== 200)) {
             console.error("Hitem3D Create Task Error:", data);
             return NextResponse.json({
                 error: data.msg || data.message || "Unknown Hitem3D Error",
@@ -137,12 +137,12 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "Invalid API response from Hitem3D Status" }, { status: 502 });
         }
 
-        if (!response.ok || data.code !== 0) {
-            console.error("Hitem3D Get Task Error:", data);
+        if (!response.ok || (data.code !== 0 && data.code !== 200)) {
+            console.error("Hitem3D Create Task Error:", data);
             return NextResponse.json({
-                error: data.msg || "Unknown Hitem3D Error",
+                error: data.msg || data.message || "Unknown Hitem3D Error",
                 details: data
-            }, { status: response.status || 500 });
+            }, { status: response.status !== 200 ? response.status : 400 });
         }
 
         return NextResponse.json(data.data);
