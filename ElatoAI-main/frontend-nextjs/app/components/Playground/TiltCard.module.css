@@ -1,0 +1,294 @@
+/* TiltCard.module.css */
+
+.container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: 200ms;
+    perspective: 800px;
+    /* Moved perspective here for better 3d context */
+}
+
+/* Base card style updates handled by parent component classes, 
+   but we apply the transform transitions to the card wrapper here */
+.cardWrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    transition: 700ms;
+    /* Removed background gradient as it is handled by the passed children which have their own images/colors */
+    transform-style: preserve-3d;
+}
+
+/* Tracker Grid System */
+.canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 200;
+    /* High z-index for hover tracking */
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 0px 0px;
+    grid-template-areas:
+        "tr-1 tr-2 tr-3 tr-4 tr-5"
+        "tr-6 tr-7 tr-8 tr-9 tr-10"
+        "tr-11 tr-12 tr-13 tr-14 tr-15"
+        "tr-16 tr-17 tr-18 tr-19 tr-20"
+        "tr-21 tr-22 tr-23 tr-24 tr-25";
+}
+
+/* Trackers */
+.tracker {
+    position: absolute;
+    z-index: 200;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+/* Hover Effects logic */
+.canvas>div {
+    z-index: 200;
+}
+
+/* Grid Areas */
+.tr-1 {
+    grid-area: tr-1;
+}
+
+.tr-2 {
+    grid-area: tr-2;
+}
+
+.tr-3 {
+    grid-area: tr-3;
+}
+
+.tr-4 {
+    grid-area: tr-4;
+}
+
+.tr-5 {
+    grid-area: tr-5;
+}
+
+.tr-6 {
+    grid-area: tr-6;
+}
+
+.tr-7 {
+    grid-area: tr-7;
+}
+
+.tr-8 {
+    grid-area: tr-8;
+}
+
+.tr-9 {
+    grid-area: tr-9;
+}
+
+.tr-10 {
+    grid-area: tr-10;
+}
+
+.tr-11 {
+    grid-area: tr-11;
+}
+
+.tr-12 {
+    grid-area: tr-12;
+}
+
+.tr-13 {
+    grid-area: tr-13;
+}
+
+.tr-14 {
+    grid-area: tr-14;
+}
+
+.tr-15 {
+    grid-area: tr-15;
+}
+
+.tr-16 {
+    grid-area: tr-16;
+}
+
+.tr-17 {
+    grid-area: tr-17;
+}
+
+.tr-18 {
+    grid-area: tr-18;
+}
+
+.tr-19 {
+    grid-area: tr-19;
+}
+
+.tr-20 {
+    grid-area: tr-20;
+}
+
+.tr-21 {
+    grid-area: tr-21;
+}
+
+.tr-22 {
+    grid-area: tr-22;
+}
+
+.tr-23 {
+    grid-area: tr-23;
+}
+
+.tr-24 {
+    grid-area: tr-24;
+}
+
+.tr-25 {
+    grid-area: tr-25;
+}
+
+/* Transform Logic */
+/* Note: We target the sibling .cardWrapper when a tracker is hovered */
+
+.tr-1:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(20deg) rotateY(-10deg) rotateZ(0deg);
+}
+
+.tr-2:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(20deg) rotateY(-5deg) rotateZ(0deg);
+}
+
+.tr-3:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(20deg) rotateY(0deg) rotateZ(0deg);
+}
+
+.tr-4:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(20deg) rotateY(5deg) rotateZ(0deg);
+}
+
+.tr-5:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(20deg) rotateY(10deg) rotateZ(0deg);
+}
+
+.tr-6:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(10deg) rotateY(-10deg) rotateZ(0deg);
+}
+
+.tr-7:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(10deg) rotateY(-5deg) rotateZ(0deg);
+}
+
+.tr-8:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(10deg) rotateY(0deg) rotateZ(0deg);
+}
+
+.tr-9:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(10deg) rotateY(5deg) rotateZ(0deg);
+}
+
+.tr-10:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(10deg) rotateY(10deg) rotateZ(0deg);
+}
+
+.tr-11:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(0deg) rotateY(-10deg) rotateZ(0deg);
+}
+
+.tr-12:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(0deg) rotateY(-5deg) rotateZ(0deg);
+}
+
+.tr-13:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+}
+
+.tr-14:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(0deg) rotateY(5deg) rotateZ(0deg);
+}
+
+.tr-15:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(0deg) rotateY(10deg) rotateZ(0deg);
+}
+
+.tr-16:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(-10deg) rotateY(-10deg) rotateZ(0deg);
+}
+
+.tr-17:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(-10deg) rotateY(-5deg) rotateZ(0deg);
+}
+
+.tr-18:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(-10deg) rotateY(0deg) rotateZ(0deg);
+}
+
+.tr-19:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(-10deg) rotateY(5deg) rotateZ(0deg);
+}
+
+.tr-20:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(-10deg) rotateY(10deg) rotateZ(0deg);
+}
+
+.tr-21:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(-20deg) rotateY(-10deg) rotateZ(0deg);
+}
+
+.tr-22:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(-20deg) rotateY(-5deg) rotateZ(0deg);
+}
+
+.tr-23:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(-20deg) rotateY(0deg) rotateZ(0deg);
+}
+
+.tr-24:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(-20deg) rotateY(5deg) rotateZ(0deg);
+}
+
+.tr-25:hover~.cardWrapper {
+    transition: 125ms ease-in-out;
+    transform: rotateX(-20deg) rotateY(10deg) rotateZ(0deg);
+}
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
