@@ -13,16 +13,15 @@ async function getToken() {
         throw new Error("Hitem3D Credentials not configured");
     }
 
-    // Try /token endpoint (deduced from flow)
-    const response = await fetch(`${API_BASE_URL}/token`, {
+    // specific endpoint for token with Basic Auth
+    const authString = Buffer.from(`${HITEM_ACCESS_KEY}:${HITEM_SECRET_KEY}`).toString('base64');
+
+    const response = await fetch(`${API_BASE_URL}/auth/token`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "Authorization": `Basic ${authString}`
         },
-        body: JSON.stringify({
-            access_key: HITEM_ACCESS_KEY,
-            secret_key: HITEM_SECRET_KEY,
-        }),
     });
 
     const text = await response.text();
@@ -34,12 +33,15 @@ async function getToken() {
         throw new Error("Invalid response from Hitem3D Auth");
     }
 
-    if (!response.ok || data.code !== 0) {
+    if (!response.ok || (data.code !== 0 && data.code !== 200)) { // Checking both standard code 0 and HTTP 200 just in case
         console.error("Hitem3D Token Error:", data);
         throw new Error(data.msg || "Failed to get Hitem3D token");
     }
 
-    return data.data.token;
+    // Documentation says response contains accessToken
+    // Some docs say data.data.token, others say data.data.accessToken. 
+    // Let's try to be robust.
+    return data.data?.token || data.data?.accessToken;
 }
 
 export async function POST(req: NextRequest) {
