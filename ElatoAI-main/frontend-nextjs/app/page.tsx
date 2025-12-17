@@ -149,7 +149,7 @@ export default async function LandingPage() {
           <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-200 rounded-full blur-3xl opacity-20 -ml-10 -mb-10"></div>
 
           <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10">
-            <MeshyGenerator />
+            <HitemGenerator />
           </div>
         </section>
 
