@@ -10,6 +10,7 @@ import CustomizationForm from "./components/LandingPage/CustomizationForm";
 import Image from "next/image";
 import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
 import { kickstarterLink } from "@/lib/data";
+import TripoGenerator from "./components/TripoGenerator";
 
 export default async function LandingPage() {
   const supabase = createClient();
@@ -142,6 +143,16 @@ export default async function LandingPage() {
           </div>
         </section>
 
+        {/* NEW: AI 3D Generator Section */}
+        <section className="w-full py-12 md:py-20 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-200 rounded-full blur-3xl opacity-20 -mr-20 -mt-20"></div>
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-200 rounded-full blur-3xl opacity-20 -ml-10 -mb-10"></div>
+
+          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10">
+            <TripoGenerator />
+          </div>
+        </section>
+
         {/* Lifestyle Showcase - Family Image */}
         <section className="w-full py-12 md:py-20 bg-gradient-to-br from-purple-50 via-pink-50 to-amber-50">
           <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
@@ -198,10 +209,10 @@ export default async function LandingPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* Product Showcase - 3 Premium Cards */}
-        <section className="w-full py-12 md:py-20 bg-white relative overflow-hidden">
+        < section className="w-full py-12 md:py-20 bg-white relative overflow-hidden" >
           <div className="absolute inset-0 bg-gradient-to-b from-white via-purple-50/50 to-white pointer-events-none" />
           <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10">
             <div className="text-center mb-16">
@@ -387,15 +398,15 @@ export default async function LandingPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* Multilingual Support - Speaks Your Language */}
-        <section className="w-full py-12 md:py-20 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 relative overflow-hidden">
+        < section className="w-full py-12 md:py-20 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 relative overflow-hidden" >
           {/* Decorative background elements */}
-          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          < div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none" >
             <div className="absolute -top-24 -left-24 w-96 h-96 bg-orange-200 rounded-full blur-3xl opacity-20"></div>
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-200 rounded-full blur-3xl opacity-20"></div>
-          </div>
+          </div >
 
           <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10">
             <div className="text-center mb-12">
@@ -543,13 +554,13 @@ export default async function LandingPage() {
               </p>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* How to Customize Your Friend - INTERACTIVE FORM */}
-        <CustomizationForm />
+        < CustomizationForm />
 
         {/* How It Works - Icon-Based Steps */}
-        <section className="w-full py-12 md:py-20 bg-gradient-to-b from-white to-purple-50">
+        < section className="w-full py-12 md:py-20 bg-gradient-to-b from-white to-purple-50" >
           <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
@@ -613,15 +624,15 @@ export default async function LandingPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* Trust & Safety */}
-        <section className="w-full py-12 md:py-16 bg-gradient-to-br from-purple-900 to-purple-800 relative overflow-hidden">
+        < section className="w-full py-12 md:py-16 bg-gradient-to-br from-purple-900 to-purple-800 relative overflow-hidden" >
           {/* Decorative background elements */}
-          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          < div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none" >
             <div className="absolute top-10 left-10 w-64 h-64 bg-purple-600 rounded-full blur-3xl opacity-30"></div>
             <div className="absolute bottom-10 right-10 w-80 h-80 bg-indigo-600 rounded-full blur-3xl opacity-30"></div>
-          </div>
+          </div >
 
           <div className="container px-4 md:px-6 max-w-screen-lg mx-auto relative z-10">
             <div className="text-center mb-12">
@@ -674,15 +685,15 @@ export default async function LandingPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* YouTube Demo */}
-        <div className="bg-gradient-to-b from-white to-purple-50 py-16">
+        < div className="bg-gradient-to-b from-white to-purple-50 py-16" >
           <YoutubeDemo caption="SMART मूर्ति Explainer" />
-        </div>
+        </div >
 
 
-      </main>
-    </div>
+      </main >
+    </div >
   )
 }
