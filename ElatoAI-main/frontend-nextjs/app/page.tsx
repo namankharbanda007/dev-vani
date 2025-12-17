@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ChevronRight, Star, Home, ArrowUpRight, Shield, Heart, Sparkles, MessageCircle, Users, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { PremiumButton } from "./components/PremiumButton"
 import { DEVICE_COST, SUBSCRIPTION_COST } from "@/lib/data";
 import { createClient } from "@/utils/supabase/server"
 import { getAllPersonalities } from "@/db/personalities"
@@ -110,14 +111,15 @@ export default async function LandingPage() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-8">
                 <Link href="/home">
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto px-8 py-6 text-lg bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white border-0 shadow-xl hover:shadow-2xl transition-all rounded-full"
+                  <PremiumButton
+                    className="w-full sm:w-auto text-lg rounded-full"
                   >
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    <span>Explore Companions</span>
-                    <ChevronRight className="ml-2 h-5 w-5" />
-                  </Button>
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5" />
+                      <span>Explore Companions</span>
+                      <ChevronRight className="h-5 w-5" />
+                    </span>
+                  </PremiumButton>
                 </Link>
 
                 <Link href="https://smartmurti.com/products">
@@ -279,10 +281,12 @@ export default async function LandingPage() {
 
                   {/* CTA */}
                   <Link href="https://smartmurti.com/products" className="block">
-                    <Button className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all">
-                      Learn More
-                      <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
+                    <PremiumButton className="w-full rounded-full">
+                      <span className="flex items-center justify-center gap-2">
+                        Learn More
+                        <ChevronRight className="h-4 w-4" />
+                      </span>
+                    </PremiumButton>
                   </Link>
                 </div>
               </div>
@@ -334,10 +338,12 @@ export default async function LandingPage() {
                   </ul>
 
                   <Link href="/home" className="block">
-                    <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all">
-                      Create Your Friend
-                      <Heart className="ml-2 h-4 w-4" />
-                    </Button>
+                    <PremiumButton className="w-full rounded-full">
+                      <span className="flex items-center justify-center gap-2">
+                        Create Your Friend
+                        <Heart className="h-4 w-4" />
+                      </span>
+                    </PremiumButton>
                   </Link>
                 </div>
               </div>
@@ -389,10 +395,12 @@ export default async function LandingPage() {
                   </ul>
 
                   <Link href="/home" className="block">
-                    <Button className="w-full bg-gradient-to-r from-pink-500 to-red-600 hover:from-pink-600 hover:to-red-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all">
-                      Create Your Friend
-                      <Heart className="ml-2 h-4 w-4" />
-                    </Button>
+                    <PremiumButton className="w-full rounded-full">
+                      <span className="flex items-center justify-center gap-2">
+                        Create Your Friend
+                        <Heart className="h-4 w-4" />
+                      </span>
+                    </PremiumButton>
                   </Link>
                 </div>
               </div>

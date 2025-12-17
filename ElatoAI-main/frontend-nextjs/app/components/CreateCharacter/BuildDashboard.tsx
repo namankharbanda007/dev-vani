@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
+import { PremiumButton } from "../PremiumButton";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -840,14 +841,16 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
         </Button>
 
         {currentStep === 'refine' ? (
-          <Button
+          <PremiumButton
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-purple-600 to-amber-600 hover:from-purple-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all rounded-full px-8 py-6 text-lg"
+            className="rounded-full px-8 py-6 text-lg"
           >
-            {isSubmitting ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Avatar" : "Create Avatar")}
-            {!isSubmitting && <Sparkles className="w-5 h-5 ml-2" />}
-          </Button>
+            <span className="flex items-center justify-center gap-2">
+              {isSubmitting ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Avatar" : "Create Avatar")}
+              {!isSubmitting && <Sparkles className="w-5 h-5 ml-2" />}
+            </span>
+          </PremiumButton>
         ) : (
           <Button
             onClick={handleNext}
