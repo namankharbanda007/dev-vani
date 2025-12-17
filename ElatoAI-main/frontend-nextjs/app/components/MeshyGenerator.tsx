@@ -33,7 +33,7 @@ declare global {
     }
 }
 
-export default function TripoGenerator() {
+export default function MeshyGenerator() {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -86,7 +86,7 @@ export default function TripoGenerator() {
         try {
             // 1. Upload to Supabase Storage
             const fileExt = imageFile.name.split(".").pop();
-            const fileName = `tripo_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+            const fileName = `meshy_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
             const filePath = `${fileName}`;
 
             const { error: uploadError } = await supabase.storage
@@ -104,7 +104,7 @@ export default function TripoGenerator() {
             setIsGenerating(true);
             setStatus("queued");
 
-            const res = await fetch("/api/tripo", {
+            const res = await fetch("/api/meshy", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ imageUrl: publicUrl }),
@@ -114,10 +114,10 @@ export default function TripoGenerator() {
 
             if (!res.ok) {
                 console.error("API Error Response:", data);
-                throw new Error(data.error || data.message || "Failed to start generation");
+                throw new Error(data.error || "Failed to start generation");
             }
 
-            setTaskId(data.task_id);
+            setTaskId(data.result); // Meshy returns 'result' as task ID for create
             setStatus("running");
 
         } catch (error: any) {
@@ -136,26 +136,30 @@ export default function TripoGenerator() {
         if (taskId && (status === "queued" || status === "running")) {
             interval = setInterval(async () => {
                 try {
-                    const res = await fetch(`/api/tripo?task_id=${taskId}`);
+                    const res = await fetch(`/api/meshy?task_id=${taskId}`);
                     const data = await res.json();
 
                     if (res.ok) {
-                        if (data.status === "success") {
-                            // Assume output model is GLB
+                        // Meshy V2 Status: PENDING, IN_PROGRESS, SUCCEEDED, FAILED, EXPIRED
+                        if (data.status === "SUCCEEDED") {
                             setStatus("success");
-                            setModelUrl(data.output.model);
+                            // Use the GLB model url
+                            setModelUrl(data.model_urls?.glb);
                             setIsGenerating(false);
                             setTaskId(null);
                             setProgress(100);
-                        } else if (data.status === "failed" || data.status === "cancelled") {
+                        } else if (data.status === "FAILED" || data.status === "EXPIRED") {
                             setStatus("failed");
                             setIsGenerating(false);
                             setTaskId(null);
-                            toast({ title: "Generation Failed", description: "Could not generate a model from this image. Please try another.", variant: "destructive" });
+                            toast({ title: "Generation Failed", description: "AI could not generate a model from this image.", variant: "destructive" });
                         } else {
-                            // Still running
+                            // Still running (PENDING or IN_PROGRESS)
                             setStatus("running");
-                            setProgress((prev) => (prev < 90 ? prev + 10 : prev)); // Fake progress to keep user engaged
+                            // Use reported progress if available, otherwise fake it
+                            const reportedProgress = data.progress || 0;
+                            // Map Meshy progress (0-100) to our state
+                            setProgress(Math.max(reportedProgress, (prev: number) => (prev < 90 ? prev + 5 : prev)));
                         }
                     }
                 } catch (e) {
@@ -232,7 +236,7 @@ export default function TripoGenerator() {
                                 </>
                             ) : isGenerating ? (
                                 <>
-                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating Magic...
+                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating Magic ({Math.round(progress)}%)...
                                 </>
                             ) : (
                                 <>
@@ -245,7 +249,7 @@ export default function TripoGenerator() {
                     {isGenerating && (
                         <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
                             <div className="bg-gradient-to-r from-purple-500 to-amber-500 h-2.5 rounded-full transition-all duration-1000" style={{ width: `${progress}%` }}></div>
-                            <p className="text-xs text-center text-gray-500 mt-1">Creating your 3D masterpiece (~30s)...</p>
+                            <p className="text-xs text-center text-gray-500 mt-1">Creating your 3D masterpiece (may take ~1 min)...</p>
                         </div>
                     )}
                 </div>
