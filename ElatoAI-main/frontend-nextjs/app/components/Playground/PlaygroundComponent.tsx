@@ -61,7 +61,7 @@ const Playground: React.FC<PlaygroundProps> = ({
                     </div>
 
                     {/* Active Conversation Area - Integrated */}
-                    <div className="glass-card p-1 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div className="transition-all duration-300">
                         <TranscriptProvider>
                             <EventProvider>
                                 <App personalityIdState={personalityIdState} isDoctor={isDoctor} userId={currentUser.user_id} />

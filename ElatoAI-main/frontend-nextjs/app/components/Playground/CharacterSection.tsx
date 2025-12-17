@@ -107,7 +107,7 @@ const CharacterSection = ({
                                     onPersonalityPicked={onPersonalityPicked}
                                     disableButtons={disableButtons}
                                 >
-                                    <TiltCard className="h-full">
+                                    <TiltCard className="h-full w-full aspect-[4/5]">
                                         <div
                                             className={cn(
                                                 "group relative overflow-hidden rounded-3xl transition-all duration-300 cursor-pointer h-full",
