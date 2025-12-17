@@ -113,7 +113,8 @@ export default function TripoGenerator() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || "Failed to start generation");
+                console.error("API Error Response:", data);
+                throw new Error(data.error || data.message || "Failed to start generation");
             }
 
             setTaskId(data.task_id);

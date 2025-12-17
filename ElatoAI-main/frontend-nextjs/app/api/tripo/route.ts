@@ -50,7 +50,10 @@ export async function POST(req: NextRequest) {
 
         if (!response.ok) {
             console.error("Tripo API Error:", data);
-            return NextResponse.json(data, { status: response.status });
+            return NextResponse.json({
+                error: data.message || data.error || "Unknown Tripo API Error",
+                details: data
+            }, { status: response.status });
         }
 
         return NextResponse.json({ task_id: data.data.task_id });
