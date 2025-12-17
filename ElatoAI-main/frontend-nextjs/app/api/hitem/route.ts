@@ -66,7 +66,10 @@ export async function POST(req: NextRequest) {
         const formData = new FormData();
         // Append file - explicit filename and type usually helps APIs
         formData.append("images", imageBlob, "input_image.png");
-        formData.append("type", "image_to_model");
+        formData.append("request_type", "3");
+        formData.append("face", "1000000");
+        formData.append("resolution", "1024");
+        formData.append("model", "hitem3dv1.5");
 
         const response = await fetch(`${API_BASE_URL}/submit-task`, {
             method: "POST",
