@@ -1,7 +1,6 @@
 "use client";
 
 import ModifyCharacterSheet from "./ModifyCharacterSheet";
-import ModifyCharacterSheet from "./ModifyCharacterSheet";
 import Image from "next/image";
 import { cn, getPersonalityImageSrc } from "@/lib/utils";
 import {
