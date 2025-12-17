@@ -84,9 +84,9 @@ export async function POST(req: NextRequest) {
         if (!response.ok || data.code !== 0) {
             console.error("Hitem3D Create Task Error:", data);
             return NextResponse.json({
-                error: data.msg || "Unknown Hitem3D Error",
+                error: data.msg || data.message || "Unknown Hitem3D Error",
                 details: data
-            }, { status: response.status || 500 });
+            }, { status: response.status !== 200 ? response.status : 400 });
         }
 
         return NextResponse.json({ task_id: data.data.id });

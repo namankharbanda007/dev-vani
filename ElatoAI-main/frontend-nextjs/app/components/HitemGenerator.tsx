@@ -116,6 +116,11 @@ export default function HitemGenerator() {
                 throw new Error(data.error || "Failed to start generation");
             }
 
+            if (!data.task_id) {
+                console.error("Missing task_id in response:", data);
+                throw new Error("Failed to start generation: No Task ID returned.");
+            }
+
             setTaskId(data.task_id);
             setStatus("running");
 
