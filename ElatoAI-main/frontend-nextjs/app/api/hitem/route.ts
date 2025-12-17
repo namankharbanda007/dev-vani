@@ -67,9 +67,11 @@ export async function POST(req: NextRequest) {
         // Append file - explicit filename and type usually helps APIs
         formData.append("images", imageBlob, "input_image.png");
         formData.append("request_type", "3");
-        formData.append("face", "1000000");
-        formData.append("resolution", "1024");
-        formData.append("model", "hitem3dv1.5");
+
+        // Economy Settings to avoid "insufficient balance" on potential Pro features
+        formData.append("face", "300000");   // Lower face count
+        formData.append("resolution", "512"); // Standard resolution
+        formData.append("model", "hitem3dv1"); // Standard model (v1 instead of v1.5)
 
         const response = await fetch(`${API_BASE_URL}/submit-task`, {
             method: "POST",
