@@ -470,6 +470,8 @@ bool WIFIMANAGER::tryConnect() {
       + " with password " + (apList[choosenAp].apPass.length() > 0 ? "'***'" : "''") + "\n"
     );
 
+    // Force Google DNS to resolve DNS failures
+    WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, IPAddress(8,8,8,8), IPAddress(8,8,4,4));
     WiFi.begin(apList[choosenAp].apName.c_str(), apList[choosenAp].apPass.c_str());
     wl_status_t status = (wl_status_t)WiFi.waitForConnectResult(5000UL);
 
