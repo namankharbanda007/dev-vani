@@ -80,7 +80,7 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
     const PersonalCharacterComponent = () => {
         return (
             <>
-                <p className="text-gray-400">
+                {/* <p className="text-gray-400">
                     {"Character prompt"}
                 </p>
                 <p className="text-gray-600 whitespace-pre-line">
@@ -97,7 +97,7 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
                 </p>
                 <p className="text-gray-600">
                     {openPersonality.voice_prompt}
-                </p>
+                </p> */}
             </>
         );
     };
