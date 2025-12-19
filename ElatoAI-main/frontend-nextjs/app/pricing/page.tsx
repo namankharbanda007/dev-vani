@@ -51,7 +51,7 @@ export default function PricingPage() {
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <Check className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
-                                        <span className="text-gray-700">Unlimited conversations</span>
+                                        <span className="text-gray-700">1 hour conversation/month</span>
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <Check className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
@@ -96,7 +96,7 @@ export default function PricingPage() {
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <Check className="h-5 w-5 text-amber-300 flex-shrink-0 mt-0.5" />
-                                        <span className="text-white">Unlimited conversations</span>
+                                        <span className="text-white">10 hours conversation/month</span>
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <Check className="h-5 w-5 text-amber-300 flex-shrink-0 mt-0.5" />
@@ -143,7 +143,7 @@ export default function PricingPage() {
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <Check className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                                        <span className="text-gray-700">Unlimited conversations</span>
+                                        <span className="text-gray-700">24 hours conversation/month</span>
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <Check className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
