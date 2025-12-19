@@ -20,17 +20,17 @@ const PersonalityFilters = ({
 
     return (
         <div className="overflow-x-auto scrollbar-hide">
-        <ToggleGroup
-            type="multiple"
-            variant="outline"
-            size="sm"
-            value={selectedFilters}
-            onValueChange={(value: string[]) => {
-                setSelectedFilters(value as PersonalityFilter[]);
-            }}
-            className="justify-start mb-4 ml-1 text-xs inline-flex flex-nowrap min-w-max"
-        >
-            <ToggleGroupItem
+            <ToggleGroup
+                type="multiple"
+                variant="outline"
+                size="sm"
+                value={selectedFilters}
+                onValueChange={(value: string[]) => {
+                    setSelectedFilters(value as PersonalityFilter[]);
+                }}
+                className="justify-start mb-4 ml-1 text-xs inline-flex flex-nowrap min-w-max"
+            >
+                {/* <ToggleGroupItem
                 value="is_story"
                 aria-label="Toggle story mode"
                 className="rounded-full flex items-center gap-2 text-xs border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 hover:shadow-sm hover:shadow-purple-100 transition-all duration-200 [&[data-state=on]]:bg-gradient-to-r [&[data-state=on]]:from-purple-400 [&[data-state=on]]:to-pink-400 [&[data-state=on]]:text-white [&[data-state=on]]:border-transparent [&[data-state=on]]:shadow-lg [&[data-state=on]]:shadow-purple-200 [&[data-state=on]]:animate-pulse"
@@ -64,10 +64,10 @@ const PersonalityFilters = ({
                         <X className="h-4 w-4" aria-hidden="true" />
                     )}
                 </ToggleGroupItem>
-            )}
-             
-        </ToggleGroup>
-    </div>
+            )} */}
+
+            </ToggleGroup>
+        </div>
     );
 };
 
