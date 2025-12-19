@@ -1,4 +1,5 @@
 import Link from "next/link"
+import dynamic from "next/dynamic";
 import { ChevronRight, Star, Home, ArrowUpRight, Shield, Heart, Sparkles, MessageCircle, Users, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DEVICE_COST, SUBSCRIPTION_COST } from "@/lib/data";
@@ -10,7 +11,7 @@ import CustomizationForm from "./components/LandingPage/CustomizationForm";
 import Image from "next/image";
 import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
 import { kickstarterLink } from "@/lib/data";
-import HitemGenerator from "./components/HitemGenerator";
+const HitemGenerator = dynamic(() => import("./components/HitemGenerator"), { ssr: false });
 
 export default async function LandingPage() {
   const supabase = createClient();

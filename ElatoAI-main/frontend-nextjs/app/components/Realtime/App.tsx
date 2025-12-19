@@ -225,6 +225,10 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
         );
 
         geminiDisconnectRef.current = geminiConnection.disconnect;
+
+        // Force state to "Speaking" immediately because we expect an initial greeting.
+        // This prevents the UI from showing "Listening" while waiting for the audio.
+        setIsAgentSpeaking(true);
         setSessionStatus("CONNECTED");
         toast({ description: "Connected" });
 
