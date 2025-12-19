@@ -1,6 +1,8 @@
-import { CATEGORY_LABELS, DISPLAY_ORDER } from "@/lib/categoryMapping";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { X } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
+import { FaBookOpen, FaHandHoldingMedical } from "react-icons/fa";
+import { FaChild } from "react-icons/fa6";
 
 interface PersonalityFiltersProps {
     setSelectedFilters: Dispatch<SetStateAction<PersonalityFilter[]>>;
@@ -28,16 +30,41 @@ const PersonalityFilters = ({
                 }}
                 className="justify-start mb-4 ml-1 text-xs inline-flex flex-nowrap min-w-max"
             >
-                {DISPLAY_ORDER.map((categoryKey) => (
+                <ToggleGroupItem
+                    value="is_story"
+                    aria-label="Toggle story mode"
+                    className="rounded-full flex items-center gap-2 text-xs border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 hover:shadow-sm hover:shadow-purple-100 transition-all duration-200 [&[data-state=on]]:bg-gradient-to-r [&[data-state=on]]:from-purple-400 [&[data-state=on]]:to-pink-400 [&[data-state=on]]:text-white [&[data-state=on]]:border-transparent [&[data-state=on]]:shadow-lg [&[data-state=on]]:shadow-purple-200 [&[data-state=on]]:animate-pulse"
+                >
+                    <FaBookOpen className="h-4 w-4 text-purple-600" />
+                    {"Story mode"}
+                    {selectedFilters.includes("is_story") && (
+                        <X className="h-4 w-4" aria-hidden="true" />
+                    )}
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                    value="is_child_voice"
+                    aria-label="Toggle children filter"
+                    className="rounded-full flex items-center gap-2 text-xs [&[data-state=on]]:bg-gray-200"
+                >
+                    <FaChild className="h-4 w-4 text-gray-800" />
+                    {"For children"}
+                    {selectedFilters.includes("is_child_voice") && (
+                        <X className="h-4 w-4" aria-hidden="true" />
+                    )}
+                </ToggleGroupItem>
+                {!isDoctor && (
                     <ToggleGroupItem
-                        key={categoryKey}
-                        value={categoryKey}
-                        aria-label={`Toggle ${CATEGORY_LABELS[categoryKey]}`}
-                        className="rounded-full flex items-center gap-2 text-xs border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 [&[data-state=on]]:bg-black [&[data-state=on]]:text-white [&[data-state=on]]:border-black"
+                        value="is_doctor"
+                        aria-label="Toggle doctors filter"
+                        className="rounded-full flex items-center gap-2 text-xs [&[data-state=on]]:bg-gray-200"
                     >
-                        {CATEGORY_LABELS[categoryKey]}
+                        <FaHandHoldingMedical className="h-4 w-4 text-gray-800" />
+                        {"For caregivers"}
+                        {selectedFilters.includes("is_doctor") && (
+                            <X className="h-4 w-4" aria-hidden="true" />
+                        )}
                     </ToggleGroupItem>
-                ))}
+                )}
 
             </ToggleGroup>
         </div>

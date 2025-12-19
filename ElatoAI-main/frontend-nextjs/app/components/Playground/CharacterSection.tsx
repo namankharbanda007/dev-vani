@@ -1,7 +1,6 @@
 "use client";
 
 import ModifyCharacterSheet from "./ModifyCharacterSheet";
-import { CATEGORY_MAP } from "@/lib/categoryMapping";
 import Image from "next/image";
 import { cn, getPersonalityImageSrc } from "@/lib/utils";
 import {
@@ -57,10 +56,8 @@ const CharacterSection = ({
     }, []);
 
     const filteredPersonalities = allPersonalities.filter((personality) => {
-        if (selectedFilters.length === 0) return true;
-        return selectedFilters.some((category) => {
-            const allowedKeys = CATEGORY_MAP[category] || [];
-            return allowedKeys.includes(personality.key);
+        return selectedFilters.every((filter) => {
+            return personality[filter] === true;
         });
     });
 
