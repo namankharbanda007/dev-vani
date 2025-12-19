@@ -187,7 +187,7 @@ declare global {
         pitch_factor: number;
     }
 
-    type PersonalityFilter = "is_child_voice" | "is_doctor" | "is_story";
+    type PersonalityFilter = "children" | "students" | "adults" | "seniors" | "specialized" | "funny" | string;
 
     type Module = "math" | "science" | "spelling" | "general_trivia";
 
