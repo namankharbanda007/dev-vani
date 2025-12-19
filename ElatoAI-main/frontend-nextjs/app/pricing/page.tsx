@@ -38,7 +38,7 @@ export default function PricingPage() {
 
                                 <div className="mb-6">
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-5xl font-bold text-gray-900">₹499</span>
+                                        <span className="text-5xl font-bold text-gray-900">₹199</span>
                                         <span className="text-gray-500">/month</span>
                                     </div>
                                     <p className="text-gray-600 mt-2">Perfect for individuals starting their journey</p>
@@ -83,7 +83,7 @@ export default function PricingPage() {
 
                                 <div className="mb-6">
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-5xl font-bold text-white">₹999</span>
+                                        <span className="text-5xl font-bold text-white">₹1,499</span>
                                         <span className="text-purple-100">/month</span>
                                     </div>
                                     <p className="text-purple-100 mt-2">For families wanting the complete experience</p>
@@ -130,7 +130,7 @@ export default function PricingPage() {
 
                                 <div className="mb-6">
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-5xl font-bold text-gray-900">₹1,499</span>
+                                        <span className="text-5xl font-bold text-gray-900">₹3,499</span>
                                         <span className="text-gray-500">/month</span>
                                     </div>
                                     <p className="text-gray-600 mt-2">For larger families and communities</p>
