@@ -18,6 +18,7 @@ import { useHandleServerEvent } from "./hooks/useHandleServerEvent";
 // Utilities
 import { createRealtimeConnection } from "./lib/realtimeConnection";
 import { createGeminiConnection } from "./lib/geminiConnection";
+import { createElevenLabsConnection } from "./lib/elevenLabsConnection";
 import { toast } from "@/components/ui/use-toast";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Transcript from "./components/Transcript";
@@ -232,6 +233,37 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
         setSessionStatus("CONNECTED");
         toast({ description: "Connected" });
 
+
+      } else if (personality?.provider === 'elevenlabs') {
+        if (!sessionData.signed_url) {
+          audioContext.close();
+          setSessionStatus("DISCONNECTED");
+          toast({ description: "Failed to get ElevenLabs signed URL", variant: "destructive" });
+          return;
+        }
+
+        const elevenLabsConnection = await createElevenLabsConnection(
+          audioContext,
+          sessionData.signed_url,
+          (event) => {
+            // Handle remote events
+            if (event.type === 'agent_response') {
+              setIsAgentSpeaking(true);
+            }
+          },
+          (speaking) => {
+            setIsAgentSpeaking(speaking);
+          },
+          () => {
+            console.log("ElevenLabs disconnected");
+            setSessionStatus("DISCONNECTED");
+          }
+        );
+
+        geminiDisconnectRef.current = elevenLabsConnection.disconnect;
+        setIsAgentSpeaking(true); // Assuming immediate interaction
+        setSessionStatus("CONNECTED");
+        toast({ description: "Connected to ElevenLabs" });
 
       } else {
         // OpenAI Logic

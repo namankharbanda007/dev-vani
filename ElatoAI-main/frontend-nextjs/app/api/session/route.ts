@@ -165,6 +165,43 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  // ElevenLabs Logic
+  if (dbUser.personality?.provider === 'elevenlabs') {
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: "ElevenLabs API Key not configured" }, { status: 500 });
+    }
+
+    const agentId = dbUser.personality.oai_voice;
+    if (!agentId) {
+      return NextResponse.json({ error: "Agent ID not found in personality" }, { status: 400 });
+    }
+
+    try {
+      const signedUrlResponse = await fetch(
+        `https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=${agentId}`,
+        {
+          headers: {
+            'xi-api-key': apiKey,
+          },
+        }
+      );
+
+      if (!signedUrlResponse.ok) {
+        const errorText = await signedUrlResponse.text();
+        console.error("ElevenLabs Signed URL Error:", errorText);
+        throw new Error(`Failed to get signed URL: ${signedUrlResponse.statusText}`);
+      }
+
+      const { signed_url } = await signedUrlResponse.json();
+      return NextResponse.json({ signed_url });
+
+    } catch (error: any) {
+      console.error("Error fetching ElevenLabs signed URL:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+  }
+
   try {
     const response = await fetch(
       "https://api.openai.com/v1/realtime/sessions",
