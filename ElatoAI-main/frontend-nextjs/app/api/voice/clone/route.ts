@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         const voiceFormData = new FormData();
         voiceFormData.append('name', name);
         voiceFormData.append('files', audioFile, 'recording.wav');
-        voiceFormData.append('description', description || 'Cloned voice from ElatoAI');
+        voiceFormData.append('description', description || 'Cloned voice from Smart murti');
         // voiceFormData.append('labels', '{"type": "cloned"}'); // Optional
 
         console.log("Cloning voice...");
@@ -46,6 +46,22 @@ export async function POST(req: Request) {
 
         // 2. Create Conversational Agent with this voice
         console.log("Creating agent...");
+        const languageInput = formData.get('language') as string || '';
+
+        // Simple heuristic mapping for common languages
+        let langCode = 'en';
+        const lowerLang = languageInput.toLowerCase();
+        if (lowerLang.includes('hindi')) langCode = 'hi';
+        else if (lowerLang.includes('spanish')) langCode = 'es';
+        else if (lowerLang.includes('french')) langCode = 'fr';
+        else if (lowerLang.includes('german')) langCode = 'de';
+        else if (lowerLang.includes('italian')) langCode = 'it';
+        else if (lowerLang.includes('portuguese')) langCode = 'pt';
+        else if (lowerLang.includes('polish')) langCode = 'pl';
+        // Add more as needed or default to 'en'
+
+        console.log(`Creating agent with language: ${langCode} (Input: ${languageInput})`);
+
         const agentResponse = await fetch('https://api.elevenlabs.io/v1/convai/agents/create', {
             method: 'POST',
             headers: {
@@ -57,13 +73,14 @@ export async function POST(req: Request) {
                 conversation_config: {
                     agent: {
                         prompt: {
-                            prompt: "You are a helpful AI assistant." // Default prompt, will be overridden by personality prompt logic likely, or checking if we need to set it dynamic here
+                            prompt: "You are a helpful AI assistant."
                         },
                         first_message: "Hello! I am your cloned voice.",
-                        language: "en"
+                        language: langCode
                     },
                     tts: {
-                        voice_id: voiceId
+                        voice_id: voiceId,
+                        model_id: "eleven_multilingual_v2"
                     }
                 }
             })

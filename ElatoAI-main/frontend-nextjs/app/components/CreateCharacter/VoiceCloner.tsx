@@ -11,9 +11,10 @@ import { cn } from "@/lib/utils";
 
 interface VoiceClonerProps {
     onCloneSuccess: (agentId: string, voiceName: string) => void;
+    language?: string;
 }
 
-export default function VoiceCloner({ onCloneSuccess }: VoiceClonerProps) {
+export default function VoiceCloner({ onCloneSuccess, language }: VoiceClonerProps) {
     const [mode, setMode] = useState<'record' | 'upload'>('record');
     const [isRecording, setIsRecording] = useState(false);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -94,6 +95,9 @@ export default function VoiceCloner({ onCloneSuccess }: VoiceClonerProps) {
         formData.append('audio', audioBlob);
         formData.append('name', name);
         formData.append('description', description);
+        if (language) {
+            formData.append('language', language);
+        }
 
         try {
             const response = await fetch('/api/voice/clone', {

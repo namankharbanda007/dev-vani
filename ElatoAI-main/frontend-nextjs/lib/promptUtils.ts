@@ -13,6 +13,8 @@ export interface CharacterAttributes {
     petPeeves: string;
     flaws: string;
     education: string;
+    occupation: string;
+    maritalStatus: string;
     extraInfo: string;
 }
 
@@ -31,6 +33,8 @@ export const initialCharacterAttributes: CharacterAttributes = {
     petPeeves: "",
     flaws: "",
     education: "",
+    occupation: "",
+    maritalStatus: "",
     extraInfo: "",
 };
 
@@ -54,7 +58,9 @@ You are to fully embody the following persona:
 * **Age:** ${attrs.age || "{{AGE}}"}
 * **Ethnicity/Background:** ${attrs.ethnicity || "{{ETHNICITY}}"}
 * **Location:** ${attrs.location || "{{WHERE_THEY_LIVE}}"}
-* **Education/Job:** ${attrs.education || "{{EDUCATION_LEVEL}}"}
+* **Education:** ${attrs.education || "{{EDUCATION_LEVEL}}"}
+* **Occupation:** ${attrs.occupation || "{{OCCUPATION}}"}
+* **Marital Status:** ${attrs.maritalStatus || "{{MARITAL_STATUS}}"}
 * **Maturity Level:** ${attrs.maturity || "{{MATURITY}}"}
 
 ### PERSONALITY & PSYCHOLOGY
@@ -135,7 +141,10 @@ export const parseCharacterPrompt = (prompt: string): CharacterAttributes | null
         age: extractValue(prompt, "* **Age:**"),
         ethnicity: extractValue(prompt, "* **Ethnicity/Background:**"),
         location: extractValue(prompt, "* **Location:**"),
-        education: extractValue(prompt, "* **Education/Job:**"),
+
+        education: extractValue(prompt, "* **Education:**"),
+        occupation: extractValue(prompt, "* **Occupation:**"),
+        maritalStatus: extractValue(prompt, "* **Marital Status:**"),
         maturity: extractValue(prompt, "* **Maturity Level:**"),
         behaviour: extractValue(prompt, "* **Core Behaviour:**"),
         humor: extractValue(prompt, "* **Humor Style:**"),

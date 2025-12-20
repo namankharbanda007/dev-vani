@@ -597,11 +597,52 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-purple-900">Education / Occupation</Label>
+                  <Label className="text-sm font-semibold text-purple-900">Education</Label>
                   <Input
                     value={characterAttributes.education}
                     onChange={(e) => handleAttributeChange('education', e.target.value)}
-                    placeholder="e.g. High School, Doctor"
+                    placeholder="e.g. High School"
+                    className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-purple-900">Occupation</Label>
+                  <Input
+                    value={characterAttributes.occupation}
+                    onChange={(e) => handleAttributeChange('occupation', e.target.value)}
+                    placeholder="e.g. Doctor, Pilot"
+                    className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-purple-900">Marital Status</Label>
+                  <Select
+                    value={characterAttributes.maritalStatus}
+                    onValueChange={(val) => handleAttributeChange('maritalStatus', val)}
+                  >
+                    <SelectTrigger className="bg-white/80 border-2 border-purple-100 rounded-xl focus:ring-0 focus:border-purple-400">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['Single', 'Married', 'Divorced', 'Widowed', 'It\'s Complicated'].map((s) => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-purple-900">Ethnicity</Label>
+                  <div className="flex flex-wrap gap-1 mb-1">
+                    {['Asian', 'Caucasian', 'Black', 'Latino', 'Indian', 'Arab', 'Alien'].map((opt) => (
+                      <button key={opt} onClick={() => handleAttributeChange('ethnicity', opt)} className="text-[10px] bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full border border-purple-100 hover:bg-purple-100">
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                  <Input
+                    value={characterAttributes.ethnicity}
+                    onChange={(e) => handleAttributeChange('ethnicity', e.target.value)}
+                    placeholder="e.g. South Asian"
                     className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
                   />
                 </div>
@@ -622,6 +663,37 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                     placeholder="e.g. Best Friend, Rival"
                     className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-purple-900">Speaking Style / Language</Label>
+                  <Input
+                    value={characterAttributes.language}
+                    onChange={(e) => handleAttributeChange('language', e.target.value)}
+                    placeholder="e.g. Casual Slang, Formal English"
+                    className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
+                  />
+                </div>
+              </div>
+
+              {/* Humor Style */}
+              <div className="space-y-3">
+                <Label className="text-base font-semibold text-purple-900">Humor Style</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['Witty', 'Sarcastic', 'Dry', 'Dad Jokes', 'Slapstick', 'Dark', 'None'].map((h) => (
+                    <div
+                      key={h}
+                      onClick={() => handleAttributeChange('humor', h)}
+                      className={cn(
+                        "cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border",
+                        characterAttributes.humor === h
+                          ? "bg-purple-600 text-white border-transparent shadow-md"
+                          : "bg-white text-gray-600 border-purple-100 hover:border-purple-300 hover:bg-purple-50"
+                      )}
+                    >
+                      {h}
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -682,6 +754,16 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold text-purple-900">Flaws</Label>
                   <Input value={characterAttributes.flaws} onChange={(e) => handleAttributeChange('flaws', e.target.value)} className="bg-white/80 border-2 border-purple-100 rounded-xl" />
+                </div>
+
+                <div className="space-y-2 col-span-2">
+                  <Label className="text-sm font-semibold text-purple-900">Extra Info (Hidden Context)</Label>
+                  <Textarea
+                    value={characterAttributes.extraInfo}
+                    onChange={(e) => handleAttributeChange('extraInfo', e.target.value)}
+                    placeholder="Any secrets or specific instructions..."
+                    className="bg-white/80 border-2 border-purple-100 rounded-xl min-h-[80px]"
+                  />
                 </div>
               </div>
             </div>
@@ -829,12 +911,14 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                 <DialogHeader>
                   <DialogTitle>Clone Your Voice</DialogTitle>
                 </DialogHeader>
-                <VoiceCloner onCloneSuccess={(agentId, voiceName) => {
-                  const newVoice = { id: agentId, name: voiceName, provider: 'elevenlabs' };
-                  setClonedVoices(prev => [...prev, newVoice]);
-                  setFormData(prev => ({ ...prev, provider: 'elevenlabs', voice: agentId }));
-                  setIsVoiceClonerOpen(false);
-                }} />
+                <VoiceCloner
+                  language={characterAttributes.language}
+                  onCloneSuccess={(agentId, voiceName) => {
+                    const newVoice = { id: agentId, name: voiceName, provider: 'elevenlabs' };
+                    setClonedVoices(prev => [...prev, newVoice]);
+                    setFormData(prev => ({ ...prev, provider: 'elevenlabs', voice: agentId }));
+                    setIsVoiceClonerOpen(false);
+                  }} />
               </DialogContent>
             </Dialog>
           </div>
