@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ArrowRight, Check, Volume2, Plus, Sparkles, User, Mic, Settings2, Image as ImageIcon, Upload, Smile, BrainCircuit } from "lucide-react";
-import { createPersonality, updatePersonality } from "@/db/personalities";
+import { createPersonality, updatePersonality, getMyPersonalities } from "@/db/personalities";
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
@@ -20,10 +20,12 @@ import ImageGenerator from "./ImageGenerator";
 import { PitchFactors } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import VoiceCloneModal from "./VoiceCloneModal";
+import VoiceCloner from "./VoiceCloner";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CharacterAttributes, generateCharacterPrompt, initialCharacterAttributes, parseCharacterPrompt } from "@/lib/promptUtils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 
 interface SettingsDashboardProps {
@@ -33,7 +35,7 @@ interface SettingsDashboardProps {
 }
 
 const formSchema = z.object({
-  provider: z.enum(["openai", "gemini"]),
+  provider: z.enum(["openai", "gemini", "elevenlabs"]),
   title: z.string().min(2, "Minimum 2 characters").max(50, "Maximum 50 characters"),
   description: z.string().min(50, "Minimum 50 characters").max(200, "Maximum 200 characters"),
   prompt: z.string().min(100, "Minimum 100 characters").max(2000, "Maximum 2000 characters"),
@@ -134,6 +136,33 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
     voiceInputPlaceholder: string;
     voiceDescription: string;
   } | null>(null);
+
+  const [isVoiceClonerOpen, setIsVoiceClonerOpen] = useState(false);
+  const [clonedVoices, setClonedVoices] = useState<any[]>([]);
+
+  // Fetch existing cloned voices on mount
+  React.useEffect(() => {
+    const fetchClonedVoices = async () => {
+      if (selectedUser?.user_id) {
+        const personalities = await getMyPersonalities(supabase, selectedUser.user_id);
+        const elevenLabsPersonas = personalities.filter(p => p.provider === 'elevenlabs');
+        const uniqueVoices = new Map();
+
+        elevenLabsPersonas.forEach(p => {
+          if (p.oai_voice && !uniqueVoices.has(p.oai_voice)) {
+            uniqueVoices.set(p.oai_voice, {
+              id: p.oai_voice,
+              name: p.title + " (Cloned)", // Or store voice name in metadata/subtitle if possible, falling back to title
+              provider: 'elevenlabs'
+            });
+          }
+        });
+
+        setClonedVoices(Array.from(uniqueVoices.values()));
+      }
+    };
+    fetchClonedVoices();
+  }, [selectedUser?.user_id, supabase]);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData({ ...formData, [field]: value });
@@ -246,6 +275,24 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
       }
 
       if (personality) {
+        // Sync with ElevenLabs if it's a cloned voice agent
+        if (personality.provider === 'elevenlabs' && personality.oai_voice) {
+          try {
+            await fetch('/api/voice/update-agent', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                agent_id: personality.oai_voice,
+                prompt: personality.character_prompt,
+                first_message: personality.first_message_prompt
+              })
+            });
+          } catch (err) {
+            console.error("Failed to sync agent prompt:", err);
+            // Don't block success, just log
+          }
+        }
+
         toast({ title: "Success!", description: initialData ? "Character updated successfully." : "Your AI companion is ready." });
         router.push(`/home`);
       } else {
@@ -661,6 +708,51 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {/* Clone Voice Card */}
+              <div
+                onClick={() => setIsVoiceClonerOpen(true)}
+                className="cursor-pointer relative group rounded-2xl p-4 border-2 border-dashed border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 hover:border-amber-500 transition-all duration-300 flex flex-col items-center justify-center gap-2 h-auto aspect-square"
+              >
+                <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
+                  <Plus className="w-8 h-8" />
+                </div>
+                <h3 className="font-bold text-sm text-amber-900">Clone Voice</h3>
+              </div>
+
+              {/* Cloned Voices */}
+              {clonedVoices.map((voice: any) => {
+                const isSelected = formData.voice === voice.id;
+                return (
+                  <div
+                    key={voice.id}
+                    onClick={() => {
+                      setFormData(prev => ({ ...prev, provider: 'elevenlabs', voice: voice.id }));
+                    }}
+                    className={cn(
+                      "cursor-pointer relative group rounded-2xl p-4 border-2 transition-all duration-300 flex flex-col items-center justify-between gap-2 h-auto aspect-square",
+                      isSelected
+                        ? "bg-amber-50 border-amber-500 shadow-md scale-105"
+                        : "bg-white border-amber-100 hover:border-amber-300 hover:shadow-sm hover:scale-105"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300",
+                      isSelected
+                        ? "bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg scale-110"
+                        : "bg-amber-50 text-amber-600 group-hover:bg-amber-100 group-hover:scale-105"
+                    )}>
+                      <User className="w-7 h-7" />
+                    </div>
+                    <div className="text-center w-full mt-2">
+                      <h3 className={cn("font-bold text-sm mb-1 truncate capitalize", isSelected ? "text-amber-900" : "text-gray-900")}>
+                        {voice.name}
+                      </h3>
+                      <p className="text-[10px] uppercase font-bold text-amber-600">CLONED</p>
+                    </div>
+                  </div>
+                )
+              })}
+
               {geminiVoices.map((voice: any) => {
                 const isSelected = formData.voice === voice.id;
                 const isPlaying = previewingVoice === voice.id;
@@ -722,14 +814,29 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
             </div> */}
 
             <div className="flex justify-center pt-4">
+              {/* Note: same tip for now */}
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-2xl flex items-start gap-3">
                 <Sparkles className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-semibold text-amber-900 text-sm">Pro Tip</h4>
-                  <p className="text-amber-800 text-sm">Click on any voice card to hear a preview. Choose one that matches the personality you defined in the previous step.</p>
+                  <p className="text-amber-800 text-sm">Click on any voice card to hear a preview. You can also clone your own voice for a truly unique experience!</p>
                 </div>
               </div>
             </div>
+
+            <Dialog open={isVoiceClonerOpen} onOpenChange={setIsVoiceClonerOpen}>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Clone Your Voice</DialogTitle>
+                </DialogHeader>
+                <VoiceCloner onCloneSuccess={(agentId, voiceName) => {
+                  const newVoice = { id: agentId, name: voiceName, provider: 'elevenlabs' };
+                  setClonedVoices(prev => [...prev, newVoice]);
+                  setFormData(prev => ({ ...prev, provider: 'elevenlabs', voice: agentId }));
+                  setIsVoiceClonerOpen(false);
+                }} />
+              </DialogContent>
+            </Dialog>
           </div>
         )}
 
