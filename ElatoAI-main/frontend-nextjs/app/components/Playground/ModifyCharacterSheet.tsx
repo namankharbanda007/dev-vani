@@ -7,27 +7,13 @@ import {
 } from "@/components/ui/sheet";
 import Image from "next/image";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { Airplay, Check, MonitorSmartphone, Phone, Edit, Trash2, Loader2 } from "lucide-react";
+import { Airplay, Check, MonitorSmartphone, Phone, Edit } from "lucide-react";
 import { useState } from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { getPersonalityImageSrc } from "@/lib/utils";
 import { EmojiComponent } from "./EmojiImage";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { deletePersonalityAction } from "@/app/actions";
-import { toast } from "@/components/ui/use-toast";
-import { useRouter } from "next/navigation";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 interface ModifyCharacterSheetProps {
     openPersonality: IPersonality;
@@ -47,55 +33,35 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
     disableButtons,
 }) => {
     const [isSent, setIsSent] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const router = useRouter();
 
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const isPersonalCharacter = openPersonality.creator_id !== null;
     const isDoctor = openPersonality.is_doctor;
 
-    const handleDelete = async () => {
-        setIsDeleting(true);
-        try {
-            const result = await deletePersonalityAction(openPersonality.personality_id!);
-            if (result.error) {
-                toast({ title: "Error", description: result.error, variant: "destructive" });
-            } else {
-                toast({ title: "Success", description: "Character deleted successfully!" });
-                router.refresh();
-            }
-        } catch (error) {
-            toast({ title: "Error", description: "Failed to delete character.", variant: "destructive" });
-        } finally {
-            setIsDeleting(false);
-        }
-    };
-
     const ButtonsComponent = () => {
         return (
-            <div className="flex flex-col gap-3 p-4">
-                <div className="flex flex-row gap-4">
-                    <Button
-                        size="lg"
-                        className={`w-full rounded-full text-sm md:text-lg flex flex-row items-center gap-1 md:gap-2 transition-colors duration-300 ${isSent || isCurrentPersonality
-                            ? "bg-green-500 hover:bg-green-600"
-                            : ""
-                            }`}
-                        variant={disableButtons ? "upsell_primary" : "default"}
-                        disabled={isCurrentPersonality || disableButtons}
-                        onClick={() => {
-                            setIsSent(true);
-                            onPersonalityPicked(openPersonality.personality_id!);
-                            setTimeout(() => setIsSent(false), 10000);
-                        }}
-                    >
-                        <Check className="flex-shrink-0 h-5 w-5 md:h-6 md:w-6" />
-                        {isSent || isCurrentPersonality
-                            ? "Live character"
-                            : "Click to chat"}
-                    </Button>
-                    {/* Edit button available for all characters */}
+            <div className="flex flex-row gap-4 p-4 ">
+                <Button
+                    size="lg"
+                    className={`w-full rounded-full text-sm md:text-lg flex flex-row items-center gap-1 md:gap-2 transition-colors duration-300 ${isSent || isCurrentPersonality
+                        ? "bg-green-500 hover:bg-green-600"
+                        : ""
+                        }`}
+                    variant={disableButtons ? "upsell_primary" : "default"}
+                    disabled={isCurrentPersonality || disableButtons}
+                    onClick={() => {
+                        setIsSent(true);
+                        onPersonalityPicked(openPersonality.personality_id!);
+                        setTimeout(() => setIsSent(false), 10000);
+                    }}
+                >
+                    <Check className="flex-shrink-0 h-5 w-5 md:h-6 md:w-6" />
+                    {isSent || isCurrentPersonality
+                        ? "Live character"
+                        : "Click to chat"}
+                </Button>
+                {isPersonalCharacter && (
                     <Link href={`/home/create?edit=true&id=${openPersonality.personality_id}`} className="w-full">
                         <Button
                             size="lg"
@@ -106,39 +72,7 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
                             Edit
                         </Button>
                     </Link>
-                </div>
-                {/* Delete button with confirmation */}
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button
-                            size="lg"
-                            variant="destructive"
-                            className="w-full rounded-full text-sm md:text-lg flex flex-row items-center gap-1 md:gap-2"
-                            disabled={isDeleting}
-                        >
-                            {isDeleting ? (
-                                <Loader2 className="flex-shrink-0 h-5 w-5 md:h-6 md:w-6 animate-spin" />
-                            ) : (
-                                <Trash2 className="flex-shrink-0 h-5 w-5 md:h-6 md:w-6" />
-                            )}
-                            {isDeleting ? "Deleting..." : "Delete Character"}
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Character?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Are you sure you want to delete "{openPersonality.title}"? This action cannot be undone.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-                                Delete
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                )}
             </div>
         );
     };
