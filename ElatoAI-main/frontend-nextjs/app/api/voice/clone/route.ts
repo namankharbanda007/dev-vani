@@ -48,8 +48,8 @@ export async function POST(req: Request) {
         console.log("Creating agent...");
         const languageInput = formData.get('language') as string || '';
 
-        // Simple heuristic mapping for common languages
-        let langCode = 'en';
+        // Simple heuristic mapping for common languages - Default to Hindi
+        let langCode = 'hi';
         const lowerLang = languageInput.toLowerCase();
         if (lowerLang.includes('hindi')) langCode = 'hi';
         else if (lowerLang.includes('spanish')) langCode = 'es';

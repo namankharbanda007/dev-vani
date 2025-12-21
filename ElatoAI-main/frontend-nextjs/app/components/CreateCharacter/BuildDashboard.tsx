@@ -13,7 +13,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { updatePersonalityAction } from "@/app/actions";
-import { emotionOptions, geminiVoices, openaiVoices, r2UrlAudio } from "@/lib/data";
+import { emotionOptions, geminiVoices, openaiVoices, r2UrlAudio, languageOptions } from "@/lib/data";
 import EmojiComponent from "./EmojiComponent";
 import ImageUpload from "./ImageUpload";
 import ImageGenerator from "./ImageGenerator";
@@ -37,9 +37,9 @@ interface SettingsDashboardProps {
 const formSchema = z.object({
   provider: z.enum(["openai", "gemini", "elevenlabs"]),
   title: z.string().min(2, "Minimum 2 characters").max(50, "Maximum 50 characters"),
-  description: z.string().min(50, "Minimum 50 characters").max(200, "Maximum 200 characters"),
+  description: z.string().max(200, "Maximum 200 characters"),
   prompt: z.string().min(100, "Minimum 100 characters").max(2000, "Maximum 2000 characters"),
-  firstMessagePrompt: z.string().min(50, "Minimum 50 characters").max(150, "Maximum 150 characters"),
+  firstMessagePrompt: z.string().max(150, "Maximum 150 characters"),
   voice: z.string().min(1, "Voice selection is required"),
   voiceCharacteristics: z.object({
     features: z.string().min(10, "Minimum 10 characters").max(150, "Maximum 150 characters"),
@@ -187,7 +187,6 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
 
     if (step === 'identity') {
       if (formData.title.length < 2) { errors.title = "Title must be at least 2 characters"; isValid = false; }
-      if (formData.description.length < 50) { errors.description = "Description must be at least 50 characters"; isValid = false; }
     }
 
     if (step === 'personality') {
@@ -199,8 +198,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
     }
 
     if (step === 'refine') {
-      if (formData.firstMessagePrompt.length < 50) { errors.firstMessagePrompt = "First message must be at least 50 characters"; isValid = false; }
-      // Speaking Style is part of attributes now, so prompt check covers it implicitly or we can check specific field
+      // No minimum lengths for firstMessagePrompt now
     }
 
     setFormErrors(errors);
@@ -666,13 +664,25 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-purple-900">Speaking Style / Language</Label>
-                  <Input
+                  <Label className="text-sm font-semibold text-purple-900">Primary Language</Label>
+                  <Select
                     value={characterAttributes.language}
-                    onChange={(e) => handleAttributeChange('language', e.target.value)}
-                    placeholder="e.g. Casual Slang, Formal English"
-                    className="bg-white/80 border-2 border-purple-100 focus:border-purple-400 focus:bg-white transition-all rounded-xl"
-                  />
+                    onValueChange={(val) => handleAttributeChange('language', val)}
+                  >
+                    <SelectTrigger className="bg-white/80 border-2 border-purple-100 rounded-xl focus:ring-0 focus:border-purple-400">
+                      <SelectValue placeholder="Select Primary Language" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      <div className="px-2 py-1 text-xs font-bold text-purple-600 bg-purple-50">🇮🇳 Indian Languages</div>
+                      {languageOptions.filter(l => l.region === 'India').map((lang) => (
+                        <SelectItem key={lang.code} value={lang.name}>{lang.name}</SelectItem>
+                      ))}
+                      <div className="px-2 py-1 text-xs font-bold text-blue-600 bg-blue-50 mt-1">🌍 Global Languages</div>
+                      {languageOptions.filter(l => l.region === 'Global').map((lang) => (
+                        <SelectItem key={lang.code} value={lang.name}>{lang.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

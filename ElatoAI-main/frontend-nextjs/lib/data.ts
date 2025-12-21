@@ -378,3 +378,39 @@ export const HIDDEN_PERSONALITIES = [
     'Blood test pal',
     'Math wiz'
 ];
+
+// Language options for voice cloning and character creation
+export const languageOptions = [
+    // Indian Languages
+    { code: 'hi', name: 'Hindi', region: 'India' },
+    { code: 'bn', name: 'Bengali', region: 'India' },
+    { code: 'te', name: 'Telugu', region: 'India' },
+    { code: 'mr', name: 'Marathi', region: 'India' },
+    { code: 'ta', name: 'Tamil', region: 'India' },
+    { code: 'gu', name: 'Gujarati', region: 'India' },
+    { code: 'kn', name: 'Kannada', region: 'India' },
+    { code: 'ml', name: 'Malayalam', region: 'India' },
+    { code: 'pa', name: 'Punjabi', region: 'India' },
+    { code: 'or', name: 'Odia', region: 'India' },
+    { code: 'as', name: 'Assamese', region: 'India' },
+    { code: 'ur', name: 'Urdu', region: 'India' },
+    // Global Languages
+    { code: 'en', name: 'English', region: 'Global' },
+    { code: 'es', name: 'Spanish', region: 'Global' },
+    { code: 'fr', name: 'French', region: 'Global' },
+    { code: 'de', name: 'German', region: 'Global' },
+    { code: 'it', name: 'Italian', region: 'Global' },
+    { code: 'pt', name: 'Portuguese', region: 'Global' },
+    { code: 'ru', name: 'Russian', region: 'Global' },
+    { code: 'zh', name: 'Chinese (Mandarin)', region: 'Global' },
+    { code: 'ja', name: 'Japanese', region: 'Global' },
+    { code: 'ko', name: 'Korean', region: 'Global' },
+    { code: 'ar', name: 'Arabic', region: 'Global' },
+    { code: 'tr', name: 'Turkish', region: 'Global' },
+    { code: 'pl', name: 'Polish', region: 'Global' },
+    { code: 'nl', name: 'Dutch', region: 'Global' },
+    { code: 'sv', name: 'Swedish', region: 'Global' },
+    { code: 'th', name: 'Thai', region: 'Global' },
+    { code: 'vi', name: 'Vietnamese', region: 'Global' },
+    { code: 'id', name: 'Indonesian', region: 'Global' },
+];
