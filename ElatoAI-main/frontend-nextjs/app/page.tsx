@@ -11,6 +11,7 @@ import CustomizationForm from "./components/LandingPage/CustomizationForm";
 import Image from "next/image";
 import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
 import { kickstarterLink } from "@/lib/data";
+const HeroCarousel = dynamic(() => import("./components/LandingPage/HeroCarousel"), { ssr: false });
 
 
 export default async function LandingPage() {
@@ -59,54 +60,23 @@ export default async function LandingPage() {
                 </p>
               </div>
 
-              {/* Character Showcase - The Three Companions */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 w-full max-w-5xl mt-12">
-
-                {/* Smart Girl - Left */}
-                <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-300">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-pink-200 to-red-200 rounded-full blur-2xl opacity-40"></div>
-                    <Image
-                      src="/products/smart-girl.jpg"
-                      alt="Smart Girl - Customizable AI Companion"
-                      width={280}
-                      height={280}
-                      className="relative z-10 drop-shadow-2xl rounded-3xl"
-                    />
-                  </div>
-                  <p className="mt-4 text-lg font-semibold text-pink-700">Your Caring Friend</p>
+              {/* Smart Pandit - Center (Main Product) */}
+              <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-300 mb-8">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-b from-amber-300 to-yellow-200 rounded-full blur-3xl opacity-50 animate-pulse"></div>
+                  <Image
+                    src="/products/smart-pandit.jpg"
+                    alt="Smart Pandit - AI Spiritual Guide"
+                    width={320}
+                    height={320}
+                    className="relative z-10 drop-shadow-2xl rounded-3xl"
+                  />
                 </div>
-
-                {/* Smart Pandit - Center (Larger) */}
-                <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-300">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-amber-300 to-yellow-200 rounded-full blur-3xl opacity-50 animate-pulse"></div>
-                    <Image
-                      src="/products/smart-pandit.jpg"
-                      alt="Smart Pandit - AI Spiritual Guide"
-                      width={320}
-                      height={320}
-                      className="relative z-10 drop-shadow-2xl rounded-3xl"
-                    />
-                  </div>
-                  <p className="mt-4 text-xl font-bold text-amber-700">Your Spiritual Guide</p>
-                </div>
-
-                {/* Smart Boy - Right */}
-                <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-300">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-blue-200 to-cyan-200 rounded-full blur-2xl opacity-40"></div>
-                    <Image
-                      src="/products/smart-boy.jpg"
-                      alt="Smart Boy - Customizable AI Companion"
-                      width={280}
-                      height={280}
-                      className="relative z-10 drop-shadow-2xl rounded-3xl"
-                    />
-                  </div>
-                  <p className="mt-4 text-lg font-semibold text-cyan-700">Your Playful Buddy</p>
-                </div>
+                <p className="mt-4 text-xl font-bold text-amber-700">Your Spiritual Guide</p>
               </div>
+
+              {/* Character Carousel - Auto-rotating personalities */}
+              <HeroCarousel />
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-8">
