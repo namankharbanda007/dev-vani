@@ -95,7 +95,7 @@ const CharacterSection = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredPersonalities.map((personality, index) => {
                         const isCurrentPersonality = personalityIdState === personality.personality_id;
-                        const isOwner = currentUserId && personality.creator_id === currentUserId;
+                        // Allow any user to edit any character
 
                         return (
                             <div key={personality.personality_id} className="relative group/card">
@@ -170,8 +170,8 @@ const CharacterSection = ({
 
                                 </ModifyCharacterSheet>
 
-                                {/* Edit Image Button (Outside Sheet Trigger) */}
-                                {isOwner && (
+                                {/* Edit Image Button (Outside Sheet Trigger) - Available for all users */}
+                                {currentUserId && (
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();

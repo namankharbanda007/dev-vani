@@ -185,21 +185,7 @@ export const updatePersonalityAction = async (
         return { error: "User not authenticated" };
     }
 
-    // Verify ownership
-    const { data: existing, error: fetchError } = await supabase
-        .from("personalities")
-        .select("creator_id")
-        .eq("personality_id", personalityId)
-        .single();
-
-    if (fetchError || !existing) {
-        return { error: "Personality not found or access denied" };
-    }
-
-    if (existing.creator_id !== user.id) {
-        return { error: "Unauthorized: You do not own this character" };
-    }
-
+    // Allow any authenticated user to update any character (including premade)
     // Filter updates
     const allowedUpdates = {
         title: updates.title,
@@ -225,11 +211,32 @@ export const updatePersonalityAction = async (
 
     if (!data || data.length === 0) {
         return {
-            error: "Update rejected by database. This usually means an RLS (Row Level Security) policy for UPDATE is missing in Supabase. Please add a policy for the 'personalities' table allowing UPDATE where 'auth.uid() = creator_id'."
+            error: "Update rejected by database. Please check RLS policies in Supabase for the 'personalities' table."
         };
     }
 
     return { data: data[0] };
+};
+
+export const deletePersonalityAction = async (personalityId: string) => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { error: "User not authenticated" };
+    }
+
+    // Allow any authenticated user to delete any character
+    const { error } = await supabase
+        .from("personalities")
+        .delete()
+        .eq("personality_id", personalityId);
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    return { success: true };
 };
 
 export const generateCharacterImageAction = async (prompt: string) => {
