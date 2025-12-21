@@ -175,6 +175,99 @@ export default async function LandingPage() {
           </div>
         </section >
 
+        {/* AI Characters Banner */}
+        <section className="w-full py-12 md:py-16 bg-gradient-to-b from-purple-50 to-white relative overflow-hidden">
+          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
+                Meet Our AI Characters
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                50+ unique personalities ready to have meaningful conversations with you
+              </p>
+            </div>
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <Image
+                src="/products/characters-banner.png"
+                alt="SMART मूर्ति AI Characters - Pandit, Advocate, Chef, and more"
+                width={1200}
+                height={500}
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* App Showcase Section */}
+        <section className="w-full py-12 md:py-16 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-orange-200 rounded-full blur-3xl opacity-20"></div>
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-200 rounded-full blur-3xl opacity-20"></div>
+
+          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              {/* Left: Content */}
+              <div className="space-y-6 order-2 md:order-1">
+                <h2 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 leading-tight">
+                  Control Everything From Our App
+                </h2>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  Manage your SMART मूर्ति companions, customize personalities, switch between characters, and explore 50+ premade AI friends - all from the palm of your hand.
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-orange-100 p-2 rounded-lg">
+                      <Sparkles className="h-5 w-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900">Easy Character Switching</h4>
+                      <p className="text-gray-600 text-sm">Change your device's personality in seconds</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="bg-amber-100 p-2 rounded-lg">
+                      <Heart className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900">Create Custom Characters</h4>
+                      <p className="text-gray-600 text-sm">Design your own AI companion with unique traits</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="bg-red-100 p-2 rounded-lg">
+                      <MessageCircle className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900">Talk via Web or Device</h4>
+                      <p className="text-gray-600 text-sm">Chat through the app or your physical murti</p>
+                    </div>
+                  </div>
+                </div>
+                <Link href="/home">
+                  <Button size="lg" className="mt-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-full shadow-lg">
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Explore Now
+                    <ChevronRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Right: Phone Mockup */}
+              <div className="flex justify-center order-1 md:order-2">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-b from-orange-300 to-red-300 rounded-[3rem] blur-3xl opacity-30"></div>
+                  <Image
+                    src="/products/app-mockup.png"
+                    alt="SMART मूर्ति Mobile App"
+                    width={350}
+                    height={700}
+                    className="relative z-10 drop-shadow-2xl"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Product Showcase - 3 Premium Cards */}
         < section className="w-full py-12 md:py-20 bg-white relative overflow-hidden" >
           <div className="absolute inset-0 bg-gradient-to-b from-white via-purple-50/50 to-white pointer-events-none" />
