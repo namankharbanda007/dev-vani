@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Sparkles, Heart, Users } from "lucide-react";
+import { ChevronRight, Sparkles, Zap, Home } from "lucide-react";
 
 export default function ProductsPage() {
     return (
@@ -27,14 +27,14 @@ export default function ProductsPage() {
 
                             {/* Smart Pandit */}
                             <div className="group bg-gradient-to-br from-amber-50 to-yellow-50 rounded-3xl p-8 border-2 border-amber-200 hover:border-amber-400 hover:shadow-2xl transition-all duration-300">
-                                <div className="relative mb-6">
+                                <div className="relative mb-6 h-[280px] flex items-center justify-center bg-amber-100/50 rounded-3xl p-4">
                                     <div className="absolute inset-0 bg-gradient-to-br from-amber-300 to-yellow-300 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
                                     <Image
                                         src="/products/pandit-temple.jpg"
                                         alt="Smart Pandit"
                                         width={400}
                                         height={400}
-                                        className="relative z-10 rounded-2xl shadow-xl"
+                                        className="relative z-10 rounded-2xl shadow-xl max-w-full max-h-full object-contain"
                                     />
                                 </div>
 
@@ -45,12 +45,16 @@ export default function ProductsPage() {
                                     <h2 className="text-3xl font-bold text-amber-900">Smart Pandit</h2>
                                 </div>
 
-                                <p className="text-lg text-amber-800 font-semibold mb-3">
+                                <p className="text-lg text-amber-800 font-semibold mb-2">
                                     Your AI Spiritual Guide
                                 </p>
 
+                                <p className="text-2xl font-bold text-amber-600 mb-4">
+                                    ₹5,000
+                                </p>
+
                                 <p className="text-gray-700 mb-6 leading-relaxed">
-                                    AI-powered marble-finish idol trained on ancient Vedas and Gita. Performs daily Puja, recites Mantras, and answers life's deepest spiritual questions.
+                                    AI-powered marble-finish idol trained on ancient Vedas and Gita. Performs daily Puja, recites Mantras, and answers life's spiritual questions.
                                 </p>
 
                                 <ul className="space-y-2 mb-6">
@@ -64,115 +68,123 @@ export default function ProductsPage() {
                                     </li>
                                     <li className="flex items-start text-sm text-gray-700">
                                         <span className="text-amber-500 mr-2">✦</span>
-                                        <span>Fixed wise personality</span>
+                                        <span>Trained on Vedas & Gita</span>
                                     </li>
                                 </ul>
 
                                 <Link href="/products/smart-pandit" className="block">
                                     <Button className="w-full bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white rounded-full shadow-lg">
-                                        Learn More
+                                        Order Now
                                         <ChevronRight className="ml-2 h-5 w-5" />
                                     </Button>
                                 </Link>
                             </div>
 
-                            {/* AI Boy */}
-                            <div className="group bg-gradient-to-br from-cyan-50 to-blue-50 rounded-3xl p-8 border-2 border-cyan-200 hover:border-cyan-400 hover:shadow-2xl transition-all duration-300">
-                                <div className="relative mb-6">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-300 to-blue-300 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                            {/* Smart Base */}
+                            <div className="group bg-gradient-to-br from-purple-50 to-indigo-50 rounded-3xl p-8 border-2 border-purple-200 hover:border-purple-400 hover:shadow-2xl transition-all duration-300">
+                                <div className="relative mb-6 h-[280px] flex items-center justify-center bg-purple-100/50 rounded-3xl p-4">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-purple-300 to-indigo-300 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
                                     <Image
-                                        src="/products/smart-boy.jpg"
-                                        alt="AI Boy Companion"
+                                        src="/products/smart-base.jpg"
+                                        alt="Smart Base"
                                         width={400}
                                         height={400}
-                                        className="relative z-10 rounded-2xl shadow-xl"
+                                        className="relative z-10 rounded-2xl shadow-xl max-w-full max-h-full object-contain"
                                     />
                                 </div>
 
                                 <div className="flex items-center gap-2 mb-3">
-                                    <div className="bg-cyan-500 p-2 rounded-full">
-                                        <Users className="h-5 w-5 text-white" />
+                                    <div className="bg-purple-500 p-2 rounded-full">
+                                        <Zap className="h-5 w-5 text-white" />
                                     </div>
-                                    <h2 className="text-3xl font-bold text-cyan-900">AI Boy</h2>
+                                    <h2 className="text-3xl font-bold text-purple-900">Smart Base</h2>
                                 </div>
 
-                                <p className="text-lg text-cyan-800 font-semibold mb-3">
-                                    Customizable Best Friend
+                                <p className="text-lg text-purple-800 font-semibold mb-2">
+                                    Bring Any Murti to Life
+                                </p>
+
+                                <p className="text-2xl font-bold text-purple-600 mb-4">
+                                    ₹5,000 <span className="text-sm font-normal text-green-600">+ FREE 3D Print</span>
                                 </p>
 
                                 <p className="text-gray-700 mb-6 leading-relaxed">
-                                    Create your perfect companion. Customize his name, age, personality, voice, hobbies, and backstory. He remembers every conversation.
+                                    Place any murti, 3D model, or statue on this smart base. Select a character from our app and your idol comes to life!
                                 </p>
 
                                 <ul className="space-y-2 mb-6">
                                     <li className="flex items-start text-sm text-gray-700">
-                                        <span className="text-cyan-500 mr-2">✦</span>
-                                        <span>Fully customizable personality</span>
+                                        <span className="text-purple-500 mr-2">✦</span>
+                                        <span>Works with any murti or statue</span>
                                     </li>
                                     <li className="flex items-start text-sm text-gray-700">
-                                        <span className="text-cyan-500 mr-2">✦</span>
-                                        <span>Remembers past conversations</span>
+                                        <span className="text-purple-500 mr-2">✦</span>
+                                        <span>FREE customized 3D print model</span>
                                     </li>
                                     <li className="flex items-start text-sm text-gray-700">
-                                        <span className="text-cyan-500 mr-2">✦</span>
-                                        <span>Grows and evolves with you</span>
+                                        <span className="text-purple-500 mr-2">✦</span>
+                                        <span>50+ AI character voices</span>
                                     </li>
                                 </ul>
 
-                                <Link href="/products/ai-boy" className="block">
-                                    <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-full shadow-lg">
-                                        Learn More
+                                <Link href="/products/smart-base" className="block">
+                                    <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full shadow-lg">
+                                        Order Now
                                         <ChevronRight className="ml-2 h-5 w-5" />
                                     </Button>
                                 </Link>
                             </div>
 
-                            {/* AI Girl */}
-                            <div className="group bg-gradient-to-br from-pink-50 to-red-50 rounded-3xl p-8 border-2 border-pink-200 hover:border-pink-400 hover:shadow-2xl transition-all duration-300">
-                                <div className="relative mb-6">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-pink-300 to-red-300 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                            {/* Smart Mandir */}
+                            <div className="group bg-gradient-to-br from-orange-50 to-red-50 rounded-3xl p-8 border-2 border-orange-200 hover:border-orange-400 hover:shadow-2xl transition-all duration-300">
+                                <div className="relative mb-6 h-[280px] flex items-center justify-center bg-orange-100/50 rounded-3xl p-4">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-orange-300 to-red-300 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
                                     <Image
-                                        src="/products/smart-girl.jpg"
-                                        alt="AI Girl Companion"
+                                        src="/products/smart-mandir.jpg"
+                                        alt="Smart Mandir"
                                         width={400}
                                         height={400}
-                                        className="relative z-10 rounded-2xl shadow-xl"
+                                        className="relative z-10 rounded-2xl shadow-xl max-w-full max-h-full object-contain"
                                     />
                                 </div>
 
                                 <div className="flex items-center gap-2 mb-3">
-                                    <div className="bg-pink-500 p-2 rounded-full">
-                                        <Heart className="h-5 w-5 text-white" />
+                                    <div className="bg-orange-500 p-2 rounded-full">
+                                        <Home className="h-5 w-5 text-white" />
                                     </div>
-                                    <h2 className="text-3xl font-bold text-pink-900">AI Girl</h2>
+                                    <h2 className="text-3xl font-bold text-orange-900">Smart Mandir</h2>
                                 </div>
 
-                                <p className="text-lg text-pink-800 font-semibold mb-3">
-                                    Caring & Empathetic Friend
+                                <p className="text-lg text-orange-800 font-semibold mb-2">
+                                    Complete AI-Powered Home Temple
+                                </p>
+
+                                <p className="text-2xl font-bold text-orange-600 mb-4">
+                                    ₹6,499
                                 </p>
 
                                 <p className="text-gray-700 mb-6 leading-relaxed">
-                                    A friend who truly listens. Customize her personality, name, and nature. Always there when you need someone to talk to, never judges.
+                                    A beautiful mandir with AI technology. Talk to your deity, play bhajans, and conduct havans automatically!
                                 </p>
 
                                 <ul className="space-y-2 mb-6">
                                     <li className="flex items-start text-sm text-gray-700">
-                                        <span className="text-pink-500 mr-2">✦</span>
-                                        <span>Empathetic & understanding</span>
+                                        <span className="text-orange-500 mr-2">✦</span>
+                                        <span>Talk to your Bhagwan murti</span>
                                     </li>
                                     <li className="flex items-start text-sm text-gray-700">
-                                        <span className="text-pink-500 mr-2">✦</span>
-                                        <span>Personalized to your preferences</span>
+                                        <span className="text-orange-500 mr-2">✦</span>
+                                        <span>Plays bhajans & aartis</span>
                                     </li>
                                     <li className="flex items-start text-sm text-gray-700">
-                                        <span className="text-pink-500 mr-2">✦</span>
-                                        <span>Always available, never judges</span>
+                                        <span className="text-orange-500 mr-2">✦</span>
+                                        <span>Automated havan ceremonies</span>
                                     </li>
                                 </ul>
 
-                                <Link href="/products/ai-girl" className="block">
-                                    <Button className="w-full bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-700 hover:to-red-700 text-white rounded-full shadow-lg">
-                                        Learn More
+                                <Link href="/products/smart-mandir" className="block">
+                                    <Button className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-full shadow-lg">
+                                        Order Now
                                         <ChevronRight className="ml-2 h-5 w-5" />
                                     </Button>
                                 </Link>
@@ -188,7 +200,7 @@ export default function ProductsPage() {
                             All Products Launching Soon
                         </h2>
                         <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
-                            Be among the first to experience SMART मूर्ति. Sign up for early access and exclusive launch offers.
+                            Be among the first to experience SMART मूर्ति. Register for preorder and get exclusive launch offers.
                         </p>
                         <Link href="/">
                             <Button size="lg" className="w-full sm:w-auto bg-white text-purple-900 hover:bg-purple-50 rounded-full shadow-xl px-12 py-6 text-lg">

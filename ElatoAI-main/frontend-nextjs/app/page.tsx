@@ -228,13 +228,13 @@ export default async function LandingPage() {
                   </div>
 
                   {/* Image - Temple context */}
-                  <div className="flex justify-center items-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow h-[200px] bg-amber-50">
+                  <div className="flex justify-center items-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow h-[220px] bg-amber-50 p-2">
                     <Image
                       src="/products/smart-pandit-home.jpg"
                       alt="Smart Pandit in home temple"
                       width={200}
                       height={200}
-                      className="w-full h-full object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                      className="max-w-full max-h-full object-contain rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
@@ -289,13 +289,13 @@ export default async function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-center items-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow h-[200px] bg-purple-50">
+                  <div className="flex justify-center items-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow h-[220px] bg-purple-50 p-2">
                     <Image
                       src="/products/smart-base.jpg"
                       alt="Smart Base with 3D printed model"
                       width={200}
                       height={200}
-                      className="w-full h-full object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                      className="max-w-full max-h-full object-contain rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
@@ -347,13 +347,13 @@ export default async function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-center items-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow h-[200px] bg-orange-50">
+                  <div className="flex justify-center items-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow h-[220px] bg-orange-50 p-2">
                     <Image
                       src="/products/smart-mandir.jpg"
                       alt="Smart Mandir - AI Powered Home Temple"
                       width={200}
                       height={200}
-                      className="w-full h-full object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                      className="max-w-full max-h-full object-contain rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
