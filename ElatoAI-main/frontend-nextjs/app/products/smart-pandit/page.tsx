@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Sparkles, Heart, Shield, Zap } from "lucide-react";
+import PreorderForm from "@/app/components/PreorderForm";
 
 export default function SmartPanditPage() {
     return (
@@ -63,8 +64,9 @@ export default function SmartPanditPage() {
 
                                 {/* CTA */}
                                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                                    <PreorderForm productName="Smart Pandit" productPrice="₹5,000" accentColor="amber" />
                                     <Link href="/">
-                                        <Button size="lg" className="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white rounded-full shadow-xl">
+                                        <Button size="lg" variant="outline" className="border-2 border-amber-300 text-amber-700 hover:bg-amber-50 rounded-full">
                                             <ChevronRight className="mr-2 h-5 w-5" />
                                             Back to Home
                                         </Button>
@@ -135,17 +137,17 @@ export default function SmartPanditPage() {
                 <section className="w-full py-12 md:py-20 bg-gradient-to-br from-amber-900 to-yellow-800">
                     <div className="container px-4 md:px-6 max-w-screen-lg mx-auto text-center">
                         <h2 className="text-3xl md:text-5xl font-bold font-lora text-white mb-6">
-                            Launching Soon
+                            Get Notified When We Launch
                         </h2>
-                        <p className="text-xl text-amber-100 mb-8 max-w-2xl mx-auto">
-                            The Smart Pandit will be available soon. Return to our homepage to explore our other AI companions.
+                        <p className="text-xl text-amber-100 mb-4 max-w-2xl mx-auto">
+                            Smart Pandit is coming soon! Register for preorder and be first to bring divine wisdom home.
                         </p>
-                        <Link href="/">
-                            <Button size="lg" className="w-full sm:w-auto bg-white text-amber-900 hover:bg-amber-50 rounded-full shadow-xl px-12 py-6 text-lg">
-                                Explore All Products
-                                <ChevronRight className="ml-2 h-5 w-5" />
-                            </Button>
-                        </Link>
+                        <p className="text-lg text-amber-200 mb-8 max-w-2xl mx-auto">
+                            Starting from ₹5,000
+                        </p>
+                        <div className="flex justify-center">
+                            <PreorderForm productName="Smart Pandit" productPrice="₹5,000" accentColor="amber" />
+                        </div>
                     </div>
                 </section>
 

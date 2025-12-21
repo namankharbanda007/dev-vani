@@ -344,21 +344,27 @@ export default async function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow bg-gradient-to-br from-orange-100 to-red-100 h-[200px] items-center">
-                    <div className="text-center p-4">
-                      <div className="text-6xl mb-2">🛕</div>
-                      <p className="text-sm text-orange-600 font-medium">Coming Soon</p>
-                    </div>
+                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
+                    <Image
+                      src="/products/smart-mandir.jpg"
+                      alt="Smart Mandir - AI Powered Home Temple"
+                      width={200}
+                      height={200}
+                      className="object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                    />
                   </div>
 
                   <h3 className="text-2xl font-bold text-orange-900 mb-3 text-center font-lora">
                     Smart Mandir
                   </h3>
-                  <p className="text-orange-800 font-semibold text-center mb-4">
+                  <p className="text-orange-800 font-semibold text-center mb-2">
                     Your Complete Home Temple
                   </p>
+                  <p className="text-2xl font-bold text-orange-600 text-center mb-4">
+                    Starting ₹6,499
+                  </p>
                   <p className="text-gray-700 text-center mb-6 leading-relaxed">
-                    A beautiful mandir for your Bhagwan murti. Talk to your deity, play divine bhajans, and let it conduct havans for you automatically!
+                    Talk to your deity, play divine bhajans, and let it conduct havans for you automatically!
                   </p>
 
                   <ul className="space-y-2 mb-6">
@@ -368,7 +374,7 @@ export default async function LandingPage() {
                     </li>
                     <li className="flex items-start text-sm text-gray-700">
                       <span className="text-orange-500 mr-2">✦</span>
-                      <span>Plays divine bhajans & aartis</span>
+                      <span>Plays bhajans & aartis</span>
                     </li>
                     <li className="flex items-start text-sm text-gray-700">
                       <span className="text-orange-500 mr-2">✦</span>
@@ -376,7 +382,7 @@ export default async function LandingPage() {
                     </li>
                   </ul>
 
-                  <Link href="https://smartmurti.com/products" className="block">
+                  <Link href="/products/smart-mandir" className="block">
                     <Button className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all">
                       Learn More
                       <ChevronRight className="ml-2 h-4 w-4" />

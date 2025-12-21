@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Sparkles, Zap, Users, Gift, Check } from "lucide-react";
+import PreorderForm from "@/app/components/PreorderForm";
 
 export default function SmartBasePage() {
     return (
@@ -23,7 +24,7 @@ export default function SmartBasePage() {
                             <div className="space-y-8">
                                 <div className="inline-block">
                                     <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide">
-                                        Now Available
+                                        Coming Soon
                                     </span>
                                 </div>
 
@@ -80,12 +81,7 @@ export default function SmartBasePage() {
 
                                 {/* CTA */}
                                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                                    <Link href="https://smartmurti.com/products">
-                                        <Button size="lg" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full shadow-xl px-8">
-                                            <Sparkles className="mr-2 h-5 w-5" />
-                                            Order Now - ₹5,000
-                                        </Button>
-                                    </Link>
+                                    <PreorderForm productName="Smart Base" productPrice="₹5,000" accentColor="purple" />
                                     <Link href="/">
                                         <Button size="lg" variant="outline" className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50 rounded-full">
                                             <ChevronRight className="mr-2 h-5 w-5" />
@@ -232,12 +228,9 @@ export default function SmartBasePage() {
                         <p className="text-lg text-purple-200 mb-8 max-w-2xl mx-auto">
                             Transform any murti or statue into an AI-powered conversational companion!
                         </p>
-                        <Link href="https://smartmurti.com/products">
-                            <Button size="lg" className="w-full sm:w-auto bg-white text-purple-900 hover:bg-purple-50 rounded-full shadow-xl px-12 py-6 text-lg">
-                                Order Now - ₹5,000
-                                <ChevronRight className="ml-2 h-5 w-5" />
-                            </Button>
-                        </Link>
+                        <div className="flex justify-center">
+                            <PreorderForm productName="Smart Base" productPrice="₹5,000" accentColor="purple" />
+                        </div>
                     </div>
                 </section>
 
