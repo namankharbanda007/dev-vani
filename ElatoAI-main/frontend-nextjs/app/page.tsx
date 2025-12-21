@@ -228,13 +228,13 @@ export default async function LandingPage() {
                   </div>
 
                   {/* Image - Temple context */}
-                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
+                  <div className="flex justify-center items-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow h-[200px] bg-amber-50">
                     <Image
                       src="/products/smart-pandit-home.jpg"
                       alt="Smart Pandit in home temple"
                       width={200}
                       height={200}
-                      className="object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
@@ -242,11 +242,14 @@ export default async function LandingPage() {
                   <h3 className="text-2xl font-bold text-amber-900 mb-3 text-center font-lora">
                     Smart Pandit
                   </h3>
-                  <p className="text-amber-800 font-semibold text-center mb-4">
+                  <p className="text-amber-800 font-semibold text-center mb-2">
                     Wisdom & Tradition
                   </p>
+                  <p className="text-2xl font-bold text-amber-600 text-center mb-4">
+                    ₹5,000
+                  </p>
                   <p className="text-gray-700 text-center mb-6 leading-relaxed">
-                    Your personal spiritual guide. Performs Puja, recites Mantras, and answers life's deepest questions. Trained on ancient Vedas and Gita.
+                    Your personal spiritual guide. Performs Puja, recites Mantras, and answers life's deepest questions.
                   </p>
 
                   {/* Features List */}
@@ -261,14 +264,14 @@ export default async function LandingPage() {
                     </li>
                     <li className="flex items-start text-sm text-gray-700">
                       <span className="text-amber-500 mr-2">✦</span>
-                      <span>Fixed wise personality</span>
+                      <span>Trained on Vedas & Gita</span>
                     </li>
                   </ul>
 
                   {/* CTA */}
-                  <Link href="https://smartmurti.com/products" className="block">
+                  <Link href="/products/smart-pandit" className="block">
                     <Button className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all">
-                      Learn More
+                      Order Now
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
@@ -286,13 +289,13 @@ export default async function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
+                  <div className="flex justify-center items-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow h-[200px] bg-purple-50">
                     <Image
                       src="/products/smart-base.jpg"
                       alt="Smart Base with 3D printed model"
                       width={200}
                       height={200}
-                      className="object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
@@ -344,13 +347,13 @@ export default async function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
+                  <div className="flex justify-center items-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow h-[200px] bg-orange-50">
                     <Image
                       src="/products/smart-mandir.jpg"
                       alt="Smart Mandir - AI Powered Home Temple"
                       width={200}
                       height={200}
-                      className="object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
