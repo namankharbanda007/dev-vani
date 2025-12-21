@@ -68,6 +68,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
   const geminiDisconnectRef = useRef<(() => void) | null>(null);
+  const intentionalDisconnectRef = useRef<boolean>(false);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const [sessionStatus, setSessionStatus] =
     useState<SessionStatus>("DISCONNECTED");
@@ -221,7 +222,10 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
           () => {
             console.log("Gemini connection disconnected");
             setSessionStatus("DISCONNECTED");
-            toast({ description: "Connection lost", variant: "destructive" });
+            if (!intentionalDisconnectRef.current) {
+              toast({ description: "Connection lost", variant: "destructive" });
+            }
+            intentionalDisconnectRef.current = false;
           }
         );
 
@@ -257,6 +261,10 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
           () => {
             console.log("ElevenLabs disconnected");
             setSessionStatus("DISCONNECTED");
+            if (!intentionalDisconnectRef.current) {
+              // Only show if not intentional
+            }
+            intentionalDisconnectRef.current = false;
           }
         );
 
@@ -312,7 +320,8 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     }
   };
 
-  const disconnectFromRealtime = () => {
+  const disconnectFromRealtime = (intentional: boolean = false) => {
+    intentionalDisconnectRef.current = intentional;
     if (geminiDisconnectRef.current) {
       geminiDisconnectRef.current();
       geminiDisconnectRef.current = null;
@@ -412,7 +421,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
       setIsSheetOpen(true);
     } else {
       // If already connected or connecting, disconnect
-      disconnectFromRealtime();
+      disconnectFromRealtime(true);
       setSessionStatus("DISCONNECTED");
       setIsSheetOpen(false);
     }
@@ -513,7 +522,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
 
     // If sheet is closed, disconnect
     if (!open && (sessionStatus === "CONNECTED" || sessionStatus === "CONNECTING")) {
-      disconnectFromRealtime();
+      disconnectFromRealtime(true);
       setSessionStatus("DISCONNECTED");
     }
   };
@@ -547,6 +556,10 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
             <ActiveCallView
               personality={personality}
               state={activeCallState}
+              onEndCall={() => {
+                disconnectFromRealtime(true);
+                setIsSheetOpen(false);
+              }}
             />
           ) : (
             <Transcript
