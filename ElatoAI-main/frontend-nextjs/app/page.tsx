@@ -11,7 +11,7 @@ import CustomizationForm from "./components/LandingPage/CustomizationForm";
 import Image from "next/image";
 import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
 import { kickstarterLink } from "@/lib/data";
-const HitemGenerator = dynamic(() => import("./components/HitemGenerator"), { ssr: false });
+
 
 export default async function LandingPage() {
   const supabase = createClient();
@@ -144,15 +144,7 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* NEW: AI 3D Generator Section */}
-        <section className="w-full py-12 md:py-20 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-200 rounded-full blur-3xl opacity-20 -mr-20 -mt-20"></div>
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-200 rounded-full blur-3xl opacity-20 -ml-10 -mb-10"></div>
 
-          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10">
-            <HitemGenerator />
-          </div>
-        </section>
 
         {/* Lifestyle Showcase - Family Image */}
         <section className="w-full py-12 md:py-20 bg-gradient-to-br from-purple-50 via-pink-50 to-amber-50">
