@@ -198,75 +198,6 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* App Showcase Section */}
-        <section className="w-full py-12 md:py-16 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-orange-200 rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-200 rounded-full blur-3xl opacity-20"></div>
-
-          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-              {/* Left: Content */}
-              <div className="space-y-6 order-2 md:order-1">
-                <h2 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 leading-tight">
-                  Control Everything From Our App
-                </h2>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  Manage your SMART मूर्ति companions, customize personalities, switch between characters, and explore 50+ premade AI friends - all from the palm of your hand.
-                </p>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-orange-100 p-2 rounded-lg">
-                      <Sparkles className="h-5 w-5 text-orange-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900">Easy Character Switching</h4>
-                      <p className="text-gray-600 text-sm">Change your device's personality in seconds</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-amber-100 p-2 rounded-lg">
-                      <Heart className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900">Create Custom Characters</h4>
-                      <p className="text-gray-600 text-sm">Design your own AI companion with unique traits</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-red-100 p-2 rounded-lg">
-                      <MessageCircle className="h-5 w-5 text-red-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900">Talk via Web or Device</h4>
-                      <p className="text-gray-600 text-sm">Chat through the app or your physical murti</p>
-                    </div>
-                  </div>
-                </div>
-                <Link href="/home">
-                  <Button size="lg" className="mt-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-full shadow-lg">
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    Explore Now
-                    <ChevronRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Right: Phone Mockup */}
-              <div className="flex justify-center order-1 md:order-2">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-b from-orange-300 to-red-300 rounded-[3rem] blur-3xl opacity-30"></div>
-                  <Image
-                    src="/products/app-mockup.png"
-                    alt="SMART मूर्ति Mobile App"
-                    width={350}
-                    height={700}
-                    className="relative z-10 drop-shadow-2xl"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Product Showcase - 3 Premium Cards */}
         < section className="w-full py-12 md:py-20 bg-white relative overflow-hidden" >
@@ -355,21 +286,27 @@ export default async function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-100 to-indigo-100 h-[200px] items-center">
-                    <div className="text-center p-4">
-                      <div className="text-6xl mb-2">🗿</div>
-                      <p className="text-sm text-purple-600 font-medium">Coming Soon</p>
-                    </div>
+                  <div className="flex justify-center mb-6 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
+                    <Image
+                      src="/products/smart-base.jpg"
+                      alt="Smart Base with 3D printed model"
+                      width={200}
+                      height={200}
+                      className="object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                    />
                   </div>
 
                   <h3 className="text-2xl font-bold text-purple-900 mb-3 text-center font-lora">
                     Smart Base
                   </h3>
-                  <p className="text-purple-800 font-semibold text-center mb-4">
+                  <p className="text-purple-800 font-semibold text-center mb-2">
                     Bring Any Murti to Life
                   </p>
+                  <p className="text-2xl font-bold text-purple-600 text-center mb-4">
+                    ₹5,000 <span className="text-sm font-normal text-green-600">+ FREE 3D Print</span>
+                  </p>
                   <p className="text-gray-700 text-center mb-6 leading-relaxed">
-                    Place any murti, 3D model, or statue on this smart base. Select a character from our app and watch your idol come to life with voice conversations!
+                    Place any murti, 3D model, or statue on this smart base. Select a character from our app and watch your idol come to life!
                   </p>
 
                   <ul className="space-y-2 mb-6">
@@ -379,17 +316,17 @@ export default async function LandingPage() {
                     </li>
                     <li className="flex items-start text-sm text-gray-700">
                       <span className="text-purple-500 mr-2">✦</span>
-                      <span>Choose from 50+ character voices</span>
+                      <span>FREE customized 3D print model</span>
                     </li>
                     <li className="flex items-start text-sm text-gray-700">
                       <span className="text-purple-500 mr-2">✦</span>
-                      <span>Your idol speaks and responds</span>
+                      <span>50+ AI character voices</span>
                     </li>
                   </ul>
 
-                  <Link href="https://smartmurti.com/products" className="block">
+                  <Link href="/products/smart-base" className="block">
                     <Button className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all">
-                      Learn More
+                      Order Now
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
