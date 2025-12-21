@@ -11,7 +11,7 @@ import CustomizationForm from "./components/LandingPage/CustomizationForm";
 import Image from "next/image";
 import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
 import { kickstarterLink } from "@/lib/data";
-const HeroCarousel = dynamic(() => import("./components/LandingPage/HeroCarousel"), { ssr: false });
+const HeroCarouselSlot = dynamic(() => import("./components/LandingPage/HeroCarousel").then(mod => mod.HeroCarouselSlot), { ssr: false });
 
 
 export default async function LandingPage() {
@@ -60,23 +60,30 @@ export default async function LandingPage() {
                 </p>
               </div>
 
-              {/* Smart Pandit - Center (Main Product) */}
-              <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-300 mb-8">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-b from-amber-300 to-yellow-200 rounded-full blur-3xl opacity-50 animate-pulse"></div>
-                  <Image
-                    src="/products/smart-pandit.jpg"
-                    alt="Smart Pandit - AI Spiritual Guide"
-                    width={320}
-                    height={320}
-                    className="relative z-10 drop-shadow-2xl rounded-3xl"
-                  />
-                </div>
-                <p className="mt-4 text-xl font-bold text-amber-700">Your Spiritual Guide</p>
-              </div>
+              {/* Character Showcase - The Three Companions */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 w-full max-w-5xl mt-12">
 
-              {/* Character Carousel - Auto-rotating personalities */}
-              <HeroCarousel />
+                {/* Left - Rotating Character */}
+                <HeroCarouselSlot position="left" />
+
+                {/* Smart Pandit - Center (Larger) */}
+                <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-300">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-b from-amber-300 to-yellow-200 rounded-full blur-3xl opacity-50 animate-pulse"></div>
+                    <Image
+                      src="/products/smart-pandit.jpg"
+                      alt="Smart Pandit - AI Spiritual Guide"
+                      width={320}
+                      height={320}
+                      className="relative z-10 drop-shadow-2xl rounded-3xl"
+                    />
+                  </div>
+                  <p className="mt-4 text-xl font-bold text-amber-700">Your Spiritual Guide</p>
+                </div>
+
+                {/* Right - Rotating Character */}
+                <HeroCarouselSlot position="right" />
+              </div>
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-8">
@@ -103,13 +110,7 @@ export default async function LandingPage() {
                 </Link>
               </div>
 
-              {/* Trust Badge */}
-              <div className="flex items-center space-x-2 text-amber-500 pt-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="fill-amber-500 h-5 w-5" />
-                ))}
-                <span className="ml-2 text-gray-700 font-medium">200+ Happy Families</span>
-              </div>
+
             </div>
           </div>
         </section>
