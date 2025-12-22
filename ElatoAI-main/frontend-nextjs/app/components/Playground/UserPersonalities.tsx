@@ -11,6 +11,7 @@ const CHARACTER_CATEGORIES: { [key: string]: { title: string; emoji: string; cha
             "pandit ji",
             "the spiritual guide",
             "ganpati havan by pandit ji",
+            "the astrologer",
         ]
     },
     seniors: {
@@ -18,6 +19,7 @@ const CHARACTER_CATEGORIES: { [key: string]: { title: string; emoji: string; cha
         emoji: "👴",
         characters: [
             "old age friend",
+            "old days friend",
             "the tech translator",
         ]
     },
