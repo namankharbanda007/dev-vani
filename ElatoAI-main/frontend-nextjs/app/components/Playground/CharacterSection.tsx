@@ -96,7 +96,7 @@ const CharacterSection = ({
 
             {/* Horizontal Scroll Container - Netflix Style */}
             <div className="relative -mx-6 md:-mx-10">
-                <div className="flex gap-3 overflow-x-auto py-2 px-6 md:px-10 scrollbar-hide scroll-smooth"
+                <div className="flex gap-3 overflow-x-auto py-3 px-6 md:px-10 scrollbar-hide scroll-smooth"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                     {filteredPersonalities.map((personality, index) => {
                         const isCurrentPersonality = personalityIdState === personality.personality_id;
