@@ -31,6 +31,7 @@ const CHARACTER_CATEGORIES: { [key: string]: { title: string; emoji: string; cha
             "the travel guide",
             "sports commentator",
             "the chef's assistant",
+            "chef's assistant",
             "the gift guru",
             "the interviewer",
             "the fitness coach",
