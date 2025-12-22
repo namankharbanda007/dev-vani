@@ -90,13 +90,13 @@ const CharacterSection = ({
     }
 
     return (
-        <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-3 w-full">
             {/* Category Title */}
-            <h3 className="text-xl md:text-2xl font-bold text-gray-800 font-lora">{title}</h3>
+            <h3 className="text-xl md:text-2xl font-bold text-gray-800 font-lora px-1">{title}</h3>
 
             {/* Horizontal Scroll Container - Netflix Style */}
-            <div className="relative -mx-6 md:-mx-10 px-6 md:px-10">
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+            <div className="relative -mx-6 md:-mx-10">
+                <div className="flex gap-3 overflow-x-auto py-2 px-6 md:px-10 scrollbar-hide scroll-smooth"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                     {filteredPersonalities.map((personality, index) => {
                         const isCurrentPersonality = personalityIdState === personality.personality_id;
@@ -105,7 +105,7 @@ const CharacterSection = ({
                         return (
                             <div
                                 key={personality.personality_id}
-                                className="relative group/card flex-shrink-0 w-[180px] sm:w-[200px] md:w-[220px] snap-start"
+                                className="relative group/card flex-shrink-0 w-[160px] sm:w-[180px] md:w-[200px]"
                             >
                                 <ModifyCharacterSheet
                                     openPersonality={personality}
@@ -116,62 +116,50 @@ const CharacterSection = ({
                                 >
                                     <div
                                         className={cn(
-                                            "group relative overflow-hidden rounded-3xl transition-all duration-300 cursor-pointer h-full",
-                                            "bg-white/40 backdrop-blur-md border border-white/50 shadow-lg hover:shadow-2xl hover:-translate-y-1",
-                                            isCurrentPersonality ? "ring-2 ring-purple-500 ring-offset-2" : "hover:border-purple-300"
+                                            "relative overflow-hidden rounded-2xl cursor-pointer h-full transition-all duration-200",
+                                            "bg-white border border-gray-200 shadow-sm hover:shadow-md",
+                                            isCurrentPersonality ? "ring-2 ring-purple-500" : "hover:border-purple-300"
                                         )}
                                     >
                                         {/* Card Content */}
-                                        <div className="relative aspect-[4/5] w-full overflow-hidden">
+                                        <div className="relative aspect-[3/4] w-full overflow-hidden">
                                             {personality.subtitle && personality.subtitle.startsWith('http') ? (
                                                 <Image
                                                     src={personality.subtitle}
                                                     alt={personality.title}
                                                     fill
-                                                    className="object-cover transform transition-transform duration-300 group-hover:scale-110"
+                                                    className="object-cover"
                                                 />
                                             ) : personality.creator_id === null ? (
                                                 <Image
                                                     src={getPersonalityImageSrc(personality.key)}
                                                     alt={personality.key}
                                                     fill
-                                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                    className="object-cover"
                                                 />
                                             ) : (
-                                                <div className="flex items-center justify-center h-full bg-gradient-to-br from-purple-100 to-amber-100 relative">
-                                                    <div className="transform transition-transform duration-300 group-hover:scale-110">
-                                                        <EmojiComponent personality={personality} />
-                                                    </div>
+                                                <div className="flex items-center justify-center h-full bg-gradient-to-br from-purple-100 to-amber-100">
+                                                    <EmojiComponent personality={personality} />
                                                 </div>
                                             )}
 
                                             {/* Gradient Overlay */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
                                             {/* Selection Indicator */}
-                                            <div className="absolute top-3 right-3 z-10">
-                                                <div className={cn(
-                                                    "rounded-full p-2 transition-all duration-300",
-                                                    isCurrentPersonality
-                                                        ? "bg-purple-600 text-white shadow-lg scale-100"
-                                                        : "bg-white/20 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
-                                                )}>
-                                                    {isCurrentPersonality ? (
-                                                        <Check className="h-4 w-4" strokeWidth={3} />
-                                                    ) : (
-                                                        <CheckCircle className="h-4 w-4" />
-                                                    )}
+                                            {isCurrentPersonality && (
+                                                <div className="absolute top-2 right-2 z-10">
+                                                    <div className="rounded-full p-1.5 bg-purple-600 text-white">
+                                                        <Check className="h-3 w-3" strokeWidth={3} />
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
 
                                             {/* Text Content */}
-                                            <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-                                                <h3 className="font-lora font-bold text-xl mb-1 truncate shadow-sm">
+                                            <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                                                <h3 className="font-semibold text-sm leading-tight truncate">
                                                     {personality.title}
                                                 </h3>
-                                                <p className="text-sm text-gray-200 line-clamp-2 font-medium">
-                                                    {personality.subtitle && !personality.subtitle.startsWith('http') ? personality.subtitle : ''}
-                                                </p>
                                             </div>
                                         </div>
                                     </div>
