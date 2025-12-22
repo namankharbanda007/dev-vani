@@ -9,20 +9,23 @@ import {
 } from "npm:@elevenlabs/client";
 
 import { addConversation, getDeviceInfo } from "../supabase.ts";
-import { encoder, FRAME_SIZE, isDev } from "../utils.ts";
+import { encoder, FRAME_SIZE, isDev, upsamplePcm, SAMPLE_RATE, boostLimitPCM16LEInPlace } from "../utils.ts";
+
+// ElevenLabs Conversational AI outputs 16kHz PCM audio
+const ELEVENLABS_SAMPLE_RATE = 16000;
 
 // Calculate audio level for debugging
 function calculateAudioLevel(audioData: any): number {
     if (!audioData || audioData.length === 0) return 0;
-    
+
     // Convert to 16-bit samples
     const samples = new Int16Array(audioData.buffer || audioData);
     let sum = 0;
-    
+
     for (let i = 0; i < samples.length; i++) {
         sum += Math.abs(samples[i]);
     }
-    
+
     return Math.round(sum / samples.length);
 }
 
@@ -57,7 +60,7 @@ export const connectToElevenLabs = async (
                     // Check if audio contains actual speech (simple volume check)
                     const audioLevel = calculateAudioLevel(data);
                     console.log(`Sending audio chunk to ElevenLabs: raw=${data.length} bytes, base64=${base64Data.length} chars, level=${audioLevel}`);
-                    
+
                     try {
                         elevenLabsConnection.sendMessage({
                             user_audio_chunk: base64Data,
@@ -113,8 +116,14 @@ export const connectToElevenLabs = async (
 
         const { signed_url } = await signedUrlResponse.json();
 
-        // Use default audio formats (let ElevenLabs auto-detect)
-        const modifiedSignedUrl = signed_url;
+        // Add audio format parameters to match firmware expectations
+        // Firmware expects 24kHz output for Opus encoding, and sends 16kHz input
+        // Without this, ElevenLabs defaults to 16kHz output causing 1.5x speedup
+        const audioParams = new URLSearchParams({
+            agent_output_audio_format: 'pcm_24000',  // 24kHz output to match Opus encoder
+        });
+        const modifiedSignedUrl = `${signed_url}&${audioParams.toString()}`;
+        console.log(`Using ElevenLabs with output format: pcm_24000 (24kHz)`);
 
         // Create ElevenLabs connection using signed URL for server-side usage
         const sessionConfig: SessionConfig = {
@@ -168,8 +177,17 @@ export const connectToElevenLabs = async (
                             hasResponseStarted = true;
                         }
 
-                        const audioBuffer = Buffer.from(event.audio_event.audio_base_64, "base64");
-                        console.log(`Received audio from ElevenLabs: ${audioBuffer.length} bytes, processing into ${Math.ceil(audioBuffer.length / FRAME_SIZE)} frames`);
+                        let audioBuffer = Buffer.from(event.audio_event.audio_base_64, "base64");
+                        console.log(`Received audio from ElevenLabs: ${audioBuffer.length} bytes at ${ELEVENLABS_SAMPLE_RATE}Hz`);
+
+                        // Upsample from ElevenLabs' 16kHz to our encoder's 24kHz
+                        // Without this, audio plays 1.5x faster (24000/16000 = 1.5)
+                        audioBuffer = upsamplePcm(audioBuffer, ELEVENLABS_SAMPLE_RATE, SAMPLE_RATE);
+
+                        // Boost audio volume to match Gemini's loudness (ElevenLabs tends to be quieter)
+                        boostLimitPCM16LEInPlace(audioBuffer, /*gainDb=*/6.0, /*ceiling=*/0.89);
+
+                        console.log(`Upsampled and boosted to ${audioBuffer.length} bytes at ${SAMPLE_RATE}Hz, processing into ${Math.ceil(audioBuffer.length / FRAME_SIZE)} frames`);
 
                         let framesSent = 0;
                         // Process audio in frames for Opus encoding
