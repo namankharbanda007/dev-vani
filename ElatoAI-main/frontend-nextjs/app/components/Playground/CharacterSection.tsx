@@ -91,14 +91,22 @@ const CharacterSection = ({
 
     return (
         <div className="flex flex-col gap-4 w-full">
-            <div className="w-full">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {/* Category Title */}
+            <h3 className="text-xl md:text-2xl font-bold text-gray-800 font-lora">{title}</h3>
+
+            {/* Horizontal Scroll Container - Netflix Style */}
+            <div className="relative -mx-6 md:-mx-10 px-6 md:px-10">
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                     {filteredPersonalities.map((personality, index) => {
                         const isCurrentPersonality = personalityIdState === personality.personality_id;
                         const isOwner = currentUserId && personality.creator_id === currentUserId;
 
                         return (
-                            <div key={personality.personality_id} className="relative group/card">
+                            <div
+                                key={personality.personality_id}
+                                className="relative group/card flex-shrink-0 w-[180px] sm:w-[200px] md:w-[220px] snap-start"
+                            >
                                 <ModifyCharacterSheet
                                     openPersonality={personality}
                                     languageState={languageState}
