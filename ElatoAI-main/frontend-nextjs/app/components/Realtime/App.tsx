@@ -242,7 +242,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
         if (!sessionData.signed_url) {
           audioContext.close();
           setSessionStatus("DISCONNECTED");
-          toast({ description: "Failed to get ElevenLabs signed URL", variant: "destructive" });
+          toast({ description: "Failed to connect", variant: "destructive" });
           return;
         }
 
@@ -271,7 +271,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
         geminiDisconnectRef.current = elevenLabsConnection.disconnect;
         setIsAgentSpeaking(true); // Assuming immediate interaction
         setSessionStatus("CONNECTED");
-        toast({ description: "Connected to ElevenLabs" });
+        toast({ description: "Connected" });
 
       } else {
         // OpenAI Logic

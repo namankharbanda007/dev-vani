@@ -268,7 +268,7 @@ export default function VoiceCloner({ onCloneSuccess, language }: VoiceClonerPro
                 )}
             </Button>
             <p className="text-xs text-center text-gray-400 mt-2">
-                This will create a custom voice and agent in ElevenLabs.
+                This will create a custom voice clone for your character.
             </p>
         </div>
     );
