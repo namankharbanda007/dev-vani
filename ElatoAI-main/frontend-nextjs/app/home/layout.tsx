@@ -59,7 +59,8 @@ export default async function RootLayout({
     }
 
     const mobileNavItems = [
-        sidebarNavItems[0], // Playground
+        sidebarNavItems[0], // Avatars
+        sidebarNavItems[1], // Settings
         sidebarNavItems[2], // Create
         {
             title: "Bhajan",
