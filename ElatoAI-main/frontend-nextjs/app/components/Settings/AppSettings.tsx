@@ -157,21 +157,6 @@ const AppSettings: React.FC<AppSettingsProps> = ({
                             }
                         </p>
                     </div>
-                    <div className="flex flex-col gap-3">
-                        <Label className="text-sm font-medium text-gray-700">
-                            Logged in as
-                        </Label>
-                        <Input
-                            // autoFocus
-                            disabled
-                            value={selectedUser?.email}
-                            className="bg-gray-50/50 border-gray-200 text-gray-600 rounded-xl"
-                            autoComplete="on"
-                            style={{
-                                fontSize: 16,
-                            }}
-                        />
-                    </div>
                     {isConnected && <div className="flex flex-col gap-4 mt-2 p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
                         <Label className="text-sm font-medium text-gray-800">
                             Device Volume
