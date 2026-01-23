@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { ArrowUpRight, Instagram, Youtube, X, Star, MoveRight, Eye, Play, Mic, Wifi } from "lucide-react";
 import Link from "next/link";
