@@ -19,15 +19,81 @@ export async function deleteUserApiKey(userId: string) {
 export const signInAction = async (formData: FormData) => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const toy_id = formData.get("toy_id") as string | undefined;
+    const personality_id = formData.get("personality_id") as string | undefined;
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    // Try to sign in first
+    const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
 
+    if (!signInError) {
+        return redirect("/home");
+    }
+
+    // If sign in fails, try to sign up
+    const origin = headers().get("origin");
+    const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+            data: {
+                toy_id: toy_id,
+                personality_id: personality_id,
+            },
+            emailRedirectTo: `${origin}/auth/callback`,
+        },
+    });
+
+    if (signUpError) {
+        return encodedRedirect("error", "/login", signUpError.message);
+    }
+
+    return encodedRedirect(
+        "success",
+        "/login",
+        "Check email to continue sign in process",
+    );
+};
+
+export const startPhoneAuthAction = async (formData: FormData) => {
+    const phone = formData.get("phone") as string;
+    const supabase = createClient();
+
+    if (!phone) {
+        return { error: "Phone number is required" };
+    }
+
+    const { error } = await supabase.auth.signInWithOtp({
+        phone,
+    });
+
     if (error) {
-        return encodedRedirect("error", "/login", error.message);
+        return { error: error.message };
+    }
+
+    return { success: true };
+};
+
+export const verifyPhoneAuthAction = async (formData: FormData) => {
+    const phone = formData.get("phone") as string;
+    const token = formData.get("otp") as string;
+    const supabase = createClient();
+
+    if (!phone || !token) {
+        return { error: "Phone and OTP are required" };
+    }
+
+    const { error } = await supabase.auth.verifyOtp({
+        phone,
+        token,
+        type: "sms",
+    });
+
+    if (error) {
+        return { error: error.message };
     }
 
     return redirect("/home");

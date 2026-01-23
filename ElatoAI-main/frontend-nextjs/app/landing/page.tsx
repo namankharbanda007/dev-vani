@@ -51,34 +51,34 @@ export default function LandingPage() {
             </header>
 
             {/* Hero Content - Adjusted for Layout issues */}
-            <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 md:px-12 lg:px-24 pt-4 md:pt-12 pb-20 flex flex-col items-center justify-center min-h-[90vh]">
+            <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 md:px-12 lg:px-24 pt-4 md:pt-12 pb-0 flex flex-col items-center justify-center min-h-[90vh]">
 
                 {/* Main Heading & Character Container */}
-                <div className="relative w-full text-center flex justify-center items-center mt-12 mb-32 md:mb-48">
+                <div className="relative w-full text-center flex justify-center items-center mt-8 mb-0 h-full min-h-[600px] md:min-h-[800px]">
 
                     {/* Background Text Layer */}
-                    <div className="relative z-0 pointer-events-none select-none flex flex-col items-center justify-center w-full min-h-[500px] md:min-h-[700px]">
-                        {/* Reduced text size from 11vw to 9vw/7rem to fix "Big as shit" issue */}
-                        <h1 className="text-[9vw] 2xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black">
+                    <div className="relative z-0 pointer-events-none select-none flex flex-col items-center justify-center w-full h-full pb-32">
+                        {/* Reduced text size to 8.5vw to better match reference */}
+                        <h1 className="text-[8.5vw] 2xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black">
                             SMART MURTI:
                         </h1>
-                        <h1 className="text-[9vw] 2xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black whitespace-nowrap">
+                        <h1 className="text-[8.5vw] 2xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black whitespace-nowrap">
                             DIVINE BLESSINGS,
                         </h1>
-                        <h1 className="text-[9vw] 2xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black text-right w-full pr-[5vw]">
+                        <h1 className="text-[8.5vw] 2xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black text-right w-full pr-[2vw]">
                             DELIVERED.
                         </h1>
                     </div>
 
                     {/* Character Image Layer - Foreground */}
-                    {/* Adjusted positioning to ensure visibility - moved further down and increased size */}
-                    <div className="absolute bottom-[-10%] left-1/2 transform -translate-x-1/2 w-[600px] md:w-[700px] lg:w-[800px] xl:w-[900px] z-20 flex items-end justify-center pointer-events-none">
+                    {/* Significantly increased size and anchored to bottom */}
+                    <div className="absolute bottom-[-5%] left-1/2 transform -translate-x-1/2 w-[90vw] md:w-[800px] lg:w-[1000px] xl:w-[1200px] z-20 flex items-end justify-center pointer-events-none">
                         <Image
                             src="/assets/landing/character.png"
                             alt="Divine Character"
-                            width={900}
-                            height={1000}
-                            className="object-contain drop-shadow-2xl translate-y-24"
+                            width={1100}
+                            height={1100}
+                            className="object-contain drop-shadow-2xl translate-y-16"
                             priority
                         />
                     </div>
