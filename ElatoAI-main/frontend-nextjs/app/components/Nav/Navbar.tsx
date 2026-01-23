@@ -18,6 +18,8 @@ export function Navbar({
     const isHome = pathname.includes("/home") || pathname.includes("/bhajan");
     const isProduct = usePathname().includes("/products");
 
+    if (pathname === "/landing") return null;
+
     useEffect(() => {
         if (typeof window !== "undefined" && isMobile) {
             const handleScroll = () => {

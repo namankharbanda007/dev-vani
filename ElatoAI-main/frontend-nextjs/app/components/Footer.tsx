@@ -10,6 +10,8 @@ export default function Footer() {
     const isHome = pathname.includes("/home");
     const isMobile = useMediaQuery("(max-width: 768px)");
 
+    if (pathname === "/landing") return null;
+
     return (
         <footer
             className={`w-full ${isHome ? "pb-16" : "pb-2"
