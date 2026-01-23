@@ -50,33 +50,35 @@ export default function LandingPage() {
                 </div>
             </header>
 
-            {/* Hero Content */}
-            <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 md:px-12 lg:px-24 pt-8 md:pt-16 pb-20 flex flex-col items-center justify-center min-h-[80vh]">
+            {/* Hero Content - Adjusted for Layout issues */}
+            <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 md:px-12 lg:px-24 pt-4 md:pt-12 pb-20 flex flex-col items-center justify-center min-h-[90vh]">
 
                 {/* Main Heading & Character Container */}
-                <div className="relative w-full text-center flex justify-center items-center">
+                <div className="relative w-full text-center flex justify-center items-center mt-12 mb-32 md:mb-48">
 
                     {/* Background Text Layer */}
-                    <div className="relative z-0 pointer-events-none select-none flex flex-col items-center justify-center w-full">
-                        <h1 className="text-[10vw] xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black">
+                    <div className="relative z-0 pointer-events-none select-none flex flex-col items-center justify-center w-full min-h-[500px] md:min-h-[700px]">
+                        {/* Reduced text size from 11vw to 9vw/7rem to fix "Big as shit" issue */}
+                        <h1 className="text-[9vw] 2xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black">
                             SMART MURTI:
                         </h1>
-                        <h1 className="text-[10vw] xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black">
+                        <h1 className="text-[9vw] 2xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black whitespace-nowrap">
                             DIVINE BLESSINGS,
                         </h1>
-                        <h1 className="text-[10vw] xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black text-right md:ml-48">
+                        <h1 className="text-[9vw] 2xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] text-black text-right w-full pr-[5vw]">
                             DELIVERED.
                         </h1>
                     </div>
 
                     {/* Character Image Layer - Foreground */}
-                    <div className="absolute top-[10%] left-1/2 transform -translate-x-1/2 w-[90vw] md:w-[600px] lg:w-[700px] xl:w-[850px] h-[90vw] md:h-[600px] lg:h-[700px] xl:h-[850px] z-20 flex items-end justify-center">
+                    {/* Adjusted positioning to ensure visibility - moved further down and increased size */}
+                    <div className="absolute bottom-[-10%] left-1/2 transform -translate-x-1/2 w-[600px] md:w-[700px] lg:w-[800px] xl:w-[900px] z-20 flex items-end justify-center pointer-events-none">
                         <Image
                             src="/assets/landing/character.png"
                             alt="Divine Character"
-                            width={850}
-                            height={850}
-                            className="object-contain drop-shadow-2xl translate-y-12 md:translate-y-20 scale-110"
+                            width={900}
+                            height={1000}
+                            className="object-contain drop-shadow-2xl translate-y-24"
                             priority
                         />
                     </div>
@@ -86,14 +88,14 @@ export default function LandingPage() {
                 {/* Floating Elements / Details */}
 
                 {/* Left Side Details relative to viewport/container */}
-                <div className="absolute top-[50%] left-6 md:left-12 lg:left-24 max-w-xs hidden lg:block z-30">
+                <div className="absolute bottom-[20%] left-6 md:left-12 lg:left-24 max-w-xs hidden lg:block z-30">
                     {/* Icons/Badges */}
-                    <div className="flex -space-x-4 mb-20 pointer-events-auto">
+                    <div className="flex -space-x-4 mb-16 pointer-events-auto">
                         <div className="w-12 h-12 rounded-full bg-[#FFD7BA] border-2 border-white relative overflow-hidden flex items-center justify-center">
-                            <span className="text-xl">🕉️</span> {/* Placeholder for Ganesha */}
+                            <span className="text-xl">🕉️</span>
                         </div>
                         <div className="w-12 h-12 rounded-full bg-[#FFA07A] border-2 border-white relative overflow-hidden flex items-center justify-center">
-                            <span className="text-xl">🪔</span> {/* Placeholder for Lakshmi/Diya */}
+                            <span className="text-xl">🪔</span>
                         </div>
                         <div className="w-12 h-12 rounded-full bg-orange-500 border-2 border-white flex items-center justify-center text-white text-lg font-bold">
                             +
