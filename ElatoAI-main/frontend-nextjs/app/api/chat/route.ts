@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
             content: text,
             role: "assistant",
             personality_key: dbUser.personality?.key || "default",
-            personality_id: dbUser.user_metadata?.personality_id
+            personality_id: dbUser.personality_id
         });
 
         return NextResponse.json({ response: text });
