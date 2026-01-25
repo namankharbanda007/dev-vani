@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
             content: message,
             role: "user",
             personality_key: dbUser.personality?.key || "default", // Assuming we track this
-            personality_id: dbUser.user_metadata?.personality_id // Fallback
+            personality_id: dbUser.personality_id // Fallback
         });
 
         const { error: aiMsgError } = await supabase.from("conversations").insert({
