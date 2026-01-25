@@ -23,6 +23,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Transcript from "./components/Transcript";
 import ActiveCallView from "./components/ActiveCallView"; // Import new view
+import ChatInterface from "./components/ChatInterface"; // Import ChatInterface
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { getPersonalityById } from "@/db/personalities";
 import { createClient } from "@/utils/supabase/client";
@@ -45,6 +46,7 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     useState<AgentConfig[] | null>(null);
 
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [userText, setUserText] = useState<string>("");
   const [isAgentSpeaking, setIsAgentSpeaking] = useState<boolean>(false); // New state
 
@@ -536,47 +538,71 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
     : isAgentSpeaking ? 'speaking'
       : 'listening';
 
-  return <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
-    <div className="inline-block">
-      <BottomToolbar
-        sessionStatus={sessionStatus}
-        onToggleConnection={onToggleConnection}
-        isDoctor={isDoctor}
-        personality={personality}
-      />
-    </div>
-    <SheetContent
-      side={isMobile ? "bottom" : "right"}
-      className="h-[80vh] md:h-full p-0"
-      style={{ maxWidth: isMobile ? "100%" : "50%" }}
-    >
-      <div className="flex flex-col h-full bg-black">
-        <div className="flex-1 overflow-hidden relative">
-          {sessionStatus === "CONNECTED" || sessionStatus === "CONNECTING" ? (
-            <ActiveCallView
+  return (
+    <>
+      <div className="inline-block">
+        <BottomToolbar
+          sessionStatus={sessionStatus}
+          onToggleConnection={onToggleConnection}
+          isDoctor={isDoctor}
+          personality={personality}
+          onToggleChat={() => setIsChatOpen(!isChatOpen)}
+          isChatOpen={isChatOpen}
+        />
+      </div>
+
+      {/* Voice Sheet */}
+      <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
+        <SheetContent
+          side={isMobile ? "bottom" : "right"}
+          className="h-[80vh] md:h-full p-0"
+          style={{ maxWidth: isMobile ? "100%" : "50%" }}
+        >
+          <div className="flex flex-col h-full bg-black">
+            <div className="flex-1 overflow-hidden relative">
+              {sessionStatus === "CONNECTED" || sessionStatus === "CONNECTING" ? (
+                <ActiveCallView
+                  personality={personality}
+                  state={activeCallState}
+                  onEndCall={() => {
+                    disconnectFromRealtime(true);
+                    setIsSheetOpen(false);
+                  }}
+                />
+              ) : (
+                <Transcript
+                  userText={userText}
+                  setUserText={setUserText}
+                  onSendMessage={handleSendTextMessage}
+                  canSend={false}
+                  personality={personality}
+                  userId={userId}
+                  isDoctor={isDoctor}
+                  supabase={supabase}
+                />
+              )}
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Chat Sheet */}
+      <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <SheetContent
+          side={isMobile ? "bottom" : "right"}
+          className="h-[80vh] md:h-full p-0 sm:max-w-md w-full"
+          style={{ zIndex: 100 }}
+        >
+          {personality && (
+            <ChatInterface
               personality={personality}
-              state={activeCallState}
-              onEndCall={() => {
-                disconnectFromRealtime(true);
-                setIsSheetOpen(false);
-              }}
-            />
-          ) : (
-            <Transcript
-              userText={userText}
-              setUserText={setUserText}
-              onSendMessage={handleSendTextMessage}
-              canSend={false}
-              personality={personality}
-              userId={userId}
-              isDoctor={isDoctor}
-              supabase={supabase}
+              onClose={() => setIsChatOpen(false)}
             />
           )}
-        </div>
-      </div>
-    </SheetContent>
-  </Sheet>
+        </SheetContent>
+      </Sheet>
+    </>
+  );
 }
 
 export default App;

@@ -3,7 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { getUserById } from "@/db/users";
 
-interface IPayload {
+export interface IPayload {
   user: IUser;
   supabase: SupabaseClient;
   timestamp: string;
@@ -102,7 +102,7 @@ Let's begin the adventure now!
   `;
 };
 
-const createSystemPrompt = async (
+export const createSystemPrompt = async (
   payload: IPayload,
 ): Promise<string> => {
   const { user, supabase, timestamp } = payload;

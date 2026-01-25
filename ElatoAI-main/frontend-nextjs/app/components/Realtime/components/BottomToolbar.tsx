@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { SessionStatus } from "@/app/components/Realtime/types";
-import { Paperclip, PhoneCall, Play, Stethoscope } from "lucide-react";
+import { Paperclip, PhoneCall, Play, Stethoscope, MessageSquare } from "lucide-react";
 import { Loader2, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import styles from "./BottomToolbar.module.css";
@@ -10,6 +10,8 @@ interface BottomToolbarProps {
   onToggleConnection: () => void;
   isDoctor: boolean;
   personality: IPersonality;
+  onToggleChat?: () => void;
+  isChatOpen?: boolean;
 }
 
 function BottomToolbar({
@@ -17,6 +19,8 @@ function BottomToolbar({
   onToggleConnection,
   isDoctor,
   personality,
+  onToggleChat,
+  isChatOpen,
 }: BottomToolbarProps) {
   const isConnected = sessionStatus === "CONNECTED";
   const isConnecting = sessionStatus === "CONNECTING";
@@ -58,7 +62,20 @@ function BottomToolbar({
   }
 
   return (
-    <>
+    <div className="flex gap-4 items-center">
+      {onToggleChat && (
+        <button
+          onClick={onToggleChat}
+          className={`p-3 rounded-full shadow-lg flex items-center justify-center transition-all ${isChatOpen
+              ? "bg-white text-black"
+              : "bg-black/50 backdrop-blur-md text-white hover:bg-black/70"
+            }`}
+          title="Chat"
+        >
+          <MessageSquare size={20} />
+        </button>
+      )}
+
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -98,7 +115,7 @@ function BottomToolbar({
         </Tooltip>
       </TooltipProvider>
 
-    </>
+    </div>
   );
 }
 

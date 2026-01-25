@@ -12,6 +12,7 @@
     "dependencies": {
         "@azure/openai": "^2.0.0-beta.1",
         "@deepgram/sdk": "^3.5.1",
+        "@google/generative-ai": "^0.24.1",
         "@google/model-viewer": "^4.1.0",
         "@hookform/resolvers": "^3.9.0",
         "@next/third-parties": "^15.0.3",
