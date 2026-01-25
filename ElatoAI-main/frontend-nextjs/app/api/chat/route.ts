@@ -2,7 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 import { getUserById } from "@/db/users";
-import { createSystemPrompt } from "../session/route";
+import { createSystemPrompt } from "@/app/lib/prompt-utils";
 
 export async function POST(request: NextRequest) {
     const supabase = createClient();
