@@ -39,7 +39,8 @@ export async function GET(request: Request) {
 
                 if (result?.error) {
                     // If user creation failed, redirect to login with error
-                    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent("Database error saving new user: " + result.error)}`);
+                    console.error("User creation failed in callback:", result.error);
+                    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(result.error)}`);
                 }
 
                 return NextResponse.redirect(`${origin}/onboard`);

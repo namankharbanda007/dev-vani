@@ -209,8 +209,9 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                 )}
 
                 {error && (
-                    <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm text-center animate-in fade-in slide-in-from-top-2">
-                        {error}
+                    <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-xs text-left animate-in fade-in slide-in-from-top-2 max-h-48 overflow-y-auto">
+                        <div className="font-bold mb-2">Database Error:</div>
+                        <div className="font-mono break-words whitespace-pre-wrap">{error}</div>
                     </div>
                 )}
 

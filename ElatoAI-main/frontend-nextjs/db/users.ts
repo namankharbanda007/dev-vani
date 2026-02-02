@@ -5,41 +5,58 @@ export const createUser = async (
     user: User,
     userProps: Partial<IUser>,
 ) => {
-    console.log("Creating user:", { id: user.id, email: user.email, phone: user.phone });
+    console.log("=== CREATING USER ===");
+    console.log("User ID:", user.id);
+    console.log("User Email:", user.email);
+    console.log("User Phone:", user.phone);
+    console.log("User Metadata:", JSON.stringify(user.user_metadata, null, 2));
+    console.log("User Props:", JSON.stringify(userProps, null, 2));
 
     // Use email if available, otherwise use phone number for phone-only authentication
     const identifier = user.email ?? user.phone ?? "";
 
-    const { error } = await supabase.from("users").insert([
-        {
-            user_id: user.id,
-            email: identifier,  // Store phone number in email field if no email exists
-            supervisor_name: user.user_metadata?.name ?? "",
-            supervisee_name: "",
-            supervisee_age: 14,
-            supervisee_persona: "",
-            personality_id: userProps.personality_id, // selecting default personality
-            language_code: userProps.language_code ?? "en-US",
-            session_time: 0,
-            last_session_reset: null,
-            is_premium: false,
-            device_id: null,
-            user_info: {
-                user_type: "user",
-                user_metadata: {}
-            },
-            avatar_url: user.user_metadata?.avatar_url ??
-                `/user_avatar/user_avatar_${Math.floor(Math.random() * 10)
-                }.png`,
-        } as IUser,
-    ]);
+    const userToInsert = {
+        user_id: user.id,
+        email: identifier,  // Store phone number in email field if no email exists
+        supervisor_name: user.user_metadata?.name ?? "",
+        supervisee_name: "",
+        supervisee_age: 14,
+        supervisee_persona: "",
+        personality_id: userProps.personality_id, // selecting default personality
+        language_code: userProps.language_code ?? "en-US",
+        session_time: 0,
+        last_session_reset: null,
+        is_premium: false,
+        device_id: null,
+        user_info: {
+            user_type: "user",
+            user_metadata: {}
+        },
+        avatar_url: user.user_metadata?.avatar_url ??
+            `/user_avatar/user_avatar_${Math.floor(Math.random() * 10)
+            }.png`,
+    };
+
+    console.log("Attempting to insert user:", JSON.stringify(userToInsert, null, 2));
+
+    const { data, error } = await supabase.from("users").insert([userToInsert as IUser]);
 
     if (error) {
-        console.error("Error creating user:", error);
-        return { error: error.message };
+        console.error("=== DATABASE ERROR ===");
+        console.error("Error Message:", error.message);
+        console.error("Error Details:", error.details);
+        console.error("Error Hint:", error.hint);
+        console.error("Error Code:", error.code);
+        console.error("Full Error:", JSON.stringify(error, null, 2));
+
+        // Return detailed error information
+        return {
+            error: `${error.message}${error.hint ? ` | Hint: ${error.hint}` : ''}${error.details ? ` | Details: ${error.details}` : ''} | Code: ${error.code}`
+        };
     }
 
-    console.log("User created successfully");
+    console.log("=== USER CREATED SUCCESSFULLY ===");
+    console.log("Inserted data:", data);
     return { success: true };
 };
 

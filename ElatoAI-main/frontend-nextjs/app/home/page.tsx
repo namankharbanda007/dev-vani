@@ -33,8 +33,9 @@ export default async function Home() {
 
             if (result?.error) {
                 // If user creation failed, sign out and redirect to login with error
+                console.error("User creation failed in /home:", result.error);
                 await supabase.auth.signOut();
-                redirect(`/login?error=${encodeURIComponent("Database error saving new user: " + result.error)}`);
+                redirect(`/login?error=${encodeURIComponent(result.error)}`);
             }
 
             redirect("/onboard");
