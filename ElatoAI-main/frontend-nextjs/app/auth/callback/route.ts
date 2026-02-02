@@ -30,12 +30,17 @@ export async function GET(request: Request) {
             const userExists = await doesUserExist(supabase, user);
             if (!userExists) {
                 // Create user if they don't exist
-                await createUser(supabase, user, {
+                const result = await createUser(supabase, user, {
                     language_code: "en-US",
                     personality_id:
                         user?.user_metadata?.personality_id ??
                         defaultPersonalityId,
                 });
+
+                if (result?.error) {
+                    // If user creation failed, redirect to login with error
+                    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent("Database error saving new user: " + result.error)}`);
+                }
 
                 return NextResponse.redirect(`${origin}/onboard`);
             }

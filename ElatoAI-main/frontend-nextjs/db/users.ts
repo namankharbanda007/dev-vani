@@ -5,13 +5,15 @@ export const createUser = async (
     user: User,
     userProps: Partial<IUser>,
 ) => {
-    // console.log("creating user", user, userProps);
+    console.log("Creating user:", { id: user.id, email: user.email, phone: user.phone });
 
-    //   return ;
+    // Use email if available, otherwise use phone number for phone-only authentication
+    const identifier = user.email ?? user.phone ?? "";
+
     const { error } = await supabase.from("users").insert([
         {
             user_id: user.id,
-            email: user.email,
+            email: identifier,  // Store phone number in email field if no email exists
             supervisor_name: user.user_metadata?.name ?? "",
             supervisee_name: "",
             supervisee_age: 14,
@@ -25,8 +27,12 @@ export const createUser = async (
     ]);
 
     if (error) {
-        // console.log("error", error);
+        console.error("Error creating user:", error);
+        return { error: error.message };
     }
+
+    console.log("User created successfully");
+    return { success: true };
 };
 
 export const getSimpleUserById = async (

@@ -18,7 +18,9 @@ export function LoginForm({ searchParams }: LoginFormProps) {
     const [phone, setPhone] = useState("");
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(searchParams?.message as string || null);
+    const [error, setError] = useState<string | null>(
+        (searchParams?.message as string) || (searchParams?.error as string) || null
+    );
     const [message, setMessage] = useState<string | null>(null);
 
     const toy_id = searchParams?.toy_id as string | undefined;

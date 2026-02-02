@@ -25,11 +25,18 @@ export default async function Home() {
         // await supabase.auth.signOut();
         if (!userExists) {
             // Create user if they don't exist
-            await createUser(supabase, user, {
+            const result = await createUser(supabase, user, {
                 personality_id:
                     user?.user_metadata?.personality_id ?? defaultPersonalityId,
                 language_code: "en-US",
             });
+
+            if (result?.error) {
+                // If user creation failed, sign out and redirect to login with error
+                await supabase.auth.signOut();
+                redirect(`/login?error=${encodeURIComponent("Database error saving new user: " + result.error)}`);
+            }
+
             redirect("/onboard");
         }
     }
