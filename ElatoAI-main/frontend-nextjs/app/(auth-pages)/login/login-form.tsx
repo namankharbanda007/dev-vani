@@ -141,7 +141,7 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                             className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
                             pendingText="Signing in..."
                         >
-                            Sign In
+                            Sign In devotee
                         </SubmitButton>
                     </form>
                 ) : (
