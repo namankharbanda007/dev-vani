@@ -1,4 +1,5 @@
 import { type SupabaseClient, type User } from "@supabase/supabase-js";
+import { createServiceClient } from "@/utils/supabase/service";
 
 export const createUser = async (
     supabase: SupabaseClient,
@@ -39,7 +40,9 @@ export const createUser = async (
 
     console.log("Attempting to insert user:", JSON.stringify(userToInsert, null, 2));
 
-    const { data, error } = await supabase.from("users").insert([userToInsert as IUser]);
+    // Use service role client to bypass RLS policies
+    const serviceClient = createServiceClient();
+    const { data, error } = await serviceClient.from("users").insert([userToInsert as IUser]);
 
     if (error) {
         console.error("=== DATABASE ERROR ===");
