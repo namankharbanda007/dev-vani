@@ -79,7 +79,8 @@ export const startPhoneAuthAction = async (formData: FormData) => {
     });
 
     if (error) {
-        return { error: error.message };
+        console.error("signInWithOtp failed:", error);
+        return { error: `[START-ERR] ${error.message}` };
     }
 
     return { success: true };
