@@ -6,10 +6,11 @@ import { createClient } from "@supabase/supabase-js";
  */
 export const createServiceClient = () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseServiceKey) {
-        throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY environment variable");
+        console.warn("SUPABASE_SERVICE_ROLE_KEY not found - user creation may fail due to RLS");
+        throw new Error("Service role key not configured");
     }
 
     return createClient(supabaseUrl, supabaseServiceKey, {

@@ -40,9 +40,21 @@ export const createUser = async (
 
     console.log("Attempting to insert user:", JSON.stringify(userToInsert, null, 2));
 
-    // Use service role client to bypass RLS policies
-    const serviceClient = createServiceClient();
-    const { data, error } = await serviceClient.from("users").insert([userToInsert as IUser]);
+    // Try to use service role client to bypass RLS, fallback to regular client if not available
+    let clientToUse = supabase;
+    try {
+        if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            const serviceClient = createServiceClient();
+            clientToUse = serviceClient;
+            console.log("Using service role client for user creation");
+        } else {
+            console.log("Service role key not found, using regular client");
+        }
+    } catch (e) {
+        console.log("Could not create service client, using regular client:", e);
+    }
+
+    const { data, error } = await clientToUse.from("users").insert([userToInsert as IUser]);
 
     if (error) {
         console.error("=== DATABASE ERROR ===");
