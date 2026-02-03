@@ -94,17 +94,14 @@ export const verifyPhoneAuthAction = async (formData: FormData) => {
         return { error: "Phone and OTP are required" };
     }
 
-    const { error } = await supabase.auth.verifyOtp({
-        phone,
-        token,
-        type: "sms",
-    });
+});
 
-    if (error) {
-        return { error: error.message };
-    }
+if (error) {
+    console.error("verifyOtp failed:", error);
+    return { error: `[ACTION-ERR] ${error.message}` };
+}
 
-    return redirect("/home");
+return redirect("/home");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
