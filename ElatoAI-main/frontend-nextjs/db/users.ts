@@ -14,7 +14,7 @@ export const createUser = async (
     console.log("User Props:", JSON.stringify(userProps, null, 2));
 
     // Use email if available, otherwise use phone number for phone-only authentication
-    const identifier = user.email ?? user.phone ?? "";
+    const identifier = user.email ?? (user.phone ? `${user.phone}@phone.com` : "") ?? "";
 
     const userToInsert = {
         user_id: user.id,
@@ -66,7 +66,7 @@ export const createUser = async (
 
         // Return detailed error information
         return {
-            error: `${error.message}${error.hint ? ` | Hint: ${error.hint}` : ''}${error.details ? ` | Details: ${error.details}` : ''} | Code: ${error.code}`
+            error: `[DB-FAIL] ${error.message} (Code: ${error.code})`
         };
     }
 

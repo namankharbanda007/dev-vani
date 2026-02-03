@@ -148,6 +148,8 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                     <div className="space-y-6">
                         {!otpSent ? (
                             <form action={handlePhoneSubmit} className="space-y-6">
+                                <input type="hidden" name="toy_id" value={toy_id ?? ""} />
+                                <input type="hidden" name="personality_id" value={personality_id ?? ""} />
                                 <div className="space-y-2">
                                     <Label htmlFor="phone" className="text-gray-700 font-medium">Phone Number</Label>
                                     <p className="text-xs text-gray-500">Includes country code (e.g. +919876543210)</p>

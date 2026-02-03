@@ -60,6 +60,8 @@ export const signInAction = async (formData: FormData) => {
 
 export const startPhoneAuthAction = async (formData: FormData) => {
     const phone = formData.get("phone") as string;
+    const toy_id = formData.get("toy_id") as string | undefined;
+    const personality_id = formData.get("personality_id") as string | undefined;
     const supabase = createClient();
 
     if (!phone) {
@@ -68,6 +70,12 @@ export const startPhoneAuthAction = async (formData: FormData) => {
 
     const { error } = await supabase.auth.signInWithOtp({
         phone,
+        options: {
+            data: {
+                toy_id,
+                personality_id,
+            },
+        },
     });
 
     if (error) {
