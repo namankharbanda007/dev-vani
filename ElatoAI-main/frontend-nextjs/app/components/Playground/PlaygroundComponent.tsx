@@ -11,6 +11,7 @@ import { EventProvider } from "../Realtime/contexts/EventContext";
 import App from "../Realtime/App";
 import { defaultPersonalityId } from "@/lib/data";
 import UserPersonalities from "./UserPersonalities";
+import HoroscopeHero from "../HoroscopeHero";
 
 interface PlaygroundProps {
     currentUser: IUser;
@@ -77,6 +78,11 @@ const Playground: React.FC<PlaygroundProps> = ({
                         page="home"
                         languageCode={'en-US'}
                     />
+                </div>
+
+                {/* Horoscope Section */}
+                <div className="w-full">
+                    <HoroscopeHero />
                 </div>
 
                 {/* Personalities Grid */}
