@@ -88,6 +88,15 @@ declare global {
         birth_time?: string;
         birth_date?: string;
         rashi?: string;
+        daily_horoscope?: {
+            date: string;
+            sign: string;
+            lucky_color: string;
+            lucky_number: string;
+            lucky_time: string;
+            mood: string;
+            content: string;
+        };
     }
 
     type Role = "user" | "assistant" | "doctor";

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
 
 interface HoroscopeHeroProps {
     currentUser?: IUser;
@@ -31,6 +31,8 @@ const getZodiacData = (dateString?: string) => {
 };
 
 const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
+    const [loading, setLoading] = useState(false);
+    const [horoscopeData, setHoroscopeData] = useState<any>(null);
 
     // Calculate Zodiac Data
     const { sign, symbol, index } = useMemo(() => {
@@ -41,9 +43,48 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
         return getZodiacData(birthDate);
     }, [currentUser]);
 
-    // Mock other data for now (could be dynamic later)
-    const luckyNumber = 3;
-    const luckyTime = "04:26 PM";
+    // Fetch Horoscope Data
+    useEffect(() => {
+        const fetchHoroscope = async () => {
+            const metadata = currentUser?.user_info?.user_metadata as IUserMetadata | undefined;
+            const cached = metadata?.daily_horoscope;
+            const today = new Date().toISOString().split('T')[0];
+
+            if (cached && cached.date === today) {
+                console.log("Using cached horoscope");
+                setHoroscopeData(cached);
+                return;
+            }
+
+            console.log("Fetching new horoscope...");
+            setLoading(true);
+            try {
+                const res = await fetch('/api/horoscope/daily');
+                if (res.ok) {
+                    const data = await res.json();
+                    setHoroscopeData(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch horoscope", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (currentUser) {
+            fetchHoroscope();
+        }
+    }, [currentUser]);
+
+    const luckyNumber = horoscopeData?.lucky_number || "3";
+    const luckyTime = horoscopeData?.lucky_time || "04:26 PM";
+    const mood = horoscopeData?.mood || "😍";
+    // Parse color if format is string
+    const colorName = horoscopeData?.lucky_color || "Coral";
+
+    // Fallback colors for visual circles (static for now, dynamic names displayed)
+    const color1 = "#FF7F50";
+    const color2 = "#008080";
 
     return (
         <div className="w-full relative overflow-hidden rounded-[30px] p-[1px] shadow-2xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(139,92,246,0.3)] group">
@@ -64,17 +105,24 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
                     <div className="absolute bottom-[20%] left-[30%] w-[2px] h-[2px] bg-white opacity-70 rounded-full animate-pulse delay-150"></div>
                 </div>
 
-                <div className="relative z-20 flex flex-col lg:flex-row items-center justify-between p-6 md:p-8 lg:p-10 gap-8">
+                <div className="relative z-20 flex flex-col lg:flex-row items-center justify-between p-6 md:p-8 lg:p-10 gap-8 min-h-[300px]">
 
                     {/* LEFT COLUMN: Data & Text */}
                     <div className="flex-1 w-full flex flex-col justify-between h-full space-y-8">
 
                         {/* Heading */}
                         <div className="space-y-1">
-                            <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-white font-medium tracking-wide">
+                            <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-white font-medium tracking-wide flex items-center gap-2">
                                 Your Daily horoscope is ready!
+                                {loading && <Loader2 className="h-6 w-6 animate-spin text-purple-400" />}
                             </h2>
                             <p className="text-purple-300/80 text-sm font-light uppercase tracking-widest">{sign} • {(currentUser?.user_info?.user_metadata as IUserMetadata)?.rashi || "Daily Insights"}</p>
+
+                            {horoscopeData?.content && (
+                                <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-lg mt-2 italic border-l-2 border-purple-500/50 pl-4 py-1">
+                                    "{horoscopeData.content}"
+                                </p>
+                            )}
                         </div>
 
                         {/* Data Grid */}
@@ -82,18 +130,18 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
 
                             {/* Lucky Colours */}
                             <div className="flex flex-col gap-2">
-                                <span className="text-gray-300 text-sm md:text-base font-light tracking-wider">Lucky Colours</span>
+                                <span className="text-gray-300 text-sm md:text-base font-light tracking-wider">Lucky Colour</span>
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#FF7F50] shadow-[0_0_15px_rgba(255,127,80,0.4)] border border-white/10"></div>
-                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#008080] shadow-[0_0_15px_rgba(0,128,128,0.4)] border border-white/10"></div>
+                                    <span className="text-white font-light">{colorName}</span>
                                 </div>
                             </div>
 
                             {/* Mood */}
                             <div className="flex flex-col gap-2">
                                 <span className="text-gray-300 text-sm md:text-base font-light tracking-wider">Mood of day</span>
-                                <div className="text-3xl md:text-4xl filter drop-shadow-[0_0_10px_rgba(255,200,0,0.3)]">
-                                    😍
+                                <div className="text-3xl md:text-4xl filter drop-shadow-[0_0_10px_rgba(255,200,0,0.3)] animate-pulse">
+                                    {mood}
                                 </div>
                             </div>
 
