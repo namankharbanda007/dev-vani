@@ -1,4 +1,3 @@
-
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
@@ -7,9 +6,9 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Helper to determine Zodiac Sign from date (duplicated from frontend for backend reliability)
+// Helper to determine Zodiac Sign from date
 const getZodiacSign = (dateString?: string) => {
-    if (!dateString) return "Aries"; // Default
+    if (!dateString) return "Aries";
     const date = new Date(dateString);
     const day = date.getDate();
     const month = date.getMonth() + 1;
@@ -28,8 +27,26 @@ const getZodiacSign = (dateString?: string) => {
     return "Pisces";
 };
 
+// Helper to get date string relative to today
+const getDateString = (offset: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offset);
+    return d.toISOString().split('T')[0];
+};
+
 export async function GET(req: Request) {
     const supabase = createClient();
+    const { searchParams } = new URL(req.url);
+
+    // 1. Parse Query Params
+    const requestedSign = searchParams.get('sign');
+    const relativeDate = searchParams.get('date'); // "Yesterday", "Today", "Tomorrow"
+
+    // Calculate actual date string
+    let targetDate = getDateString(0); // Default Today
+    if (relativeDate === "Yesterday") targetDate = getDateString(-1);
+    if (relativeDate === "Tomorrow") targetDate = getDateString(1);
+
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -37,7 +54,7 @@ export async function GET(req: Request) {
     }
 
     try {
-        // Fetch current user data to check cache
+        // Fetch current user data for context
         const { data: dbUser, error: fetchError } = await supabase
             .from("users")
             .select("user_info")
@@ -45,30 +62,34 @@ export async function GET(req: Request) {
             .single();
 
         if (fetchError || !dbUser) {
-            console.error("Error fetching user:", fetchError);
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
         const metadata = (dbUser.user_info as any)?.user_metadata || {};
-        const birthDate = metadata.birth_date;
-        const rashi = metadata.rashi;
+        const userBirthDate = metadata.birth_date;
+        const userSign = getZodiacSign(userBirthDate);
 
-        // 1. Check if we already have a horoscope for TODAY
-        const today = new Date().toISOString().split('T')[0];
-        const cachedHoroscope = metadata.daily_horoscope;
+        // Determine which sign to generate for
+        const signToUse = requestedSign || userSign;
+        const rashiToUse = (signToUse === userSign) ? metadata.rashi : ""; // Only use Rashi if it's the user's sign
 
-        if (cachedHoroscope && cachedHoroscope.date === today) {
-            // Return cached version
-            return NextResponse.json(cachedHoroscope);
+        // 2. CHECK CACHE (Only if it's the user's main horoscope for TODAY)
+        const isMainProfile = (signToUse === userSign && targetDate === getDateString(0));
+
+        if (isMainProfile) {
+            const cachedHoroscope = metadata.daily_horoscope;
+            if (cachedHoroscope && cachedHoroscope.date === targetDate) {
+                // Check if it has the new fields (migration check)
+                if (cachedHoroscope.money) {
+                    return NextResponse.json(cachedHoroscope);
+                }
+            }
         }
 
-        // 2. Generate New Horoscope via OpenAI
-        const sign = getZodiacSign(birthDate);
-        console.log(`Generating horoscope for ${sign}...`);
-
+        // 3. GENERATE
         const prompt = `
-            Generate a short, mystical, and uplifting daily horoscope for a ${sign} (Zodiac) user.
-            ${rashi ? `Their Vedic Rashi is ${rashi}.` : ""}
+            Generate a short, mystical, and uplifting daily horoscope for a ${signToUse} (Zodiac) user for the date ${targetDate}.
+            ${rashiToUse ? `Their Vedic Rashi is ${rashiToUse}.` : ""}
             
             Return strictly a JSON object with the following fields:
             {
@@ -77,20 +98,17 @@ export async function GET(req: Request) {
                 "lucky_time": "Time string (e.g. '04:20 PM')",
                 "mood": "Single emoji (e.g. '✨')",
                 "content": "A 2-sentence general horoscope prediction.",
-                "love": {
-                    "text": "Insight about love life.",
-                    "percentage": 85
-                },
-                "career": {
-                    "text": "Insight about career/work.",
-                    "percentage": 60
-                }
+                "love": { "text": "Insight about love.", "percentage": 85 },
+                "career": { "text": "Insight about career.", "percentage": 60 },
+                "money": { "text": "Insight about finances.", "percentage": 70 },
+                "health": { "text": "Insight about health.", "percentage": 90 },
+                "travel": { "text": "Insight about travel.", "percentage": 40 }
             }
         `;
 
         const completion = await openai.chat.completions.create({
             messages: [{ role: "system", content: "You are a mystical astrologer." }, { role: "user", content: prompt }],
-            model: "gpt-4o-mini", // Cost effective
+            model: "gpt-4o-mini",
             response_format: { type: "json_object" },
         });
 
@@ -100,30 +118,27 @@ export async function GET(req: Request) {
         const generatedData = JSON.parse(rawContent);
 
         const newHoroscope = {
-            date: today,
-            sign: sign,
+            date: targetDate,
+            sign: signToUse,
             ...generatedData
         };
 
-        // 3. Save to Database (Cache it)
-        const updatedMetadata = {
-            ...metadata,
-            daily_horoscope: newHoroscope
-        };
+        // 4. CACHE (Only if main profile)
+        if (isMainProfile) {
+            const updatedMetadata = {
+                ...metadata,
+                daily_horoscope: newHoroscope
+            };
 
-        const { error: updateError } = await supabase
-            .from("users")
-            .update({
-                user_info: {
-                    ...dbUser.user_info as any,
-                    user_metadata: updatedMetadata
-                }
-            })
-            .eq("user_id", user.id);
-
-        if (updateError) {
-            console.error("Failed to cache horoscope:", updateError);
-            // We still return the data even if caching failed
+            await supabase
+                .from("users")
+                .update({
+                    user_info: {
+                        ...dbUser.user_info as any,
+                        user_metadata: updatedMetadata
+                    }
+                })
+                .eq("user_id", user.id);
         }
 
         return NextResponse.json(newHoroscope);
