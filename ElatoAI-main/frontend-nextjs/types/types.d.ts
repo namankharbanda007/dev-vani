@@ -104,6 +104,18 @@ declare global {
                 text: string;
                 percentage: number;
             };
+            money?: {
+                text: string;
+                percentage: number;
+            };
+            health?: {
+                text: string;
+                percentage: number;
+            };
+            travel?: {
+                text: string;
+                percentage: number;
+            };
         };
     }
 
