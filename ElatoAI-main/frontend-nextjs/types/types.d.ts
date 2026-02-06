@@ -96,6 +96,14 @@ declare global {
             lucky_time: string;
             mood: string;
             content: string;
+            love?: {
+                text: string;
+                percentage: number;
+            };
+            career?: {
+                text: string;
+                percentage: number;
+            };
         };
     }
 

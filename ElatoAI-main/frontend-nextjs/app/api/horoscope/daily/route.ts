@@ -76,7 +76,15 @@ export async function GET(req: Request) {
                 "lucky_number": "Single number string (e.g. '7')",
                 "lucky_time": "Time string (e.g. '04:20 PM')",
                 "mood": "Single emoji (e.g. '✨')",
-                "content": "A 2-sentence horoscope prediction."
+                "content": "A 2-sentence general horoscope prediction.",
+                "love": {
+                    "text": "Insight about love life.",
+                    "percentage": 85
+                },
+                "career": {
+                    "text": "Insight about career/work.",
+                    "percentage": 60
+                }
             }
         `;
 

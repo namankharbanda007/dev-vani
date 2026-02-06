@@ -2,6 +2,7 @@
 
 import React, { useMemo, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronRight, Loader2 } from "lucide-react";
 
 interface HoroscopeHeroProps {
@@ -164,10 +165,12 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
 
                         {/* Desktop CTA Button (Hidden on Mobile, shown on Large) */}
                         <div className="hidden lg:block pt-4">
-                            <button className="flex items-center justify-between w-full max-w-lg bg-[#FFD700] hover:bg-[#FFC000] text-black font-medium text-lg px-8 py-4 rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(255,215,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] transform hover:-translate-y-1">
-                                <span>View your Detailed Horoscope</span>
-                                <ChevronRight className="w-6 h-6 text-black" strokeWidth={2.5} />
-                            </button>
+                            <Link href="/horoscope">
+                                <button className="flex items-center justify-between w-full max-w-lg bg-[#FFD700] hover:bg-[#FFC000] text-black font-medium text-lg px-8 py-4 rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(255,215,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] transform hover:-translate-y-1">
+                                    <span>View your Detailed Horoscope</span>
+                                    <ChevronRight className="w-6 h-6 text-black" strokeWidth={2.5} />
+                                </button>
+                            </Link>
                         </div>
                     </div>
 
@@ -198,10 +201,12 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
 
                         {/* Mobile CTA Button (Shown on Mobile/Tablet, hidden on Desktop) */}
                         <div className="block lg:hidden w-full mt-8">
-                            <button className="flex items-center justify-between w-full bg-[#FFD700] hover:bg-[#FFC000] text-black font-medium text-lg px-6 py-4 rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(255,215,0,0.3)]">
-                                <span>View Detailed Horoscope</span>
-                                <ChevronRight className="w-6 h-6 text-black" strokeWidth={2.5} />
-                            </button>
+                            <Link href="/horoscope">
+                                <button className="flex items-center justify-between w-full bg-[#FFD700] hover:bg-[#FFC000] text-black font-medium text-lg px-6 py-4 rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(255,215,0,0.3)]">
+                                    <span>View Detailed Horoscope</span>
+                                    <ChevronRight className="w-6 h-6 text-black" strokeWidth={2.5} />
+                                </button>
+                            </Link>
                         </div>
                     </div>
 
