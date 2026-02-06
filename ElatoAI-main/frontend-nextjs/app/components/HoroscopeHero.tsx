@@ -1,22 +1,50 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 
 interface HoroscopeHeroProps {
-    // Making these optional for now with defaults, so we can easily inject dynamic data later
-    zodiacSign?: string;
-    luckyNumber?: number;
-    luckyTime?: string;
-    userName?: string; // Future use
+    currentUser?: IUser;
 }
 
-const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({
-    zodiacSign = "Taurus",
-    luckyNumber = 3,
-    luckyTime = "04:26 PM",
-}) => {
+// Helper to determine Zodiac Sign from date
+const getZodiacData = (dateString?: string) => {
+    // Default to Aries if no date
+    const date = dateString ? new Date(dateString) : new Date("2000-03-21");
+    const day = date.getDate();
+    const month = date.getMonth() + 1; // 1-12
+
+    // Standard Zodiac Date Ranges
+    if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return { sign: "Aries", symbol: "♈", index: "01" };
+    if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return { sign: "Taurus", symbol: "♉", index: "02" };
+    if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return { sign: "Gemini", symbol: "♊", index: "03" };
+    if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return { sign: "Cancer", symbol: "♋", index: "04" };
+    if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return { sign: "Leo", symbol: "♌", index: "05" };
+    if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return { sign: "Virgo", symbol: "♍", index: "06" };
+    if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return { sign: "Libra", symbol: "♎", index: "07" };
+    if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return { sign: "Scorpio", symbol: "♏", index: "08" };
+    if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return { sign: "Sagittarius", symbol: "♐", index: "09" };
+    if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return { sign: "Capricorn", symbol: "♑", index: "10" };
+    if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return { sign: "Aquarius", symbol: "♒", index: "11" };
+    return { sign: "Pisces", symbol: "♓", index: "12" };
+};
+
+const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
+
+    // Calculate Zodiac Data
+    const { sign, symbol, index } = useMemo(() => {
+        // Try getting date from user metadata
+        // We cast to IUserMetadata to access birth_date safely as we expect this to be a user context
+        const metadata = currentUser?.user_info?.user_metadata as IUserMetadata | undefined;
+        let birthDate = metadata?.birth_date;
+        return getZodiacData(birthDate);
+    }, [currentUser]);
+
+    // Mock other data for now (could be dynamic later)
+    const luckyNumber = 3;
+    const luckyTime = "04:26 PM";
+
     return (
         <div className="w-full relative overflow-hidden rounded-[30px] p-[1px] shadow-2xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(139,92,246,0.3)] group">
             {/* Animated Glow Border Gradient */}
@@ -42,9 +70,12 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({
                     <div className="flex-1 w-full flex flex-col justify-between h-full space-y-8">
 
                         {/* Heading */}
-                        <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-white font-medium tracking-wide">
-                            Your Daily horoscope is ready!
-                        </h2>
+                        <div className="space-y-1">
+                            <h2 className="text-2xl md:text-3xl lg:text-4xl font-sans text-white font-medium tracking-wide">
+                                Your Daily horoscope is ready!
+                            </h2>
+                            <p className="text-purple-300/80 text-sm font-light uppercase tracking-widest">{sign} • {(currentUser?.user_info?.user_metadata as IUserMetadata)?.rashi || "Daily Insights"}</p>
+                        </div>
 
                         {/* Data Grid */}
                         <div className="grid grid-cols-2 gap-x-8 gap-y-6 max-w-md">
@@ -102,14 +133,14 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({
 
                             {/* Zodiac Sign Bubble */}
                             <div className="absolute top-[10%] left-[-10%] z-20 w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-yellow-100 to-yellow-300 rounded-full flex items-center justify-center shadow-[0_0_25px_rgba(255,215,0,0.5)] border-2 border-white animate-bounce-slow">
-                                <span className="text-3xl md:text-4xl text-black">♉</span>
+                                <span className="text-3xl md:text-4xl text-black">{symbol}</span>
                             </div>
 
                             {/* Avatar Container */}
-                            <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-yellow-400/50 shadow-[0_0_50px_rgba(255,215,0,0.2)]">
+                            <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-yellow-400/50 shadow-[0_0_50px_rgba(255,215,0,0.2)] bg-black">
                                 <Image
-                                    src="/assets/horoscope-taurus.jpg"
-                                    alt="Horoscope Avatar"
+                                    src={`/assets/horoscope-${index}.webp`}
+                                    alt={`Horoscope Avatar for ${sign}`}
                                     fill
                                     className="object-cover"
                                     priority

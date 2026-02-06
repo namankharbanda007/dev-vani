@@ -82,7 +82,7 @@ const Playground: React.FC<PlaygroundProps> = ({
 
                 {/* Horoscope Section */}
                 <div className="w-full">
-                    <HoroscopeHero />
+                    <HoroscopeHero currentUser={currentUser} />
                 </div>
 
                 {/* Personalities Grid */}
