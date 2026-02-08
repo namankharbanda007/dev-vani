@@ -1,4 +1,13 @@
-import { Astronomy, DefineStar, Equator, Observer, SearchMoonQuarter, Time } from 'astronomy-engine';
+import {
+    AstroTime,
+    Body,
+    Observer,
+    SunPosition,
+    MoonPhase,
+    GeoVector,
+    Ecliptic,
+    SearchRiseSet,
+} from 'astronomy-engine';
 
 // Zodiac Signs with their starting longitudes (Tropical)
 const ZODIAC_SIGNS = [
@@ -20,12 +29,12 @@ const ZODIAC_SIGNS = [
  * Calculates the Tropical Sun Sign for a given date.
  */
 export const getSunSign = (date: Date) => {
-    const astroTime = new Time(date);
-    const sun = Astronomy.SunPosition(astroTime);
-    // longitude is 0-360. 0 is Aries start.
-    const lon = sun.ecliptic.longitude;
+    const astroTime = new AstroTime(date);
+    const sun = SunPosition(astroTime);
+    // SunPosition returns EclipticCoordinates { elon, elat, ... }
+    const lon = sun.elon;
 
-    const sign = ZODIAC_SIGNS.find(s => lon >= s.start && lon < s.end) || ZODIAC_SIGNS[11]; // Fallback to Pisces if 359.9...
+    const sign = ZODIAC_SIGNS.find(s => lon >= s.start && lon < s.end) || ZODIAC_SIGNS[11];
     return sign;
 };
 
@@ -33,11 +42,9 @@ export const getSunSign = (date: Date) => {
  * Calculates the current Moon Phase and Sign.
  */
 export const getMoonDetails = (date: Date) => {
-    const astroTime = new Time(date);
-    const moon = Astronomy.GeoVector(Astronomy.Body.Moon, astroTime, true);
-    // Calculate ecliptic longitude of Moon? Astronomy-engine approach:
-    // easier to just use MoonPhase function for phase
-    const phase = Astronomy.MoonPhase(astroTime); // 0-360
+    const astroTime = new AstroTime(date);
+    const moonVec = GeoVector(Body.Moon, astroTime, true);
+    const phase = MoonPhase(astroTime); // 0-360
 
     let phaseName = "New Moon";
     if (phase < 45) phaseName = "Waxing Crescent";
@@ -48,11 +55,9 @@ export const getMoonDetails = (date: Date) => {
     else if (phase < 270) phaseName = "Last Quarter";
     else if (phase < 315) phaseName = "Waning Crescent";
 
-    // To get Moon Sign, we need Ecliptic Longitude
-    // GeoVector returns equatorial coordinates. 
-    // We can use Ecliptic(vector)
-    const moonPos = Astronomy.Ecliptic(moon);
-    const lon = moonPos.longitude;
+    // Convert GeoVector to Ecliptic to get longitude
+    const moonPos = Ecliptic(moonVec);
+    const lon = moonPos.elon;
     const sign = ZODIAC_SIGNS.find(s => lon >= s.start && lon < s.end);
 
     return {
@@ -65,22 +70,21 @@ export const getMoonDetails = (date: Date) => {
 
 /**
  * Get current positions of major planets to inject into AI prompt.
- * "Saturn is in Pisces", "Jupiter is in Gemini", etc.
  */
 export const getPlanetaryTransits = (date: Date) => {
-    const astroTime = new Time(date);
+    const astroTime = new AstroTime(date);
     const bodies = [
-        { name: 'Mercury', body: Astronomy.Body.Mercury },
-        { name: 'Venus', body: Astronomy.Body.Venus },
-        { name: 'Mars', body: Astronomy.Body.Mars },
-        { name: 'Jupiter', body: Astronomy.Body.Jupiter },
-        { name: 'Saturn', body: Astronomy.Body.Saturn },
+        { name: 'Mercury', body: Body.Mercury },
+        { name: 'Venus', body: Body.Venus },
+        { name: 'Mars', body: Body.Mars },
+        { name: 'Jupiter', body: Body.Jupiter },
+        { name: 'Saturn', body: Body.Saturn },
     ];
 
     return bodies.map(b => {
-        const vec = Astronomy.GeoVector(b.body, astroTime, true);
-        const ecl = Astronomy.Ecliptic(vec);
-        const lon = ecl.longitude;
+        const vec = GeoVector(b.body, astroTime, true);
+        const ecl = Ecliptic(vec);
+        const lon = ecl.elon;
         const sign = ZODIAC_SIGNS.find(s => lon >= s.start && lon < s.end);
         return `${b.name} in ${sign?.name}`;
     }).join(', ');
@@ -88,30 +92,21 @@ export const getPlanetaryTransits = (date: Date) => {
 
 /**
  * Calculates a "Lucky Time" based on Planetary Hours (Hora).
- * Simple approximation: Sunrise + (DayOfWeekOffset).
- * Ideally needs lat/long, defaulting to New Delhi for generic.
  */
 export const getPlanetaryHour = (date: Date) => {
-    // Default observer: New Delhi (28.6139, 77.2090)
     const observer = new Observer(28.6139, 77.2090, 0);
-    const astroTime = new Time(date);
+    const astroTime = new AstroTime(date);
 
-    // Get sunrise/sunset
-    const sunrise = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, +1, date, 300); // +1 for Rise
+    // SearchRiseSet returns AstroTime | null
+    const sunrise = SearchRiseSet(Body.Sun, observer, +1, date, 300);
 
-    if (!sunrise) return "10:00 AM"; // Fallback
+    if (!sunrise) return "10:00 AM";
 
-    const sunriseDate = sunrise.date;
-    // Simple Hora logic: The 1st hour of the day is ruled by the Day Lord.
-    // Sunday -> Sun, Monday -> Moon, etc.
-    // Let's just return a "Peak Power Time" which is usually Noon or Sunrise + 2hrs
-
-    // Add random offset deterministic to date to simulate "Lucky Time"
+    // Seed logic
     const seed = date.getDate() + date.getMonth();
-    const rangeStart = 8; // 8 AM
-    const rangeEnd = 20; // 8 PM
+    const rangeStart = 8;
+    const rangeEnd = 20;
 
-    // Deterministic pseudo-random based on date
     const hour = (seed % (rangeEnd - rangeStart)) + rangeStart;
     const minute = (seed * 17) % 60;
 
