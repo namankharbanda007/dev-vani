@@ -1,12 +1,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
-import { getPlanetaryTransits, getPlanetaryHour, getDailyNumerology } from "@/lib/astrology"; // Added getDailyNumerology
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getPlanetaryTransits, getPlanetaryHour, getDailyNumerology } from "@/lib/astrology";
 import { toZonedTime, format } from 'date-fns-tz';
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function GET(req: Request) {
     const supabase = createClient();
@@ -58,16 +54,19 @@ export async function GET(req: Request) {
             return NextResponse.json(cachedHoroscope);
         }
 
-        // 5. GENERATE
+        // 5. GENERATE WITH GEMINI
         console.log(`Generating horoscope for ${signToUse} on ${targetDate}`);
 
-        // Create a robust seed to prevent collisions between signs
-        const seedString = `${targetDate}-${signToUse}`;
-        let seedHash = 0;
-        for (let i = 0; i < seedString.length; i++) {
-            seedHash = ((seedHash << 5) - seedHash) + seedString.charCodeAt(i);
-            seedHash |= 0;
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            throw new Error("Gemini API Key not configured");
         }
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            generationConfig: { responseMimeType: "application/json" }
+        });
 
         const prompt = `
             Act as an expert mystic astrologer.
@@ -88,7 +87,7 @@ export async function GET(req: Request) {
             - "Mood" should be a single emoji reflecting the transit energy.
             - Provide percentages (0-100) for Love, Career, Money, Health, Travel based on the astrological aspects.
             
-            Return strictly a JSON object:
+            Return strictly a JSON object with this schema:
             {
                 "mood": "Single emoji",
                 "content": "2-sentence astrological prediction referencing the transits.",
@@ -100,19 +99,15 @@ export async function GET(req: Request) {
             }
         `;
 
-        const completion = await openai.chat.completions.create({
-            messages: [{ role: "system", content: "You are a mystical astrologer. Output valid JSON only." }, { role: "user", content: prompt }],
-            model: "gpt-4o-mini",
-            response_format: { type: "json_object" },
-            seed: Math.abs(seedHash), // Robust deterministic seed
-        });
-
-        const rawContent = completion.choices[0].message.content;
-        if (!rawContent) throw new Error("No content from OpenAI");
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
 
         let generatedData = {};
         try {
-            generatedData = JSON.parse(rawContent);
+            // Gemini often wraps JSON in markdown code blocks, so we need to extract it
+            const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
+            const jsonString = jsonMatch ? jsonMatch[1] : responseText;
+            generatedData = JSON.parse(jsonString);
         } catch (e) {
             console.error("JSON Parse Error", e);
             // Fallback content if JSON fails
