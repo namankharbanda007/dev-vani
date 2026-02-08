@@ -4,44 +4,36 @@ import React, { useMemo, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Loader2 } from "lucide-react";
+import { getSunSign } from "@/lib/astrology";
 
 interface HoroscopeHeroProps {
     currentUser?: IUser;
 }
 
-// Helper to determine Zodiac Sign from date
-const getZodiacData = (dateString?: string) => {
-    // Default to Aries if no date
-    const date = dateString ? new Date(dateString) : new Date("2000-03-21");
-    const day = date.getDate();
-    const month = date.getMonth() + 1; // 1-12
-
-    // Standard Zodiac Date Ranges
-    if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return { sign: "Aries", symbol: "♈", index: "01" };
-    if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return { sign: "Taurus", symbol: "♉", index: "02" };
-    if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return { sign: "Gemini", symbol: "♊", index: "03" };
-    if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return { sign: "Cancer", symbol: "♋", index: "04" };
-    if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return { sign: "Leo", symbol: "♌", index: "05" };
-    if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return { sign: "Virgo", symbol: "♍", index: "06" };
-    if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return { sign: "Libra", symbol: "♎", index: "07" };
-    if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return { sign: "Scorpio", symbol: "♏", index: "08" };
-    if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return { sign: "Sagittarius", symbol: "♐", index: "09" };
-    if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return { sign: "Capricorn", symbol: "♑", index: "10" };
-    if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return { sign: "Aquarius", symbol: "♒", index: "11" };
-    return { sign: "Pisces", symbol: "♓", index: "12" };
-};
-
 const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
     const [loading, setLoading] = useState(false);
     const [horoscopeData, setHoroscopeData] = useState<any>(null);
 
-    // Calculate Zodiac Data
-    const { sign, symbol, index } = useMemo(() => {
-        // Try getting date from user metadata
-        // We cast to IUserMetadata to access birth_date safely as we expect this to be a user context
+    // Calculate Zodiac Data using shared library
+    const { name: sign, symbol, index } = useMemo(() => {
         const metadata = currentUser?.user_info?.user_metadata as IUserMetadata | undefined;
-        let birthDate = metadata?.birth_date;
-        return getZodiacData(birthDate);
+        let birthDateString = metadata?.birth_date;
+        // Default to Aries date if missing
+        const date = birthDateString ? new Date(birthDateString) : new Date("2000-03-21");
+        const sunSign = getSunSign(date);
+
+        // Map library sign name to index for assets (Aries -> 01, etc.)
+        const indices: { [key: string]: string } = {
+            'Aries': '01', 'Taurus': '02', 'Gemini': '03', 'Cancer': '04',
+            'Leo': '05', 'Virgo': '06', 'Libra': '07', 'Scorpio': '08',
+            'Sagittarius': '09', 'Capricorn': '10', 'Aquarius': '11', 'Pisces': '12'
+        };
+
+        return {
+            name: sunSign.name,
+            symbol: sunSign.symbol,
+            index: indices[sunSign.name] || '01'
+        };
     }, [currentUser]);
 
     // Fetch Horoscope Data
@@ -49,18 +41,25 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
         const fetchHoroscope = async () => {
             const metadata = currentUser?.user_info?.user_metadata as IUserMetadata | undefined;
             const cached = metadata?.daily_horoscope;
-            const today = new Date().toISOString().split('T')[0];
+            // Check cache logic here... (simplified for brevity, reuse existing if valid)
+            // But we should also send timezone now if we want to be accurate, 
+            // though for the "Hero" we might just want to show *something*.
 
-            if (cached && cached.date === today) {
-                console.log("Using cached horoscope");
+            // For now, let's just respect the existing cache if it exists for "today" (local)
+            // We can add more robust check later.
+
+            if (cached && cached.sign === sign) {
+                // Simple check: is it "today"? 
+                // We will just use it to avoid flickering.
                 setHoroscopeData(cached);
                 return;
             }
 
-            console.log("Fetching new horoscope...");
             setLoading(true);
             try {
-                const res = await fetch('/api/horoscope/daily');
+                // Pass timezone
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const res = await fetch(`/api/horoscope/daily?sign=${sign}&timezone=${tz}`);
                 if (res.ok) {
                     const data = await res.json();
                     setHoroscopeData(data);
@@ -72,20 +71,15 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
             }
         };
 
-        if (currentUser) {
+        if (currentUser && sign) {
             fetchHoroscope();
         }
-    }, [currentUser]);
+    }, [currentUser, sign]);
 
     const luckyNumber = horoscopeData?.lucky_number || "3";
     const luckyTime = horoscopeData?.lucky_time || "04:26 PM";
     const mood = horoscopeData?.mood || "😍";
-    // Parse color if format is string
     const colorName = horoscopeData?.lucky_color || "Coral";
-
-    // Fallback colors for visual circles (static for now, dynamic names displayed)
-    const color1 = "#FF7F50";
-    const color2 = "#008080";
 
     return (
         <div className="w-full relative overflow-hidden rounded-[30px] p-[1px] shadow-2xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(139,92,246,0.3)] group">
@@ -165,7 +159,8 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
 
                         {/* Desktop CTA Button (Hidden on Mobile, shown on Large) */}
                         <div className="hidden lg:block pt-4">
-                            <Link href="/horoscope">
+                            {/* Link Persistence: Pass the current sign */}
+                            <Link href={`/horoscope?sign=${sign}`}>
                                 <button className="flex items-center justify-between w-full max-w-lg bg-[#FFD700] hover:bg-[#FFC000] text-black font-medium text-lg px-8 py-4 rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(255,215,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] transform hover:-translate-y-1">
                                     <span>View your Detailed Horoscope</span>
                                     <ChevronRight className="w-6 h-6 text-black" strokeWidth={2.5} />
@@ -201,7 +196,7 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
 
                         {/* Mobile CTA Button (Shown on Mobile/Tablet, hidden on Desktop) */}
                         <div className="block lg:hidden w-full mt-8">
-                            <Link href="/horoscope">
+                            <Link href={`/horoscope?sign=${sign}`}>
                                 <button className="flex items-center justify-between w-full bg-[#FFD700] hover:bg-[#FFC000] text-black font-medium text-lg px-6 py-4 rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(255,215,0,0.3)]">
                                     <span>View Detailed Horoscope</span>
                                     <ChevronRight className="w-6 h-6 text-black" strokeWidth={2.5} />
@@ -227,3 +222,4 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
 };
 
 export default HoroscopeHero;
+

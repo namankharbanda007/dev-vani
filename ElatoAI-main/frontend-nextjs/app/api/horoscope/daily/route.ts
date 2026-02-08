@@ -1,38 +1,12 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { getPlanetaryTransits, getPlanetaryHour } from "@/lib/astrology";
+import { toZonedTime, format } from 'date-fns-tz';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
-
-// Helper to determine Zodiac Sign from date
-const getZodiacSign = (dateString?: string) => {
-    if (!dateString) return "Aries";
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-
-    if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return "Aries";
-    if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return "Taurus";
-    if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return "Gemini";
-    if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return "Cancer";
-    if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return "Leo";
-    if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return "Virgo";
-    if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return "Libra";
-    if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return "Scorpio";
-    if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return "Sagittarius";
-    if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return "Capricorn";
-    if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return "Aquarius";
-    return "Pisces";
-};
-
-// Helper to get date string relative to today
-const getDateString = (offset: number) => {
-    const d = new Date();
-    d.setDate(d.getDate() + offset);
-    return d.toISOString().split('T')[0];
-};
 
 export async function GET(req: Request) {
     const supabase = createClient();
@@ -41,11 +15,17 @@ export async function GET(req: Request) {
     // 1. Parse Query Params
     const requestedSign = searchParams.get('sign');
     const relativeDate = searchParams.get('date'); // "Yesterday", "Today", "Tomorrow"
+    const userTimezone = searchParams.get('timezone') || "UTC"; // Default to UTC if not provided
 
-    // Calculate actual date string
-    let targetDate = getDateString(0); // Default Today
-    if (relativeDate === "Yesterday") targetDate = getDateString(-1);
-    if (relativeDate === "Tomorrow") targetDate = getDateString(1);
+    // 2. Calculate "Target Date" relative to User's Timezone
+    const now = new Date();
+    const zonedNow = toZonedTime(now, userTimezone);
+
+    const targetDateObj = new Date(zonedNow);
+    if (relativeDate === "Yesterday") targetDateObj.setDate(targetDateObj.getDate() - 1);
+    if (relativeDate === "Tomorrow") targetDateObj.setDate(targetDateObj.getDate() + 1);
+
+    const targetDate = format(targetDateObj, 'yyyy-MM-dd', { timeZone: userTimezone });
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -54,7 +34,7 @@ export async function GET(req: Request) {
     }
 
     try {
-        // Fetch current user data for context
+        // Fetch current user data
         const { data: dbUser, error: fetchError } = await supabase
             .from("users")
             .select("user_info")
@@ -66,38 +46,61 @@ export async function GET(req: Request) {
         }
 
         const metadata = (dbUser.user_info as any)?.user_metadata || {};
-        const userBirthDate = metadata.birth_date;
-        const userSign = getZodiacSign(userBirthDate);
+        const signToUse = requestedSign || "Aries"; // Default if something goes wrong, but frontend should always send
 
-        // Determine which sign to generate for
-        const signToUse = requestedSign || userSign;
-        const rashiToUse = (signToUse === userSign) ? metadata.rashi : ""; // Only use Rashi if it's the user's sign
+        // 3. Real Astronomical Data
+        const transits = getPlanetaryTransits(targetDateObj);
+        const luckyTime = getPlanetaryHour(targetDateObj);
 
-        // 2. CHECK CACHE (Only if it's the user's main horoscope for TODAY)
-        const isMainProfile = (signToUse === userSign && targetDate === getDateString(0));
+        // 4. CHECK CACHE (Logic: If we have a stored horoscope for this date/sign, return it)
+        // We need to check if the *user's* stored daily horoscope matches this request.
+        // We only cache the "Main" horoscope in the user_metadata to avoid cluttering DB with 12 signs.
+        // For other signs/dates, we might just return generated data without saving to profile, 
+        // OR we could implement a separate "cache" table. For now, following the audit plan:
+        // "Browsing other signs... triggers fresh API calls". 
+        // We will stick to caching ONLY if it's the User's Own Sign + Today.
 
-        if (isMainProfile) {
-            const cachedHoroscope = metadata.daily_horoscope;
-            if (cachedHoroscope && cachedHoroscope.date === targetDate) {
-                // Check if it has the new fields (migration check)
-                if (cachedHoroscope.money) {
-                    return NextResponse.json(cachedHoroscope);
-                }
-            }
+        // However, to prevent "Token Wasting" for Tomorrow/Others, we can eventually use a global cache.
+        // For this step, I will implement the "Deterministic Seed" in the prompt to ensure consistency if re-generated.
+
+        // Check if this request matches the user's "Primary" horoscope (User's Sign + Today)
+        // We need the user's actual sign to know if this is "their" horoscope.
+        // For simplicity, let's assume `signToUse` matches their birth sign if `requestedSign` was empty or same.
+        // But since we are stateless about "User's Sign" here properly without recalculating it each time...
+        // Let's just check the existing cache date.
+
+        const cachedHoroscope = metadata.daily_horoscope;
+        const isUserSign = (cachedHoroscope?.sign === signToUse);
+
+        if (isUserSign && cachedHoroscope?.date === targetDate && cachedHoroscope?.money) {
+            return NextResponse.json(cachedHoroscope);
         }
 
-        // 3. GENERATE
+        // 5. GENERATE
+        console.log(`Generating horoscope for ${signToUse} on ${targetDate}`);
+
         const prompt = `
-            Generate a short, mystical, and uplifting daily horoscope for a ${signToUse} (Zodiac) user for the date ${targetDate}.
-            ${rashiToUse ? `Their Vedic Rashi is ${rashiToUse}.` : ""}
+            Act as an expert mystic astrologer.
+            Generate a daily horoscope for: ${signToUse}
+            Date: ${targetDate}
             
-            Return strictly a JSON object with the following fields:
+            REAL ASTRONOMICAL DATA (Use this to ground your predictions):
+            - Planetary Transits: ${transits}
+            - Planetary Hour (Lucky Time): ${luckyTime}
+            
+            INSTRUCTIONS:
+            - Use the planetary positions to give specific advice. e.g. "With Saturn in Pisces, focus on..."
+            - The "Lucky Time" MUST be exactly: "${luckyTime}".
+            - Generate a "Lucky Number" and "Lucky Color" based on numerology of the date.
+            - "Mood" should be a single emoji reflecting the transit energy.
+            
+            Return strictly a JSON object:
             {
-                "lucky_color": "Specific color name (e.g. 'Azure Blue')",
-                "lucky_number": "Single number string (e.g. '7')",
-                "lucky_time": "Time string (e.g. '04:20 PM')",
-                "mood": "Single emoji (e.g. '✨')",
-                "content": "A 2-sentence general horoscope prediction.",
+                "lucky_color": "Specific color name",
+                "lucky_number": "Single number string",
+                "lucky_time": "${luckyTime}",
+                "mood": "Single emoji",
+                "content": "2-sentence astrological prediction referencing the transits.",
                 "love": { "text": "Insight about love.", "percentage": 85 },
                 "career": { "text": "Insight about career.", "percentage": 60 },
                 "money": { "text": "Insight about finances.", "percentage": 70 },
@@ -107,9 +110,10 @@ export async function GET(req: Request) {
         `;
 
         const completion = await openai.chat.completions.create({
-            messages: [{ role: "system", content: "You are a mystical astrologer." }, { role: "user", content: prompt }],
+            messages: [{ role: "system", content: "You are a mystical astrologer. Output valid JSON only." }, { role: "user", content: prompt }],
             model: "gpt-4o-mini",
             response_format: { type: "json_object" },
+            seed: parseInt(targetDate.replace(/-/g, '')) + signToUse.length, // Deterministic Seed based on Date+Sign
         });
 
         const rawContent = completion.choices[0].message.content;
@@ -123,8 +127,16 @@ export async function GET(req: Request) {
             ...generatedData
         };
 
-        // 4. CACHE (Only if main profile)
-        if (isMainProfile) {
+        // 6. CACHE (Only if it's "Today" and likely the user's primary sign request)
+        // Since we don't strictly check if signToUse == UserBirthSign here (we could but it requires extra DB read of birthdate -> sign calc),
+        // we will update the profile cache IF the requests didn't specify a sign (meaning it used default/user sign) OR if it matches the 'cached' sign.
+        // Actually best logic: Update cache if relativeDate is "Today" and requestedSign is null (implied user sign) OR matches user metadata.
+
+        // For now, to be safe and simple: If `referenceDate` is Today, we update. 
+        // The user might be browsing "Aries" when they are "Taurus". We shouldn't overwrite their "Taurus" cache with "Aries".
+        // We will skip overwriting if `requestedSign` is present. We only write if `requestedSign` was null (default flow).
+
+        if (!requestedSign && relativeDate === "Today") {
             const updatedMetadata = {
                 ...metadata,
                 daily_horoscope: newHoroscope
