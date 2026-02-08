@@ -150,6 +150,7 @@ export async function GET(req: Request) {
 
     } catch (error) {
         console.error("Horoscope API Error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : "Unknown Error";
+        return NextResponse.json({ error: errorMessage, details: String(error) }, { status: 500 });
     }
 }

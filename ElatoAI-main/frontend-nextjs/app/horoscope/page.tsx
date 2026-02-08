@@ -92,11 +92,19 @@ function HoroscopeContent() {
                     const data = await res.json();
                     setHoroscopeData(data);
                 } else {
-                    throw new Error("Failed to fetch horoscope");
+                    const errorText = await res.text();
+                    let errorMessage = "Failed to fetch horoscope";
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMessage = errorJson.error || errorJson.details || errorMessage;
+                    } catch (e) {
+                        // erratic response
+                    }
+                    throw new Error(errorMessage);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error(error);
-                setError("Unable to connect to the stars. Please try again.");
+                setError(error.message || "Unable to connect to the stars. Please try again.");
             } finally {
                 setLoading(false);
             }
