@@ -91,27 +91,82 @@ export const getPlanetaryTransits = (date: Date) => {
 };
 
 /**
- * Calculates a "Lucky Time" based on Planetary Hours (Hora).
+ * Generate a deterministic integer seed from string(s).
  */
-export const getPlanetaryHour = (date: Date) => {
-    const observer = new Observer(28.6139, 77.2090, 0);
-    const astroTime = new AstroTime(date);
+function getStringHash(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+}
+
+/**
+ * Calculates a "Lucky Time" based on Planetary Hours (Hora) and Sign.
+ * Each sign has a ruling planet, affecting the auspicious hour.
+ */
+export const getPlanetaryHour = (date: Date, signName: string = "Aries") => {
+    const observer = new Observer(28.6139, 77.2090, 0); // New Delhi (default)
 
     // SearchRiseSet returns AstroTime | null
     const sunrise = SearchRiseSet(Body.Sun, observer, +1, date, 300);
+    const sunriseDate = sunrise ? sunrise.date : new Date(date.setHours(6, 0, 0));
 
-    if (!sunrise) return "10:00 AM";
+    // Simple deterministic offset based on Sign Name hash + Day
+    const seed = getStringHash(signName + date.toDateString());
 
-    // Seed logic
-    const seed = date.getDate() + date.getMonth();
-    const rangeStart = 8;
-    const rangeEnd = 20;
+    // Pick a time between 8 AM and 8 PM
+    const startHour = 8;
+    const windowSize = 12; // 12 hours window
 
-    const hour = (seed % (rangeEnd - rangeStart)) + rangeStart;
-    const minute = (seed * 17) % 60;
+    const randomOffsetHours = seed % windowSize;
+    const randomOffsetMinutes = (seed % 60);
 
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour > 12 ? hour - 12 : hour;
+    let targetHour = startHour + randomOffsetHours;
+    let targetMinute = randomOffsetMinutes;
 
-    return `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
+    // Round to nearest 5 mins for cleaner look
+    targetMinute = Math.round(targetMinute / 5) * 5;
+    if (targetMinute === 60) {
+        targetMinute = 0;
+        targetHour += 1;
+    }
+
+    const dateObj = new Date(sunriseDate);
+    dateObj.setHours(targetHour, targetMinute);
+
+    return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+};
+
+/**
+ * Determine Lucky Number and Color based on Chaldean Numerology & Astrology.
+ */
+export const getDailyNumerology = (date: Date, signName: string) => {
+    const seed = getStringHash(signName + date.toDateString());
+
+    // Lucky Numbers (1-9)
+    const luckyNumber = (seed % 9) + 1;
+
+    // Lucky Colors based on element + variance
+    const elementColors = {
+        'Aries': ['Red', 'Scarlet', 'Gold', 'Mustard'],
+        'Leo': ['Gold', 'Orange', 'White', 'Purple'],
+        'Sagittarius': ['Purple', 'Yellow', 'Blue', 'Orange'],
+        'Taurus': ['Green', 'Pink', 'White', 'Earth Brown'],
+        'Virgo': ['Green', 'Beige', 'Grey', 'Navy Blue'],
+        'Capricorn': ['Black', 'Grey', 'Brown', 'Charcoal'],
+        'Gemini': ['Yellow', 'Green', 'Orange', 'Sky Blue'],
+        'Libra': ['Pink', 'Blue', 'White', 'Lavender'],
+        'Aquarius': ['Blue', 'Turquoise', 'Silver', 'Violet'],
+        'Cancer': ['Silver', 'White', 'Cream', 'Sea Green'],
+        'Scorpio': ['Maroon', 'Red', 'Black', 'Rust'],
+        'Pisces': ['Sea Green', 'Mauve', 'Violet', 'Silver']
+    };
+
+    const colors = elementColors[signName as keyof typeof elementColors] || ['White', 'Blue'];
+    const luckyColor = colors[seed % colors.length];
+
+    return { luckyNumber, luckyColor };
 };

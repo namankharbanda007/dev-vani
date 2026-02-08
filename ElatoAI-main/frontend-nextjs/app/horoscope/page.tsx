@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
-import { ChevronLeft, Share2, Briefcase, Heart, MessageCircle, Phone, Loader2, DollarSign, Activity, Plane, Home } from "lucide-react";
+import { ChevronLeft, Share2, Briefcase, Heart, MessageCircle, Phone, Loader2, DollarSign, Activity, Plane, Home, RefreshCw } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSunSign } from "@/lib/astrology";
@@ -34,10 +34,10 @@ function HoroscopeContent() {
     const dateParam = searchParams.get('date') || 'Today';
 
     const [activeSign, setActiveSign] = useState(zodiacSigns[0]);
-    // We don't need independent state for Tab, we use URL param
 
     const [horoscopeData, setHoroscopeData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [userSign, setUserSign] = useState<string | null>(null);
 
     // Sync State with URL
@@ -79,6 +79,7 @@ function HoroscopeContent() {
     useEffect(() => {
         const fetchHoroscope = async () => {
             setLoading(true);
+            setError(null);
             try {
                 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
                 const params = new URLSearchParams();
@@ -90,15 +91,18 @@ function HoroscopeContent() {
                 if (res.ok) {
                     const data = await res.json();
                     setHoroscopeData(data);
+                } else {
+                    throw new Error("Failed to fetch horoscope");
                 }
             } catch (error) {
                 console.error(error);
+                setError("Unable to connect to the stars. Please try again.");
             } finally {
                 setLoading(false);
             }
         };
 
-        // Only fetch if we have a valid sign set (and after hydration usually)
+        // Only fetch if we have a valid active sign
         if (activeSign) {
             fetchHoroscope();
         }
@@ -133,7 +137,6 @@ function HoroscopeContent() {
     };
 
     const handleBack = () => {
-        // Simple heuristic: if there's history, go back, else home
         if (window.history.length > 2) {
             router.back();
         } else {
@@ -141,10 +144,28 @@ function HoroscopeContent() {
         }
     };
 
-    // Display Date
     const displayDate = new Date().toLocaleDateString("en-GB", {
         day: 'numeric', month: 'short', year: 'numeric'
-    }); // Needs better client-only handling if we want strict match, but this is acceptable for now given content updates dynamically
+    });
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-2">
+                    <Activity className="w-8 h-8 text-red-500" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Cosmic Connection Interrupted</h2>
+                <p className="text-gray-500 max-w-xs">{error}</p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="px-6 py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                >
+                    <RefreshCw className="w-4 h-4" />
+                    Retry
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-neutral-50 pb-28">
@@ -171,7 +192,7 @@ function HoroscopeContent() {
 
             <main className="max-w-7xl mx-auto px-4 pb-8 space-y-8 pt-6">
 
-                {/* 2. Zodiac Selector (Grid on Desktop, Scroll on Mobile) - Audit Fix #38 */}
+                {/* 2. Zodiac Selector (Grid on Desktop, Scroll on Mobile) */}
                 <div className="relative">
                     {/* Mobile Scroll */}
                     <div className="flex md:hidden overflow-x-auto gap-4 pb-4 no-scrollbar items-center">
@@ -206,7 +227,7 @@ function HoroscopeContent() {
                         })}
                     </div>
 
-                    {/* Desktop Grid - Audit Fix #38 */}
+                    {/* Desktop Grid */}
                     <div className="hidden md:grid grid-cols-6 lg:grid-cols-12 gap-4">
                         {zodiacSigns.map((sign) => {
                             const isActive = activeSign.name === sign.name;
@@ -257,7 +278,6 @@ function HoroscopeContent() {
                 </div>
 
                 {/* 4. Daily Summary Card */}
-                {/* Audit Fix: Ensure Min Height to prevent layout shift */}
                 <div className="w-full relative overflow-hidden rounded-[32px] bg-[#0F111A] text-white p-8 shadow-2xl min-h-[380px]">
                     {/* Background Effects */}
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/60 via-purple-900/40 to-black pointer-events-none"></div>
@@ -291,7 +311,7 @@ function HoroscopeContent() {
                                         <p className="text-xs text-gray-400 uppercase tracking-wider">Lucky Colour</p>
                                         <div className="flex items-center justify-center md:justify-start gap-3">
                                             <div className="w-4 h-4 rounded-full bg-[#FF7F50] shadow-[0_0_10px_#FF7F50]"></div>
-                                            <span className="text-lg font-light">{horoscopeData?.lucky_color}</span>
+                                            <span className="text-lg font-light">{horoscopeData?.lucky_color || "--"}</span>
                                         </div>
                                     </div>
                                     <div className="space-y-1">
@@ -300,11 +320,11 @@ function HoroscopeContent() {
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-xs text-gray-400 uppercase tracking-wider">Lucky Number</p>
-                                        <p className="text-4xl font-light text-[#FFD700]">{horoscopeData?.lucky_number || "7"}</p>
+                                        <p className="text-4xl font-light text-[#FFD700]">{horoscopeData?.lucky_number || "--"}</p>
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-xs text-gray-400 uppercase tracking-wider">Lucky Time</p>
-                                        <p className="text-xl font-light whitespace-nowrap">{horoscopeData?.lucky_time || "4:20 PM"}</p>
+                                        <p className="text-xl font-light whitespace-nowrap">{horoscopeData?.lucky_time || "--"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -338,7 +358,6 @@ function HoroscopeContent() {
                     <h3 className="text-2xl font-bold text-gray-900">Horoscope Readings</h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* Wrapper to reduce repetition? or just direct map if we had an array. Keeping explicit for distinct styling */}
 
                         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-start mb-4">
@@ -347,11 +366,11 @@ function HoroscopeContent() {
                                     <span className="font-bold text-gray-900">Love</span>
                                 </div>
                                 <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                    {horoscopeData?.love?.percentage ?? 0}%
+                                    {horoscopeData?.love?.percentage ?? "--"}%
                                 </span>
                             </div>
                             <p className="text-gray-600 text-sm leading-relaxed">
-                                {horoscopeData?.love?.text || "The stars are aligning..."}
+                                {horoscopeData?.love?.text || "No specific insight for this aspect today."}
                             </p>
                         </div>
 
@@ -362,11 +381,11 @@ function HoroscopeContent() {
                                     <span className="font-bold text-gray-900">Career</span>
                                 </div>
                                 <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                    {horoscopeData?.career?.percentage ?? 0}%
+                                    {horoscopeData?.career?.percentage ?? "--"}%
                                 </span>
                             </div>
                             <p className="text-gray-600 text-sm leading-relaxed">
-                                {horoscopeData?.career?.text || "The stars are aligning..."}
+                                {horoscopeData?.career?.text || "No specific insight for this aspect today."}
                             </p>
                         </div>
 
@@ -377,11 +396,11 @@ function HoroscopeContent() {
                                     <span className="font-bold text-gray-900">Money</span>
                                 </div>
                                 <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                    {horoscopeData?.money?.percentage ?? 0}%
+                                    {horoscopeData?.money?.percentage ?? "--"}%
                                 </span>
                             </div>
                             <p className="text-gray-600 text-sm leading-relaxed">
-                                {horoscopeData?.money?.text || "The stars are aligning..."}
+                                {horoscopeData?.money?.text || "No specific insight for this aspect today."}
                             </p>
                         </div>
 
@@ -392,11 +411,11 @@ function HoroscopeContent() {
                                     <span className="font-bold text-gray-900">Health</span>
                                 </div>
                                 <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                    {horoscopeData?.health?.percentage ?? 0}%
+                                    {horoscopeData?.health?.percentage ?? "--"}%
                                 </span>
                             </div>
                             <p className="text-gray-600 text-sm leading-relaxed">
-                                {horoscopeData?.health?.text || "The stars are aligning..."}
+                                {horoscopeData?.health?.text || "No specific insight for this aspect today."}
                             </p>
                         </div>
 
@@ -407,11 +426,11 @@ function HoroscopeContent() {
                                     <span className="font-bold text-gray-900">Travel</span>
                                 </div>
                                 <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                    {horoscopeData?.travel?.percentage ?? 0}%
+                                    {horoscopeData?.travel?.percentage ?? "--"}%
                                 </span>
                             </div>
                             <p className="text-gray-600 text-sm leading-relaxed">
-                                {horoscopeData?.travel?.text || "The stars are aligning..."}
+                                {horoscopeData?.travel?.text || "No specific insight for this aspect today."}
                             </p>
                         </div>
                     </div>
