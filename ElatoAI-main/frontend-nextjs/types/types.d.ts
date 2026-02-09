@@ -121,6 +121,14 @@ declare global {
 
     type Role = "user" | "assistant" | "doctor";
 
+    interface IDailyHoroscopeEntry {
+        id: string;
+        date: string;
+        sign: string;
+        horoscope_data: IUserMetadata['daily_horoscope'];
+        created_at: string;
+    }
+
     interface IConversation {
         conversation_id?: string;
         created_at?: string;

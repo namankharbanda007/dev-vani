@@ -45,14 +45,21 @@ export async function GET(req: Request) {
         const luckyTime = getPlanetaryHour(targetDateObj, signToUse); // Pass sign for variance
         const numerology = getDailyNumerology(targetDateObj, signToUse); // Get deterministic numbers/colors
 
-        // 4. CHECK USER CACHE (Only for "Today" + "User's Sign")
-        const cachedHoroscope = metadata.daily_horoscope;
-        const isUserSign = (cachedHoroscope?.sign === signToUse);
+        // 4. CHECK GLOBAL CACHE (The "Generate Once" Logic)
+        const { data: globalCache } = await supabase
+            .from('daily_horoscopes')
+            .select('horoscope_data')
+            .eq('date', targetDate)
+            .eq('sign', signToUse)
+            .single();
 
-        // Return cache if it matches Today + Sign + has data
-        if (isUserSign && cachedHoroscope?.date === targetDate && cachedHoroscope?.money) {
-            return NextResponse.json(cachedHoroscope);
+        if (globalCache && globalCache.horoscope_data) {
+            console.log(`Cache HIT for ${signToUse} on ${targetDate}`);
+            const cachedData = globalCache.horoscope_data;
+            return NextResponse.json(cachedData);
         }
+
+        console.log(`Cache MISS for ${signToUse} on ${targetDate} - Generating...`);
 
         // 5. GENERATE WITH GEMINI
         console.log(`Generating horoscope for ${signToUse} on ${targetDate}`);
@@ -124,6 +131,18 @@ export async function GET(req: Request) {
         };
 
         // 6. UPDATE CACHE (Only if logic permits, same as before)
+        // 6. UPDATE GLOBAL CACHE
+        const { error: insertError } = await supabase
+            .from('daily_horoscopes')
+            .upsert({
+                date: targetDate,
+                sign: signToUse,
+                horoscope_data: newHoroscope
+            }, { onConflict: 'date, sign' });
+
+        if (insertError) console.error("Global Cache Insert Error:", insertError);
+
+        // 7. SYNC TO USER METADATA (Optional: Keeps dashboard fast without global lookup)
         if (!requestedSign && relativeDate === "Today") {
             const updatedMetadata = {
                 ...metadata,
