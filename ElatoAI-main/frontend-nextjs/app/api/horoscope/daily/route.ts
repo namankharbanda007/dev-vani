@@ -71,7 +71,7 @@ export async function GET(req: Request) {
 
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
+            model: "gemini-1.5-flash",
             generationConfig: { responseMimeType: "application/json" }
         });
 
@@ -106,19 +106,26 @@ export async function GET(req: Request) {
             }
         `;
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
-
         let generatedData = {};
         try {
+            const result = await model.generateContent(prompt);
+            const responseText = result.response.text();
             // Gemini often wraps JSON in markdown code blocks, so we need to extract it
             const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
             const jsonString = jsonMatch ? jsonMatch[1] : responseText;
             generatedData = JSON.parse(jsonString);
         } catch (e) {
-            console.error("JSON Parse Error", e);
-            // Fallback content if JSON fails
-            generatedData = { content: "The stars are quiet today. Please try again later." };
+            console.error("Gemini Generation Error", e);
+            // FALLBACK: If AI fails (Quota/404), use deterministic but valid data
+            generatedData = {
+                mood: "✨",
+                content: `The stars are aligning for ${signToUse} today. ${transits.split(',')[0] || ''} brings focus to your goals. Trust your intuition.`,
+                love: { text: "Be open to connection.", percentage: 70 + (numerology.luckyNumber % 30) },
+                career: { text: "Steady progress is favored.", percentage: 60 + (numerology.luckyNumber % 30) },
+                money: { text: "Wise investments pay off.", percentage: 50 + (numerology.luckyNumber % 40) },
+                health: { text: "Prioritize rest today.", percentage: 80 },
+                travel: { text: "Short trips are lucky.", percentage: 40 }
+            };
         }
 
         const newHoroscope = {
