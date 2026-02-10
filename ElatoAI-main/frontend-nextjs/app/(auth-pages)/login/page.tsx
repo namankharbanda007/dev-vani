@@ -1,20 +1,8 @@
-import Image from "next/image";
-import { LoginForm } from "./login-form";
-
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-
 interface LoginProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 export default async function Login({ searchParams }: LoginProps) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (user) {
-    return redirect("/home");
-  }
 
   return (
     <div className="flex min-h-screen w-full">
