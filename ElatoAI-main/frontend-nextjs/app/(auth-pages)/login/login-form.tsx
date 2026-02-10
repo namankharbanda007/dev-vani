@@ -17,7 +17,7 @@ interface LoginFormProps {
 export function LoginForm({ searchParams }: LoginFormProps) {
     const [loading, setLoading] = useState(false);
     const error = (searchParams?.message as string) || (searchParams?.error as string) || null;
-    const message = null;
+    const [message, setMessage] = useState<string | null>((searchParams?.success as string) || null);
 
     const toy_id = searchParams?.toy_id as string | undefined;
     const personality_id = searchParams?.personality_id as string | undefined;
