@@ -8,6 +8,8 @@ import { signInAction, startPhoneAuthAction, verifyPhoneAuthAction } from "@/app
 import Link from "next/link";
 
 
+import GoogleLoginButton from "@/app/components/GoogleLoginButton";
+
 interface LoginFormProps {
     searchParams?: { [key: string]: string | string[] | undefined };
 }
@@ -122,6 +124,19 @@ export function LoginForm({ searchParams }: LoginFormProps) {
             </div>
 
             <div className="space-y-6">
+                <GoogleLoginButton toy_id={toy_id} personality_id={personality_id} />
+
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-gray-300" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white px-2 text-gray-500 rounded-full">
+                            Or continue with email
+                        </span>
+                    </div>
+                </div>
+
                 <form className="space-y-6">
                     {toy_id && <input type="hidden" name="toy_id" value={toy_id} />}
                     {personality_id && <input type="hidden" name="personality_id" value={personality_id} />}
