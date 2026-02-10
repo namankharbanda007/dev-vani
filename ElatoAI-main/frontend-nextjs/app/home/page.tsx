@@ -32,13 +32,48 @@ export default async function Home() {
             });
 
             if (result?.error) {
-                // If user creation failed, sign out and redirect to login with error
+                // If user creation failed, DO NOT redirect. Show error here.
                 console.error("User creation failed in /home:", result.error);
-                await supabase.auth.signOut();
-                redirect(`/login?error=${encodeURIComponent(result.error)}`);
+                return (
+                    <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-red-50 text-red-900">
+                        <h1 className="text-2xl font-bold mb-4">Account Creation Failed</h1>
+                        <p className="mb-4">We verified your number, but could not create your profile.</p>
+                        <div className="bg-white p-4 rounded shadow font-mono text-sm border border-red-200 mb-6 max-w-lg overflow-auto">
+                            {result.error}
+                        </div>
+                        <form action={async () => {
+                            "use server";
+                            const sb = createClient();
+                            await sb.auth.signOut();
+                            redirect("/login");
+                        }}>
+                            <button className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">
+                                Sign Out & Try Again
+                            </button>
+                        </form>
+                    </div>
+                );
             }
 
-            redirect("/onboard");
+            return (
+                <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-red-50 text-red-900">
+                    <h1 className="text-2xl font-bold mb-4">Account Creation Failed</h1>
+                    <p className="mb-4">We verified your number, but could not create your profile.</p>
+                    <div className="bg-white p-4 rounded shadow font-mono text-sm border border-red-200 mb-6 max-w-lg overflow-auto">
+                        {result.error}
+                    </div>
+                    <form action={async () => {
+                        "use server";
+                        const sb = createClient();
+                        await sb.auth.signOut();
+                        redirect("/login");
+                    }}>
+                        <button className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">
+                            Sign Out & Try Again
+                        </button>
+                    </form>
+                </div>
+            );
         }
     }
 
