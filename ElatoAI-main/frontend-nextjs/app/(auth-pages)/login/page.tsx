@@ -1,3 +1,6 @@
+import Image from "next/image";
+import { LoginForm } from "./login-form";
+
 interface LoginProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
