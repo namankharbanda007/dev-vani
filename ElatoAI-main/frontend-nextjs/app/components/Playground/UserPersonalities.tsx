@@ -14,7 +14,22 @@ const CHARACTER_CATEGORIES: { [key: string]: { title: string; emoji: string; cha
             "sundarkand path",
             "navagraha shanti havan",
             "shri satyanarayan puja",
-            "the astrologer",
+        ]
+    },
+    astrology: {
+        title: "✨ Astrology",
+        emoji: "✨",
+        characters: [
+            "the horoscope astrologer",
+            "the relationship advisor",
+            "the financial advisor",
+            "the navigator of love stories",
+            "the salaried employee",
+            "the govt. job aspirant",
+            "the career healer",
+            "the business scaler",
+            "the path decider",
+            "the educational guide",
         ]
     },
     seniors: {
@@ -64,7 +79,7 @@ const CHARACTER_CATEGORIES: { [key: string]: { title: string; emoji: string; cha
 };
 
 // Order of categories to display
-const CATEGORY_ORDER = ["spiritual", "seniors", "adult", "students", "children"];
+const CATEGORY_ORDER = ["spiritual", "astrology", "seniors", "adult", "students", "children"];
 
 interface UserPersonalitiesProps {
     onPersonalityPicked: (personalityIdPicked: string) => void;
