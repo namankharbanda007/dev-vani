@@ -12,6 +12,7 @@ const CHARACTER_CATEGORIES: { [key: string]: { title: string; emoji: string; cha
             "the spiritual guide",
             "ganpati havan by pandit ji",
             "sundarkand path",
+            "navagraha shanti havan",
             "the astrologer",
         ]
     },
