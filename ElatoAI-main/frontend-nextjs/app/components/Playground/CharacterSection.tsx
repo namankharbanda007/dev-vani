@@ -123,7 +123,7 @@ const CharacterSection = ({
                                     >
                                         {/* Card Content */}
                                         <div className="relative aspect-[3/4] w-full overflow-hidden">
-                                            {personality.subtitle && personality.subtitle.startsWith('http') ? (
+                                            {personality.subtitle && (personality.subtitle.startsWith('http') || personality.subtitle.startsWith('/')) ? (
                                                 <Image
                                                     src={personality.subtitle}
                                                     alt={personality.title}
