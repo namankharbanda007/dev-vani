@@ -18,13 +18,13 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
     const textRef = useRef<HTMLDivElement>(null);
     const subTextRef = useRef<HTMLDivElement>(null);
 
-    // Assuming ~150 frames for the sequence (User needs to provide actual count)
-    const frameCount = 150;
+    // 240 frames provided by user
+    const frameCount = 240;
 
     const { progress, isLoaded, drawFrame } = usePanditSequence({
         canvasRef,
         frameCount,
-        path: "/pandit-sequence/", // User to place images here
+        path: "/pandit-hero/", // Location in public folder
         triggerRef: sectionRef,
     });
 

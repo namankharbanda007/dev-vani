@@ -277,44 +277,46 @@ export default function NewLandingPage() {
                     </div>
                 </section>
 
-                {/* 8. Footer */}
-                <footer className="bg-gray-50 border-t border-gray-200 pt-16 pb-8" id="contact">
-                    <div className="container mx-auto px-4">
-                        <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
-                            <div className="text-center md:text-left">
-                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Bring the Temple Home Today.</h2>
-                                <p className="text-gray-600">Join the revolution of smart devotion.</p>
-                            </div>
-                            <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-white rounded-full text-lg px-8 py-6 shadow-lg">
-                                Join the Waitlist / Pre-Order
-                            </Button>
-                        </div>
+            </main>
 
-                        <div className="grid md:grid-cols-3 gap-8 py-8 border-t border-gray-200">
-                            <div>
-                                <h4 className="font-bold text-gray-900 mb-4">Contact Us</h4>
-                                <p className="text-gray-600 mb-2">Email: praveen.dhingra98@gmail.com</p>
-                                <p className="text-gray-600">Phone: +91 79822 51998</p>
+            {/* 8. Footer */}
+            <footer className="bg-gray-50 border-t border-gray-200 pt-16 pb-8" id="contact">
+                <div className="container mx-auto px-4">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
+                        <div className="text-center md:text-left">
+                            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Bring the Temple Home Today.</h2>
+                            <p className="text-gray-600">Join the revolution of smart devotion.</p>
+                        </div>
+                        <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-white rounded-full text-lg px-8 py-6 shadow-lg">
+                            Join the Waitlist / Pre-Order
+                        </Button>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8 py-8 border-t border-gray-200">
+                        <div>
+                            <h4 className="font-bold text-gray-900 mb-4">Contact Us</h4>
+                            <p className="text-gray-600 mb-2">Email: praveen.dhingra98@gmail.com</p>
+                            <p className="text-gray-600">Phone: +91 79822 51998</p>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-900 mb-4">Social</h4>
+                            <div className="flex gap-4">
+                                <Link href="#" className="text-gray-400 hover:text-orange-600">Facebook</Link>
+                                <Link href="#" className="text-gray-400 hover:text-orange-600">Instagram</Link>
+                                <Link href="#" className="text-gray-400 hover:text-orange-600">LinkedIn</Link>
+                                <Link href="#" className="text-gray-400 hover:text-orange-600">YouTube</Link>
                             </div>
-                            <div>
-                                <h4 className="font-bold text-gray-900 mb-4">Social</h4>
-                                <div className="flex gap-4">
-                                    <Link href="#" className="text-gray-400 hover:text-orange-600">Facebook</Link>
-                                    <Link href="#" className="text-gray-400 hover:text-orange-600">Instagram</Link>
-                                    <Link href="#" className="text-gray-400 hover:text-orange-600">LinkedIn</Link>
-                                    <Link href="#" className="text-gray-400 hover:text-orange-600">YouTube</Link>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-gray-900 mb-4">Smart Murti</h4>
-                                <p className="text-gray-500 text-sm">
-                                    © 2026 SmartMurti AI Private Limited.<br />
-                                    All Rights Reserved.
-                                </p>
-                            </div>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-900 mb-4">Smart Murti</h4>
+                            <p className="text-gray-500 text-sm">
+                                © 2026 SmartMurti AI Private Limited.<br />
+                                All Rights Reserved.
+                            </p>
                         </div>
                     </div>
-                </footer>
+                </div>
+            </footer>
         </div>
     );
 }

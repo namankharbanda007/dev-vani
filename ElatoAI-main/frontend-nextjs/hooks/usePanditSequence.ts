@@ -28,8 +28,8 @@ export function usePanditSequence({
             for (let i = 1; i <= frameCount; i++) {
                 const promise = new Promise<void>((resolve, reject) => {
                     const img = new Image();
-                    // Format: 0001.jpg, 0002.jpg, etc.
-                    const fileName = `${i.toString().padStart(4, "0")}.jpg`;
+                    // Format: ezgif-frame-001.jpg etc.
+                    const fileName = `ezgif-frame-${i.toString().padStart(3, "0")}.jpg`;
                     img.src = `${path}${fileName}`;
 
                     img.onload = () => {
