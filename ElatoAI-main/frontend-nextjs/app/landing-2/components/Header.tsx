@@ -1,36 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import Link from "next/link";
-import { ShoppingBag, Users, Zap, Mail, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import clsx from "clsx";
 
 export default function Header() {
     const { scrollY } = useScroll();
-    const [isScrolled, setIsScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    useMotionValueEvent(scrollY, "change", (latest) => {
-        const hasScrolled = latest > 50;
-        if (isScrolled !== hasScrolled) {
-            setIsScrolled(hasScrolled);
+    // Initial animation for the header
+    const headerVariants = {
+        hidden: { y: -100, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: { duration: 0.8, ease: "easeOut" }
         }
-    });
+    };
 
     return (
         <>
             <motion.header
+                variants={headerVariants}
+                initial="hidden"
+                animate="visible"
                 className={clsx(
-                    "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4 md:px-12 flex items-center justify-between",
-                    isScrolled ? "bg-white/80 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
+                    // Positioning: Fixed, centered, top-6
+                    "fixed top-6 left-1/2 -translate-x-1/2 z-50",
+                    // Sizing: Pill shape, limited width
+                    "w-[90%] max-w-4xl h-14 rounded-full",
+                    // Glassmorphism: Blur, semi-transparent background, subtle border/shadow
+                    "backdrop-blur-lg bg-white/70 border border-white/40 shadow-lg", // Adjusted for visibility on light bg
+                    // Layout: Flex center
+                    "flex items-center justify-between px-6"
                 )}
             >
-                {/* Logo */}
-                <Link href="/landing-2" className="flex items-center gap-2">
-                    <div className="relative h-12 w-auto">
+                {/* Logo Section */}
+                <Link href="/landing-2" className="flex items-center gap-2 h-full">
+                    <div className="relative h-8 w-auto flex items-center">
                         <img
-                            src="/smart-murti-logo.png"
+                            src="/smart-murti-logo-v2.png"
                             alt="Smart Murti"
                             className="h-full w-auto object-contain"
                             onError={(e) => {
@@ -38,32 +49,32 @@ export default function Header() {
                                 e.currentTarget.nextElementSibling?.classList.remove('hidden');
                             }}
                         />
-                        <span className="hidden text-2xl font-serif font-bold text-murti-stone">SMART MURTI</span>
+                        {/* Fallback Text */}
+                        <span className="hidden text-xl font-serif font-bold text-murti-stone tracking-wide">SMART MURTI</span>
                     </div>
                 </Link>
 
-                {/* Desktop Nav */}
+                {/* Desktop Nav - Centered/Right aligned */}
                 <nav className="hidden md:flex items-center space-x-8">
                     <NavLink href="#collection" label="Shop" />
                     <NavLink href="#story" label="Our Story" />
                     <NavLink href="#technology" label="Technology" />
-                    <NavLink href="#contact" label="Contact" />
                 </nav>
 
                 {/* CTA & Mobile Menu Toggle */}
                 <div className="flex items-center space-x-4">
                     <Link
                         href="#get-app"
-                        className="hidden md:inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-white bg-black rounded-full hover:bg-gray-800 transition-all"
+                        className="hidden md:inline-flex items-center justify-center px-5 py-2 text-xs font-bold uppercase tracking-widest text-white bg-black rounded-full hover:bg-gray-800 transition-all"
                     >
                         Get App
                     </Link>
 
                     <button
                         onClick={() => setMobileMenuOpen(true)}
-                        className="md:hidden text-murti-stone p-2"
+                        className="md:hidden text-murti-stone p-1"
                     >
-                        <Menu className="w-6 h-6" />
+                        <Menu className="w-5 h-5" />
                     </button>
                 </div>
             </motion.header>
@@ -76,7 +87,10 @@ export default function Header() {
 
 function NavLink({ href, label }: { href: string; label: string }) {
     return (
-        <Link href={href} className="text-sm font-medium text-murti-stone/80 hover:text-divine-saffron transition-colors">
+        <Link
+            href={href}
+            className="text-xs font-medium uppercase tracking-widest text-murti-stone/80 hover:text-black transition-colors"
+        >
             {label}
         </Link>
     );
