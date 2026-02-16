@@ -106,7 +106,7 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
     }, []);
 
     return (
-        <div ref={sectionRef} className="relative w-full h-[400vh] bg-[#cecece]">
+        <div ref={sectionRef} className="relative w-full h-[300vh] bg-[#cecece]">
             <div className="sticky top-0 w-full h-screen flex items-center justify-center overflow-hidden">
 
                 {/* The Canvas */}
@@ -120,7 +120,7 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
                     ref={textRef}
                     className="relative z-20 text-center pointer-events-none"
                 >
-                    <h1 className="text-5xl md:text-8xl font-serif font-bold tracking-tight text-murti-stone/30">
+                    <h1 className="text-5xl md:text-8xl font-serif font-bold tracking-tight text-[#2A2A2A] opacity-50">
                         TRADITION <br /> REIMAGINED
                     </h1>
                 </div>
