@@ -38,10 +38,13 @@ export default function Header() {
                 style={{ left: "50%", x: "-50%" }} // Ensure centering works with fixed position
             >
                 {/* Logo */}
-                <Link href="/landing-2" className="text-2xl font-serif font-bold tracking-tight text-murti-stone flex items-center">
-                    <span className={clsx("transition-opacity duration-300", isScrolled ? "opacity-100" : "opacity-90")}>
-                        SMART MURTI
-                    </span>
+                {/* Logo */}
+                <Link href="/landing-2" className="flex items-center">
+                    <img
+                        src="/smart-murti-logo.png"
+                        alt="Smart Murti"
+                        className="h-20 w-auto object-contain"
+                    />
                 </Link>
 
                 {/* Desktop Nav */}

@@ -106,7 +106,7 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
     }, []);
 
     return (
-        <div ref={sectionRef} className="relative w-full h-[400vh] bg-soft-paper">
+        <div ref={sectionRef} className="relative w-full h-[400vh] bg-[#cecece]">
             <div className="sticky top-0 w-full h-screen flex items-center justify-center overflow-hidden">
 
                 {/* The Canvas */}

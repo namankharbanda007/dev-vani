@@ -33,6 +33,7 @@ import Script from "next/script";
 import { Navbar } from "./components/Nav/Navbar";
 import { getUserById } from "@/db/users";
 import TawkToScript from "@/app/components/TawkToScript";
+import LayoutWrapper from "@/app/components/LayoutWrapper";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -342,11 +343,9 @@ export default async function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 > */}
-                <main className="flex-grow mx-auto w-full flex flex-col pt-[44px]">
-                    <Navbar user={dbUser ?? null} />
+                <LayoutWrapper user={dbUser ?? null}>
                     {children}
-                    <Footer />
-                </main>
+                </LayoutWrapper>
                 {/* <Analytics /> */}
                 <Toaster />
                 {/* </ThemeProvider> */}
