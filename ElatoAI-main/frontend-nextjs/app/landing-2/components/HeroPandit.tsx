@@ -61,10 +61,10 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
             });
 
             // 2. Text Animations
-            // "TRADITION" & "REIMAGINED" fade out/scale up as Namaste happens
+            // "TRADITION REIMAGINED" fades out as Namaste happens
             tl.to(textRef.current, {
                 opacity: 0,
-                scale: 1.2, // Subtle scale up for drama
+                y: -50,
                 duration: 1,
                 ease: "power2.out"
             }, 0); // Start at beginning
@@ -106,29 +106,26 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
     }, []);
 
     return (
-        <div ref={sectionRef} className="relative w-full h-[400vh] bg-[#E5E5E5]">
+        <div ref={sectionRef} className="relative w-full h-[400vh] bg-[#cecece]">
             <div className="sticky top-0 w-full h-screen flex items-center justify-center overflow-hidden">
 
-                {/* Text Layer 1: Start (Background Layer) */}
-                <div
-                    ref={textRef}
-                    className="absolute inset-0 z-0 flex flex-col justify-between py-32 items-center pointer-events-none"
-                >
-                    <h1 className="text-5xl md:text-9xl font-serif font-bold tracking-tight text-murti-stone/20">
-                        TRADITION
-                    </h1>
-                    <h1 className="text-5xl md:text-9xl font-serif font-bold tracking-tight text-murti-stone/20">
-                        REIMAGINED
-                    </h1>
-                </div>
-
-                {/* The Canvas (Foreground Layer) */}
+                {/* The Canvas */}
                 <canvas
                     ref={canvasRef}
                     className="absolute inset-0 z-10 w-full h-full object-contain"
                 />
 
-                {/* Text Layer 2: End (Overlay on top) */}
+                {/* Text Layer 1: Start */}
+                <div
+                    ref={textRef}
+                    className="relative z-20 text-center pointer-events-none"
+                >
+                    <h1 className="text-5xl md:text-8xl font-serif font-bold tracking-tight text-murti-stone/30">
+                        TRADITION <br /> REIMAGINED
+                    </h1>
+                </div>
+
+                {/* Text Layer 2: End */}
                 <div
                     ref={subTextRef}
                     className="absolute z-20 text-center pointer-events-none opacity-0"
