@@ -9,6 +9,7 @@ const config = {
         "./app/**/*.{ts,tsx}",
         "./src/**/*.{ts,tsx}",
     ],
+
     prefix: "",
     safelist: [
         // Voice background colors
@@ -80,6 +81,12 @@ const config = {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
+                'divine-saffron': '#FF9933',
+                'murti-stone': '#2A2A2A',
+                'soft-paper': '#FDFBF7',
+            },
+            backgroundImage: {
+                'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
             },
             borderRadius: {
                 lg: "var(--radius)",
@@ -117,6 +124,8 @@ const config = {
                 borel: ["var(--font-borel)"],
                 silkscreen: ["var(--font-silkscreen)"],
                 luckiestGuy: ["var(--font-luckiest-guy)"],
+                sans: ['Satoshi', 'Inter', 'sans-serif'],
+                serif: ['Cinzel', 'serif'],
             },
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",

@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --bg-color: #FDFBF7;
+    --text-color: #1A1A1A;
+}
+
+.glass-pill {
+    @apply backdrop-blur-xl bg-white/70 border border-white/40 shadow-sm rounded-full;
+}
+
+/* Hide scrollbar for cleaner look */
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+
 @layer base {
     :root {
         --background: 0 0% 100%;
