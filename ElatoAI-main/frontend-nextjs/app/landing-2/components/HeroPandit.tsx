@@ -118,9 +118,9 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
                 {/* Text Layer 1: Start */}
                 <div
                     ref={textRef}
-                    className="relative z-20 text-center pointer-events-none mix-blend-difference text-white"
+                    className="relative z-20 text-center pointer-events-none"
                 >
-                    <h1 className="text-5xl md:text-8xl font-serif font-bold tracking-tight">
+                    <h1 className="text-5xl md:text-8xl font-serif font-bold tracking-tight text-murti-stone/30">
                         TRADITION <br /> REIMAGINED
                     </h1>
                 </div>

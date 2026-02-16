@@ -12,7 +12,7 @@ export default function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useMotionValueEvent(scrollY, "change", (latest) => {
-        const hasScrolled = latest > 100;
+        const hasScrolled = latest > 50;
         if (isScrolled !== hasScrolled) {
             setIsScrolled(hasScrolled);
         }
@@ -21,30 +21,25 @@ export default function Header() {
     return (
         <>
             <motion.header
-                layout
-                initial={{ width: "100%", y: 0, borderRadius: 0 }}
-                animate={{
-                    width: isScrolled ? "90%" : "100%",
-                    top: isScrolled ? 20 : 0,
-                    borderRadius: isScrolled ? 9999 : 0,
-                    backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.7)" : "transparent",
-                    borderColor: isScrolled ? "rgba(255, 255, 255, 0.4)" : "transparent",
-                    borderWidth: isScrolled ? 1 : 0,
-                    backdropFilter: isScrolled ? "blur(12px)" : "blur(0px)",
-                    boxShadow: isScrolled ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none",
-                }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="fixed left-1/2 -translate-x-1/2 z-50 flex items-center justify-between px-6 py-4 md:px-10 transition-all"
-                style={{ left: "50%", x: "-50%" }} // Ensure centering works with fixed position
+                className={clsx(
+                    "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4 md:px-12 flex items-center justify-between",
+                    isScrolled ? "bg-white/80 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
+                )}
             >
                 {/* Logo */}
-                {/* Logo */}
-                <Link href="/landing-2" className="flex items-center">
-                    <img
-                        src="/smart-murti-logo.png"
-                        alt="Smart Murti"
-                        className="h-20 w-auto object-contain"
-                    />
+                <Link href="/landing-2" className="flex items-center gap-2">
+                    <div className="relative h-12 w-auto">
+                        <img
+                            src="/smart-murti-logo.png"
+                            alt="Smart Murti"
+                            className="h-full w-auto object-contain"
+                            onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
+                        />
+                        <span className="hidden text-2xl font-serif font-bold text-murti-stone">SMART MURTI</span>
+                    </div>
                 </Link>
 
                 {/* Desktop Nav */}
@@ -59,7 +54,7 @@ export default function Header() {
                 <div className="flex items-center space-x-4">
                     <Link
                         href="#get-app"
-                        className="hidden md:inline-flex items-center justify-center px-6 py-2 text-sm font-medium text-white bg-divine-saffron rounded-full hover:bg-orange-600 transition-colors shadow-lg hover:shadow-orange-500/30"
+                        className="hidden md:inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-white bg-black rounded-full hover:bg-gray-800 transition-all"
                     >
                         Get App
                     </Link>

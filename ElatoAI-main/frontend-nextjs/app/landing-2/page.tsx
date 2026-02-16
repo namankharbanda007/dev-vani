@@ -39,48 +39,51 @@ export default function LandingPage() {
                     setIsLoaded={setIsLoaded}
                 />
 
-                {/* Marquee Separator */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1 }}
-                >
-                    <Marquee />
-                </motion.div>
+                {/* Content Wrapper with background */}
+                <div className="relative z-10 bg-white">
+                    {/* Marquee Separator */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1 }}
+                    >
+                        <Marquee />
+                    </motion.div>
 
-                {/* Bento Grid - Features & Collection */}
-                <div id="collection">
-                    <BentoGrid />
-                </div>
-
-                {/* Story Section Placeholder (Could be expanded later) */}
-                <section id="story" className="py-24 px-6 md:px-10 bg-white">
-                    <div className="max-w-4xl mx-auto text-center space-y-8">
-                        <h2 className="text-4xl md:text-6xl font-serif font-bold text-murti-stone">
-                            The Divine Algorithm
-                        </h2>
-                        <p className="text-xl md:text-2xl text-murti-stone/60 leading-relaxed font-light">
-                            We asked ourselves: Can technology have a soul? <br />
-                            Smart Murti is the answer. <br />
-                            <span className="text-divine-saffron">A bridge between the Vedas and the Verse.</span>
-                        </p>
+                    {/* Bento Grid - Features & Collection */}
+                    <div id="collection">
+                        <BentoGrid />
                     </div>
-                </section>
 
-                {/* Technology Marquee */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1 }}
-                >
-                    <Marquee />
-                </motion.div>
+                    {/* Story Section Placeholder (Could be expanded later) */}
+                    <section id="story" className="py-24 px-6 md:px-10 bg-white">
+                        <div className="max-w-4xl mx-auto text-center space-y-8">
+                            <h2 className="text-4xl md:text-6xl font-serif font-bold text-murti-stone">
+                                The Divine Algorithm
+                            </h2>
+                            <p className="text-xl md:text-2xl text-murti-stone/60 leading-relaxed font-light">
+                                We asked ourselves: Can technology have a soul? <br />
+                                Smart Murti is the answer. <br />
+                                <span className="text-divine-saffron">A bridge between the Vedas and the Verse.</span>
+                            </p>
+                        </div>
+                    </section>
 
-                {/* Footer */}
-                <div id="contact">
-                    <Footer />
+                    {/* Technology Marquee */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1 }}
+                    >
+                        <Marquee />
+                    </motion.div>
+
+                    {/* Footer */}
+                    <div id="contact">
+                        <Footer />
+                    </div>
                 </div>
 
             </main>
