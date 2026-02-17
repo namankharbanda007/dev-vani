@@ -16,7 +16,7 @@ export default function LayoutWrapper({
     const isLanding2 = pathname?.startsWith("/landing-2");
 
     return (
-        <main className="flex-grow mx-auto w-full flex flex-col pt-[44px]">
+        <main className="flex-grow mx-auto w-full flex flex-col pt-0">
             {!isLanding2 && <Navbar user={user} />}
             {children}
             {!isLanding2 && <Footer />}

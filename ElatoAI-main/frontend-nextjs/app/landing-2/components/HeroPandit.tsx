@@ -45,7 +45,6 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
                     start: "top top",
                     end: "bottom bottom",
                     scrub: 1, // Smooth scrubbing
-                    pin: true, // Pin the section
                 },
             });
 
@@ -106,7 +105,7 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
     }, []);
 
     return (
-        <div ref={sectionRef} className="relative w-full h-[300vh] bg-[#cecece]">
+        <div ref={sectionRef} className="relative w-full h-[250vh] bg-[#cecece]">
             <div className="sticky top-0 w-full h-screen flex items-center justify-center overflow-hidden">
 
                 {/* The Canvas */}

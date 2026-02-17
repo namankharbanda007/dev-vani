@@ -48,9 +48,8 @@ export default function Header() {
                     {/* Logo */}
                     <Link href="/landing-2" className="flex items-center gap-2">
                         <div className="relative h-10 w-auto">
-                            {/* Use SVG first, fall back to text if needed */}
                             <img
-                                src="/smart-murti-logo.svg"
+                                src="/smart-murti-logo-new.png"
                                 alt="Smart Murti"
                                 className="h-full w-auto object-contain"
                             />
