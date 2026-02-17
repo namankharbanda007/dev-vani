@@ -93,7 +93,13 @@ export function usePanditSequence({
         const newHeight = imgHeight * ratio;
 
         // Center the image
-        const offsetX = (canvasWidth - newWidth) / 2;
+        // Fix for mobile: "inclined to left" -> Shift Right
+        // We add a positive offset to X if in portrait mode
+        let offsetX = (canvasWidth - newWidth) / 2;
+        if (isPortrait) {
+            offsetX += newWidth * 0.15; // Shift right by 15% of image width
+        }
+
         const offsetY = (canvasHeight - newHeight) / 2;
 
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
