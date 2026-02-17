@@ -13,13 +13,13 @@ export default function LayoutWrapper({
     user: any; // Type as needed
 }) {
     const pathname = usePathname();
-    const isLanding2 = pathname?.startsWith("/landing-2");
+    const isLandingPage = pathname?.startsWith("/landing-2") || pathname === "/";
 
     return (
         <main className="flex-grow mx-auto w-full flex flex-col pt-0">
-            {!isLanding2 && <Navbar user={user} />}
+            {!isLandingPage && <Navbar user={user} />}
             {children}
-            {!isLanding2 && <Footer />}
+            {!isLandingPage && <Footer />}
         </main>
     );
 }

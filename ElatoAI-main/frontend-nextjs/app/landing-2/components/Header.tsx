@@ -58,19 +58,19 @@ export default function Header() {
 
                     {/* Desktop Nav */}
                     <nav className="hidden md:flex items-center space-x-8">
-                        <NavLink href="#collection" label="Shop" />
+                        <NavLink href="/products/smart-pandit" label="Shop" />
                         <NavLink href="#story" label="Our Story" />
-                        <NavLink href="#technology" label="Technology" />
+                        <NavLink href="/pricing" label="Pricing" />
                         <NavLink href="#contact" label="Contact" />
                     </nav>
 
                     {/* CTA & Mobile Menu Toggle */}
                     <div className="flex items-center space-x-4">
                         <Link
-                            href="#get-app"
+                            href="/login"
                             className="hidden md:inline-flex items-center justify-center px-6 py-2 text-sm font-medium text-white bg-black rounded-full hover:bg-gray-800 transition-all"
                         >
-                            Get App
+                            Login
                         </Link>
 
                         <button
@@ -109,9 +109,9 @@ function AnimateMobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () =
             </button>
 
             <nav className="flex flex-col items-center space-y-6 text-2xl font-serif">
-                <Link href="#collection" onClick={onClose}>Shop</Link>
+                <Link href="/products/smart-pandit" onClick={onClose}>Shop</Link>
                 <Link href="#story" onClick={onClose}>Our Story</Link>
-                <Link href="#technology" onClick={onClose}>Technology</Link>
+                <Link href="/pricing" onClick={onClose}>Pricing</Link>
                 <Link href="#contact" onClick={onClose}>Contact</Link>
             </nav>
         </motion.div>

@@ -11,6 +11,8 @@ import CustomizationForm from "./components/LandingPage/CustomizationForm";
 import Image from "next/image";
 import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
 import { kickstarterLink } from "@/lib/data";
+import HomeHeroWrapper from "@/app/components/HomeHeroWrapper";
+
 const HeroCarouselSlot = dynamic(() => import("./components/LandingPage/HeroCarousel").then(mod => mod.HeroCarouselSlot), { ssr: false });
 
 
@@ -24,96 +26,8 @@ export default async function LandingPage() {
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-[#FFFBEB] via-[#FAF9F6] to-white">
       <main className="flex-1">
 
-        {/* Hero Section - The Split World */}
-        <section className="w-full py-12 md:py-24 bg-gradient-to-br from-[#FAF9F6] via-[#FFF8E7] to-[#FFFBEB] relative overflow-hidden">
-          {/* Background Decorative Elements */}
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-20 left-10 w-72 h-72 bg-purple-200 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-20 right-10 w-96 h-96 bg-amber-200 rounded-full blur-3xl"></div>
-          </div>
-
-          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10">
-            <div className="flex flex-col items-center justify-center space-y-8">
-
-              {/* Brand */}
-              <div className="flex flex-col items-center space-y-4">
-                <h1 className="text-3xl md:text-5xl font-bold font-luckiestGuy tracking-wider text-purple-900">
-                  SMART मूर्ति
-                </h1>
-
-                {/* Made in INDIA Badge */}
-                <div className="inline-flex w-fit items-center space-x-2 rounded-full shadow-lg bg-white px-4 py-2 text-sm text-black">
-                  <span className="inline ml-1 font-medium">Made in INDIA ❤️</span>
-                </div>
-              </div>
-
-              {/* Main Headline - Emotional & Soulful */}
-              <div className="text-center space-y-4 max-w-4xl">
-                <h2 className="text-4xl md:text-7xl font-bold font-lora text-transparent bg-clip-text bg-gradient-to-r from-purple-900 via-purple-700 to-amber-600 leading-tight">
-                  Spirituality Meets Companionship
-                </h2>
-                <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed px-4">
-                  From a wise AI Pandit for your home temple to a customizable best friend for your daily life
-                </p>
-                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  Moving you away from addictive screens, back to meaningful voice conversations
-                </p>
-              </div>
-
-              {/* Character Showcase - The Three Companions */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 w-full max-w-5xl mt-12">
-
-                {/* Left - Rotating Character */}
-                <HeroCarouselSlot position="left" />
-
-                {/* Smart Pandit - Center (Larger) */}
-                <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-300">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-amber-300 to-yellow-200 rounded-full blur-3xl opacity-50 animate-pulse"></div>
-                    <Image
-                      src="/products/smart-pandit.jpg"
-                      alt="Smart Pandit - AI Spiritual Guide"
-                      width={320}
-                      height={320}
-                      className="relative z-10 drop-shadow-2xl rounded-3xl"
-                    />
-                  </div>
-                  <p className="mt-4 text-xl font-bold text-amber-700">Your Spiritual Guide</p>
-                </div>
-
-                {/* Right - Rotating Character */}
-                <HeroCarouselSlot position="right" />
-              </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-8">
-                <Link href="/home">
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto px-8 py-6 text-lg bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white border-0 shadow-xl hover:shadow-2xl transition-all rounded-full"
-                  >
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    <span>Explore Companions</span>
-                    <ChevronRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-
-                <Link href="https://smartmurti.com/products">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto px-8 py-6 text-lg border-2 border-amber-600 text-amber-700 hover:bg-amber-50 shadow-lg hover:shadow-xl transition-all rounded-full"
-                  >
-                    <Home className="mr-2 h-5 w-5" />
-                    <span>Get SMART मूर्ति</span>
-                  </Button>
-                </Link>
-              </div>
-
-
-            </div>
-          </div>
-        </section>
+        {/* New Hero Section from Landing-2 */}
+        <HomeHeroWrapper />
 
 
 
