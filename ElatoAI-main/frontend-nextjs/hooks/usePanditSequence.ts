@@ -73,13 +73,22 @@ export function usePanditSequence({
 
         const img = imagesRef.current[index];
 
-        // Maintain Aspect Ratio "Contain" Logic
+        // Maintain Aspect Ratio
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
         const imgWidth = img.width;
         const imgHeight = img.height;
 
-        const ratio = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
+        // Determine if we should cover or contain
+        // For this design: 
+        // Mobile (Portrait) -> Cover (fill screen, crop sides)
+        // Desktop (Landscape) -> Contain (show full image)
+        const isPortrait = canvasHeight > canvasWidth;
+
+        const ratio = isPortrait
+            ? Math.max(canvasWidth / imgWidth, canvasHeight / imgHeight) // Cover
+            : Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight); // Contain
+
         const newWidth = imgWidth * ratio;
         const newHeight = imgHeight * ratio;
 
