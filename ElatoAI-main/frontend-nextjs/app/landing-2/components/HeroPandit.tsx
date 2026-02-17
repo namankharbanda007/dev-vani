@@ -45,6 +45,7 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
                     start: "top top",
                     end: "bottom bottom",
                     scrub: 1, // Smooth scrubbing
+                    pin: true, // Pin the section
                 },
             });
 

@@ -49,7 +49,7 @@ export default function Header() {
                     <Link href="/landing-2" className="flex items-center gap-2">
                         <div className="relative h-10 w-auto">
                             <img
-                                src="/smart-murti-logo-new.png"
+                                src="https://www.smartmurti.com/_next/image?url=%2Fassets%2Flanding%2Flogo.png&w=1920&q=75"
                                 alt="Smart Murti"
                                 className="h-full w-auto object-contain"
                             />

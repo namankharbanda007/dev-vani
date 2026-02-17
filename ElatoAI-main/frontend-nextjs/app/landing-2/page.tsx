@@ -24,7 +24,7 @@ export default function LandingPage() {
 
     return (
         <ReactLenis root options={lenisOptions}>
-            <main className="relative min-h-screen bg-soft-paper overflow-hidden">
+            <main className="relative min-h-screen bg-soft-paper">
 
                 {/* Preloader - Blocks interaction until loaded */}
                 <Preloader progress={loadingProgress} isLoaded={isLoaded} />
