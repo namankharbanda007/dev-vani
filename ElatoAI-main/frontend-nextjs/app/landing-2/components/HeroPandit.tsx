@@ -76,16 +76,11 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
             );
 
             // 3. Camera Push-in Effect (Simulated via Canvas Scale)
-            // Only apply on desktop (landscape) or reduce intensity on mobile
-            const isMobile = window.innerWidth < 768; // Simple check
-
-            if (!isMobile) {
-                tl.to(canvasRef.current, {
-                    scale: 1.1,
-                    duration: 2,
-                    ease: "power1.inOut"
-                }, 2);
-            }
+            tl.to(canvasRef.current, {
+                scale: 1.1,
+                duration: 2,
+                ease: "power1.inOut"
+            }, 2);
 
         }, sectionRef);
 
