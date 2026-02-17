@@ -35,15 +35,21 @@ export default function BentoGrid() {
             [ 3 (1 col)  ] [ 4 (1 col) ] 
         */}
 
-                {/* Card 2: App Control (Tall - Spans 1 col, 2 rows) */}
+                {/* Card 2: WhatsApp Integration (Tall - Spans 1 col, 2 rows) */}
                 <BentoCard
-                    title="App Control"
-                    description="Devotion at your fingertips."
-                    className="row-span-2 bg-murti-stone text-white"
-                    icon={<Smartphone className="w-8 h-8 text-divine-saffron" />}
+                    title="WhatsApp Integration"
+                    description="Chat with your Smart Pandit directly on WhatsApp."
+                    className="row-span-2 bg-[#075E54] text-white overflow-hidden relative"
+                    icon={<Smartphone className="w-8 h-8 text-[#25D366]" />}
                     dark
                 >
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-3/4 bg-neutral-800 rounded-t-3xl border-t-8 border-x-8 border-neutral-700 opacity-50" />
+                    <div className="absolute inset-x-4 bottom-0 top-24 overflow-hidden rounded-t-2xl">
+                        <img
+                            src="/assets/landing-2/whatsapp-integration.png"
+                            alt="WhatsApp Integration Demo"
+                            className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
+                        />
+                    </div>
                 </BentoCard>
 
                 {/* Card 3: Pure Materials */}
