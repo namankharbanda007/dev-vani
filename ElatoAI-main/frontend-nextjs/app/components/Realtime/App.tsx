@@ -409,6 +409,9 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
   };
 
   const createFirstMessage = () => {
+    if (isGuest && guestName) {
+      return `My name is ${guestName}${guestDob ? ` and my date of birth is ${guestDob}` : ''}. Please greet me warmly by my name and give me personalized spiritual guidance.`;
+    }
     return personality?.first_message_prompt
       ? `Always start the conversation following these instructions from the user: ${personality?.first_message_prompt}`
       : "The user is initiating a new chat here. Say something!";
