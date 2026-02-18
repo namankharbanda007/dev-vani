@@ -64,11 +64,32 @@ export async function GET(request: NextRequest) {
   const openAiApiKey = process.env.OPENAI_API_KEY;
   const geminiApiKey = process.env.GEMINI_API_KEY;
 
-  const systemPrompt = await createSystemPrompt({
-    user: dbUser,
-    supabase,
-    timestamp: new Date().toISOString(),
-  });
+  let systemPrompt = "";
+
+  if (isGuest) {
+    // Guest Mode: Generate simple prompt without history access (bypassing RLS)
+    systemPrompt = `
+YOUR VOICE IS: ${dbUser.personality?.voice_prompt}
+
+YOUR CHARACTER PROMPT IS: ${dbUser.personality?.character_prompt}
+
+YOU ARE TALKING TO: A guest user named ${dbUser.first_name}.
+
+Do not ask for personal information.
+Your physical form is in the form of a physical object or a toy.
+A person interacts with you by pressing a button, sends you instructions and you must respond in a concise conversational style.
+
+LANGUAGE:
+You may talk in any language the user would like, but the default language is English.
+`;
+  } else {
+    // Authenticated Mode: Use full prompt utility with history
+    systemPrompt = await createSystemPrompt({
+      user: dbUser,
+      supabase,
+      timestamp: new Date().toISOString(),
+    });
+  }
 
   // If the user's personality provider is Gemini, we simply return the key and the system prompt.
   // The client will handle the WebSocket connection.
