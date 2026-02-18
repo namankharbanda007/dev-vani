@@ -205,6 +205,18 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false }: AppProps
     try {
       const sessionData = await fetchSessionData();
 
+      // If the API returned an error, show it immediately
+      if (sessionData.error) {
+        console.error("[App] Session API error:", sessionData.error, sessionData.details);
+        audioContext.close();
+        setSessionStatus("DISCONNECTED");
+        toast({
+          description: `Failed to connect: ${sessionData.error}`,
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Determine provider: use API-returned provider (works for guests) or client-side personality state
       const provider = sessionData.provider || personality?.provider;
       console.log("[App] Provider determined:", provider, "| sessionData.provider:", sessionData.provider, "| personality?.provider:", personality?.provider, "| isGuest:", isGuest);
