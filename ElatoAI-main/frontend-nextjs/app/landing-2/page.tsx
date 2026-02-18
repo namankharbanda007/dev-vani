@@ -56,6 +56,15 @@ export default function LandingPage() {
                         <BentoGrid />
                     </div>
 
+                    {/* Demo Section */}
+                    <section className="w-full h-screen relative">
+                        <img
+                            src="/assets/landing-2/Whisk_735a8a55d307434b6e1488437477c36beg.png"
+                            alt="Smart Murti Demo"
+                            className="absolute inset-0 w-full h-full object-cover"
+                        />
+                    </section>
+
                     {/* Story Section Placeholder (Could be expanded later) */}
                     <section id="story" className="py-24 px-6 md:px-10 bg-white">
                         <div className="max-w-4xl mx-auto text-center space-y-8">
