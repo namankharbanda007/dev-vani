@@ -32,9 +32,10 @@ interface AppProps {
   personalityIdState: string;
   isDoctor: boolean;
   userId: string;
+  isGuest?: boolean;
 }
 
-function App({ personalityIdState, isDoctor, userId }: AppProps) {
+function App({ personalityIdState, isDoctor, userId, isGuest = false }: AppProps) {
   const supabase = createClient();
 
   const { transcriptItems, addTranscriptMessage, addTranscriptBreadcrumb } =
@@ -173,7 +174,11 @@ function App({ personalityIdState, isDoctor, userId }: AppProps) {
 
   const fetchSessionData = async (): Promise<any> => {
     logClientEvent({ url: "/session" }, "fetch_session_token_request");
-    const tokenResponse = await fetch("/api/session");
+    const url = isGuest
+      ? `/api/session?guest=true&personalityId=${personalityIdState}`
+      : "/api/session";
+
+    const tokenResponse = await fetch(url);
     const data = await tokenResponse.json();
     logServerEvent(data, "fetch_session_token_response");
     return data;

@@ -6,14 +6,59 @@ import { createSystemPrompt } from "@/app/lib/prompt-utils";
 export async function GET(request: NextRequest) {
   const supabase = createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const searchParams = request.nextUrl.searchParams;
+  const isGuest = searchParams.get("guest") === "true";
+  const personalityId = searchParams.get("personalityId");
 
-  const dbUser = await getUserById(supabase, user.id);
-  if (!dbUser) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  let dbUser;
+
+  if (isGuest && personalityId) {
+    // Guest Mode: Fetch personality directly
+    const { data: personality, error } = await supabase
+      .from("personalities")
+      .select("*")
+      .eq("personality_id", personalityId)
+      .single();
+
+    if (error || !personality) {
+      return NextResponse.json({ error: "Personality not found" }, { status: 404 });
+    }
+
+    // Mock dbUser for system prompt generation
+    dbUser = {
+      user_id: "guest",
+      avatar_url: "",
+      is_premium: false,
+      email: "guest@smartmurti.com",
+      supervisor_name: "",
+      supervisee_name: "",
+      supervisee_persona: "",
+      supervisee_age: 0,
+      session_time: 0,
+      last_session_reset: null,
+      user_info: {
+        user_type: "user",
+        user_metadata: {
+          // Guest metadata
+        }
+      },
+      personality_id: personality.personality_id,
+      personality: personality,
+      language_code: "en-US",
+      device_id: null
+    } as IUser;
+
+  } else {
+    // Authenticated Mode
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    dbUser = await getUserById(supabase, user.id);
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
   }
 
   const openAiApiKey = process.env.OPENAI_API_KEY;
