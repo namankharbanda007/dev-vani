@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       is_premium: false,
       email: "guest@smartmurti.com",
       supervisor_name: "",
-      supervisee_name: "",
+      supervisee_name: "Guest",
       supervisee_persona: "",
       supervisee_age: 0,
       session_time: 0,
@@ -73,7 +73,7 @@ YOUR VOICE IS: ${dbUser.personality?.voice_prompt}
 
 YOUR CHARACTER PROMPT IS: ${dbUser.personality?.character_prompt}
 
-YOU ARE TALKING TO: A guest user named ${dbUser.first_name}.
+YOU ARE TALKING TO: A guest user named ${dbUser.supervisee_name}.
 
 Do not ask for personal information.
 Your physical form is in the form of a physical object or a toy.
