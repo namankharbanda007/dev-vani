@@ -98,9 +98,10 @@ You may talk in any language the user would like, but the default language is En
       return NextResponse.json({ error: "Gemini API Key not configured" }, { status: 500 });
     }
     return NextResponse.json({
+      provider: 'gemini',
       gemini_api_key: geminiApiKey,
       system_prompt: systemPrompt,
-      voice: dbUser.personality.oai_voice // Assuming we map this to a Gemini voice config client-side or here
+      voice: dbUser.personality.oai_voice
     });
   }
 

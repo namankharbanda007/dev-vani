@@ -128,7 +128,7 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false }: AppProps
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
 
-    if (sessionStatus === "CONNECTED") {
+    if (sessionStatus === "CONNECTED" && !isGuest) {
       // 1. Initial check (optional, but good to catch limit immediately)
       // For now we just start tracking.
 
@@ -197,7 +197,10 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false }: AppProps
     try {
       const sessionData = await fetchSessionData();
 
-      if (personality?.provider === 'gemini') {
+      // Determine provider: use API-returned provider (works for guests) or client-side personality state
+      const provider = sessionData.provider || personality?.provider;
+
+      if (provider === 'gemini') {
         if (!sessionData.gemini_api_key) {
           audioContext.close(); // Clean up if failing
           setSessionStatus("DISCONNECTED");
@@ -245,7 +248,7 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false }: AppProps
         toast({ description: "Connected" });
 
 
-      } else if (personality?.provider === 'elevenlabs') {
+      } else if (provider === 'elevenlabs') {
         if (!sessionData.signed_url) {
           audioContext.close();
           setSessionStatus("DISCONNECTED");
