@@ -70,6 +70,7 @@ export default function DemoSession({ guestData, mode, onClose }: DemoSessionPro
                             personalityIdState={PANDIT_PERSONALITY_ID}
                             isDoctor={false}
                             userId={`guest-${guestData.whatsapp || Date.now()}`}
+                            isGuest={true}
                         />
                     </EventProvider>
                 </TranscriptProvider>
