@@ -71,6 +71,8 @@ export default function DemoSession({ guestData, mode, onClose }: DemoSessionPro
                             isDoctor={false}
                             userId={`guest-${guestData.whatsapp || Date.now()}`}
                             isGuest={true}
+                            guestName={guestData.name}
+                            guestDob={guestData.dob}
                         />
                     </EventProvider>
                 </TranscriptProvider>

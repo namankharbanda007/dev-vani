@@ -8,10 +8,12 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const isGuest = searchParams.get("guest") === "true";
   const personalityId = searchParams.get("personalityId");
+  const guestName = searchParams.get("guestName") || undefined;
+  const guestDob = searchParams.get("guestDob") || undefined;
 
   try {
     if (isGuest && personalityId) {
-      return await handleGuestSession(personalityId);
+      return await handleGuestSession(personalityId, guestName, guestDob);
     } else {
       return await handleAuthenticatedSession();
     }
@@ -25,7 +27,7 @@ export async function GET(request: NextRequest) {
 }
 
 // ======== GUEST SESSION (no cookies needed) ========
-async function handleGuestSession(personalityId: string) {
+async function handleGuestSession(personalityId: string, guestName?: string, guestDob?: string) {
   // Use a direct Supabase client (NOT the server cookie-based one)
   // This avoids any issues with cookies() for unauthenticated requests
   const directSupabase = createSupabaseDirectClient(
@@ -33,7 +35,7 @@ async function handleGuestSession(personalityId: string) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  console.log("[Session API] Guest mode. personalityId:", personalityId);
+  console.log("[Session API] Guest mode. personalityId:", personalityId, "guestName:", guestName, "guestDob:", guestDob);
 
   const { data: personality, error } = await directSupabase
     .from("personalities")
@@ -57,17 +59,27 @@ async function handleGuestSession(personalityId: string) {
 
   const geminiApiKey = process.env.GEMINI_API_KEY;
 
-  // Build system prompt for guest
+  // Build personalized system prompt for guest
+  const userName = guestName || "Guest";
+  const dobInfo = guestDob
+    ? `Their date of birth is ${guestDob}. Use this information to provide personalized astrological and spiritual guidance.`
+    : "";
+
   const systemPrompt = `
 YOUR VOICE IS: ${personality.voice_prompt}
 
 YOUR CHARACTER PROMPT IS: ${personality.character_prompt}
 
-YOU ARE TALKING TO: A guest user trying a live demo.
+YOU ARE TALKING TO: ${userName}. This is a live demo session.
+${dobInfo}
 
-Do not ask for personal information.
+Greet ${userName} warmly by name at the start of the conversation.
+${guestDob ? `Since you know their date of birth (${guestDob}), you can offer personalized insights, predictions, or spiritual guidance based on their birth details.` : ""}
+
 Your physical form is in the form of a physical object or a toy.
 A person interacts with you by pressing a button, sends you instructions and you must respond in a concise conversational style.
+
+This is a 2-minute demo session. Keep responses concise but insightful.
 
 LANGUAGE:
 You may talk in any language the user would like, but the default language is Hindi.
