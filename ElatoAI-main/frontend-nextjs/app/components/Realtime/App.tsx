@@ -178,9 +178,17 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false }: AppProps
       ? `/api/session?guest=true&personalityId=${personalityIdState}`
       : "/api/session";
 
+    console.log("[App] Fetching session data from:", url);
     const tokenResponse = await fetch(url);
+    console.log("[App] Session API response status:", tokenResponse.status);
     const data = await tokenResponse.json();
+    console.log("[App] Session API response data:", JSON.stringify(data));
     logServerEvent(data, "fetch_session_token_response");
+
+    if (!tokenResponse.ok) {
+      console.error("[App] Session API returned error:", data);
+    }
+
     return data;
   };
 
@@ -199,6 +207,8 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false }: AppProps
 
       // Determine provider: use API-returned provider (works for guests) or client-side personality state
       const provider = sessionData.provider || personality?.provider;
+      console.log("[App] Provider determined:", provider, "| sessionData.provider:", sessionData.provider, "| personality?.provider:", personality?.provider, "| isGuest:", isGuest);
+      console.log("[App] Has gemini_api_key:", !!sessionData.gemini_api_key);
 
       if (provider === 'gemini') {
         if (!sessionData.gemini_api_key) {

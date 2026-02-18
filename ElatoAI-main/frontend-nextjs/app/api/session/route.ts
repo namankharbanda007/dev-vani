@@ -14,14 +14,18 @@ export async function GET(request: NextRequest) {
 
   if (isGuest && personalityId) {
     // Guest Mode: Fetch personality directly
+    console.log("[Session API] Guest mode. personalityId:", personalityId);
     const { data: personality, error } = await supabase
       .from("personalities")
       .select("*")
       .eq("personality_id", personalityId)
       .single();
 
+    console.log("[Session API] Personality fetch result:", { personality: personality?.title, provider: personality?.provider, error });
+
     if (error || !personality) {
-      return NextResponse.json({ error: "Personality not found" }, { status: 404 });
+      console.error("[Session API] Personality not found:", error);
+      return NextResponse.json({ error: "Personality not found", details: error?.message }, { status: 404 });
     }
 
     // Mock dbUser for system prompt generation
@@ -93,10 +97,13 @@ You may talk in any language the user would like, but the default language is En
 
   // If the user's personality provider is Gemini, we simply return the key and the system prompt.
   // The client will handle the WebSocket connection.
+  console.log("[Session API] dbUser.personality.provider:", dbUser.personality?.provider);
   if (dbUser.personality?.provider === 'gemini') {
     if (!geminiApiKey) {
+      console.error("[Session API] GEMINI_API_KEY env var not set!");
       return NextResponse.json({ error: "Gemini API Key not configured" }, { status: 500 });
     }
+    console.log("[Session API] Returning gemini session data successfully");
     return NextResponse.json({
       provider: 'gemini',
       gemini_api_key: geminiApiKey,
