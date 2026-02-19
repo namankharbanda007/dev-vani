@@ -5,11 +5,20 @@ import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-mot
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import clsx from "clsx";
+import { createClient } from "@/utils/supabase/client";
 
 export default function Header() {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const supabase = createClient();
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setIsLoggedIn(!!session);
+        });
+    }, []);
 
     useMotionValueEvent(scrollY, "change", (latest) => {
         const hasScrolled = latest > 50;
@@ -67,10 +76,10 @@ export default function Header() {
                     {/* CTA & Mobile Menu Toggle */}
                     <div className="flex items-center space-x-4">
                         <Link
-                            href="/login"
+                            href={isLoggedIn ? "/home" : "/login"}
                             className="hidden md:inline-flex items-center justify-center px-6 py-2 text-sm font-medium text-white bg-black rounded-full hover:bg-gray-800 transition-all"
                         >
-                            Login
+                            {isLoggedIn ? "Home" : "Login"}
                         </Link>
 
                         <button
