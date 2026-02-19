@@ -35,9 +35,10 @@ interface AppProps {
   isGuest?: boolean;
   guestName?: string;
   guestDob?: string;
+  onStateChange?: (state: { sessionStatus: string; isAgentSpeaking: boolean }) => void;
 }
 
-function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName, guestDob }: AppProps) {
+function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName, guestDob, onStateChange }: AppProps) {
   const supabase = createClient();
 
   const { transcriptItems, addTranscriptMessage, addTranscriptBreadcrumb } =
@@ -125,6 +126,11 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
       updateSession(true);
     }
   }, [sessionStatus]);
+
+  // Broadcast state to parent
+  useEffect(() => {
+    onStateChange?.({ sessionStatus, isAgentSpeaking });
+  }, [sessionStatus, isAgentSpeaking, onStateChange]);
 
   // Usage Tracking Heartbeat
   useEffect(() => {
