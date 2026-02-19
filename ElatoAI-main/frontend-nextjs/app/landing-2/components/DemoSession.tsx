@@ -6,6 +6,7 @@ import { TranscriptProvider } from "@/app/components/Realtime/contexts/Transcrip
 import { EventProvider } from "@/app/components/Realtime/contexts/EventContext";
 import { X, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import DemoChatSession from "./DemoChatSession";
 
 interface DemoSessionProps {
     guestData: any;
@@ -17,6 +18,18 @@ interface DemoSessionProps {
 const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
 
 export default function DemoSession({ guestData, mode, onClose }: DemoSessionProps) {
+    // If mode is "chat", render WhatsApp-style chat
+    if (mode === "chat") {
+        return (
+            <DemoChatSession
+                guestData={guestData}
+                onClose={onClose}
+                personalityId={PANDIT_PERSONALITY_ID}
+            />
+        );
+    }
+
+    // ===== CALL MODE =====
     const [timeLeft, setTimeLeft] = useState(120); // 2 minutes
     const [isTimeUp, setIsTimeUp] = useState(false);
 
@@ -62,10 +75,6 @@ export default function DemoSession({ guestData, mode, onClose }: DemoSessionPro
             <div className="flex-1 w-full h-full relative">
                 <TranscriptProvider>
                     <EventProvider>
-                        {/* 
-                            We pass a dummy ID for guest.
-                            Note: Ensure App.tsx handles guest userId gracefully or supply a uuid.
-                        */}
                         <App
                             personalityIdState={PANDIT_PERSONALITY_ID}
                             isDoctor={false}
