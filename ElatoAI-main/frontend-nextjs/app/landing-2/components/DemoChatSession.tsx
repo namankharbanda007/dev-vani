@@ -298,15 +298,14 @@ export default function DemoChatSession({
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-            {/* WhatsApp Phone Container */}
+            {/* WhatsApp Phone Container — full-screen on mobile, phone-sim on desktop */}
             <motion.div
                 initial={{ scale: 0.92, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 transition={{ type: "spring", damping: 28, stiffness: 350 }}
-                className="relative w-full max-w-[412px] h-[92vh] max-h-[780px] flex flex-col overflow-hidden"
+                className="relative w-full h-full md:max-w-[412px] md:h-[92vh] md:max-h-[780px] flex flex-col overflow-hidden md:rounded-[1.8rem]"
                 style={{
-                    borderRadius: "1.8rem",
-                    border: "2px solid #313d45",
+                    border: "none",
                     boxShadow:
                         "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset",
                 }}
