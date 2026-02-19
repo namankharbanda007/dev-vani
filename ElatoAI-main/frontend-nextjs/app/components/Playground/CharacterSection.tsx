@@ -171,7 +171,7 @@ const CharacterSection = ({
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        if (onCallCharacter) {
+                                                        if (onCallCharacter && personality.personality_id) {
                                                             onPersonalityPicked(personality.personality_id);
                                                             onCallCharacter(personality.personality_id);
                                                         }
@@ -184,7 +184,7 @@ const CharacterSection = ({
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        if (onChatCharacter) {
+                                                        if (onChatCharacter && personality.personality_id) {
                                                             onPersonalityPicked(personality.personality_id);
                                                             onChatCharacter(personality.personality_id);
                                                         }
