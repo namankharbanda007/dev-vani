@@ -35,7 +35,7 @@ interface AppProps {
   isGuest?: boolean;
   guestName?: string;
   guestDob?: string;
-  onStateChange?: (state: { sessionStatus: string; isAgentSpeaking: boolean }) => void;
+  onStateChange?: (state: { sessionStatus: string; isAgentSpeaking: boolean; agentActivity: 'speaking' | 'listening' | 'thinking' }) => void;
   autoConnect?: boolean;
   disconnectRef?: React.MutableRefObject<(() => void) | null>;
 }
@@ -54,7 +54,8 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [userText, setUserText] = useState<string>("");
-  const [isAgentSpeaking, setIsAgentSpeaking] = useState<boolean>(false); // New state
+  const [isAgentSpeaking, setIsAgentSpeaking] = useState<boolean>(false);
+  const [agentActivity, setAgentActivity] = useState<'speaking' | 'listening' | 'thinking'>('thinking');
 
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -131,8 +132,8 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
 
   // Broadcast state to parent
   useEffect(() => {
-    onStateChange?.({ sessionStatus, isAgentSpeaking });
-  }, [sessionStatus, isAgentSpeaking, onStateChange]);
+    onStateChange?.({ sessionStatus, isAgentSpeaking, agentActivity });
+  }, [sessionStatus, isAgentSpeaking, agentActivity, onStateChange]);
 
   // Auto-connect for guest demo
   useEffect(() => {
@@ -284,6 +285,13 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
           },
           (speaking) => {
             setIsAgentSpeaking(speaking);
+            if (speaking) {
+              setAgentActivity('speaking');
+            } else {
+              // When speaking stops via hangover timeout, set to thinking
+              // (turnComplete callback will set to listening if appropriate)
+              setAgentActivity(prev => prev === 'speaking' ? 'thinking' : prev);
+            }
           },
           () => {
             console.log("Gemini connection disconnected");
@@ -292,14 +300,18 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
               toast({ description: "Connection lost", variant: "destructive" });
             }
             intentionalDisconnectRef.current = false;
+          },
+          () => {
+            // onTurnComplete: AI finished speaking, now listening
+            setAgentActivity('listening');
           }
         );
 
         geminiDisconnectRef.current = geminiConnection.disconnect;
 
         // Force state to "Speaking" immediately because we expect an initial greeting.
-        // This prevents the UI from showing "Listening" while waiting for the audio.
         setIsAgentSpeaking(true);
+        setAgentActivity('speaking');
         setSessionStatus("CONNECTED");
         toast({ description: "Connected" });
 

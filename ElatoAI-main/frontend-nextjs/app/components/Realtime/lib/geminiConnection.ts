@@ -86,7 +86,8 @@ export async function createGeminiConnection(
     initialMessage: string,
     onRemoteEvent: (event: any) => void,
     onSpeakingStateChange?: (isSpeaking: boolean) => void,
-    onDisconnect?: () => void
+    onDisconnect?: () => void,
+    onTurnComplete?: () => void
 ) {
     let ws: WebSocket | null = null;
     let mediaStream: MediaStream | null = null;
@@ -126,7 +127,7 @@ export async function createGeminiConnection(
                 if (speakingTimeout) clearTimeout(speakingTimeout);
                 speakingTimeout = setTimeout(() => {
                     onSpeakingStateChange(false);
-                }, 2500); // 2.5s hangover to avoid flickering during natural pauses
+                }, 300); // 300ms hangover — only bridges micro-gaps within a sentence
             }
 
             // Gemini output is 24kHz typically
@@ -200,6 +201,13 @@ export async function createGeminiConnection(
                         playAudioChunk(pcmData);
                     }
                 }
+            }
+
+            // Detect turn complete — AI is done speaking, user's turn
+            if (data.serverContent?.turnComplete) {
+                if (speakingTimeout) clearTimeout(speakingTimeout);
+                if (onSpeakingStateChange) onSpeakingStateChange(false);
+                if (onTurnComplete) onTurnComplete();
             }
 
             // Forward other events if needed

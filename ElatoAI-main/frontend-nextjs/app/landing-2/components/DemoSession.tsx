@@ -57,11 +57,11 @@ function WhatsAppCallUI({
         "connecting" | "connected"
     >("connecting");
     const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
+    const [agentActivity, setAgentActivity] = useState<'speaking' | 'listening' | 'thinking'>('thinking');
     const [isMuted, setIsMuted] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const connectedAtRef = useRef<number | null>(null);
     const disconnectRef = useRef<(() => void) | null>(null);
-    const [hasEverSpoken, setHasEverSpoken] = useState(false);
 
     // Timer — only start when connected
     useEffect(() => {
@@ -92,14 +92,14 @@ function WhatsAppCallUI({
     }, [callState]);
 
     const handleStateChange = useCallback(
-        (state: { sessionStatus: string; isAgentSpeaking: boolean }) => {
+        (state: { sessionStatus: string; isAgentSpeaking: boolean; agentActivity: 'speaking' | 'listening' | 'thinking' }) => {
             if (state.sessionStatus === "CONNECTING") {
                 setCallState("connecting");
             } else if (state.sessionStatus === "CONNECTED") {
                 setCallState("connected");
             }
             setIsAgentSpeaking(state.isAgentSpeaking);
-            if (state.isAgentSpeaking) setHasEverSpoken(true);
+            setAgentActivity(state.agentActivity);
         },
         []
     );
@@ -117,22 +117,24 @@ function WhatsAppCallUI({
         return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
 
-    // Derive call status text
+    // Derive call status text from agentActivity
     const statusText =
         callState === "connecting"
             ? "Connecting..."
-            : isAgentSpeaking
+            : agentActivity === 'speaking'
                 ? "Speaking..."
-                : hasEverSpoken
-                    ? "Checking Kundali... 🔮"
-                    : "Connecting...";
+                : agentActivity === 'listening'
+                    ? "Listening..."
+                    : "Checking Kundali... 🔮";
 
     const statusColor =
         callState !== "connected"
             ? "#8696a0"
-            : isAgentSpeaking
+            : agentActivity === 'speaking'
                 ? "#25D366"
-                : "#53bdeb";
+                : agentActivity === 'listening'
+                    ? "#53bdeb"
+                    : "#f0b429";
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
@@ -214,45 +216,55 @@ function WhatsAppCallUI({
                                         className="absolute inset-0 rounded-full"
                                         initial={{ scale: 1, opacity: 0 }}
                                         animate={{
-                                            scale: isAgentSpeaking
+                                            scale: agentActivity === 'speaking'
                                                 ? [1, 1.4, 1]
-                                                : [1, 1.2, 1],
-                                            opacity: isAgentSpeaking
+                                                : agentActivity === 'listening'
+                                                    ? [1, 1.2, 1]
+                                                    : [1, 1.15, 1],
+                                            opacity: agentActivity === 'speaking'
                                                 ? [0, 0.3, 0]
-                                                : [0, 0.15, 0],
+                                                : agentActivity === 'listening'
+                                                    ? [0, 0.15, 0]
+                                                    : [0, 0.1, 0],
                                         }}
                                         transition={{
-                                            duration: isAgentSpeaking
+                                            duration: agentActivity === 'speaking'
                                                 ? 0.8
-                                                : 2,
+                                                : agentActivity === 'listening'
+                                                    ? 1.5
+                                                    : 2.5,
                                             repeat: Infinity,
                                             ease: "easeOut",
                                         }}
                                         style={{
-                                            border: `2px solid ${isAgentSpeaking ? "#25D366" : "#53bdeb"}`,
+                                            border: `2px solid ${statusColor}`,
                                         }}
                                     />
                                     <motion.div
                                         className="absolute inset-0 rounded-full"
                                         initial={{ scale: 1, opacity: 0 }}
                                         animate={{
-                                            scale: isAgentSpeaking
+                                            scale: agentActivity === 'speaking'
                                                 ? [1, 1.6, 1]
-                                                : [1, 1.35, 1],
-                                            opacity: isAgentSpeaking
+                                                : agentActivity === 'listening'
+                                                    ? [1, 1.35, 1]
+                                                    : [1, 1.25, 1],
+                                            opacity: agentActivity === 'speaking'
                                                 ? [0, 0.15, 0]
                                                 : [0, 0.08, 0],
                                         }}
                                         transition={{
-                                            duration: isAgentSpeaking
+                                            duration: agentActivity === 'speaking'
                                                 ? 0.8
-                                                : 2,
+                                                : agentActivity === 'listening'
+                                                    ? 1.5
+                                                    : 2.5,
                                             repeat: Infinity,
                                             ease: "easeOut",
                                             delay: 0.2,
                                         }}
                                         style={{
-                                            border: `2px solid ${isAgentSpeaking ? "#25D366" : "#53bdeb"}`,
+                                            border: `2px solid ${statusColor}`,
                                         }}
                                     />
                                 </>
