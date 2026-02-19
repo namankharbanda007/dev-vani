@@ -113,6 +113,14 @@ export default function DemoChatSession({
                             status: "read",
                         },
                     ]);
+                    // Sync timer from server
+                    if (typeof data.remainingSeconds === 'number') {
+                        setTimeLeft(data.remainingSeconds);
+                    }
+                } else if (data.timeUp) {
+                    // Server says demo already expired for this IP
+                    setIsTimeUp(true);
+                    setTimeLeft(0);
                 } else if (data.error) {
                     setMessages([
                         {
@@ -178,6 +186,14 @@ export default function DemoChatSession({
             });
             const data = await res.json();
 
+            // Check for server-side rate limit
+            if (res.status === 429 || data.timeUp) {
+                setIsTimeUp(true);
+                setTimeLeft(0);
+                setIsTyping(false);
+                return;
+            }
+
             setMessages((prev) =>
                 prev.map((m) =>
                     m.id === userMsg.id
@@ -185,6 +201,11 @@ export default function DemoChatSession({
                         : m
                 )
             );
+
+            // Sync timer from server
+            if (typeof data.remainingSeconds === 'number') {
+                setTimeLeft(data.remainingSeconds);
+            }
 
             if (data.response) {
                 setTimeout(() => {
