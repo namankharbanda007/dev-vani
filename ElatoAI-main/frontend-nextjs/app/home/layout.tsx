@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { SidebarNav } from "../components/Nav/SidebarNavItems";
-import { Gamepad2, Plus, PlusCircle, Settings, Users, Music } from "lucide-react";
+import { Plus, Settings, Home, LogOut } from "lucide-react";
 import { Metadata } from "next";
 import { getOpenGraphMetadata } from "@/lib/utils";
 import { MobileNav } from "../components/Nav/MobileNav";
@@ -20,9 +20,9 @@ export const metadata: Metadata = {
 
 const sidebarNavItems: SidebarNavItem[] = [
     {
-        title: "Avatars",
+        title: "Home",
         href: "/home",
-        icon: <Users size={ICON_SIZE} />,
+        icon: <Home size={ICON_SIZE} />,
     },
     {
         title: "Settings",
@@ -59,13 +59,13 @@ export default async function RootLayout({
     }
 
     const mobileNavItems = [
-        sidebarNavItems[0], // Avatars
+        sidebarNavItems[0], // Home
         sidebarNavItems[1], // Settings
         sidebarNavItems[2], // Create
         {
-            title: "Bhajan",
-            href: "/bhajan",
-            icon: <Music size={ICON_SIZE} />,
+            title: "Account",
+            href: "/home/settings",
+            icon: <LogOut size={ICON_SIZE} />,
         },
     ];
 

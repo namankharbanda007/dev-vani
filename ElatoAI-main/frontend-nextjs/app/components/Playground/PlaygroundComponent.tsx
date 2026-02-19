@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { updateUser } from "@/db/users";
 import _ from "lodash";
@@ -36,6 +36,9 @@ const Playground: React.FC<PlaygroundProps> = ({
         []
     );
 
+    // Pending action: 'call' or 'chat' — triggers App to auto-connect or open chat
+    const [pendingAction, setPendingAction] = useState<'call' | 'chat' | null>(null);
+
     // Time-based greeting
     const greeting = useMemo(() => {
         const hour = new Date().getHours();
@@ -58,16 +61,26 @@ const Playground: React.FC<PlaygroundProps> = ({
         );
     };
 
+    // When a card's Call button is clicked
+    const handleCallCharacter = useCallback((personalityId: string) => {
+        setPendingAction('call');
+    }, []);
+
+    // When a card's Chat button is clicked
+    const handleChatCharacter = useCallback((personalityId: string) => {
+        setPendingAction('chat');
+    }, []);
+
     return (
-        <div className="flex flex-col min-h-[calc(100vh-80px)] py-6 md:py-10 max-w-[1600px] mx-auto w-full">
-            <div className="flex flex-col w-full gap-10">
+        <div className="flex flex-col min-h-[calc(100vh-80px)] py-4 md:py-8 max-w-[1600px] mx-auto w-full">
+            <div className="flex flex-col w-full gap-8">
 
                 {/* ===== Hero Greeting Section ===== */}
-                <div className="relative overflow-hidden rounded-3xl mx-2 md:mx-0">
+                <div className="relative overflow-hidden rounded-2xl mx-2 md:mx-0">
                     {/* Glassmorphism card */}
-                    <div className="relative z-10 p-6 md:p-8 bg-white/60 backdrop-blur-xl border border-white/80 rounded-3xl shadow-[0_8px_32px_rgba(139,92,246,0.08)]">
-                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                            <div className="space-y-3 flex-1">
+                    <div className="relative z-10 p-5 md:p-8 bg-white/60 backdrop-blur-xl border border-white/80 rounded-2xl shadow-[0_8px_32px_rgba(139,92,246,0.08)]">
+                        <div className="flex flex-col gap-3">
+                            <div className="space-y-2 flex-1">
                                 {/* Greeting badge */}
                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-50 to-amber-50 border border-purple-100/50">
                                     {greeting.icon}
@@ -75,35 +88,23 @@ const Playground: React.FC<PlaygroundProps> = ({
                                 </div>
 
                                 {/* Main heading */}
-                                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold font-lora text-gray-900 tracking-tight leading-tight">
+                                <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold font-lora text-gray-900 tracking-tight leading-tight">
                                     Namaste, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-purple-500 to-amber-600">{userName}</span> 🙏
                                 </h1>
 
                                 {/* Blessing text */}
-                                <p className="text-base md:text-lg text-gray-500 max-w-lg leading-relaxed">
+                                <p className="text-sm md:text-base text-gray-500 max-w-lg leading-relaxed">
                                     {isDoctor
                                         ? "Your patients are waiting. Start a healing conversation."
-                                        : "May the stars guide your path today. Choose an avatar to begin."
+                                        : "Choose an avatar below to call or chat instantly."
                                     }
                                 </p>
-                            </div>
-
-                            {/* Connect Button */}
-                            <div className="w-fit flex-shrink-0">
-                                <TranscriptProvider>
-                                    <EventProvider>
-                                        <App personalityIdState={personalityIdState} isDoctor={isDoctor} userId={currentUser.user_id} />
-                                    </EventProvider>
-                                </TranscriptProvider>
                             </div>
                         </div>
 
                         {/* Decorative floating sparkles */}
-                        <div className="absolute top-4 right-4 animate-float opacity-20 pointer-events-none">
+                        <div className="absolute top-4 right-4 animate-float opacity-20 pointer-events-none hidden md:block">
                             <Sparkles className="w-8 h-8 text-purple-400" />
-                        </div>
-                        <div className="absolute bottom-6 right-20 animate-float opacity-10 pointer-events-none" style={{ animationDelay: '1s' }}>
-                            <Sparkles className="w-6 h-6 text-amber-400" />
                         </div>
                     </div>
                 </div>
@@ -116,7 +117,7 @@ const Playground: React.FC<PlaygroundProps> = ({
                 {/* ===== Divider ===== */}
                 <div className="flex items-center gap-4 px-4 md:px-0">
                     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
-                    <span className="text-sm font-medium text-gray-400 tracking-wide">EXPLORE AVATARS</span>
+                    <span className="text-xs font-medium text-gray-400 tracking-widest uppercase">Choose an Avatar</span>
                     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
                 </div>
 
@@ -124,7 +125,7 @@ const Playground: React.FC<PlaygroundProps> = ({
                 <div className="flex flex-col gap-6 px-2 md:px-0">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 font-lora tracking-tight">Your Avatars</h2>
+                            <h2 className="text-xl md:text-2xl font-bold text-gray-800 font-lora tracking-tight">Your Avatars</h2>
                             <div className="px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
                                 {allPersonalities.length}
                             </div>
@@ -140,6 +141,8 @@ const Playground: React.FC<PlaygroundProps> = ({
                     <UserPersonalities
                         selectedFilters={selectedFilters}
                         onPersonalityPicked={onPersonalityPicked}
+                        onCallCharacter={handleCallCharacter}
+                        onChatCharacter={handleChatCharacter}
                         personalityIdState={personalityIdState}
                         languageState={'en-US'}
                         disableButtons={false}
@@ -150,6 +153,19 @@ const Playground: React.FC<PlaygroundProps> = ({
                     />
                 </div>
             </div>
+
+            {/* ===== Hidden App component — activated when card actions are triggered ===== */}
+            <TranscriptProvider>
+                <EventProvider>
+                    <App
+                        personalityIdState={personalityIdState}
+                        isDoctor={isDoctor}
+                        userId={currentUser.user_id}
+                        pendingAction={pendingAction}
+                        onActionHandled={() => setPendingAction(null)}
+                    />
+                </EventProvider>
+            </TranscriptProvider>
         </div>
     );
 };

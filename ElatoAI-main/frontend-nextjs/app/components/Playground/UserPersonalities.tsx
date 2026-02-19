@@ -83,6 +83,8 @@ const CATEGORY_ORDER = ["spiritual", "astrology", "seniors", "adult", "students"
 
 interface UserPersonalitiesProps {
     onPersonalityPicked: (personalityIdPicked: string) => void;
+    onCallCharacter?: (personalityId: string) => void;
+    onChatCharacter?: (personalityId: string) => void;
     allPersonalities: IPersonality[];
     personalityIdState: string;
     languageState: string;
@@ -116,6 +118,8 @@ const findCategory = (personality: IPersonality): string | null => {
 
 const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
     onPersonalityPicked,
+    onCallCharacter,
+    onChatCharacter,
     allPersonalities,
     personalityIdState,
     languageState,
@@ -165,6 +169,8 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
                     languageState={languageState}
                     personalityIdState={personalityIdState}
                     onPersonalityPicked={onPersonalityPicked}
+                    onCallCharacter={onCallCharacter}
+                    onChatCharacter={onChatCharacter}
                     title={"My Characters"}
                     disableButtons={disableButtons}
                 />
@@ -178,6 +184,8 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
                     languageState={languageState}
                     personalityIdState={personalityIdState}
                     onPersonalityPicked={onPersonalityPicked}
+                    onCallCharacter={onCallCharacter}
+                    onChatCharacter={onChatCharacter}
                     title={"Community Characters"}
                     disableButtons={disableButtons}
                 />
@@ -198,6 +206,8 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
                         languageState={languageState}
                         personalityIdState={personalityIdState}
                         onPersonalityPicked={onPersonalityPicked}
+                        onCallCharacter={onCallCharacter}
+                        onChatCharacter={onChatCharacter}
                         title={categoryInfo.title}
                         disableButtons={disableButtons}
                     />
@@ -212,6 +222,8 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
                     languageState={languageState}
                     personalityIdState={personalityIdState}
                     onPersonalityPicked={onPersonalityPicked}
+                    onCallCharacter={onCallCharacter}
+                    onChatCharacter={onChatCharacter}
                     title={"Other Characters"}
                     disableButtons={disableButtons}
                 />

@@ -38,9 +38,11 @@ interface AppProps {
   onStateChange?: (state: { sessionStatus: string; isAgentSpeaking: boolean; agentActivity: 'speaking' | 'listening' | 'thinking' }) => void;
   autoConnect?: boolean;
   disconnectRef?: React.MutableRefObject<(() => void) | null>;
+  pendingAction?: 'call' | 'chat' | null;
+  onActionHandled?: () => void;
 }
 
-function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false, disconnectRef }: AppProps) {
+function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false, disconnectRef, pendingAction, onActionHandled }: AppProps) {
   const supabase = createClient();
 
   const { transcriptItems, addTranscriptMessage, addTranscriptBreadcrumb } =
@@ -151,6 +153,24 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
       disconnectRef.current = () => disconnectFromRealtime(true);
     }
   });
+
+  // Handle pending actions from character card buttons
+  useEffect(() => {
+    if (!pendingAction || !personality) return;
+
+    if (pendingAction === 'call') {
+      // Auto-connect voice call
+      if (sessionStatus === 'DISCONNECTED') {
+        connectToRealtime();
+        setIsSheetOpen(true);
+      }
+    } else if (pendingAction === 'chat') {
+      // Open chat
+      setIsChatOpen(true);
+    }
+
+    onActionHandled?.();
+  }, [pendingAction, personality]);
 
   // Usage Tracking Heartbeat
   useEffect(() => {
@@ -619,16 +639,19 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
 
   return (
     <>
-      <div className="inline-block">
-        <BottomToolbar
-          sessionStatus={sessionStatus}
-          onToggleConnection={onToggleConnection}
-          isDoctor={isDoctor}
-          personality={personality}
-          onToggleChat={() => setIsChatOpen(!isChatOpen)}
-          isChatOpen={isChatOpen}
-        />
-      </div>
+      {/* Only show BottomToolbar when not in card-action mode (i.e. guest/external usage) */}
+      {(isGuest || autoConnect) && (
+        <div className="inline-block">
+          <BottomToolbar
+            sessionStatus={sessionStatus}
+            onToggleConnection={onToggleConnection}
+            isDoctor={isDoctor}
+            personality={personality}
+            onToggleChat={() => setIsChatOpen(!isChatOpen)}
+            isChatOpen={isChatOpen}
+          />
+        </div>
+      )}
 
       {/* Voice Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
