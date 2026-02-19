@@ -10,8 +10,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Message is required" }, { status: 400 });
         }
 
-        const apiKey = process.env.GEMINI_API_KEY;
+        const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+        console.log("[Guest Chat API] GEMINI_API_KEY present:", !!process.env.GEMINI_API_KEY, "| GOOGLE_API_KEY present:", !!process.env.GOOGLE_API_KEY);
         if (!apiKey) {
+            console.error("[Guest Chat API] No API key found! Check GEMINI_API_KEY or GOOGLE_API_KEY in .env");
             return NextResponse.json({ error: "Gemini API Key not configured" }, { status: 500 });
         }
 

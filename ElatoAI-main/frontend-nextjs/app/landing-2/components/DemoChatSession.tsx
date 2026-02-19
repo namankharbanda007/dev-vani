@@ -63,6 +63,7 @@ export default function DemoChatSession({ guestData, onClose, personalityId }: D
         const sendInitialGreeting = async () => {
             setIsTyping(true);
             try {
+                console.log("[DemoChat] Sending initial greeting request...");
                 const res = await fetch("/api/guest-chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -74,7 +75,9 @@ export default function DemoChatSession({ guestData, onClose, personalityId }: D
                         guestDob: guestData.dob,
                     }),
                 });
+                console.log("[DemoChat] Initial greeting response status:", res.status);
                 const data = await res.json();
+                console.log("[DemoChat] Initial greeting data:", data);
                 if (data.response) {
                     setMessages([
                         {
@@ -85,9 +88,29 @@ export default function DemoChatSession({ guestData, onClose, personalityId }: D
                             status: "read",
                         },
                     ]);
+                } else if (data.error) {
+                    console.error("[DemoChat] API error:", data.error);
+                    setMessages([
+                        {
+                            id: "error-1",
+                            content: `🙏 Kshama karein, there was an issue connecting. Please try again. (${data.error})`,
+                            role: "assistant",
+                            timestamp: new Date(),
+                            status: "read",
+                        },
+                    ]);
                 }
             } catch (err) {
-                console.error("Failed to get initial greeting:", err);
+                console.error("[DemoChat] Failed to get initial greeting:", err);
+                setMessages([
+                    {
+                        id: "error-1",
+                        content: "🙏 Connection failed. Please try again later.",
+                        role: "assistant",
+                        timestamp: new Date(),
+                        status: "read",
+                    },
+                ]);
             } finally {
                 setIsTyping(false);
             }
@@ -119,6 +142,7 @@ export default function DemoChatSession({ guestData, onClose, personalityId }: D
         }));
 
         try {
+            console.log("[DemoChat] Sending message:", text);
             const res = await fetch("/api/guest-chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -130,7 +154,9 @@ export default function DemoChatSession({ guestData, onClose, personalityId }: D
                     guestDob: guestData.dob,
                 }),
             });
+            console.log("[DemoChat] Response status:", res.status);
             const data = await res.json();
+            console.log("[DemoChat] Response data:", data);
 
             // Mark user message as delivered
             setMessages((prev) =>
@@ -158,11 +184,29 @@ export default function DemoChatSession({ guestData, onClose, personalityId }: D
                         )
                     );
                 }, 300);
+            } else if (data.error) {
+                const errorMsg: Message = {
+                    id: `error-${Date.now()}`,
+                    content: `🙏 Sorry, something went wrong. (${data.error})`,
+                    role: "assistant",
+                    timestamp: new Date(),
+                    status: "read",
+                };
+                setMessages((prev) => [...prev, errorMsg]);
+                setIsTyping(false);
             } else {
                 setIsTyping(false);
             }
         } catch (err) {
-            console.error("Chat error:", err);
+            console.error("[DemoChat] Chat error:", err);
+            const errorMsg: Message = {
+                id: `error-${Date.now()}`,
+                content: "🙏 Connection error. Please try again.",
+                role: "assistant",
+                timestamp: new Date(),
+                status: "read",
+            };
+            setMessages((prev) => [...prev, errorMsg]);
             setIsTyping(false);
         }
     };
@@ -279,15 +323,15 @@ export default function DemoChatSession({ guestData, onClose, personalityId }: D
                         >
                             <div
                                 className={`relative max-w-[80%] px-2.5 pt-1.5 pb-1 rounded-lg shadow-sm ${msg.role === "user"
-                                        ? "bg-[#005c4b] text-[#e9edef] rounded-tr-none"
-                                        : "bg-[#202c33] text-[#e9edef] rounded-tl-none"
+                                    ? "bg-[#005c4b] text-[#e9edef] rounded-tr-none"
+                                    : "bg-[#202c33] text-[#e9edef] rounded-tl-none"
                                     }`}
                             >
                                 {/* Bubble tail */}
                                 <div
                                     className={`absolute top-0 w-2 h-3 ${msg.role === "user"
-                                            ? "-right-1.5 text-[#005c4b]"
-                                            : "-left-1.5 text-[#202c33]"
+                                        ? "-right-1.5 text-[#005c4b]"
+                                        : "-left-1.5 text-[#202c33]"
                                         }`}
                                 >
                                     <svg viewBox="0 0 8 13" width="8" height="13" className="fill-current">
