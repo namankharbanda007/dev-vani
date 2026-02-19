@@ -54,15 +54,16 @@ function WhatsAppCallUI({
     const [timeLeft, setTimeLeft] = useState(120);
     const [isTimeUp, setIsTimeUp] = useState(false);
     const [callState, setCallState] = useState<
-        "ringing" | "connecting" | "connected"
-    >("ringing");
+        "connecting" | "connected"
+    >("connecting");
     const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const connectedAtRef = useRef<number | null>(null);
 
-    // Timer
+    // Timer — only start when connected
     useEffect(() => {
+        if (callState !== "connected") return;
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
@@ -74,7 +75,7 @@ function WhatsAppCallUI({
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, []);
+    }, [callState]);
 
     // Elapsed call time
     useEffect(() => {
@@ -108,13 +109,11 @@ function WhatsAppCallUI({
 
     // Derive call status text
     const statusText =
-        callState === "ringing"
-            ? "Ringing..."
-            : callState === "connecting"
-                ? "Connecting..."
-                : isAgentSpeaking
-                    ? "Speaking..."
-                    : "Listening...";
+        callState === "connecting"
+            ? "Connecting..."
+            : isAgentSpeaking
+                ? "Speaking..."
+                : "Listening...";
 
     const statusColor =
         callState !== "connected"
@@ -449,6 +448,7 @@ function WhatsAppCallUI({
                                 guestName={guestData.name}
                                 guestDob={guestData.dob}
                                 onStateChange={handleStateChange}
+                                autoConnect={true}
                             />
                         </EventProvider>
                     </TranscriptProvider>

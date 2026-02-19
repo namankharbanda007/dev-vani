@@ -36,9 +36,10 @@ interface AppProps {
   guestName?: string;
   guestDob?: string;
   onStateChange?: (state: { sessionStatus: string; isAgentSpeaking: boolean }) => void;
+  autoConnect?: boolean;
 }
 
-function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName, guestDob, onStateChange }: AppProps) {
+function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false }: AppProps) {
   const supabase = createClient();
 
   const { transcriptItems, addTranscriptMessage, addTranscriptBreadcrumb } =
@@ -131,6 +132,16 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
   useEffect(() => {
     onStateChange?.({ sessionStatus, isAgentSpeaking });
   }, [sessionStatus, isAgentSpeaking, onStateChange]);
+
+  // Auto-connect for guest demo
+  useEffect(() => {
+    if (autoConnect && sessionStatus === "DISCONNECTED") {
+      const timer = setTimeout(() => {
+        connectToRealtime();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [autoConnect]);
 
   // Usage Tracking Heartbeat
   useEffect(() => {
