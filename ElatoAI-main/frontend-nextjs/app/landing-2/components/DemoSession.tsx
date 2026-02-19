@@ -60,6 +60,8 @@ function WhatsAppCallUI({
     const [isMuted, setIsMuted] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const connectedAtRef = useRef<number | null>(null);
+    const disconnectRef = useRef<(() => void) | null>(null);
+    const [hasEverSpoken, setHasEverSpoken] = useState(false);
 
     // Timer — only start when connected
     useEffect(() => {
@@ -97,9 +99,17 @@ function WhatsAppCallUI({
                 setCallState("connected");
             }
             setIsAgentSpeaking(state.isAgentSpeaking);
+            if (state.isAgentSpeaking) setHasEverSpoken(true);
         },
         []
     );
+
+    const handleEndCall = useCallback(() => {
+        if (disconnectRef.current) {
+            disconnectRef.current();
+        }
+        onClose();
+    }, [onClose]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -113,7 +123,9 @@ function WhatsAppCallUI({
             ? "Connecting..."
             : isAgentSpeaking
                 ? "Speaking..."
-                : "Listening...";
+                : hasEverSpoken
+                    ? "Checking Kundali... 🔮"
+                    : "Connecting...";
 
     const statusColor =
         callState !== "connected"
@@ -392,7 +404,7 @@ function WhatsAppCallUI({
                         </button>
 
                         {/* End Call */}
-                        <button onClick={onClose} className="flex flex-col items-center gap-1.5">
+                        <button onClick={handleEndCall} className="flex flex-col items-center gap-1.5">
                             <div
                                 className="w-[64px] h-[64px] rounded-full flex items-center justify-center"
                                 style={{ background: "#ea0038" }}
@@ -449,6 +461,7 @@ function WhatsAppCallUI({
                                 guestDob={guestData.dob}
                                 onStateChange={handleStateChange}
                                 autoConnect={true}
+                                disconnectRef={disconnectRef}
                             />
                         </EventProvider>
                     </TranscriptProvider>

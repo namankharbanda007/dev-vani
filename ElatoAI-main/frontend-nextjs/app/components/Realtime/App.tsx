@@ -37,9 +37,10 @@ interface AppProps {
   guestDob?: string;
   onStateChange?: (state: { sessionStatus: string; isAgentSpeaking: boolean }) => void;
   autoConnect?: boolean;
+  disconnectRef?: React.MutableRefObject<(() => void) | null>;
 }
 
-function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false }: AppProps) {
+function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false, disconnectRef }: AppProps) {
   const supabase = createClient();
 
   const { transcriptItems, addTranscriptMessage, addTranscriptBreadcrumb } =
@@ -142,6 +143,13 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
       return () => clearTimeout(timer);
     }
   }, [autoConnect]);
+
+  // Expose disconnect to parent via ref
+  useEffect(() => {
+    if (disconnectRef) {
+      disconnectRef.current = () => disconnectFromRealtime(true);
+    }
+  });
 
   // Usage Tracking Heartbeat
   useEffect(() => {

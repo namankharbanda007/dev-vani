@@ -126,7 +126,7 @@ export async function createGeminiConnection(
                 if (speakingTimeout) clearTimeout(speakingTimeout);
                 speakingTimeout = setTimeout(() => {
                     onSpeakingStateChange(false);
-                }, 1000); // 1s hangover
+                }, 2500); // 2.5s hangover to avoid flickering during natural pauses
             }
 
             // Gemini output is 24kHz typically
