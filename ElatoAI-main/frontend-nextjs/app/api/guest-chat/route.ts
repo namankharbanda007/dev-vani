@@ -60,7 +60,7 @@ You may respond in any language the user writes in, but default to Hindi with En
 
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash",
             systemInstruction,
         });
 
