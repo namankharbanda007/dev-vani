@@ -70,7 +70,7 @@ export default async function RootLayout({
     ];
 
     return (
-        <div className="flex flex-1 flex-col mx-auto w-full max-w-[1400px] gap-2 pb-2 md:flex-row">
+        <div className="flex flex-1 flex-col mx-auto w-full max-w-[1400px] gap-2 pb-20 md:pb-2 md:flex-row min-h-screen bg-gradient-to-br from-[#FDFBF7] via-white to-[#F8F5FF]">
             <main className="flex-1 sm:py-4 px-4 flex justify-center">
                 <div className="max-w-5xl w-full">{children}</div>
             </main>

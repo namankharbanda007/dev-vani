@@ -120,3 +120,69 @@
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* ===== Home Page Redesign Utilities ===== */
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+    }
+}
+
+.card-hover {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -4px rgba(139, 92, 246, 0.1);
+}
+
+.card-glow-active {
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.animate-float {
+    animation: float 4s ease-in-out infinite;
+}
+
+.animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+}

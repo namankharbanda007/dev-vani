@@ -3,14 +3,7 @@
 import ModifyCharacterSheet from "./ModifyCharacterSheet";
 import Image from "next/image";
 import { cn, getPersonalityImageSrc } from "@/lib/utils";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Check, CheckCircle, Pencil, Loader2 } from "lucide-react";
+import { Check, Pencil, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmojiComponent } from "./EmojiImage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -89,23 +82,38 @@ const CharacterSection = ({
         return null;
     }
 
-    return (
-        <div className="flex flex-col gap-3 w-full">
-            {/* Category Title */}
-            <h3 className="text-xl md:text-2xl font-bold text-gray-800 font-lora px-1">{title}</h3>
+    // Extract emoji from title for pill badge (e.g. "🙏 Spiritual" → "🙏")
+    const emojiMatch = title.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)/u);
+    const emoji = emojiMatch ? emojiMatch[0] : null;
+    const titleText = emoji ? title.replace(emoji, '').trim() : title;
 
-            {/* Horizontal Scroll Container - Netflix Style */}
-            <div className="relative -mx-6 md:-mx-10">
-                <div className="flex gap-3 overflow-x-auto py-3 px-6 md:px-10 scrollbar-hide scroll-smooth"
+    return (
+        <div className="flex flex-col gap-4 w-full">
+            {/* Category Title — Pill Style */}
+            <div className="flex items-center gap-3 px-1">
+                {emoji && (
+                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-purple-50 text-lg border border-purple-100/50">
+                        {emoji}
+                    </span>
+                )}
+                <h3 className="section-title text-xl md:text-2xl text-gray-800 font-lora">{titleText}</h3>
+                <span className="text-xs text-gray-400 font-medium bg-gray-100 px-2 py-0.5 rounded-full">
+                    {filteredPersonalities.length}
+                </span>
+            </div>
+
+            {/* Horizontal Scroll Container — Premium Netflix Style */}
+            <div className="relative -mx-2 md:-mx-0">
+                <div className="flex gap-4 overflow-x-auto py-3 px-2 md:px-0 scrollbar-hide scroll-smooth"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                    {filteredPersonalities.map((personality, index) => {
+                    {filteredPersonalities.map((personality) => {
                         const isCurrentPersonality = personalityIdState === personality.personality_id;
                         const isOwner = currentUserId && personality.creator_id === currentUserId;
 
                         return (
                             <div
                                 key={personality.personality_id}
-                                className="relative group/card flex-shrink-0 w-[160px] sm:w-[180px] md:w-[200px]"
+                                className="relative group/card flex-shrink-0 w-[170px] sm:w-[190px] md:w-[210px]"
                             >
                                 <ModifyCharacterSheet
                                     openPersonality={personality}
@@ -116,54 +124,60 @@ const CharacterSection = ({
                                 >
                                     <div
                                         className={cn(
-                                            "relative overflow-hidden rounded-2xl cursor-pointer h-full transition-all duration-200",
-                                            "bg-white border border-gray-200 shadow-sm hover:shadow-md",
-                                            isCurrentPersonality ? "ring-2 ring-purple-500" : "hover:border-purple-300"
+                                            "card-hover relative overflow-hidden rounded-2xl cursor-pointer h-full",
+                                            "bg-white border border-gray-100 shadow-sm",
+                                            isCurrentPersonality
+                                                ? "ring-2 ring-purple-500 card-glow-active"
+                                                : "hover:border-purple-200 hover:shadow-lg"
                                         )}
                                     >
-                                        {/* Card Content */}
+                                        {/* Card Image */}
                                         <div className="relative aspect-[3/4] w-full overflow-hidden">
                                             {personality.subtitle && (personality.subtitle.startsWith('http') || personality.subtitle.startsWith('/')) ? (
                                                 <Image
                                                     src={personality.subtitle}
                                                     alt={personality.title}
                                                     fill
-                                                    className="object-cover"
+                                                    className="object-cover transition-transform duration-500 group-hover/card:scale-110"
                                                 />
                                             ) : personality.creator_id === null ? (
                                                 <Image
                                                     src={getPersonalityImageSrc(personality.key)}
                                                     alt={personality.key}
                                                     fill
-                                                    className="object-cover"
+                                                    className="object-cover transition-transform duration-500 group-hover/card:scale-110"
                                                 />
                                             ) : (
-                                                <div className="flex items-center justify-center h-full bg-gradient-to-br from-purple-100 to-amber-100">
+                                                <div className="flex items-center justify-center h-full bg-gradient-to-br from-purple-100 via-purple-50 to-amber-100">
                                                     <EmojiComponent personality={personality} />
                                                 </div>
                                             )}
 
-                                            {/* Gradient Overlay */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                                            {/* Gradient Overlay — Richer */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
                                             {/* Selection Indicator */}
                                             {isCurrentPersonality && (
-                                                <div className="absolute top-2 right-2 z-10">
-                                                    <div className="rounded-full p-1.5 bg-purple-600 text-white">
-                                                        <Check className="h-3 w-3" strokeWidth={3} />
+                                                <div className="absolute top-2.5 right-2.5 z-10">
+                                                    <div className="rounded-full p-1.5 bg-purple-600 text-white shadow-lg shadow-purple-500/30">
+                                                        <Check className="h-3.5 w-3.5" strokeWidth={3} />
                                                     </div>
                                                 </div>
                                             )}
 
                                             {/* Text Content */}
-                                            <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                                                <h3 className="font-semibold text-sm leading-tight truncate">
+                                            <div className="absolute bottom-0 left-0 right-0 p-3.5 text-white">
+                                                <h3 className="font-semibold text-sm leading-tight line-clamp-1">
                                                     {personality.title}
                                                 </h3>
+                                                {personality.short_description && (
+                                                    <p className="text-[11px] text-white/60 mt-1 line-clamp-1 font-light">
+                                                        {personality.short_description}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
-
                                 </ModifyCharacterSheet>
 
                                 {/* Edit Image Button (Outside Sheet Trigger) */}
@@ -185,7 +199,7 @@ const CharacterSection = ({
                         );
                     })}
                 </div>
-            </div >
+            </div>
 
             <Dialog open={!!editingPersonality} onOpenChange={(open) => !open && setEditingPersonality(null)}>
                 <DialogContent className="sm:max-w-md">
@@ -207,7 +221,7 @@ const CharacterSection = ({
                     </div>
                 </DialogContent>
             </Dialog>
-        </div >
+        </div>
     );
 };
 
