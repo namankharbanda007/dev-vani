@@ -79,7 +79,15 @@ export default function DemoChatSession({ guestData, onClose, personalityId }: D
                 const data = await res.json();
                 console.log("[DemoChat] Initial greeting data:", data);
                 if (data.response) {
+                    const triggerMsg = `My name is ${guestData.name} and my date of birth is ${guestData.dob}. Please greet me warmly and introduce yourself.`;
                     setMessages([
+                        {
+                            id: "trigger-1",
+                            content: triggerMsg,
+                            role: "user",
+                            timestamp: new Date(),
+                            status: "read",
+                        },
                         {
                             id: "greeting-1",
                             content: data.response,
@@ -313,7 +321,7 @@ export default function DemoChatSession({ guestData, onClose, personalityId }: D
                         </div>
                     </div>
 
-                    {messages.map((msg) => (
+                    {messages.filter((msg) => msg.id !== "trigger-1").map((msg) => (
                         <motion.div
                             key={msg.id}
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
