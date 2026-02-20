@@ -6,12 +6,14 @@ import Header from "./components/Header";
 import HeroPandit from "./components/HeroPandit";
 import Preloader from "./components/Preloader";
 import Marquee from "./components/Marquee";
-import BentoGrid from "./components/BentoGrid";
 import Footer from "./components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, MessageCircle } from "lucide-react";
 import DemoForm, { GuestData } from "./components/DemoForm";
 import DemoSession from "./components/DemoSession";
+import SoftwareFeaturesGrid from "./components/SoftwareFeaturesGrid";
+import DivinationServices from "./components/DivinationServices";
+import DailySpirituality from "./components/DailySpirituality";
 
 export default function LandingPage() {
     const [loadingProgress, setLoadingProgress] = useState(0);
@@ -87,10 +89,16 @@ export default function LandingPage() {
                         <Marquee />
                     </motion.div>
 
-                    {/* Bento Grid - Features & Collection */}
-                    <div id="collection">
-                        <BentoGrid />
+                    {/* Software Features Grid (Live AI, Rituals, WhatsApp) */}
+                    <div id="features">
+                        <SoftwareFeaturesGrid />
                     </div>
+
+                    {/* Divination Services (Astrology, Match Making, Tarot, Palm Reading) */}
+                    <DivinationServices />
+
+                    {/* Daily Spirituality (Horoscope & Bhajans) */}
+                    <DailySpirituality />
 
                     {/* Demo Section */}
                     <section className="w-full min-h-[60vh] md:h-screen relative flex items-end md:items-center justify-center bg-black">
@@ -138,20 +146,6 @@ export default function LandingPage() {
                                 </div>
                             </motion.button>
 
-                        </div>
-                    </section>
-
-                    {/* Story Section Placeholder (Could be expanded later) */}
-                    <section id="story" className="py-24 px-6 md:px-10 bg-white">
-                        <div className="max-w-4xl mx-auto text-center space-y-8">
-                            <h2 className="text-4xl md:text-6xl font-serif font-bold text-murti-stone">
-                                The Divine Algorithm
-                            </h2>
-                            <p className="text-xl md:text-2xl text-murti-stone/60 leading-relaxed font-light">
-                                We asked ourselves: Can technology have a soul? <br />
-                                Smart Murti is the answer. <br />
-                                <span className="text-divine-saffron">A bridge between the Vedas and the Verse.</span>
-                            </p>
                         </div>
                     </section>
 
