@@ -59,16 +59,18 @@ export default function SoftwareFeaturesGrid() {
                 </BentoCard>
 
                 {/* Virtual Rituals */}
-                <BentoCard
-                    title="Live AI Hawans & Pujas"
-                    description="Perform virtual rituals guided perfectly by your personal AI Pandit."
-                    className="bg-zinc-100"
-                    icon={<Flame className="w-8 h-8 text-orange-500" />}
-                >
-                    <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-4 translate-y-4">
-                        <Flame className="w-48 h-48" />
-                    </div>
-                </BentoCard>
+                <a href="/puja/ganpati-havan" className="block transition-transform hover:scale-[1.02]">
+                    <BentoCard
+                        title="Live AI Hawans & Pujas"
+                        description="Perform virtual rituals guided perfectly by your personal AI Pandit. (Click to try Ganpati Havan)"
+                        className="bg-zinc-100 h-full"
+                        icon={<Flame className="w-8 h-8 text-orange-500" />}
+                    >
+                        <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-4 translate-y-4">
+                            <Flame className="w-48 h-48" />
+                        </div>
+                    </BentoCard>
+                </a>
 
                 {/* Divine Matchmaking */}
                 <BentoCard

@@ -1,6 +1,6 @@
 import Link from "next/link"
 import dynamic from "next/dynamic";
-import { ChevronRight, Star, Home, ArrowUpRight, Shield, Heart, Sparkles, MessageCircle, Users, Zap } from "lucide-react"
+import { ChevronRight, Star, Home, ArrowUpRight, Shield, Heart, Sparkles, Users, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DEVICE_COST, SUBSCRIPTION_COST } from "@/lib/data";
 import { createClient } from "@/utils/supabase/server"
@@ -12,6 +12,8 @@ import Image from "next/image";
 import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
 import { kickstarterLink } from "@/lib/data";
 import HomeHeroWrapper from "@/app/components/HomeHeroWrapper";
+import { motion } from "framer-motion";
+import HomeDemoSection from "./components/LandingPage/HomeDemoSection";
 
 const HeroCarouselSlot = dynamic(() => import("./components/LandingPage/HeroCarousel").then(mod => mod.HeroCarouselSlot), { ssr: false });
 
@@ -28,8 +30,6 @@ export default async function LandingPage() {
 
         {/* New Hero Section from Landing-2 */}
         <HomeHeroWrapper />
-
-
 
         {/* Lifestyle Showcase - Family Image */}
         <section className="w-full py-12 md:py-20 bg-gradient-to-br from-purple-50 via-pink-50 to-amber-50">
@@ -89,29 +89,8 @@ export default async function LandingPage() {
           </div>
         </section >
 
-        {/* AI Characters Banner */}
-        <section className="w-full py-12 md:py-16 bg-gradient-to-b from-purple-50 to-white relative overflow-hidden">
-          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl md:text-5xl font-bold font-lora text-gray-900 mb-4">
-                Meet Our AI Characters
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                50+ unique personalities ready to have meaningful conversations with you
-              </p>
-            </div>
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-              <Image
-                src="/products/characters-banner.png"
-                alt="SMART मूर्ति AI Characters - Pandit, Advocate, Chef, and more"
-                width={1200}
-                height={500}
-                className="w-full h-auto object-cover"
-              />
-            </div>
-          </div>
-        </section>
-
+        {/* Demo Section Client Wrapper */}
+        <HomeDemoSection />
 
         {/* Product Showcase - 3 Premium Cards */}
         < section className="w-full py-12 md:py-20 bg-white relative overflow-hidden" >

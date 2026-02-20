@@ -31,7 +31,7 @@ import { createClient } from "@/utils/supabase/client";
 interface AppProps {
   personalityIdState: string;
   isDoctor: boolean;
-  userId: string;
+  userData: any;
   isGuest?: boolean;
   guestName?: string;
   guestDob?: string;
@@ -40,9 +40,10 @@ interface AppProps {
   disconnectRef?: React.MutableRefObject<(() => void) | null>;
   pendingAction?: 'call' | 'chat' | null;
   onActionHandled?: () => void;
+  children?: React.ReactNode;
 }
 
-function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false, disconnectRef, pendingAction, onActionHandled }: AppProps) {
+function App({ personalityIdState, isDoctor, userData, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false, disconnectRef, pendingAction, onActionHandled, children }: AppProps) {
   const supabase = createClient();
 
   const { transcriptItems, addTranscriptMessage, addTranscriptBreadcrumb } =
@@ -678,7 +679,7 @@ function App({ personalityIdState, isDoctor, userId, isGuest = false, guestName,
                   onSendMessage={handleSendTextMessage}
                   canSend={false}
                   personality={personality}
-                  userId={userId}
+                  userId={userData?.id || 'guest'}
                   isDoctor={isDoctor}
                   supabase={supabase}
                 />
