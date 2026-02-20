@@ -279,15 +279,21 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
       console.log("[App] Has gemini_api_key:", !!sessionData.gemini_api_key);
 
       if (provider === 'gemini') {
-        if (!sessionData.gemini_api_key) {
+        // Fetch the Gemini API key securely just-in-time
+        const keyResponse = await fetch('/api/voice/get-gemini-key', { method: 'POST' });
+        const keyData = await keyResponse.json();
+
+        if (!keyResponse.ok || !keyData.gemini_api_key) {
           audioContext.close(); // Clean up if failing
           setSessionStatus("DISCONNECTED");
           toast({
-            description: "Connection configuration invalid.",
+            description: "Connection configuration invalid or API key missing.",
             variant: "destructive"
           });
           return;
         }
+
+        const secureGeminiKey = keyData.gemini_api_key;
 
         // Generate the initial system instructions or greeting
         const firstMsg = isDoctor
@@ -296,7 +302,7 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
 
         const geminiConnection = await createGeminiConnection(
           audioContext, // Pass the context created with user gesture
-          sessionData.gemini_api_key,
+          secureGeminiKey,
           sessionData.system_prompt || "",
           sessionData.voice, // mapped voice
           firstMsg,       // Pass initial message to trigger greeting

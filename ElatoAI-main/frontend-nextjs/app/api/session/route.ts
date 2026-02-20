@@ -88,17 +88,9 @@ You may talk in any language the user would like, but the default language is Hi
   console.log("[Session API] Provider:", personality.provider);
 
   if (personality.provider === "gemini") {
-    if (!geminiApiKey) {
-      console.error("[Session API] GEMINI_API_KEY env var not set!");
-      return NextResponse.json(
-        { error: "Gemini API Key not configured" },
-        { status: 500 }
-      );
-    }
     console.log("[Session API] Returning gemini session data for guest");
     return NextResponse.json({
       provider: "gemini",
-      gemini_api_key: geminiApiKey,
       system_prompt: systemPrompt,
       voice: personality.oai_voice,
     });
@@ -176,15 +168,8 @@ async function handleAuthenticatedSession() {
   });
 
   if (dbUser.personality?.provider === "gemini") {
-    if (!geminiApiKey) {
-      return NextResponse.json(
-        { error: "Gemini API Key not configured" },
-        { status: 500 }
-      );
-    }
     return NextResponse.json({
       provider: "gemini",
-      gemini_api_key: geminiApiKey,
       system_prompt: systemPrompt,
       voice: dbUser.personality.oai_voice,
     });

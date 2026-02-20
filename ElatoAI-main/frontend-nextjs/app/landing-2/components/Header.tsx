@@ -93,7 +93,7 @@ export default function Header() {
             </div>
 
             {/* Mobile Menu Overlay */}
-            <AnimateMobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+            <AnimateMobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} isLoggedIn={isLoggedIn} />
         </>
     );
 }
@@ -106,7 +106,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
     );
 }
 
-function AnimateMobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function AnimateMobileMenu({ isOpen, onClose, isLoggedIn }: { isOpen: boolean; onClose: () => void; isLoggedIn: boolean }) {
     return (
         <motion.div
             initial={{ opacity: 0, pointerEvents: "none" }}
@@ -122,6 +122,13 @@ function AnimateMobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                 <Link href="#story" onClick={onClose}>Our Story</Link>
                 <Link href="/pricing" onClick={onClose}>Pricing</Link>
                 <Link href="#contact" onClick={onClose}>Contact</Link>
+                <Link
+                    href={isLoggedIn ? "/home" : "/login"}
+                    onClick={onClose}
+                    className="mt-4 px-8 py-3 text-lg font-medium text-white bg-black rounded-full hover:bg-gray-800 transition-all font-sans"
+                >
+                    {isLoggedIn ? "Home" : "Login"}
+                </Link>
             </nav>
         </motion.div>
     );
