@@ -160,7 +160,7 @@ const Playground: React.FC<PlaygroundProps> = ({
                     <App
                         personalityIdState={personalityIdState}
                         isDoctor={isDoctor}
-                        userId={currentUser.user_id}
+                        userData={{ id: currentUser.user_id }}
                         pendingAction={pendingAction}
                         onActionHandled={() => setPendingAction(null)}
                     />

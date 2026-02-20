@@ -1,6 +1,6 @@
 import Link from "next/link"
 import dynamic from "next/dynamic";
-import { ChevronRight, Star, Home, ArrowUpRight, Shield, Heart, Sparkles, Users, Zap } from "lucide-react"
+import { ChevronRight, Star, Home, ArrowUpRight, Shield, Heart, Sparkles, Users, Zap, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DEVICE_COST, SUBSCRIPTION_COST } from "@/lib/data";
 import { createClient } from "@/utils/supabase/server"

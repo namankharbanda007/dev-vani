@@ -35,7 +35,8 @@ export default function PujaSession({
         <TranscriptProvider>
             <EventProvider>
                 <App
-                    personalityId={personalityId}
+                    personalityIdState={personalityId}
+                    isDoctor={false}
                     userData={{
                         firstName: guestData.firstName,
                         gender: guestData.gender,
@@ -179,8 +180,8 @@ function PujaCallUI({
                     <button
                         onClick={() => setIsMuted(!isMuted)}
                         className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isMuted
-                                ? "bg-stone-800 text-stone-400 hover:bg-stone-700"
-                                : "bg-stone-800/80 backdrop-blur-md text-white border border-stone-700 hover:bg-stone-700 hover:border-stone-500"
+                            ? "bg-stone-800 text-stone-400 hover:bg-stone-700"
+                            : "bg-stone-800/80 backdrop-blur-md text-white border border-stone-700 hover:bg-stone-700 hover:border-stone-500"
                             }`}
                     >
                         {isMuted ? <MicOff size={24} /> : <Mic size={24} />}

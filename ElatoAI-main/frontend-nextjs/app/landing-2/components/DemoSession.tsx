@@ -465,7 +465,7 @@ function WhatsAppCallUI({
                             <App
                                 personalityIdState={PANDIT_PERSONALITY_ID}
                                 isDoctor={false}
-                                userId={`guest-${guestData.whatsapp || Date.now()}`}
+                                userData={{ id: `guest-${guestData.whatsapp || Date.now()}` }}
                                 isGuest={true}
                                 guestName={guestData.name}
                                 guestDob={guestData.dob}
