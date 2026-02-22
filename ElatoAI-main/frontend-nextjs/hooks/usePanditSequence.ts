@@ -98,8 +98,8 @@ export function usePanditSequence({
 
         if (isPortrait) {
             // The pandit appears shifted to the left on mobile crops.
-            // Shifting the drawing to the right by about 12% of canvas width to center him.
-            offsetX += canvasWidth * 0.12;
+            // Shifting the drawing to the right by about 6% of canvas width to center him.
+            offsetX += canvasWidth * 0.06;
         }
 
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
