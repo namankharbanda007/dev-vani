@@ -93,8 +93,14 @@ export function usePanditSequence({
         const newHeight = imgHeight * ratio;
 
         // Center the image
-        const offsetX = (canvasWidth - newWidth) / 2;
+        let offsetX = (canvasWidth - newWidth) / 2;
         const offsetY = (canvasHeight - newHeight) / 2;
+
+        if (isPortrait) {
+            // The pandit appears shifted to the left on mobile crops.
+            // Shifting the drawing to the right by about 12% of canvas width to center him.
+            offsetX += canvasWidth * 0.12;
+        }
 
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         ctx.drawImage(img, offsetX, offsetY, newWidth, newHeight);
