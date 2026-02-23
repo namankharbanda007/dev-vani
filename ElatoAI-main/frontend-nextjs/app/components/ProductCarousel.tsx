@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/carousel"
 
 const images = [
-    "/products/1.png",
-    "/products/2.png",
-    "/products/3.png",
-    "/products/4.png",
+    "/products/1.webp",
+    "/products/2.webp",
+    "/products/3.webp",
+    "/products/4.webp",
 ]
 
 export default function ProductCarousel() {

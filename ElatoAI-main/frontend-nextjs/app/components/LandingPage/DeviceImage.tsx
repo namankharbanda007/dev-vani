@@ -18,7 +18,7 @@ export const DeviceImage = () => {
                 className="w-full h-full"
             >
                 <Image
-                    src="/products/box43.png"
+                    src="/products/box43.webp"
                     alt="smart murti"
                     fill
                     className="object-contain object-center mr-6 rounded-3xl"

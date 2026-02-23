@@ -9,52 +9,52 @@ import Image from "next/image";
 
 const images = [
     {
-        src: "/products/box43.png",
+        src: "/products/box43.webp",
         alt: "Smartmurti Device - white",
         objectFit: "contain",
     },
     // {
-    //     src: "/products/multi3.png",
+    //     src: "/products/multi3.webp",
     //     alt: "Smartmurti Device Decomposition",
     //     objectFit: "contain",
     // },
     {
-        src: "/products/multi3.png",
+        src: "/products/multi3.webp",
         alt: "Smartmurti Device - gray",
         objectFit: "contain",
     },
     {
-        src: "/products/multi2.png",
+        src: "/products/multi2.webp",
         alt: "Smartmurti Device - black",
         objectFit: "contain",
     },
     // {
-    //     src: "/products/orange.jpg",
+    //     src: "/products/orange.webp",
     //     alt: "Smartmurti AI Device",
     //     objectFit: "contain",
     // },
     // {
-    //     src: "/products/multi_black.jpg",
+    //     src: "/products/multi_black.webp",
     //     alt: "Smartmurti Device Decomposition",
     //     objectFit: "contain",
     // },
     // {
-    //     src: "/products/multi.jpg",
+    //     src: "/products/multi.webp",
     //     alt: "Holding the device",
     //     objectFit: "cover",
     // },
     // {
-    //     src: "/products/multi2_black.jpg",
+    //     src: "/products/multi2_black.webp",
     //     alt: "Toys with insights",
     //     objectFit: "contain",
     // },
     // {
-    //     src: "/products/pink.jpg",
+    //     src: "/products/pink.webp",
     //     alt: "Using it with toys",
     //     objectFit: "contain",
     // },
     // {
-    //     src: "/products/gray_black.jpg",
+    //     src: "/products/gray_black.webp",
     //     alt: "Using it with toys",
     //     objectFit: "cover",
     // },

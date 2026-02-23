@@ -45,7 +45,7 @@ export default function BentoGrid() {
                 >
                     <div className="absolute inset-x-4 bottom-0 top-24 overflow-hidden rounded-t-2xl">
                         <img
-                            src="/assets/landing-2/whatsapp-integration.png"
+                            src="/assets/landing-2/whatsapp-integration.webp"
                             alt="WhatsApp Integration Demo"
                             className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
                         />

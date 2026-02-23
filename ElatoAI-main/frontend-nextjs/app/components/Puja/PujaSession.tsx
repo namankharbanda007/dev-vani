@@ -155,7 +155,7 @@ function PujaCallUI({
 
                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-orange-900/40 border border-orange-500/40 flex items-center justify-center overflow-hidden z-10 shadow-[0_0_40px_rgba(234,88,12,0.15)]">
                             <img
-                                src="/products/pandit-hand.jpg"
+                                src="/products/pandit-hand.webp"
                                 alt="Pandit Ji"
                                 className={`w-full h-full object-cover transition-transform duration-700 ${agentActivity === 'speaking' ? 'scale-110' : 'scale-100'}`}
                             />

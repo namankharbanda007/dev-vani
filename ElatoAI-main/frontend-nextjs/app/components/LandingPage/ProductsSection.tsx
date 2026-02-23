@@ -24,7 +24,7 @@ const products: Product[] = [
         description: "Transform any toy into an AI companion with any voice and personality with our advanced conversational AI",
         price: 55,
         url: "https://smartmurti.com/products",
-        imageUrl: "/products/device1.jpeg",
+        imageUrl: "/products/device1.webp",
         features: [
             "Works with any toy or plushie",
             "Create unlimited AI characters",
@@ -38,7 +38,7 @@ const products: Product[] = [
         description: "Create custom AI experiences with our developer-friendly kit, complete with sensors and tutorials",
         price: 65,
         url: "https://smartmurti.com/products/ai-devkit",
-        imageUrl: "/products/devkit1.png",
+        imageUrl: "/products/devkit1.webp",
         features: [
             "Flash our open source code to your device",
             "Flexible speaker and Lipo battery options",
