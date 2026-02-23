@@ -22,7 +22,7 @@ interface DemoSessionProps {
 }
 
 const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
-const PANDIT_AVATAR = "/products/pandit-hand.jpg";
+const PANDIT_AVATAR = "/products/pandit-hand.webp";
 
 export default function DemoSession({
     guestData,
@@ -166,7 +166,7 @@ function WhatsAppCallUI({
                 <div className="absolute inset-0 bg-black">
                     <video
                         ref={videoRef}
-                        src="/assets/Video_Project_2.mp4"
+                        src="/assets/Video_Project_2_optimized.mp4"
                         className="w-full h-full object-cover opacity-90"
                         loop
                         muted

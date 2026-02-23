@@ -103,7 +103,7 @@ export default function LandingPage() {
                     {/* Demo Section */}
                     <section className="w-full min-h-[60vh] md:h-screen relative flex items-end md:items-center justify-center bg-black">
                         <img
-                            src="/assets/landing-2/Whisk_735a8a55d307434b6e1488437477c36beg.png"
+                            src="/assets/landing-2/Whisk_735a8a55d307434b6e1488437477c36beg.webp"
                             alt="Smart Murti Demo"
                             className="absolute inset-0 w-full h-full object-cover opacity-90"
                         />
