@@ -68,7 +68,7 @@ function WhatsAppCallUI({
     useEffect(() => {
         if (!videoRef.current) return;
 
-        if (callState === "connected" && agentActivity === "speaking") {
+        if (callState === "connected" && (agentActivity === "speaking" || agentActivity === "thinking")) {
             videoRef.current.play().catch(e => console.error("Video play error:", e));
         } else {
             videoRef.current.pause();
@@ -171,6 +171,7 @@ function WhatsAppCallUI({
                         loop
                         muted
                         playsInline
+                        preload="auto"
                     />
                     {/* Gradient overlays to make text readable over the video */}
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none" />

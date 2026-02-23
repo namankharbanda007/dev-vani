@@ -56,7 +56,7 @@ export default function HomeDemoSection() {
                         Talk directly to our AI Pandit and experience personalized spiritual guidance.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-center justify-between w-full max-w-[800px] mx-auto mt-12 gap-6 px-4">
                         <button
                             onClick={() => handleStartDemo("call")}
                             className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium text-lg flex items-center justify-center gap-3 transition-colors shadow-lg shadow-orange-500/20"
