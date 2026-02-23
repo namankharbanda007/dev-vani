@@ -62,6 +62,18 @@ function WhatsAppCallUI({
     const [elapsed, setElapsed] = useState(0);
     const connectedAtRef = useRef<number | null>(null);
     const disconnectRef = useRef<(() => void) | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    // Video playback control based on agent activity
+    useEffect(() => {
+        if (!videoRef.current) return;
+
+        if (callState === "connected" && agentActivity === "speaking") {
+            videoRef.current.play().catch(e => console.error("Video play error:", e));
+        } else {
+            videoRef.current.pause();
+        }
+    }, [callState, agentActivity]);
 
     // Timer — only start when connected
     useEffect(() => {
@@ -150,24 +162,20 @@ function WhatsAppCallUI({
                         "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset",
                 }}
             >
-                {/* ===== BACKGROUND ===== */}
-                <div
-                    className="absolute inset-0"
-                    style={{
-                        background:
-                            "linear-gradient(180deg, #1a2930 0%, #0b141a 40%, #0b141a 100%)",
-                    }}
-                />
-
-                {/* Subtle grid pattern */}
-                <div
-                    className="absolute inset-0 opacity-[0.03]"
-                    style={{
-                        backgroundImage:
-                            "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
-                        backgroundSize: "24px 24px",
-                    }}
-                />
+                {/* ===== VIDEO BACKGROUND ===== */}
+                <div className="absolute inset-0 bg-black">
+                    <video
+                        ref={videoRef}
+                        src="/assets/Video_Project_2.mp4"
+                        className="w-full h-full object-cover opacity-90"
+                        loop
+                        muted
+                        playsInline
+                    />
+                    {/* Gradient overlays to make text readable over the video */}
+                    <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none" />
+                    <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
+                </div>
 
                 {/* ===== TOP BAR ===== */}
                 <div className="relative z-10 flex items-center justify-between px-5 pt-5 pb-2 shrink-0">
@@ -202,79 +210,14 @@ function WhatsAppCallUI({
                     </div>
                 </div>
 
-                {/* ===== CENTER CONTENT ===== */}
-                <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6">
-                    {/* Avatar with pulse ring */}
-                    <div className="relative mb-6">
-                        {/* Animated rings */}
-                        <AnimatePresence>
-                            {callState === "connected" && (
-                                <>
-                                    <motion.div
-                                        className="absolute inset-0 rounded-full"
-                                        initial={{ scale: 1, opacity: 0 }}
-                                        animate={{
-                                            scale: agentActivity === 'speaking'
-                                                ? [1, 1.4, 1]
-                                                : agentActivity === 'listening'
-                                                    ? [1, 1.2, 1]
-                                                    : [1, 1.15, 1],
-                                            opacity: agentActivity === 'speaking'
-                                                ? [0, 0.3, 0]
-                                                : agentActivity === 'listening'
-                                                    ? [0, 0.15, 0]
-                                                    : [0, 0.1, 0],
-                                        }}
-                                        transition={{
-                                            duration: agentActivity === 'speaking'
-                                                ? 0.8
-                                                : agentActivity === 'listening'
-                                                    ? 1.5
-                                                    : 2.5,
-                                            repeat: Infinity,
-                                            ease: "easeOut",
-                                        }}
-                                        style={{
-                                            border: `2px solid ${statusColor}`,
-                                        }}
-                                    />
-                                    <motion.div
-                                        className="absolute inset-0 rounded-full"
-                                        initial={{ scale: 1, opacity: 0 }}
-                                        animate={{
-                                            scale: agentActivity === 'speaking'
-                                                ? [1, 1.6, 1]
-                                                : agentActivity === 'listening'
-                                                    ? [1, 1.35, 1]
-                                                    : [1, 1.25, 1],
-                                            opacity: agentActivity === 'speaking'
-                                                ? [0, 0.15, 0]
-                                                : [0, 0.08, 0],
-                                        }}
-                                        transition={{
-                                            duration: agentActivity === 'speaking'
-                                                ? 0.8
-                                                : agentActivity === 'listening'
-                                                    ? 1.5
-                                                    : 2.5,
-                                            repeat: Infinity,
-                                            ease: "easeOut",
-                                            delay: 0.2,
-                                        }}
-                                        style={{
-                                            border: `2px solid ${statusColor}`,
-                                        }}
-                                    />
-                                </>
-                            )}
-                        </AnimatePresence>
-
-                        {/* Connecting spinner */}
-                        {callState !== "connected" && (
+                {/* ===== CENTER CONTENT (Connecting Spinner Only) ===== */}
+                <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pointer-events-none">
+                    {callState !== "connected" && (
+                        <div className="flex flex-col items-center justify-center space-y-5 bg-black/40 p-6 rounded-2xl backdrop-blur-md">
                             <motion.div
-                                className="absolute -inset-3 rounded-full"
+                                className="w-16 h-16 rounded-full"
                                 style={{
-                                    border: "2px solid transparent",
+                                    border: "3px solid transparent",
                                     borderTopColor: "#25D366",
                                     borderRightColor: "#25D366",
                                 }}
@@ -285,100 +228,86 @@ function WhatsAppCallUI({
                                     ease: "linear",
                                 }}
                             />
-                        )}
-
-                        {/* Avatar circle */}
-                        <div
-                            className="w-[140px] h-[140px] rounded-full overflow-hidden"
-                            style={{
-                                border: `3px solid ${callState === "connected" ? (isAgentSpeaking ? "#25D366" : "#53bdeb") : "#8696a0"}`,
-                                boxShadow:
-                                    callState === "connected" && isAgentSpeaking
-                                        ? "0 0 30px rgba(37,211,102,0.3)"
-                                        : "0 0 20px rgba(0,0,0,0.3)",
-                                transition: "border-color 0.3s, box-shadow 0.3s",
-                            }}
-                        >
-                            <img
-                                src={PANDIT_AVATAR}
-                                alt="Pandit Ji"
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Name */}
-                    <h2
-                        className="text-[22px] font-normal mb-1"
-                        style={{ color: "#e9edef" }}
-                    >
-                        Pandit Ji 🙏
-                    </h2>
-
-                    {/* Status / Timer */}
-                    <div className="flex items-center gap-2">
-                        <motion.span
-                            key={statusText}
-                            initial={{ opacity: 0, y: 5 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-[14px]"
-                            style={{ color: statusColor }}
-                        >
-                            {statusText}
-                        </motion.span>
-
-                        {callState === "connected" && (
-                            <span
-                                className="text-[13px] font-mono"
-                                style={{ color: "#8696a0" }}
-                            >
-                                · {formatTime(elapsed)}
-                            </span>
-                        )}
-                    </div>
-
-                    {/* Speaking/Listening indicator bar */}
-                    {callState === "connected" && (
-                        <div className="mt-6 flex items-center gap-[3px]">
-                            {Array.from({ length: 12 }).map((_, i) => (
-                                <motion.div
-                                    key={i}
-                                    className="rounded-full"
-                                    style={{
-                                        width: "3px",
-                                        background: isAgentSpeaking
-                                            ? "#25D366"
-                                            : "#53bdeb",
-                                    }}
-                                    animate={{
-                                        height: isAgentSpeaking
-                                            ? [
-                                                `${6 + Math.random() * 8}px`,
-                                                `${14 + Math.random() * 18}px`,
-                                                `${6 + Math.random() * 8}px`,
-                                            ]
-                                            : [
-                                                `${4 + Math.random() * 4}px`,
-                                                `${8 + Math.random() * 6}px`,
-                                                `${4 + Math.random() * 4}px`,
-                                            ],
-                                    }}
-                                    transition={{
-                                        duration: isAgentSpeaking
-                                            ? 0.3 + Math.random() * 0.3
-                                            : 1 + Math.random() * 0.5,
-                                        repeat: Infinity,
-                                        ease: "easeInOut",
-                                        delay: i * 0.05,
-                                    }}
-                                />
-                            ))}
+                            <p className="text-white/90 font-medium text-lg tracking-wide drop-shadow-md">
+                                Connecting to Ashram...
+                            </p>
                         </div>
                     )}
                 </div>
 
-                {/* ===== BOTTOM CONTROLS ===== */}
-                <div className="relative z-10 shrink-0 pb-10 pt-4 px-6">
+                {/* ===== BOTTOM CONTROLS & CALL INFO ===== */}
+                <div className="relative z-10 shrink-0 pb-10 pt-4 px-6 flex flex-col w-full">
+                    {/* Status & Name floating above controls */}
+                    <div className="mb-6 flex flex-col items-center justify-center w-full">
+                        <h2
+                            className="text-[26px] font-semibold mb-1 tracking-tight"
+                            style={{ color: "#ffffff", textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}
+                        >
+                            Pandit Ji 🙏
+                        </h2>
+
+                        <div className="flex items-center gap-2" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>
+                            <motion.span
+                                key={statusText}
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-[15px] font-medium"
+                                style={{ color: statusColor }}
+                            >
+                                {statusText}
+                            </motion.span>
+
+                            {callState === "connected" && (
+                                <span
+                                    className="text-[14px] font-mono font-medium"
+                                    style={{ color: "#e9edef" }}
+                                >
+                                    · {formatTime(elapsed)}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Speaking/Listening indicator bar */}
+                        {callState === "connected" && (
+                            <div className="mt-4 flex items-center gap-[4px] drop-shadow-md">
+                                {Array.from({ length: 12 }).map((_, i) => (
+                                    <motion.div
+                                        key={i}
+                                        className="rounded-full"
+                                        style={{
+                                            width: "4px",
+                                            background: isAgentSpeaking
+                                                ? "#25D366"
+                                                : "#53bdeb",
+                                        }}
+                                        animate={{
+                                            height: isAgentSpeaking
+                                                ? [
+                                                    `${6 + Math.random() * 10}px`,
+                                                    `${16 + Math.random() * 20}px`,
+                                                    `${6 + Math.random() * 10}px`,
+                                                ]
+                                                : [
+                                                    `${4 + Math.random() * 4}px`,
+                                                    `${8 + Math.random() * 6}px`,
+                                                    `${4 + Math.random() * 4}px`,
+                                                ],
+                                        }}
+                                        transition={{
+                                            duration: isAgentSpeaking
+                                                ? 0.3 + Math.random() * 0.3
+                                                : 1 + Math.random() * 0.5,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                            delay: i * 0.05,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Action Buttons */}
                     <div className="flex items-center justify-center gap-8">
                         {/* Mute */}
                         <button
