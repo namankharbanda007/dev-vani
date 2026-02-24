@@ -4,6 +4,7 @@ import { useState } from "react";
 import DemoForm, { GuestData } from "@/app/landing-2/components/DemoForm";
 import DemoSession from "@/app/landing-2/components/DemoSession";
 import { Phone, MessageCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function HomeDemoSection() {
     const [showDemoForm, setShowDemoForm] = useState(false);
@@ -48,30 +49,40 @@ export default function HomeDemoSection() {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent md:from-black/40 md:via-transparent" />
 
-                <div className="relative z-10 w-full max-w-4xl mx-auto px-6 pb-12 md:pb-0 text-center">
-                    <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-6 drop-shadow-md">
-                        Experience the Divine Connection
-                    </h2>
-                    <p className="text-lg md:text-xl text-white/90 mb-10 max-w-2xl mx-auto drop-shadow-sm">
-                        Talk directly to our AI Pandit and experience personalized spiritual guidance.
-                    </p>
+                <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-center md:justify-between items-center gap-4 md:gap-0 pb-10 md:pb-0 pt-40 md:pt-0">
 
-                    <div className="flex flex-col sm:flex-row items-center justify-between w-full max-w-[800px] mx-auto mt-12 gap-6 px-4">
-                        <button
-                            onClick={() => handleStartDemo("call")}
-                            className="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium text-lg flex items-center justify-center gap-3 transition-colors shadow-lg shadow-orange-500/20"
-                        >
-                            <Phone className="w-5 h-5" />
-                            Live Call
-                        </button>
-                        <button
-                            onClick={() => handleStartDemo("chat")}
-                            className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white rounded-xl font-medium text-lg flex items-center justify-center gap-3 transition-colors"
-                        >
-                            <MessageCircle className="w-5 h-5" />
-                            Live Chat
-                        </button>
-                    </div>
+                    {/* Left Button: Live Call */}
+                    <motion.button
+                        onClick={() => handleStartDemo("call")}
+                        initial={{ y: 30, opacity: 0 }}
+                        whileInView={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full md:w-auto group flex items-center justify-center gap-3 md:gap-4 bg-black/80 backdrop-blur-md border border-white/10 px-6 py-4 md:px-8 md:py-5 rounded-2xl md:rounded-full shadow-[0_0_40px_-10px_rgba(0,0,0,0.5)] hover:bg-black hover:border-white/20 transition-all duration-300"
+                    >
+                        <div className="p-2 md:p-3 bg-white/10 rounded-full group-hover:bg-[#FFD700] group-hover:text-black transition-colors duration-300">
+                            <Phone className="w-5 h-5 md:w-8 md:h-8 fill-current" />
+                        </div>
+                        <span className="text-base md:text-2xl font-bold text-white tracking-wider md:tracking-widest uppercase font-satoshi">Live Call</span>
+                    </motion.button>
+
+                    {/* Right Button: Live Chat */}
+                    <motion.button
+                        onClick={() => handleStartDemo("chat")}
+                        initial={{ y: 30, opacity: 0 }}
+                        whileInView={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 0.6, delay: 0.35 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full md:w-auto group flex items-center justify-center gap-3 md:gap-4 bg-black/80 backdrop-blur-md border border-white/10 px-6 py-4 md:px-8 md:py-5 rounded-2xl md:rounded-full shadow-[0_0_40px_-10px_rgba(0,0,0,0.5)] hover:bg-black hover:border-white/20 transition-all duration-300"
+                    >
+                        <span className="text-base md:text-2xl font-bold text-white tracking-wider md:tracking-widest uppercase font-satoshi">Live Chat</span>
+                        <div className="p-2 md:p-3 bg-white/10 rounded-full group-hover:bg-[#FFD700] group-hover:text-black transition-colors duration-300">
+                            <MessageCircle className="w-5 h-5 md:w-8 md:h-8 fill-current" />
+                        </div>
+                    </motion.button>
+
                 </div>
             </section>
         </>
