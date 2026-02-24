@@ -62,16 +62,19 @@ function WhatsAppCallUI({
     const [elapsed, setElapsed] = useState(0);
     const connectedAtRef = useRef<number | null>(null);
     const disconnectRef = useRef<(() => void) | null>(null);
-    const videoRef = useRef<HTMLVideoElement>(null);
+    const speakingVideoRef = useRef<HTMLVideoElement>(null);
+    const listeningVideoRef = useRef<HTMLVideoElement>(null);
 
     // Video playback control based on agent activity
     useEffect(() => {
-        if (!videoRef.current) return;
+        if (!speakingVideoRef.current || !listeningVideoRef.current) return;
 
         if (callState === "connected" && (agentActivity === "speaking" || agentActivity === "thinking")) {
-            videoRef.current.play().catch(e => console.error("Video play error:", e));
+            speakingVideoRef.current.play().catch(e => console.error("Speaking Video play error:", e));
+            listeningVideoRef.current.pause();
         } else {
-            videoRef.current.pause();
+            listeningVideoRef.current.play().catch(e => console.error("Listening Video play error:", e));
+            speakingVideoRef.current.pause();
         }
     }, [callState, agentActivity]);
 
@@ -164,18 +167,32 @@ function WhatsAppCallUI({
             >
                 {/* ===== VIDEO BACKGROUND ===== */}
                 <div className="absolute inset-0 bg-black">
+                    {/* Speaking Video */}
                     <video
-                        ref={videoRef}
+                        ref={speakingVideoRef}
                         src="/assets/Video_Project_2_optimized.mp4"
-                        className="w-full h-full object-cover opacity-90"
+                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${(callState === "connected" && (agentActivity === "speaking" || agentActivity === "thinking")) ? "opacity-90" : "opacity-0"
+                            }`}
                         loop
                         muted
                         playsInline
                         preload="auto"
                     />
+                    {/* Listening/Idle Video */}
+                    <video
+                        ref={listeningVideoRef}
+                        src="/assets/Silently_paying_attention_optimized.mp4"
+                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${(callState !== "connected" || agentActivity === "listening") ? "opacity-90 z-0" : "opacity-0 -z-10"
+                            }`}
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                    />
+
                     {/* Gradient overlays to make text readable over the video */}
-                    <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none" />
-                    <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
+                    <div className="absolute inset-x-0 top-0 h-40 z-10 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none" />
+                    <div className="absolute inset-x-0 bottom-0 h-64 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
                 </div>
 
                 {/* ===== TOP BAR ===== */}
