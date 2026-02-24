@@ -94,6 +94,15 @@ function WhatsAppCallUI({
         return () => clearInterval(timer);
     }, [callState]);
 
+    // Force disconnect audio when time is up
+    useEffect(() => {
+        if (isTimeUp) {
+            if (disconnectRef.current) {
+                disconnectRef.current();
+            }
+        }
+    }, [isTimeUp]);
+
     // Elapsed call time
     useEffect(() => {
         if (callState !== "connected") return;

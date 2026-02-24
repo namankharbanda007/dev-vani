@@ -82,6 +82,7 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
   const geminiDisconnectRef = useRef<(() => void) | null>(null);
   const intentionalDisconnectRef = useRef<boolean>(false);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const hasAutoConnectedRef = useRef<boolean>(false);
   const [sessionStatus, setSessionStatus] =
     useState<SessionStatus>("DISCONNECTED");
 
@@ -140,13 +141,14 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
 
   // Auto-connect for guest demo
   useEffect(() => {
-    if (autoConnect && sessionStatus === "DISCONNECTED") {
+    if (autoConnect && sessionStatus === "DISCONNECTED" && !hasAutoConnectedRef.current) {
+      hasAutoConnectedRef.current = true;
       const timer = setTimeout(() => {
         connectToRealtime();
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [autoConnect]);
+  }, [autoConnect, sessionStatus]);
 
   // Expose disconnect to parent via ref
   useEffect(() => {

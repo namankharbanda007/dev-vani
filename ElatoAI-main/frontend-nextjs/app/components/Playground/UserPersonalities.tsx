@@ -14,6 +14,10 @@ const CHARACTER_CATEGORIES: { [key: string]: { title: string; emoji: string; cha
             "sundarkand path",
             "navagraha shanti havan",
             "shri satyanarayan puja",
+            "smart pandit ankshastri",
+            "smart pandit margdarshak",
+            "smart pandit vastu",
+            "smart pandit lalit",
         ]
     },
     astrology: {
