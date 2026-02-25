@@ -2,13 +2,19 @@ import { NextResponse } from 'next/server';
 import { createClient } from "@supabase/supabase-js";
 import { format, toZonedTime } from 'date-fns-tz';
 
-// Since this is a webhook, we need a service role client to query users by phone number securely
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
 export async function POST(req: Request) {
     try {
+        // Since this is a webhook, we need a service role client to query users by phone number securely
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+        if (!supabaseUrl || !supabaseServiceKey) {
+            console.error("Missing Supabase Service Role Key or URL");
+            return NextResponse.json({ error: "Server Configuration Error" }, { status: 500 });
+        }
+
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
         const body = await req.json();
 
         // --- 1. Meta WhatsApp Webhook Verification ---
