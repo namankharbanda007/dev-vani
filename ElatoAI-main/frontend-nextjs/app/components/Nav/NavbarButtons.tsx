@@ -48,6 +48,15 @@ const NavbarButtons: React.FC<NavbarButtonsProps> = ({
                                     <span>Bhajan</span>
                                 </Button>
                             </Link>
+                            <Link href="/wallet" passHref>
+                                <Button
+                                    variant="ghost"
+                                    className={`flex flex-row gap-2 items-center ${pathname === "/wallet" ? "text-primary" : "text-muted-foreground"}`}
+                                >
+                                    <CreditCard size={20} />
+                                    <span>Wallet</span>
+                                </Button>
+                            </Link>
                             <Link href="/home/settings" passHref>
                                 <Button
                                     variant="ghost"

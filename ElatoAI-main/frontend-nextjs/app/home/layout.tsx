@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { SidebarNav } from "../components/Nav/SidebarNavItems";
-import { Plus, Settings, Home, LogOut } from "lucide-react";
+import { Plus, Settings, Home, LogOut, CreditCard } from "lucide-react";
 import { Metadata } from "next";
 import { getOpenGraphMetadata } from "@/lib/utils";
 import { MobileNav } from "../components/Nav/MobileNav";
@@ -23,6 +23,11 @@ const sidebarNavItems: SidebarNavItem[] = [
         title: "Home",
         href: "/home",
         icon: <Home size={ICON_SIZE} />,
+    },
+    {
+        title: "Wallet",
+        href: "/wallet",
+        icon: <CreditCard size={ICON_SIZE} />,
     },
     {
         title: "Settings",
@@ -60,8 +65,9 @@ export default async function RootLayout({
 
     const mobileNavItems = [
         sidebarNavItems[0], // Home
-        sidebarNavItems[1], // Settings
-        sidebarNavItems[2], // Create
+        sidebarNavItems[1], // Wallet
+        sidebarNavItems[2], // Settings
+        sidebarNavItems[3], // Create
         {
             title: "Account",
             href: "/home/settings",
