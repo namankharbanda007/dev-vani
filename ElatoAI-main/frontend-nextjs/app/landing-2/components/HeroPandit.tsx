@@ -120,7 +120,7 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
                     className="relative z-20 text-center pointer-events-none"
                 >
                     <h1 className="text-5xl md:text-8xl font-serif font-bold tracking-tight text-[#2A2A2A] opacity-50">
-                        TRADITION <br /> REIMAGINED
+                        YOUR PERSONAL <br /> SPIRITUAL AI
                     </h1>
                 </div>
 
@@ -132,8 +132,8 @@ export default function HeroPandit({ setLoadingProgress, setIsLoaded }: HeroPand
                     <h1 className="text-6xl md:text-9xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-b from-divine-saffron to-orange-600 drop-shadow-2xl">
                         SMART MURTI
                     </h1>
-                    <p className="text-murti-stone text-xl tracking-[0.2em] mt-4 font-sans uppercase">
-                        Design • Devotion • Dharma
+                    <p className="text-murti-stone text-xl tracking-[0.2em] mt-4 font-sans uppercase font-bold">
+                        CHAT • ASTROLOGY • PALMISTRY
                     </p>
                 </div>
 

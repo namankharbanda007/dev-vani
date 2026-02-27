@@ -33,63 +33,34 @@ export default async function LandingPage() {
         {/* New Hero Section from Landing-2 */}
         <HomeHeroWrapper />
 
-        {/* Lifestyle Showcase - Family Image */}
-        <section className="w-full py-12 md:py-20 bg-gradient-to-br from-purple-50 via-pink-50 to-amber-50">
-          <div className="container px-4 md:px-6 max-w-screen-lg mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-              {/* Left: Image */}
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-300 to-amber-300 rounded-3xl blur-2xl opacity-20"></div>
-                <Image
-                  src="/products/family-namaste.jpg"
-                  alt="SMART मूर्ति Family - Bringing spirituality and companionship together"
-                  width={600}
-                  height={600}
-                  className="relative z-10 rounded-3xl shadow-2xl"
-                />
+        {/* Welcome Bonus CTA Segment */}
+        <section className="w-full py-16 bg-gradient-to-br from-purple-50 via-pink-50 to-amber-50">
+          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto">
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between text-white border-4 border-amber-300/50">
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay"></div>
+
+              <div className="relative z-10 w-full md:w-2/3 mb-8 md:mb-0">
+                <div className="inline-block bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-amber-100 font-bold mb-4 border border-white/30 text-sm tracking-wider">
+                  🎉 START FOR FREE TODAY
+                </div>
+                <h2 className="text-4xl md:text-5xl font-extrabold font-lora leading-tight mb-4 drop-shadow-md">
+                  Claim Your ₹100<br />Welcome Bonus
+                </h2>
+                <p className="text-xl text-orange-50 max-w-lg mb-0 font-medium leading-relaxed drop-shadow">
+                  Sign up now and get ₹100 instantly credited to your Smart Murti Wallet. Try AI Voice Chat, Tarot, or Palmistry completely risk-free.
+                </p>
               </div>
 
-              {/* Right: Content */}
-              <div className="space-y-6">
-                <h2 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 leading-tight">
-                  A Companion for Every Family Member
-                </h2>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  Whether it's spiritual guidance from the Pandit for the elders, or a playful friend for the children, SMART मूर्ति brings the entire family together through meaningful conversations.
-                </p>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-2 rounded-lg">
-                      <Heart className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900">For Children</h4>
-                      <p className="text-gray-600 text-sm">A friend who plays, learns, and grows with them</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-amber-100 p-2 rounded-lg">
-                      <Sparkles className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900">For Parents</h4>
-                      <p className="text-gray-600 text-sm">Spiritual guidance and daily wisdom</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-pink-100 p-2 rounded-lg">
-                      <Users className="h-5 w-5 text-pink-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900">For Everyone</h4>
-                      <p className="text-gray-600 text-sm">Meaningful connections without screens</p>
-                    </div>
-                  </div>
-                </div>
+              <div className="relative z-10 w-full md:w-auto flex justify-center">
+                <Link href="/login">
+                  <Button size="lg" className="w-full md:w-auto bg-white text-orange-600 hover:bg-orange-50 font-bold text-xl px-12 py-8 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
+                    Claim Bonus & Start
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
-        </section >
+        </section>
 
         {/* Demo Section Client Wrapper */}
         <HomeDemoSection />
@@ -283,9 +254,9 @@ export default async function LandingPage() {
                     <span className="text-lg font-bold text-purple-600">1</span>
                   </div>
                 </div>
-                <h3 className="text-2xl font-bold text-purple-900 mb-3">Choose Your Companion</h3>
+                <h3 className="text-2xl font-bold text-purple-900 mb-3">Choose Your AI Guide</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Select between a wise Pandit for spiritual guidance or a customizable friend for daily companionship
+                  Select between a wise Pandit for spiritual guidance, an Astrologer, or a playful character.
                 </p>
               </div>
 
@@ -294,15 +265,15 @@ export default async function LandingPage() {
                 <div className="relative mb-6">
                   <div className="absolute inset-0 bg-amber-200 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
                   <div className="relative bg-gradient-to-br from-amber-500 to-yellow-600 p-6 rounded-full shadow-xl transform group-hover:scale-110 transition-transform duration-300">
-                    <Sparkles className="h-12 w-12 text-white" />
+                    <MessageCircle className="h-12 w-12 text-white" />
                   </div>
                   <div className="absolute -top-2 -right-2 bg-white rounded-full px-3 py-1 shadow-lg">
                     <span className="text-lg font-bold text-amber-600">2</span>
                   </div>
                 </div>
-                <h3 className="text-2xl font-bold text-amber-900 mb-3">Customize & Personalize</h3>
+                <h3 className="text-2xl font-bold text-amber-900 mb-3">Connect Instantly</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Give them a name, choose their voice, personality traits, and create a unique backstory that resonates with you
+                  Start a voice or text chat directly from your phone. Enjoy seamless, real-time conversations.
                 </p>
               </div>
 
@@ -311,15 +282,15 @@ export default async function LandingPage() {
                 <div className="relative mb-6">
                   <div className="absolute inset-0 bg-pink-200 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
                   <div className="relative bg-gradient-to-br from-pink-500 to-red-600 p-6 rounded-full shadow-xl transform group-hover:scale-110 transition-transform duration-300">
-                    <MessageCircle className="h-12 w-12 text-white" />
+                    <Sparkles className="h-12 w-12 text-white" />
                   </div>
                   <div className="absolute -top-2 -right-2 bg-white rounded-full px-3 py-1 shadow-lg">
                     <span className="text-lg font-bold text-pink-600">3</span>
                   </div>
                 </div>
-                <h3 className="text-2xl font-bold text-pink-900 mb-3">Connect Daily</h3>
+                <h3 className="text-2xl font-bold text-pink-900 mb-3">Explore Divination</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Talk to them voice-to-voice, no screens needed. Build a real relationship that grows with meaningful conversations
+                  Go beyond chat. Upload your palm for AI analysis or get personalized Vedic astrology readings.
                 </p>
               </div>
             </div>
@@ -371,15 +342,15 @@ export default async function LandingPage() {
                 </div>
               </div>
 
-              {/* Hardware Presence */}
+              {/* Instant Access */}
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all hover:-translate-y-1 shadow-lg">
                 <div className="flex flex-col items-center text-center">
                   <div className="bg-pink-500 p-4 rounded-full mb-4 shadow-lg">
                     <Zap className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-3">Hardware Presence</h3>
+                  <h3 className="text-xl font-bold text-white mb-3">Instant Access</h3>
                   <p className="text-purple-100 leading-relaxed">
-                    A physical companion disconnects you from internet noise and brings you back to the present.
+                    Available 24/7 on your phone or computer. Your personal spiritual guide is always just one click away.
                   </p>
                 </div>
               </div>
