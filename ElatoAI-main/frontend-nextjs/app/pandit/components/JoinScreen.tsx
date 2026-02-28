@@ -6,10 +6,11 @@ import { motion } from "framer-motion";
 
 interface JoinScreenProps {
     onJoin: (names: string[]) => void;
+    initialName?: string | null;
 }
 
-export default function JoinScreen({ onJoin }: JoinScreenProps) {
-    const [namesInput, setNamesInput] = useState("");
+export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
+    const [namesInput, setNamesInput] = useState(initialName || "");
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

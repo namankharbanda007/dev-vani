@@ -66,13 +66,13 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
     const listeningVideoRef = useRef<HTMLVideoElement>(null);
 
     // Initialize the Voice Connection exactly once on mount
+    // EDIT: Removed auto-connect on mount to require explicit user action.
     useEffect(() => {
-        connect();
         // The hook handles cleanup on unmount
         return () => {
             disconnect();
         };
-    }, [connect, disconnect]);
+    }, [disconnect]);
 
     // Video playback control based on agent activity
     useEffect(() => {
@@ -155,7 +155,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                             <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-red-500 border border-white"></span>
                         </button>
                         <div className="w-10 h-10 rounded-full bg-purple-100 overflow-hidden shadow-sm border-2 border-white">
-                            <Image src={mockUsers[0].img} alt="User" width={40} height={40} className="w-full h-full object-cover" />
+                            <img src={mockUsers[0].img} alt="User" className="w-full h-full object-cover" />
                         </div>
                     </div>
                 </header>
@@ -217,7 +217,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                                                 <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
                                             )
                                         ) : (
-                                            <Image src={user.img!} alt={user.name} fill className="object-cover" />
+                                            <img src={user.img!} alt={user.name} className="w-full h-full object-cover" />
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
                                         <div className="absolute bottom-3 left-3 text-white font-medium text-sm drop-shadow-md truncate max-w-[90%]">
@@ -230,9 +230,25 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                             {/* Main AI Video Stage */}
                             <div className="flex-1 relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
 
+                                {sessionStatus === "DISCONNECTED" && (
+                                    <div className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-white">
+                                        <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6">
+                                            <VideoIcon className="w-10 h-10 text-emerald-400" />
+                                        </div>
+                                        <h2 className="text-2xl font-lora font-bold mb-2">Ready to joining the Puja?</h2>
+                                        <p className="text-gray-400 mb-8 max-w-sm text-center">Ensure your camera and microphone are ready. The Pandit is waiting.</p>
+                                        <button
+                                            onClick={() => connect()}
+                                            className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-full shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2"
+                                        >
+                                            <Mic className="w-5 h-5" /> Start Live Puja
+                                        </button>
+                                    </div>
+                                )}
+
                                 {sessionStatus === "CONNECTING" && (
                                     <div className="absolute inset-0 z-40 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center text-white">
-                                        <div className="w-16 h-16 rounded-full border-4 border-transparent border-t-green-500 border-r-green-500 animate-spin mb-4"></div>
+                                        <div className="w-16 h-16 rounded-full border-4 border-transparent border-t-emerald-500 border-r-emerald-500 animate-spin mb-4"></div>
                                         <p className="font-medium text-lg text-emerald-100">Connecting to Ashram...</p>
                                         <p className="text-sm text-gray-400 mt-2">Initializing group context for {participants.join(", ")}</p>
                                     </div>
@@ -360,7 +376,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                         {/* Top Expert Profiles Banner */}
                         <div className="w-full flex justify-end gap-2 mb-2 pr-2">
                             <div className="flex items-center gap-2 bg-white/80 backdrop-blur rounded-full p-1.5 shadow-sm border border-white border-b-black/5 pr-4 pl-2 cursor-pointer hover:bg-white transition-colors">
-                                <Image src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=64&h=64" width={32} height={32} alt="Expert" className="w-8 h-8 rounded-full border border-gray-200" />
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=64&h=64" alt="Expert" className="w-8 h-8 rounded-full border border-gray-200 object-cover" />
                                 <div className="flex flex-col">
                                     <span className="text-[10px] font-bold leading-tight">Language Coach</span>
                                 </div>
@@ -386,7 +402,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                             <div className="flex-1 overflow-y-auto p-5 pb-32 flex flex-col gap-5 scrollbar-hide">
 
                                 <div className="flex gap-3">
-                                    <Image src={mockUsers[0].img} alt="Participant" width={32} height={32} className="w-8 h-8 rounded-full object-cover shrink-0 mt-1" />
+                                    <img src={mockUsers[0].img} alt="Participant" className="w-8 h-8 rounded-full object-cover shrink-0 mt-1" />
                                     <div className="flex flex-col">
                                         <span className="text-xs text-gray-500 mb-1 font-medium">{participants[0] || 'User'} (Host) <span className="float-right ml-4">07:23 AM</span></span>
                                         <div className="bg-white p-3.5 rounded-2xl rounded-tl-sm text-sm text-gray-700 shadow-sm border border-black/[0.03]">
