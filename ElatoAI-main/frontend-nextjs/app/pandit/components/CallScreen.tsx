@@ -205,9 +205,9 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                         <div className="flex-1 flex gap-4 min-h-0 relative">
 
                             {/* Participant Ticker Column */}
-                            <div className="w-[180px] shrink-0 flex flex-col gap-4 overflow-y-auto pb-4 scrollbar-hide">
+                            <div className="w-[220px] shrink-0 flex flex-col gap-4 overflow-y-auto pb-4 scrollbar-hide">
                                 {assignedMockUsers.map((user, i) => (
-                                    <div key={i} className="relative w-full aspect-square rounded-[24px] overflow-hidden bg-gray-200 shadow-sm border border-black/5 group">
+                                    <div key={i} className="relative w-full aspect-[4/3] rounded-[24px] overflow-hidden bg-gray-200 shadow-sm border border-black/5 group">
                                         {user.type === 'webcam' ? (
                                             isVideoOff ? (
                                                 <div className="w-full h-full flex items-center justify-center bg-gray-800 text-white">
@@ -228,7 +228,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                             </div>
 
                             {/* Main AI Video Stage */}
-                            <div className="flex-1 relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
+                            <div className="w-full max-w-[850px] aspect-[16/10] flex-1 relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group mx-auto shrink-0">
 
                                 {sessionStatus === "DISCONNECTED" && (
                                     <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
