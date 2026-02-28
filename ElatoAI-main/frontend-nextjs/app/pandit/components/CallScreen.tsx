@@ -88,21 +88,35 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
     }, [sessionStatus, agentActivity]);
 
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+    const [cameraError, setCameraError] = useState<string | null>(null);
 
     useEffect(() => {
+        let isMounted = true;
         let activeStream: MediaStream | null = null;
+        setCameraError(null);
+
         if (!isVideoOff) {
             navigator.mediaDevices.getUserMedia({ video: true, audio: false })
                 .then((stream) => {
+                    if (!isMounted) {
+                        stream.getTracks().forEach(track => track.stop());
+                        return;
+                    }
                     activeStream = stream;
                     setLocalStream(stream);
                 })
-                .catch(console.error);
+                .catch(err => {
+                    if (isMounted) {
+                        console.error("Camera access error:", err);
+                        setCameraError(err.message || "Camera access denied");
+                    }
+                });
         } else {
             setLocalStream(null);
         }
 
         return () => {
+            isMounted = false;
             if (activeStream) {
                 activeStream.getTracks().forEach(track => track.stop());
             }
@@ -111,7 +125,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
 
     // Robustly attach stream to video element
     const handleVideoRef = useCallback((node: HTMLVideoElement | null) => {
-        if (node && localStream) {
+        if (node) {
             node.srcObject = localStream;
         }
     }, [localStream]);
@@ -126,13 +140,13 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
     });
 
     return (
-        <div className="min-h-screen w-full bg-[#E5E0F4] relative flex p-[2vh] overflow-y-auto">
+        <div className="min-h-screen w-full bg-[#E5E0F4] relative flex p-2 lg:p-[2vh] overflow-y-auto overflow-x-hidden">
 
             {/* The main App Window Container with Glassmorphism / neumorphism */}
-            <div className="w-full min-h-[900px] bg-[#f4f2f9]/90 backdrop-blur-2xl rounded-[32px] shadow-2xl border border-white/40 flex flex-col relative z-10 transition-all duration-300">
+            <div className="w-full min-h-screen lg:min-h-[900px] bg-[#f4f2f9]/90 backdrop-blur-2xl lg:rounded-[32px] shadow-2xl border border-white/40 flex flex-col relative z-10 transition-all duration-300">
 
                 {/* TOP HEADER BAR */}
-                <header className="h-[80px] w-full flex items-center justify-between px-8 shrink-0">
+                <header className="h-[60px] lg:h-[80px] w-full flex items-center justify-between px-4 lg:px-8 shrink-0">
                     <div className="flex items-center gap-2">
                         <img
                             src="/assets/landing/logo.png"
@@ -172,10 +186,10 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                 </header>
 
                 {/* MAIN CONTENT AREA */}
-                <div className="flex-1 w-full flex overflow-hidden p-6 pt-2 gap-6">
+                <div className="flex-1 w-full flex flex-col lg:flex-row p-4 lg:p-6 pt-2 gap-4 lg:gap-6 h-auto">
 
                     {/* LEFT SIDEBAR NAVIGATION */}
-                    <aside className="w-[60px] shrink-0 flex flex-col items-center gap-4 py-4">
+                    <aside className="hidden lg:flex w-[60px] shrink-0 flex-col items-center gap-4 py-4">
                         <div className="flex flex-col gap-4 w-full items-center bg-white/60 p-2 rounded-full shadow-sm shadow-black/5 pb-6">
                             <button className="w-12 h-12 rounded-full bg-[#111] text-white flex items-center justify-center shadow-md">
                                 <VideoIcon className="w-5 h-5" />
@@ -210,19 +224,24 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                     {/* CENTER STAGE (Videos & Guidelines) */}
                     <div className="flex-1 flex flex-col min-w-0">
                         <div className="mb-4">
-                            <h1 className="text-4xl font-lora font-medium text-gray-900 tracking-tight">Your Pujas Made Easy.</h1>
+                            <h1 className="text-3xl lg:text-4xl font-lora font-medium text-gray-900 tracking-tight">Your Pujas Made Easy.</h1>
                         </div>
 
-                        <div className="flex-1 flex gap-4 min-h-0 relative">
+                        <div className="flex flex-col lg:flex-row gap-4 relative">
 
-                            {/* Participant Ticker Column */}
-                            <div className="w-[220px] shrink-0 flex flex-col gap-4 overflow-y-auto pb-4 scrollbar-hide">
+                            {/* Participant Ticker Column / Row */}
+                            <div className="w-full lg:w-[220px] shrink-0 flex flex-row lg:flex-col gap-4 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto pb-2 lg:pb-4 scrollbar-hide">
                                 {assignedMockUsers.map((user, i) => (
-                                    <div key={i} className="relative w-full aspect-[4/3] rounded-[24px] overflow-hidden bg-gray-200 shadow-sm border border-black/5 group">
+                                    <div key={i} className="relative w-[140px] lg:w-full shrink-0 aspect-[4/3] rounded-[16px] lg:rounded-[24px] overflow-hidden bg-gray-200 shadow-sm border border-black/5 group">
                                         {user.type === 'webcam' ? (
                                             isVideoOff ? (
                                                 <div className="w-full h-full flex items-center justify-center bg-gray-800 text-white">
                                                     <User className="w-12 h-12 opacity-50" />
+                                                </div>
+                                            ) : cameraError ? (
+                                                <div className="w-full h-full flex flex-col items-center justify-center bg-red-900/20 text-red-500 p-2 text-center text-[10px] lg:text-xs">
+                                                    <VideoOff className="w-6 h-6 mb-1" />
+                                                    <span>{cameraError}</span>
                                                 </div>
                                             ) : (
                                                 <video ref={handleVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
@@ -231,7 +250,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                                             <img src={user.img!} alt={user.name} className="w-full h-full object-cover" />
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
-                                        <div className="absolute bottom-3 left-3 text-white font-medium text-sm drop-shadow-md truncate max-w-[90%]">
+                                        <div className="absolute bottom-2 lg:bottom-3 left-2 lg:left-3 text-white font-medium text-xs lg:text-sm drop-shadow-md truncate max-w-[90%]">
                                             {user.name} {i === 0 && "(You)"}
                                         </div>
                                     </div>
@@ -239,7 +258,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                             </div>
 
                             {/* Main AI Video Stage */}
-                            <div className="flex-1 aspect-square max-w-[800px] relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
+                            <div className="flex-1 w-full max-w-[800px] aspect-square mx-auto relative rounded-[24px] lg:rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
 
                                 {sessionStatus === "DISCONNECTED" && (
                                     <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
@@ -336,18 +355,18 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                         </div>
 
                         {/* Bottom Guidelines & Transcription Area */}
-                        <div className="h-[80px] shrink-0 w-full mt-3 flex gap-4">
-                            <div className="flex-1 bg-white/60 backdrop-blur rounded-[24px] p-5 shadow-sm border border-white/60 flex flex-col justify-between">
-                                <div className="flex items-center justify-between pointer-events-none">
+                        <div className="shrink-0 w-full mt-4 flex flex-col xl:flex-row gap-4 h-auto xl:h-[80px]">
+                            <div className="flex-1 bg-white/60 backdrop-blur rounded-[24px] p-4 lg:p-5 shadow-sm border border-white/60 flex flex-col justify-between">
+                                <div className="flex items-center justify-between pointer-events-none pb-2">
                                     <h3 className="font-bold text-gray-900 text-sm tracking-wide">PUJA GUIDELINES</h3>
                                     <span className="text-xs text-gray-400 font-mono">cite: 8</span>
                                 </div>
-                                <p className="text-gray-700 font-medium">
+                                <p className="text-gray-700 font-medium text-sm lg:text-base">
                                     Namaste! We will perform Ganesh Puja shortly. Keep your space sacred for new beginnings. This time is highly auspicious.
                                 </p>
                             </div>
 
-                            <div className="w-[320px] bg-white/60 backdrop-blur rounded-[24px] p-5 shadow-sm border border-white/60 flex items-center justify-between gap-4">
+                            <div className="w-full xl:w-[320px] bg-white/60 backdrop-blur rounded-[24px] p-4 lg:p-5 shadow-sm border border-white/60 flex items-center justify-between gap-4">
                                 <div className="flex gap-2">
                                     <button className="bg-gray-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow">Transcription</button>
                                     <button className="bg-white text-gray-600 border border-gray-200 text-xs font-bold px-4 py-2 rounded-full shadow-sm hover:bg-gray-50">Subtitle</button>
@@ -382,7 +401,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                     </div>
 
                     {/* RIGHT SIDEBAR (Chat & Muhurtas) */}
-                    <div className="w-[350px] shrink-0 flex flex-col gap-4">
+                    <div className="w-full lg:w-[350px] h-[500px] lg:h-auto shrink-0 flex flex-col gap-4">
 
                         {/* Top Expert Profiles Banner */}
                         <div className="w-full flex justify-end gap-2 mb-2 pr-2">
