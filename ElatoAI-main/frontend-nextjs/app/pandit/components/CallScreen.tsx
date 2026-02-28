@@ -228,7 +228,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                             </div>
 
                             {/* Main AI Video Stage */}
-                            <div className="w-full max-w-[850px] aspect-[16/10] flex-1 relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group mx-auto shrink-0">
+                            <div className="flex-1 relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
 
                                 {sessionStatus === "DISCONNECTED" && (
                                     <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
