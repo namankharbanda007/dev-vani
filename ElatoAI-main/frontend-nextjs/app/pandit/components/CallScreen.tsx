@@ -125,9 +125,11 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                 {/* TOP HEADER BAR */}
                 <header className="h-[80px] w-full flex items-center justify-between px-8 shrink-0">
                     <div className="flex items-center gap-2">
-                        <span className="text-2xl font-lora font-bold text-gray-900 tracking-tight flex items-center gap-1">
-                            स्मार्टmurti <span className="text-xs font-sans text-gray-500 font-normal mt-1">.com</span>
-                        </span>
+                        <img
+                            src="/assets/landing/logo.png"
+                            alt="SmartMurti Logo"
+                            className="h-8 object-contain"
+                        />
                     </div>
 
                     {/* Navigation Tabs */}
@@ -228,7 +230,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                             </div>
 
                             {/* Main AI Video Stage */}
-                            <div className="flex-1 aspect-[4/3] max-w-[800px] relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
+                            <div className="flex-1 aspect-square max-w-[800px] relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
 
                                 {sessionStatus === "DISCONNECTED" && (
                                     <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
