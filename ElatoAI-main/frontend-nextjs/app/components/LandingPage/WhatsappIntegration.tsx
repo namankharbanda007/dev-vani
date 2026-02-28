@@ -135,14 +135,9 @@ export default function WhatsappIntegration() {
                             </div>
                         </div>
 
-                        {/* Decorative Character Image extending out of phone */}
-                        <div className="absolute top-1/2 -translate-y-1/2 -left-12 md:-left-24 lg:-left-40 w-48 md:w-56 lg:w-72 aspect-[3/4] z-20 hidden md:block" style={{ transform: 'scaleX(-1) translateY(-50%)' }}>
-                            {/* We flip it horizontally so it peaks out from behind */}
-                            <Image src="/assets/erasebg-transformed (5).png.png" alt="Smart Pandit Character" fill className="object-contain drop-shadow-2xl" />
-                        </div>
-
-                        <div className="absolute top-1/2 -translate-y-1/2 -right-12 md:-right-24 lg:-right-32 w-48 md:w-56 lg:w-72 aspect-[3/4] z-20 hidden lg:block pointer-events-none">
-                            <Image src="/assets/Cartoon Palm Reader.jpg" alt="Second Character" fill className="object-contain drop-shadow-2xl opacity-60 rounded-full blur-sm" />
+                        {/* Main Decorative Character leaning on phone (Right Side) */}
+                        <div className="absolute top-1/2 -translate-y-1/2 -right-20 md:-right-40 lg:-right-64 w-64 md:w-96 lg:w-[40rem] aspect-[3/4] z-20 hidden md:block pointer-events-none">
+                            <Image src="/assets/landing-2/Gemini_Generated_Image_gsxe1ugsxe1ugsxe.png" alt="Smart Pandit Character" fill className="object-contain drop-shadow-2xl" priority />
                         </div>
                     </div>
                 </div>
