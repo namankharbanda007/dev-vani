@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
     Mic,
     MicOff,
@@ -87,25 +87,34 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
         }
     }, [sessionStatus, agentActivity]);
 
+    const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+
     useEffect(() => {
-        let stream: MediaStream | null = null;
+        let activeStream: MediaStream | null = null;
         if (!isVideoOff) {
             navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                .then((s) => {
-                    stream = s;
-                    if (localVideoRef.current) {
-                        localVideoRef.current.srcObject = s;
-                    }
+                .then((stream) => {
+                    activeStream = stream;
+                    setLocalStream(stream);
                 })
                 .catch(console.error);
+        } else {
+            setLocalStream(null);
         }
 
         return () => {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
+            if (activeStream) {
+                activeStream.getTracks().forEach(track => track.stop());
             }
         };
     }, [isVideoOff]);
+
+    // Robustly attach stream to video element
+    const handleVideoRef = useCallback((node: HTMLVideoElement | null) => {
+        if (node && localStream) {
+            node.srcObject = localStream;
+        }
+    }, [localStream]);
 
     // Determine standard profile images based on names entered to create a diverse layout
     const assignedMockUsers = participants.map((name, index) => {
@@ -216,7 +225,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                                                     <User className="w-12 h-12 opacity-50" />
                                                 </div>
                                             ) : (
-                                                <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
+                                                <video ref={handleVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
                                             )
                                         ) : (
                                             <img src={user.img!} alt={user.name} className="w-full h-full object-cover" />
