@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/server"
 import { getAllPersonalities } from "@/db/personalities"
 import { CharacterShowcase } from "./components/LandingPage/CharacterShowcase";
 import { CreateCharacterShowcase } from "./components/LandingPage/CreateCharacterShowcase";
-import CustomizationForm from "./components/LandingPage/CustomizationForm";
+import WhatsappIntegration from "./components/LandingPage/WhatsappIntegration";
 import Image from "next/image";
 import YoutubeDemo from "./components/LandingPage/YoutubeDemo";
 import { kickstarterLink } from "@/lib/data";
@@ -287,8 +287,8 @@ export default async function LandingPage() {
           </div>
         </section >
 
-        {/* How to Customize Your Friend - INTERACTIVE FORM */}
-        < CustomizationForm />
+        {/* WhatsApp Integration - Horoscope & Daily Reminders */}
+        <WhatsappIntegration />
 
         {/* How It Works - Icon-Based Steps */}
         < section className="w-full py-12 md:py-20 bg-gradient-to-b from-white to-purple-50" >
