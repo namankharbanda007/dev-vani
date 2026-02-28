@@ -74,7 +74,7 @@ export default function LandingPage() {
                     {/* Significantly increased size and anchored to bottom */}
                     <div className="absolute bottom-[-5%] left-1/2 transform -translate-x-1/2 w-[90vw] md:w-[800px] lg:w-[1000px] xl:w-[1200px] z-20 flex items-end justify-center pointer-events-none">
                         <Image
-                            src="/assets/landing/character.png"
+                            src="/assets/erasebg-transformed (5).png.png"
                             alt="Divine Character"
                             width={1100}
                             height={1100}

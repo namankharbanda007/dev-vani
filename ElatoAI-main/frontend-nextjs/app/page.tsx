@@ -91,6 +91,37 @@ export default async function LandingPage() {
           </div>
         </section >
 
+        {/* New Characters Showcase */}
+        <section className="w-full py-12 md:py-20 bg-white border-y border-gray-100">
+          <div className="container px-4 md:px-6 max-w-screen-xl mx-auto text-center">
+            <h2 className="text-4xl md:text-5xl font-bold font-lora text-gray-900 mb-12">
+              Meet Your Spiritual Guides
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Astrologer */}
+              <div className="bg-orange-50 rounded-3xl p-6 flex flex-col items-center">
+                <Image src="/assets/Cartoon Astrologer.jpg" alt="Astrologer" width={200} height={200} className="rounded-full shadow-lg border-4 border-white mb-6 w-full h-auto max-w-[250px] object-cover aspect-square" />
+                <h3 className="text-2xl font-bold text-gray-900">Expert Astrologer</h3>
+                <p className="text-gray-600 mt-2">Discover your planetary alignments.</p>
+              </div>
+
+              {/* Palm Reader */}
+              <div className="bg-purple-50 rounded-3xl p-6 flex flex-col items-center">
+                <Image src="/assets/Cartoon Palm Reader.jpg" alt="Palm Reader" width={200} height={200} className="rounded-full shadow-lg border-4 border-white mb-6 w-full h-auto max-w-[250px] object-cover aspect-square" />
+                <h3 className="text-2xl font-bold text-gray-900">Palm Reader</h3>
+                <p className="text-gray-600 mt-2">Unlock the destiny written on your hands.</p>
+              </div>
+
+              {/* Face Reader / Love Advisor */}
+              <div className="bg-pink-50 rounded-3xl p-6 flex flex-col items-center">
+                <Image src="/assets/Cartoon Face Reader.jpg" alt="Face Reader" width={200} height={200} className="rounded-full shadow-lg border-4 border-white mb-6 w-full h-auto max-w-[250px] object-cover aspect-square" />
+                <h3 className="text-2xl font-bold text-gray-900">Face Reader</h3>
+                <p className="text-gray-600 mt-2">Reveal hidden traits and compatibility.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Demo Section Client Wrapper */}
         <HomeDemoSection />
 
