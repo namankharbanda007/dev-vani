@@ -117,10 +117,10 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
     });
 
     return (
-        <div className="h-screen w-full bg-[#E5E0F4] relative flex overflow-hidden p-[2vh]">
+        <div className="min-h-screen w-full bg-[#E5E0F4] relative flex p-[2vh] overflow-y-auto">
 
             {/* The main App Window Container with Glassmorphism / neumorphism */}
-            <div className="w-full h-full bg-[#f4f2f9]/90 backdrop-blur-2xl rounded-[32px] shadow-2xl border border-white/40 overflow-hidden flex flex-col relative z-10 transition-all duration-300">
+            <div className="w-full min-h-[900px] bg-[#f4f2f9]/90 backdrop-blur-2xl rounded-[32px] shadow-2xl border border-white/40 flex flex-col relative z-10 transition-all duration-300">
 
                 {/* TOP HEADER BAR */}
                 <header className="h-[80px] w-full flex items-center justify-between px-8 shrink-0">
