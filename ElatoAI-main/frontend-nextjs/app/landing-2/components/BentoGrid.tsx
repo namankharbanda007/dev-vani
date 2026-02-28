@@ -16,9 +16,8 @@ export default function BentoGrid() {
                     className="md:col-span-2 bg-gradient-to-br from-orange-50 to-white"
                     icon={<Zap className="w-8 h-8 text-divine-saffron" />}
                 >
-                    {/* Placeholder for Video/Animation */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                        <span className="text-9xl font-serif">ॐ</span>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-40">
+                        <img src="/assets/Pandit Performing Aarti.jpg" alt="Aarti" className="w-full h-full object-cover rounded-3xl" />
                     </div>
                 </BentoCard>
 

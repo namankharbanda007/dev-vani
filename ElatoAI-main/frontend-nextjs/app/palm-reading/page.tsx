@@ -44,7 +44,7 @@ export default function PalmReadingPage() {
                             {/* Character Image */}
                             <div className="w-64 h-80 relative z-10 overflow-hidden rounded-t-full mt-4">
                                 <Image
-                                    src="/assets/palm-reading/pandit-video.png"
+                                    src="/assets/Cartoon Palm Reader.jpg"
                                     fill
                                     className="object-cover object-center"
                                     alt="Smart Murti Pandit"
@@ -149,7 +149,7 @@ export default function PalmReadingPage() {
                             {/* Main Video Area Placeholder */}
                             <div className="flex-1 m-2 mt-0 border border-amber-500/30 rounded-2xl bg-gradient-to-b from-amber-100 to-orange-50 relative overflow-hidden flex flex-col items-center justify-end pb-4 shadow-[inset_0_0_20px_rgba(251,146,60,0.3)]">
                                 <Image
-                                    src="/assets/palm-reading/pandit-video.png"
+                                    src="/assets/Cartoon Palm Reader.jpg"
                                     fill
                                     className="object-cover"
                                     alt="Video Call Frame"

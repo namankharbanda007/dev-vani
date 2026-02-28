@@ -65,8 +65,8 @@ export default function NewLandingPage() {
                             {/* Glow effect behind */}
                             <div className="absolute inset-0 bg-amber-400 rounded-full blur-[100px] opacity-20 animate-pulse"></div>
                             <Image
-                                src="/assets/landing/smart-pandit-3d.png"
-                                alt="Smart Pandit 3D Character"
+                                src="/assets/erasebg-transformed (5).png.png"
+                                alt="Smart Pandit Character"
                                 fill
                                 className="object-contain drop-shadow-2xl z-10"
                                 priority
@@ -131,11 +131,11 @@ export default function NewLandingPage() {
                                 {/* Product Image Placeholder */}
                                 <div className="absolute inset-0 bg-gradient-to-br from-orange-100 to-transparent rounded-[3rem]"></div>
                                 <Image
-                                    src="/products/smart-mandir.jpg" // Using existing image as placeholder
-                                    alt="Smart Murti Device"
+                                    src="/assets/Pandit Performing Hawan.jpg"
+                                    alt="Smart Murti Hawan"
                                     width={400}
                                     height={400}
-                                    className="relative z-10 object-contain drop-shadow-2xl"
+                                    className="relative z-10 object-cover rounded-3xl shadow-2xl h-[400px] w-full"
                                 />
                             </div>
 
