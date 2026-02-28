@@ -1,30 +1,16 @@
-"use client";
+import { createClient } from "@/utils/supabase/server";
+import ClientPage from "./ClientPage";
 
-import { useState } from "react";
-import JoinScreen from "./components/JoinScreen";
-import CallScreen from "./components/CallScreen";
+export default async function PanditCallPage() {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-export default function PanditCallPage() {
-    const [hasJoined, setHasJoined] = useState(false);
-    const [participants, setParticipants] = useState<string[]>([]);
+    // If the user is logged in, extract their name or email to auto-join the call.
+    // We prioritize the full name from user metadata, else email name.
+    let initialUser = null;
+    if (user) {
+        initialUser = user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
+    }
 
-    const handleJoin = (names: string[]) => {
-        setParticipants(names);
-        setHasJoined(true);
-    };
-
-    const handleLeave = () => {
-        setHasJoined(false);
-        setParticipants([]);
-    };
-
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 text-white font-sans selection:bg-purple-500/30">
-            {!hasJoined ? (
-                <JoinScreen onJoin={handleJoin} />
-            ) : (
-                <CallScreen participants={participants} onLeave={handleLeave} />
-            )}
-        </div>
-    );
+    return <ClientPage initialUser={initialUser} />;
 }

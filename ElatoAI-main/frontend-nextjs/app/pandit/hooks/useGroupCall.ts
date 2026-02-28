@@ -26,8 +26,8 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
         setSessionStatus("CONNECTING");
 
         try {
-            // Fetch session token for the specific personality
-            const response = await fetch(`/api/session?personalityId=${personalityId}`);
+            // Fetch session token for the specific personality as a 'guest' to bypass the user's own DB personality preferences.
+            const response = await fetch(`/api/session?personalityId=${personalityId}&guest=true`);
             const sessionData = await response.json();
 
             if (sessionData.error) {

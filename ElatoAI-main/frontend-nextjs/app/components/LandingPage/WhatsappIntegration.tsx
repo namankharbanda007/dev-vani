@@ -1,145 +1,138 @@
 "use client";
 
 import Image from "next/image";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, CheckCircle2, Sparkles, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function WhatsappIntegration() {
     return (
-        <section className="w-full py-16 md:py-24 bg-[#0a100d] relative overflow-hidden">
-            {/* Background Decorative */}
-            <div className="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-900 rounded-full blur-[100px] opacity-40"></div>
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-green-900 rounded-full blur-[100px] opacity-20"></div>
-            </div>
+        <section className="w-full py-24 md:py-32 relative overflow-hidden bg-black">
+            {/* Deep premium background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0a1a12] via-black to-[#05100a] pointer-events-none" />
 
-            <div className="container px-4 md:px-6 max-w-screen-xl mx-auto relative z-10 flex flex-col lg:flex-row items-center gap-12">
-                {/* Left side text */}
-                <div className="flex-1 space-y-6 text-white text-center lg:text-left">
-                    <div className="inline-block bg-emerald-500/20 text-emerald-400 font-semibold px-4 py-2 rounded-full mb-2 border border-emerald-500/30">
-                        WhatsApp Integration
-                    </div>
-                    <h2 className="text-4xl md:text-5xl font-bold font-lora leading-tight">
-                        Daily Horoscope & Remedies, <br />
-                        <span className="text-emerald-400">Direct to your WhatsApp</span>
-                    </h2>
-                    <p className="text-xl text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                        Start your day with divine guidance. Receive your personalized daily horoscope, lucky elements, and powerful remedies straight from Smart Pandit directly on WhatsApp.
-                    </p>
+            {/* Cosmic/Spiritual lighting effects */}
+            <div className="absolute top-1/4 left-0 w-full h-[500px] bg-emerald-900/10 blur-[150px] pointer-events-none mix-blend-screen" />
+            <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-indigo-900/20 blur-[150px] rounded-full pointer-events-none mix-blend-screen" />
 
-                    <ul className="text-left space-y-4 text-gray-200 mt-8 max-w-md mx-auto lg:mx-0">
-                        <li className="flex items-start gap-3">
-                            <span className="bg-emerald-500 p-1 rounded-full text-white mt-1">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                            </span>
-                            <span>Personalized birth-chart based predictions</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                            <span className="bg-emerald-500 p-1 rounded-full text-white mt-1">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                            </span>
-                            <span>Lucky colors, numbers, and gemstones</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                            <span className="bg-emerald-500 p-1 rounded-full text-white mt-1">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                            </span>
-                            <span>Daily tasks and spiritual power-boosts</span>
-                        </li>
-                    </ul>
+            <div className="container px-6 md:px-12 max-w-7xl mx-auto relative z-10">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-8 items-center">
 
-                    <div className="pt-6">
-                        <button className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center gap-3 mx-auto lg:mx-0">
-                            <MessageCircle className="w-6 h-6" />
-                            Try it on WhatsApp
-                        </button>
-                    </div>
-                </div>
-
-                {/* Right side Visual - Mockup of the image */}
-                <div className="flex-1 flex justify-center lg:justify-end relative w-full pt-10 lg:pt-0">
-                    <div className="relative w-full max-w-[320px] lg:max-w-sm">
-                        {/* The Phone Mockup */}
-                        <div className="relative bg-[#0d1418] border-[12px] border-gray-900 rounded-[3rem] shadow-2xl overflow-hidden aspect-[9/19] z-10 w-full mx-auto">
-                            {/* iPhone Notch */}
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-6 w-1/3 bg-gray-900 rounded-b-3xl z-30"></div>
-
-                            {/* WhatsApp Header */}
-                            <div className="bg-[#075e54] p-4 pt-8 flex items-center gap-3 relative z-20">
-                                <div className="w-10 h-10 rounded-full bg-white overflow-hidden shrink-0">
-                                    <Image src="/assets/Cartoon Astrologer.jpg" alt="Pandit" width={40} height={40} className="object-cover w-full h-full" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-white leading-tight truncate w-32">Smart Pandit</h4>
-                                    <p className="text-xs text-white/70">typing...</p>
-                                </div>
+                    {/* Left Content Area */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-100px" }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="flex flex-col gap-8 max-w-2xl"
+                    >
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-semibold tracking-wide mb-6">
+                                <Sparkles className="w-4 h-4" />
+                                <span>Next-Gen Spiritual Companion</span>
                             </div>
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white font-lora leading-[1.15] mb-6">
+                                Your Personal Pandit,<br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">
+                                    Always on WhatsApp.
+                                </span>
+                            </h2>
+                            <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-xl">
+                                Experience divine guidance seamlessly integrated into your daily life. Get personalized horoscopes, profound remedies, and answers to life's burning questions—right where you chat.
+                            </p>
+                        </div>
 
-                            {/* Chat Area */}
-                            <div className="bg-[#efe7dd] h-full p-4 flex flex-col gap-4 relative overflow-y-auto pb-24 scrollbar-hide">
-                                {/* WA Background pattern mockup */}
-                                <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'url("https://w0.peakpx.com/wallpaper/818/148/HD-wallpaper-whatsapp-background-cool-dark-green-new-theme-whatsapp.jpg")', backgroundSize: 'cover' }}></div>
-
-                                {/* User Message */}
-                                <div className="bg-[#dcf8c6] p-3 rounded-xl rounded-tr-none self-end max-w-[85%] shadow-sm relative z-10 text-gray-800 text-sm mt-2">
-                                    horoscope bheje do pandit ji
-                                    <span className="text-[10px] text-gray-500 ml-2 float-right mt-1">9:01 AM ✓✓</span>
-                                </div>
-
-                                {/* Bot Message */}
-                                <div className="bg-white p-3 rounded-xl rounded-tl-none self-start w-[95%] shadow-sm relative z-10 border-l-4 border-emerald-500 text-sm">
-
-                                    {/* Rich Card */}
-                                    <div className="bg-[#111b21] rounded-xl p-4 mb-3 text-white">
-                                        <h5 className="text-center font-bold text-emerald-400 mb-3 border-b border-gray-700 pb-2">Lucky Elements</h5>
-                                        <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
-                                            <div>
-                                                <p className="text-gray-400 mb-1">Colour</p>
-                                                <p className="font-bold text-lg flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-orange-500"></span> Orange</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-gray-400 mb-1">Number</p>
-                                                <p className="font-bold text-lg text-white">2</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-gray-400 mb-1">Gemstone</p>
-                                                <p className="font-bold text-[15px] text-emerald-400 truncate">Emerald</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-gray-400 mb-1">Direction</p>
-                                                <p className="font-bold text-[15px] text-white">North-East</p>
-                                            </div>
-                                        </div>
+                        <div className="space-y-5">
+                            {[
+                                "Daily Horoscope & Lucky Elements tailored to your birth chart.",
+                                "Instant answers to spiritual and astrological queries 24/7.",
+                                "Reminders for important Muhurtas and Puja times."
+                            ].map((feature, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.3 + (idx * 0.1), duration: 0.5 }}
+                                    className="flex items-start gap-4"
+                                >
+                                    <div className="mt-1 shrink-0 bg-emerald-500/20 rounded-full p-0.5">
+                                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                                     </div>
-
-                                    <p className="text-gray-800 font-medium mb-2 leading-relaxed text-[13px]">
-                                        🌅 Good Morning Praveen!<br />
-                                        Monday - Bhagwan Shiv ka powerful din 🙏
-                                    </p>
-                                    <p className="text-gray-600 mb-2 leading-relaxed text-[12px]">
-                                        Aaj full focus mode ON! Goals crystal clear honge, tasks time pe perfectly smash kar loge...
-                                    </p>
-                                    <p className="text-emerald-700 font-bold font-serif text-[12px] pr-12">
-                                        Smartmurti - Your pocket Pandit!
-                                    </p>
-
-                                    <span className="absolute bottom-2 right-2 text-[10px] text-gray-400 pt-1">9:01 AM</span>
-                                </div>
-                            </div>
-
-                            {/* Chat Input Area Mockup */}
-                            <div className="absolute bottom-0 left-0 right-0 p-3 bg-[#f0f0f0] flex items-center gap-2 z-20">
-                                <div className="flex-1 bg-white rounded-full px-4 py-2 text-gray-400 text-sm">Message</div>
-                                <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-md">
-                                    <svg className="w-5 h-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-                                </div>
-                            </div>
+                                    <p className="text-gray-300 text-lg leading-snug">{feature}</p>
+                                </motion.div>
+                            ))}
                         </div>
 
-                        {/* Main Decorative Character leaning on phone (Right Side) */}
-                        <div className="absolute top-1/2 -translate-y-1/2 -right-20 md:-right-40 lg:-right-64 w-64 md:w-96 lg:w-[40rem] aspect-[3/4] z-20 hidden md:block pointer-events-none">
-                            <Image src="/assets/landing-2/Gemini_Generated_Image_gsxe1ugsxe1ugsxe.png" alt="Smart Pandit Character" fill className="object-contain drop-shadow-2xl" priority />
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.7, duration: 0.5 }}
+                            className="pt-4"
+                        >
+                            <button className="group relative inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20bd5c] text-black font-bold text-lg py-4 px-10 rounded-full shadow-[0_0_40px_rgba(37,211,102,0.3)] hover:shadow-[0_0_60px_rgba(37,211,102,0.5)] transition-all overflow-hidden">
+                                <MessageCircle className="w-6 h-6 fill-black/10" />
+                                <span className="relative z-10 tracking-wide">Connect on WhatsApp</span>
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
+
+                                {/* Button shine effect */}
+                                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:animate-shimmer" />
+                            </button>
+                        </motion.div>
+                    </motion.div>
+
+                    {/* Right Visual Area: Cinematic Image Display */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true, margin: "-100px" }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="relative lg:ml-auto w-full max-w-lg mx-auto lg:max-w-none"
+                    >
+                        {/* Ambient glow behind image */}
+                        <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full transform -translate-y-12 scale-110" />
+
+                        <div className="relative aspect-[4/5] w-full rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl backdrop-blur-sm group">
+                            <Image
+                                src="/assets/landing-2/Gemini_Generated_Image_gsxe1ugsxe1ugsxe.png"
+                                alt="WhatsApp Spiritual Guide"
+                                fill
+                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                priority
+                            />
+
+                            {/* Premium gradient overlay to blend image into background smoothly */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
+
+                            {/* Floating UI Element embedded in image */}
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                whileInView={{ y: 0, opacity: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.8 }}
+                                className="absolute bottom-8 left-8 right-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center shrink-0">
+                                        <MessageCircle className="w-6 h-6 text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-white font-bold text-sm tracking-wide">Smart Pandit</h4>
+                                        <p className="text-emerald-300 text-xs font-medium mt-0.5">Typing a divine message...</p>
+                                    </div>
+                                </div>
+                            </motion.div>
                         </div>
-                    </div>
+
+                        {/* Floating decorative particles */}
+                        <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                            className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-emerald-400/30 to-teal-600/30 blur-2xl rounded-full"
+                        />
+                    </motion.div>
+
                 </div>
             </div>
         </section>

@@ -335,12 +335,12 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                                                 className={`w-1.5 rounded-full ${agentActivity === 'speaking' ? 'bg-green-500' : 'bg-blue-500'}`}
                                                 animate={{
                                                     height: agentActivity === 'speaking' || agentActivity === 'thinking'
-                                                        ? ["12px", `${Math.random() * 24 + 12}px`, "12px"]
+                                                        ? ["12px", `${24 + (i % 4) * 6}px`, "12px"]
                                                         : "6px"
                                                 }}
                                                 transition={{
                                                     repeat: Infinity,
-                                                    duration: 0.5 + Math.random() * 0.5,
+                                                    duration: 0.5 + (i % 3) * 0.2,
                                                 }}
                                             />
                                         ))}
