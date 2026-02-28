@@ -202,33 +202,33 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                             <h1 className="text-4xl font-lora font-medium text-gray-900 tracking-tight">Your Pujas Made Easy.</h1>
                         </div>
 
-                        <div className="flex-1 min-h-0 relative">
+                        <div className="flex-1 flex gap-4 min-h-0 relative">
 
-                            {/* Main AI Video Stage - fills full center width */}
-                            <div className="w-full h-full relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
-
-                                {/* Participant Tiles - floating overlay on video */}
-                                <div className="absolute top-4 left-4 z-30 flex flex-col gap-3 w-[160px]">
-                                    {assignedMockUsers.map((user, i) => (
-                                        <div key={i} className="relative w-full aspect-[4/3] rounded-[18px] overflow-hidden bg-gray-200 shadow-lg border-2 border-white/20">
-                                            {user.type === 'webcam' ? (
-                                                isVideoOff ? (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gray-800 text-white">
-                                                        <User className="w-8 h-8 opacity-50" />
-                                                    </div>
-                                                ) : (
-                                                    <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
-                                                )
+                            {/* Participant Ticker Column */}
+                            <div className="w-[220px] shrink-0 flex flex-col gap-4 overflow-y-auto pb-4 scrollbar-hide">
+                                {assignedMockUsers.map((user, i) => (
+                                    <div key={i} className="relative w-full aspect-[4/3] rounded-[24px] overflow-hidden bg-gray-200 shadow-sm border border-black/5 group">
+                                        {user.type === 'webcam' ? (
+                                            isVideoOff ? (
+                                                <div className="w-full h-full flex items-center justify-center bg-gray-800 text-white">
+                                                    <User className="w-12 h-12 opacity-50" />
+                                                </div>
                                             ) : (
-                                                <img src={user.img!} alt={user.name} className="w-full h-full object-cover" />
-                                            )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                                            <div className="absolute bottom-2 left-2 text-white font-medium text-xs drop-shadow-md truncate max-w-[90%]">
-                                                {user.name} {i === 0 && "(You)"}
-                                            </div>
+                                                <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
+                                            )
+                                        ) : (
+                                            <img src={user.img!} alt={user.name} className="w-full h-full object-cover" />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+                                        <div className="absolute bottom-3 left-3 text-white font-medium text-sm drop-shadow-md truncate max-w-[90%]">
+                                            {user.name} {i === 0 && "(You)"}
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Main AI Video Stage */}
+                            <div className="h-full aspect-square relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
 
                                 {sessionStatus === "DISCONNECTED" && (
                                     <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
