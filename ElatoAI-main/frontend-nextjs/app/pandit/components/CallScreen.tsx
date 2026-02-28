@@ -202,40 +202,40 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                             <h1 className="text-4xl font-lora font-medium text-gray-900 tracking-tight">Your Pujas Made Easy.</h1>
                         </div>
 
-                        <div className="flex-1 flex gap-4 min-h-0 relative">
+                        <div className="flex-1 min-h-0 relative">
 
-                            {/* Participant Ticker Column */}
-                            <div className="w-[220px] shrink-0 flex flex-col gap-4 overflow-y-auto pb-4 scrollbar-hide">
-                                {assignedMockUsers.map((user, i) => (
-                                    <div key={i} className="relative w-full aspect-[4/3] rounded-[24px] overflow-hidden bg-gray-200 shadow-sm border border-black/5 group">
-                                        {user.type === 'webcam' ? (
-                                            isVideoOff ? (
-                                                <div className="w-full h-full flex items-center justify-center bg-gray-800 text-white">
-                                                    <User className="w-12 h-12 opacity-50" />
-                                                </div>
+                            {/* Main AI Video Stage - fills full center width */}
+                            <div className="w-full h-full relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
+
+                                {/* Participant Tiles - floating overlay on video */}
+                                <div className="absolute top-4 left-4 z-30 flex flex-col gap-3 w-[160px]">
+                                    {assignedMockUsers.map((user, i) => (
+                                        <div key={i} className="relative w-full aspect-[4/3] rounded-[18px] overflow-hidden bg-gray-200 shadow-lg border-2 border-white/20">
+                                            {user.type === 'webcam' ? (
+                                                isVideoOff ? (
+                                                    <div className="w-full h-full flex items-center justify-center bg-gray-800 text-white">
+                                                        <User className="w-8 h-8 opacity-50" />
+                                                    </div>
+                                                ) : (
+                                                    <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
+                                                )
                                             ) : (
-                                                <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
-                                            )
-                                        ) : (
-                                            <img src={user.img!} alt={user.name} className="w-full h-full object-cover" />
-                                        )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
-                                        <div className="absolute bottom-3 left-3 text-white font-medium text-sm drop-shadow-md truncate max-w-[90%]">
-                                            {user.name} {i === 0 && "(You)"}
+                                                <img src={user.img!} alt={user.name} className="w-full h-full object-cover" />
+                                            )}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                            <div className="absolute bottom-2 left-2 text-white font-medium text-xs drop-shadow-md truncate max-w-[90%]">
+                                                {user.name} {i === 0 && "(You)"}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Main AI Video Stage */}
-                            <div className="h-full aspect-square relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
+                                    ))}
+                                </div>
 
                                 {sessionStatus === "DISCONNECTED" && (
                                     <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
                                         <div className="w-16 h-12 rounded-2xl bg-[#20bd5c]/20 border border-[#20bd5c]/30 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
                                             <VideoIcon className="w-6 h-6 text-[#25D366]" />
                                         </div>
-                                        <h2 className="text-2xl font-lora font-bold mb-3">Ready to joining the Puja?</h2>
+                                        <h2 className="text-2xl font-lora font-bold mb-3">Ready to join the Puja?</h2>
                                         <p className="text-gray-400 mb-10 max-w-sm text-center text-sm">Ensure your camera and microphone are ready.<br />The Pandit is waiting.</p>
                                         <button
                                             onClick={() => connect()}
@@ -325,7 +325,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                         </div>
 
                         {/* Bottom Guidelines & Transcription Area */}
-                        <div className="h-[120px] shrink-0 w-full mt-4 flex gap-4">
+                        <div className="h-[80px] shrink-0 w-full mt-3 flex gap-4">
                             <div className="flex-1 bg-white/60 backdrop-blur rounded-[24px] p-5 shadow-sm border border-white/60 flex flex-col justify-between">
                                 <div className="flex items-center justify-between pointer-events-none">
                                     <h3 className="font-bold text-gray-900 text-sm tracking-wide">PUJA GUIDELINES</h3>
