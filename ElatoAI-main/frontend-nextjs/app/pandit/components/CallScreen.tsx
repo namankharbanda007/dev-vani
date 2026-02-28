@@ -231,17 +231,17 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                             <div className="flex-1 relative rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
 
                                 {sessionStatus === "DISCONNECTED" && (
-                                    <div className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-white">
-                                        <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6">
-                                            <VideoIcon className="w-10 h-10 text-emerald-400" />
+                                    <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
+                                        <div className="w-16 h-12 rounded-2xl bg-[#20bd5c]/20 border border-[#20bd5c]/30 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
+                                            <VideoIcon className="w-6 h-6 text-[#25D366]" />
                                         </div>
-                                        <h2 className="text-2xl font-lora font-bold mb-2">Ready to joining the Puja?</h2>
-                                        <p className="text-gray-400 mb-8 max-w-sm text-center">Ensure your camera and microphone are ready. The Pandit is waiting.</p>
+                                        <h2 className="text-2xl font-lora font-bold mb-3">Ready to joining the Puja?</h2>
+                                        <p className="text-gray-400 mb-10 max-w-sm text-center text-sm">Ensure your camera and microphone are ready.<br />The Pandit is waiting.</p>
                                         <button
                                             onClick={() => connect()}
-                                            className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-full shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2"
+                                            className="px-8 py-3.5 bg-[#1da851] hover:bg-[#199446] text-white font-bold rounded-full shadow-lg shadow-[#1da851]/20 transition-all flex items-center gap-2"
                                         >
-                                            <Mic className="w-5 h-5" /> Start Live Puja
+                                            <Mic className="w-4 h-4" /> Start Live Puja
                                         </button>
                                     </div>
                                 )}
