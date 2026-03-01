@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import JoinScreen from "./components/JoinScreen";
-import CallScreen from "./components/CallScreen";
+import CallScreen, { getSharedAudioContext } from "./components/CallScreen";
 import { useSearchParams, useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,6 +27,17 @@ export default function ClientPage({ initialUser }: { initialUser: string | null
     }, [searchParams, router]);
 
     const handleJoin = (names: string[]) => {
+        // Eagerly resume Web Audio context during this exact user gesture (crucial for mobile Safari/Android)
+        try {
+            const ctx = getSharedAudioContext();
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+                console.log("🔊 WebAudio Context resumed via user gesture");
+            }
+        } catch (e) {
+            console.error("Failed to resume WebAudio:", e);
+        }
+
         setParticipants(names);
         setHasJoined(true);
     };

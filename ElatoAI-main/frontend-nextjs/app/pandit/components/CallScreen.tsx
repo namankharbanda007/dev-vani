@@ -6,7 +6,7 @@ import { useGroupCall } from '../hooks/useGroupCall';
 import { useWebRTC } from '../hooks/useWebRTC';
 
 // Keep track of audio contexts to prevent memory leaks
-const getSharedAudioContext = () => {
+export const getSharedAudioContext = () => {
     if (!(window as any).sharedAudioCtx) {
         (window as any).sharedAudioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
@@ -75,11 +75,12 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     const [isAiActiveGlobally, setIsAiActiveGlobally] = useState<boolean>(false);
     const [isHost, setIsHost] = useState(false); // Did THIS user start the AI?
 
-    // Group Call Voice Connection — no mixedAudioStream at init, it's passed at connect() time
     const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream } = useGroupCall({
         participants,
         personalityId: PANDIT_PERSONALITY_ID
     });
+
+    const [sharedAgentActivity, setSharedAgentActivity] = useState<string>("idle");
 
     // Initialize WebRTC P2P Mesh Network Connections
     // We send the `outboundStream` (Local Mic + AI Voice)
@@ -94,6 +95,7 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     // Listen for AI shared state changes from other peers
     useEffect(() => {
         if (!channel) return;
+
         channel.on('broadcast', { event: 'AI_STATE' }, ({ payload }) => {
             if (payload.status === "STARTED") {
                 setIsAiActiveGlobally(true);
@@ -101,7 +103,13 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                 setIsAiActiveGlobally(false);
             }
         });
-    }, [channel]);
+
+        channel.on('broadcast', { event: 'AI_ACTIVITY' }, ({ payload }) => {
+            if (!isHost) {
+                setSharedAgentActivity(payload.activity);
+            }
+        });
+    }, [channel, isHost]);
 
     // Cleanup AI on unmount
     useEffect(() => {
@@ -128,18 +136,29 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
         }
     }, [sessionStatus, broadcastEvent, isAiActiveGlobally, isHost]);
 
-    // Video playback control based on agent activity
+    // Broadcast and apply agent activity changes if Host
+    useEffect(() => {
+        if (isHost && isAiActiveGlobally) {
+            setSharedAgentActivity(agentActivity);
+            broadcastEvent('AI_ACTIVITY', { activity: agentActivity });
+        }
+    }, [agentActivity, isHost, isAiActiveGlobally, broadcastEvent]);
+
+    // Video playback control based on sharedAgentActivity (synced for everyone)
     useEffect(() => {
         if (!speakingVideoRef.current || !listeningVideoRef.current) return;
 
-        if (sessionStatus === "CONNECTED" && (agentActivity === "speaking" || agentActivity === "thinking")) {
+        // If Host is connected, sessionStatus = "CONNECTED". For guests, sessionStatus is always "DISCONNECTED" but isAiActiveGlobally is true.
+        const isActive = sessionStatus === "CONNECTED" || isAiActiveGlobally;
+
+        if (isActive && (sharedAgentActivity === "speaking" || sharedAgentActivity === "thinking")) {
             speakingVideoRef.current.play().catch(e => console.error("Speaking play error:", e));
             listeningVideoRef.current.pause();
         } else {
             listeningVideoRef.current.play().catch(e => console.error("Listening play error:", e));
             speakingVideoRef.current.pause();
         }
-    }, [sessionStatus, agentActivity]);
+    }, [sessionStatus, isAiActiveGlobally, sharedAgentActivity]);
 
     // Device Setup & Web Audio Bootstrap
     useEffect(() => {
@@ -524,9 +543,10 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                                 <video
                                     ref={speakingVideoRef}
                                     src="/assets/Video_Project_2_optimized.mp4"
-                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${(sessionStatus === "CONNECTED" && (agentActivity === "speaking" || agentActivity === "thinking")) ? "opacity-100 z-10" : "opacity-0 -z-10"}`}
+                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${((sessionStatus === "CONNECTED" || isAiActiveGlobally) && (sharedAgentActivity === "speaking" || sharedAgentActivity === "thinking")) ? "opacity-100 z-10" : "opacity-0 -z-10"}`}
                                     loop
                                     muted
+                                    autoPlay
                                     playsInline
                                     preload="auto"
                                 />
@@ -534,9 +554,10 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                                 <video
                                     ref={listeningVideoRef}
                                     src="/assets/Silently_paying_attention_optimized.mp4"
-                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${(sessionStatus !== "CONNECTED" || agentActivity === "listening") ? "opacity-100 z-0" : "opacity-0 -z-10"}`}
+                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${(!(sessionStatus === "CONNECTED" || isAiActiveGlobally) || sharedAgentActivity === "listening" || sharedAgentActivity === "idle") ? "opacity-100 z-0" : "opacity-0 -z-10"}`}
                                     loop
                                     muted
+                                    autoPlay
                                     playsInline
                                     preload="auto"
                                 />
@@ -546,7 +567,7 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
 
                                 {/* Floating Namaste indicator shown briefly after connect */}
                                 <AnimatePresence>
-                                    {(sessionStatus === "CONNECTED" || isAiActiveGlobally) && agentActivity === "speaking" && (
+                                    {(sessionStatus === "CONNECTED" || isAiActiveGlobally) && sharedAgentActivity === "speaking" && (
                                         <motion.div
                                             initial={{ scale: 0.8, opacity: 0 }}
                                             animate={{ scale: 1, opacity: 1 }}
@@ -559,8 +580,8 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                                     )}
                                 </AnimatePresence>
 
-                                <div className={`absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center text-white z-20 transition-colors ${agentActivity === 'listening' ? 'bg-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.5)] border border-blue-500/50' : agentActivity === 'speaking' ? 'bg-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.5)] border border-green-500/50' : 'bg-gray-500/20 border border-gray-500/50'}`}>
-                                    {agentActivity === 'listening' ? <Mic className="w-5 h-5 text-blue-400" /> : <Mic className="w-5 h-5 text-green-400" />}
+                                <div className={`absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center text-white z-20 transition-colors ${sharedAgentActivity === 'listening' || sharedAgentActivity === 'idle' ? 'bg-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.5)] border border-blue-500/50' : sharedAgentActivity === 'speaking' ? 'bg-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.5)] border border-green-500/50' : 'bg-gray-500/20 border border-gray-500/50'}`}>
+                                    {sharedAgentActivity === 'listening' || sharedAgentActivity === 'idle' ? <Mic className="w-5 h-5 text-blue-400" /> : <Mic className="w-5 h-5 text-green-400" />}
                                 </div>
 
                                 {/* Internal Controls Overlay */}

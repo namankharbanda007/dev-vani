@@ -105,6 +105,22 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
             }
         };
 
+        // Automatic renegotiation mechanism whenever tracks are added/removed dynamically
+        pc.onnegotiationneeded = async () => {
+            addLog(`🔄 Negotiation needed for ${remoteId.slice(0, 4)}`);
+            try {
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                channelRef.current?.send({
+                    type: 'broadcast',
+                    event: 'offer',
+                    payload: { offer, to: remoteId, from: myIdRef.current }
+                });
+            } catch (e: any) {
+                addLog(`❌ Renegotiation error: ${e?.message}`);
+            }
+        };
+
         // When we start receiving the actual remote media streams
         pc.ontrack = (event) => {
             const [stream] = event.streams;
@@ -123,8 +139,10 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         };
 
         // If we are the initiating party (we joined second), create the Offer
+        // Note: the `onnegotiationneeded` event usually handles this, but creating an initial empty offer 
+        // forces the connection to start even if no local camera is active yet.
         if (isInitiator) {
-            addLog(`⏳ Creating OFFER for ${remoteId.slice(0, 4)}...`);
+            addLog(`⏳ Creating initial OFFER for ${remoteId.slice(0, 4)}...`);
             pc.createOffer().then(offer => {
                 pc.setLocalDescription(offer).then(() => {
                     addLog(`📤 Sending initial OFFER to ${remoteId.slice(0, 4)}`);
@@ -163,9 +181,14 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
             // If someone new is online, and we aren't already connected to them, WE initiate the WebRTC offer.
             onlineUsers.forEach(userId => {
                 if (userId !== myIdRef.current && !peerConnectionsRef.current[userId]) {
-                    addLog(`🚀 Found new user ${userId.slice(0, 4)}, I will initiate.`);
-                    // We saw them first via presence, so we act as the initiator
-                    createPeerConnection(userId, true);
+                    // Strict Lexicographical Ordering to resolve glare/collisions
+                    const isInitiator = myIdRef.current > userId;
+                    if (isInitiator) {
+                        addLog(`🚀 Found user ${userId.slice(0, 4)}, I am initiator.`);
+                    } else {
+                        addLog(`⏳ Found user ${userId.slice(0, 4)}, awaiting their offer.`);
+                    }
+                    createPeerConnection(userId, isInitiator);
                 }
             });
         });
