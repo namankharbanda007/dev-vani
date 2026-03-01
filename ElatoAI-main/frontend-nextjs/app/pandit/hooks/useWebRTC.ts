@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -16,7 +16,9 @@ export interface RemoteParticipant {
 }
 
 export function useWebRTC(roomId: string, localStream: MediaStream | null) {
-    const supabase = createClient();
+    // Memoize the supabase client so it doesn't trigger re-renders or effect cleanups
+    const supabase = useMemo(() => createClient(), []);
+
     const [remoteParticipants, setRemoteParticipants] = useState<RemoteParticipant[]>([]);
     const [connected, setConnected] = useState(false);
 
@@ -172,16 +174,25 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         });
 
         // 4. Subscribe to the channel and track presence
-        channel.subscribe(async (status) => {
+        channel.subscribe(async (status, err) => {
             if (status === 'SUBSCRIBED') {
+                console.log("Successfully connected to WebRTC signaling room");
                 setConnected(true);
-                await channel.track({ online_at: new Date().toISOString() });
+                try {
+                    await channel.track({ online_at: new Date().toISOString() });
+                } catch (e) {
+                    console.error("Presence tracking failed (continuing anyway):", e);
+                }
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                console.error(`Supabase Realtime Channel Error [${status}]:`, err);
             }
         });
 
         return () => {
             setConnected(false);
-            channel.unsubscribe();
+            channel.unsubscribe().then(() => {
+                supabase.removeChannel(channel);
+            });
             // Cleanup all peer connections
             Object.values(peerConnectionsRef.current).forEach(pc => pc.close());
             peerConnectionsRef.current = {};
