@@ -66,7 +66,10 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     // Audio Mixing Refs
     const mixerContextRef = useRef<AudioContext | null>(null);
     const mixedAiInputStreamRef = useRef<MediaStream | null>(null);
-    const sourceNodesRef = useRef<MediaStreamAudioSourceNode[]>([]);
+    const aiInputDestRef = useRef<MediaStreamAudioDestinationNode | null>(null);
+    const p2pOutputDestRef = useRef<MediaStreamAudioDestinationNode | null>(null);
+    const peerSourcesRef = useRef<Map<string, MediaStreamAudioSourceNode>>(new Map());
+    const aiSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
 
     // Shared State: Who is the host?
     const [isAiActiveGlobally, setIsAiActiveGlobally] = useState<boolean>(false);
@@ -137,9 +140,11 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
         }
     }, [sessionStatus, agentActivity]);
 
+    // Device Setup & Web Audio Bootstrap
     useEffect(() => {
         let isMounted = true;
         let activeStream: MediaStream | null = null;
+        let audioCtx: AudioContext | null = null;
         setCameraError(null);
 
         if (!isVideoOff) {
@@ -153,8 +158,36 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                     activeStream = stream;
                     setLocalStream(stream);
 
-                    // Initialize the outbound stream initially as just our local mic
-                    setOutboundStream(stream);
+                    try {
+                        const ctx = getSharedAudioContext();
+                        if (ctx.state === 'suspended') void ctx.resume();
+                        audioCtx = ctx;
+                        mixerContextRef.current = ctx;
+
+                        // Create the Input Mixer (Pipes everything to AI)
+                        const aiInputDest = ctx.createMediaStreamDestination();
+                        mixedAiInputStreamRef.current = aiInputDest.stream;
+                        aiInputDestRef.current = aiInputDest;
+
+                        // Create the Output Mixer (Pipes Your Mic + AI Audio back to WebRTC peers)
+                        const p2pOutputDest = ctx.createMediaStreamDestination();
+                        p2pOutputDestRef.current = p2pOutputDest;
+
+                        // Now create a single, stable outbound stream
+                        const outputStream = new MediaStream();
+                        if (stream.getVideoTracks().length > 0) outputStream.addTrack(stream.getVideoTracks()[0]);
+                        outputStream.addTrack(p2pOutputDest.stream.getAudioTracks()[0]);
+
+                        setOutboundStream(outputStream);
+
+                        // Attach the local mic to both destinations (except we'll mute local output dynamically down below)
+                        const localSource = ctx.createMediaStreamSource(stream);
+                        localSource.connect(aiInputDest);
+                        localSource.connect(p2pOutputDest);
+                    } catch (e) {
+                        console.error("Web Audio setup error:", e);
+                        setOutboundStream(stream); // fallback
+                    }
                 })
                 .catch(err => {
                     if (isMounted) {
@@ -169,91 +202,38 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
 
         return () => {
             isMounted = false;
-            // Clean up Web Audio nodes
-            sourceNodesRef.current.forEach(node => node.disconnect());
-            sourceNodesRef.current = [];
-
             if (activeStream) {
                 activeStream.getTracks().forEach(track => track.stop());
+            }
+            if (p2pOutputDestRef.current) p2pOutputDestRef.current = null;
+            if (aiInputDestRef.current) aiInputDestRef.current = null;
+            // Disconnect all peer sources
+            peerSourcesRef.current.forEach(source => source.disconnect());
+            peerSourcesRef.current.clear();
+            if (aiSourceRef.current) {
+                aiSourceRef.current.disconnect();
+                aiSourceRef.current = null;
             }
         };
     }, [isVideoOff]);
 
-    // --- AUDIO MIXING ENGINE ---
+    // 3. Mix AI Output back into P2P and Local Speakers
     useEffect(() => {
-        if (isMuted) return; // Wait to mix until not muted, or handle mute on the tracks
+        const ctx = mixerContextRef.current;
+        const p2pOutputDest = p2pOutputDestRef.current;
+        if (!ctx || !p2pOutputDest || !aiOutputStream) return;
 
-        try {
-            const ctx = getSharedAudioContext();
-            mixerContextRef.current = ctx;
-
-            if (ctx.state === 'suspended') {
-                void ctx.resume();
+        if (aiOutputStream.getAudioTracks().length > 0 && !aiSourceRef.current) {
+            try {
+                const aiSource = ctx.createMediaStreamSource(aiOutputStream);
+                aiSource.connect(p2pOutputDest);
+                aiSource.connect(ctx.destination);
+                aiSourceRef.current = aiSource;
+            } catch (e) {
+                console.error("Failed to connect AI output:", e);
             }
-
-            // 1. Mix all mics together to feed the AI (Input Mixer)
-            const aiInputDest = ctx.createMediaStreamDestination();
-            mixedAiInputStreamRef.current = aiInputDest.stream;
-
-            // 2. Mix our local mic WITH the AI's returning voice to send to WebRTC peers (Output Mixer)
-            const p2pOutputDest = ctx.createMediaStreamDestination();
-
-            // Re-create the outbound stream instead of mutating it directly
-            if (localStream) {
-                // Keep the video track from the webcam
-                const outputStream = new MediaStream();
-                const videoTracks = localStream.getVideoTracks();
-                if (videoTracks.length > 0) outputStream.addTrack(videoTracks[0]);
-
-                // Add the mixed audio track
-                outputStream.addTrack(p2pOutputDest.stream.getAudioTracks()[0]);
-                setOutboundStream(outputStream);
-            }
-
-            // Clean up previous nodes
-            sourceNodesRef.current.forEach(node => {
-                try { node.disconnect(); } catch (e) { }
-            });
-            sourceNodesRef.current = [];
-
-            // Add Local Mic to both Mixers
-            if (localStream && localStream.getAudioTracks().length > 0) {
-                const localSource = ctx.createMediaStreamSource(localStream);
-
-                // If muted locally, don't pipe audio
-                if (!isMuted) {
-                    localSource.connect(aiInputDest);
-                    localSource.connect(p2pOutputDest);
-                }
-
-                sourceNodesRef.current.push(localSource);
-            }
-
-            // Add all Remote Peers to the AI Input Mixer (so the AI hears them)
-            // But we do NOT add them to the p2pOutputDest, because we don't want to echo their voice back to them!
-            remoteParticipants.forEach(participant => {
-                if (participant.stream.getAudioTracks().length > 0) {
-                    const peerContentSource = ctx.createMediaStreamSource(participant.stream);
-                    peerContentSource.connect(aiInputDest);
-                    sourceNodesRef.current.push(peerContentSource);
-                }
-            });
-
-            // Add the AI's returning voice into the WebRTC P2P Output Mixer
-            // AND also route it to ctx.destination so WE can hear it locally through our speakers!
-            if (aiOutputStream && aiOutputStream.getAudioTracks().length > 0) {
-                const aiVoiceSource = ctx.createMediaStreamSource(aiOutputStream);
-                aiVoiceSource.connect(p2pOutputDest); // Send to peers
-                aiVoiceSource.connect(ctx.destination); // Play locally
-                sourceNodesRef.current.push(aiVoiceSource);
-            }
-
-        } catch (e) {
-            console.error("Web Audio Mixing Error:", e);
         }
-
-    }, [localStream, remoteParticipants, aiOutputStream, isMuted]);
-    // ----------------------------
+    }, [aiOutputStream]);
 
     const handleVideoRef = useCallback((node: HTMLVideoElement | null) => {
         if (node) {
