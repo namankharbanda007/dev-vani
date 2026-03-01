@@ -3,11 +3,22 @@ import { Search, Bell, Video as VideoIcon, MessageSquare, Users, FolderOpen, Cal
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useGroupCall } from '../hooks/useGroupCall';
+import { useWebRTC } from '../hooks/useWebRTC';
 
 interface CallScreenProps {
     participants: string[];
+    roomId: string;
     onLeave: () => void;
 }
+
+// Helper component to explicitly attach incoming WebRTC React Refs to standard HTML5 video elements.
+const RemoteVideo = ({ stream }: { stream: MediaStream }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    useEffect(() => {
+        if (videoRef.current) videoRef.current.srcObject = stream;
+    }, [stream]);
+    return <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover bg-gray-900" />;
+};
 
 // Mock users for the realistic UI feel
 const mockUsers = [
@@ -17,7 +28,7 @@ const mockUsers = [
     { name: "Amit Kumar", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200&h=200" },
 ];
 
-export default function CallScreen({ participants, onLeave }: CallScreenProps) {
+export default function CallScreen({ participants, roomId, onLeave }: CallScreenProps) {
     // Group Call Voice Connection
     // We use the same personality ID for the Pandit as the demo session
     const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
@@ -37,14 +48,16 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
     const [isChatOpen, setIsChatOpen] = useState(true);
     const [showMuhurtaWidget, setShowMuhurtaWidget] = useState(true);
 
-    // Family Meet Integration States
-    const [simulatedFamily, setSimulatedFamily] = useState<{ name: string, img: string }[]>([]);
+    // Family Meet States
     const [linkCopied, setLinkCopied] = useState(false);
     const [showInviteToast, setShowInviteToast] = useState(false);
 
     // Camera State
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const [cameraError, setCameraError] = useState<string | null>(null);
+
+    // Initialize WebRTC P2P Mesh Network Connections
+    const { connected, remoteParticipants } = useWebRTC(roomId, localStream);
 
     // Real webcam feed
     const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -146,7 +159,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
 
     // Family Meet - Invite Link Logic
     const copyInviteLink = () => {
-        const url = `${window.location.origin}/pandit?room=${Math.random().toString(36).substring(7)}`;
+        const url = `${window.location.origin}/pandit?room=${roomId}`;
         navigator.clipboard.writeText(url);
         setLinkCopied(true);
         setShowInviteToast(true);
@@ -154,19 +167,14 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
         setTimeout(() => setShowInviteToast(false), 5000);
     };
 
-    // Family Meet - Simulate Join Logic
-    const simulateFamilyJoin = () => {
-        const unusedMock = mockUsers.find(u => !simulatedFamily.find(sf => sf.name === u.name) && u.name !== "You");
-        if (unusedMock) {
-            setSimulatedFamily([...simulatedFamily, unusedMock]);
-        }
-    };
-
-    // Determine standard profile images based on names entered plus simulated joins
-    const assignedMockUsers: { name: string, type: 'webcam' | 'mock', img?: string }[] = [
-        { name: "You", type: 'webcam' },
-        ...participants.slice(1).map((name, index) => ({ name, type: 'mock' as const, img: mockUsers[(index + 1) % mockUsers.length].img })),
-        ...simulatedFamily.map(u => ({ name: u.name, type: 'mock' as const, img: u.img }))
+    // Consolidate local user and actual WebRTC remote participants
+    const activeCallUsers = [
+        { name: participants[0] || "You", type: 'local', stream: localStream },
+        ...remoteParticipants.map(participant => ({
+            name: `User (${participant.id.slice(0, 4)})`,
+            type: 'remote',
+            stream: participant.stream
+        }))
     ];
 
     return (
@@ -277,9 +285,9 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
 
                             {/* Participant Ticker Column */}
                             <div className="w-full xl:w-[220px] shrink-0 flex max-xl:flex-row flex-col gap-4 max-xl:overflow-x-auto overflow-y-auto pb-2 xl:pb-4 scrollbar-hide">
-                                {assignedMockUsers.map((user, i) => (
+                                {activeCallUsers.map((user, i) => (
                                     <div key={i} className="relative w-[140px] xl:w-full shrink-0 aspect-[4/3] rounded-[16px] xl:rounded-[24px] overflow-hidden bg-gray-200 shadow-sm border border-black/5 group">
-                                        {user.type === 'webcam' ? (
+                                        {user.type === 'local' ? (
                                             isVideoOff ? (
                                                 <div className="w-full h-full flex items-center justify-center bg-gray-800 text-white">
                                                     <User className="w-12 h-12 opacity-50" />
@@ -293,27 +301,22 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                                                 <video ref={handleVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
                                             )
                                         ) : (
-                                            <img src={user.img!} alt={user.name} className="w-full h-full object-cover" />
+                                            <RemoteVideo stream={user.stream!} />
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
                                         <div className="absolute bottom-2 xl:bottom-3 left-2 xl:left-3 text-white font-medium text-xs xl:text-sm drop-shadow-md truncate max-w-[90%] flex items-center gap-1.5">
-                                            {user.type !== 'webcam' && <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>}
-                                            {user.name} {user.type === 'webcam' && "(You)"}
+                                            {user.type === 'remote' && <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>}
+                                            {user.name} {user.type === 'local' && "(You)"}
                                         </div>
                                     </div>
                                 ))}
 
-                                {/* Simulate Join Button (Demo Purpose) */}
-                                {simulatedFamily.length < 3 && (
-                                    <button
-                                        onClick={simulateFamilyJoin}
-                                        className="relative w-[140px] xl:w-full shrink-0 aspect-[4/3] rounded-[16px] xl:rounded-[24px] overflow-hidden bg-white/40 border-2 border-dashed border-gray-300 hover:border-indigo-400 hover:bg-white/60 transition-all flex flex-col items-center justify-center gap-2 group cursor-pointer"
-                                    >
-                                        <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-400 group-hover:text-indigo-600 transition-colors">
-                                            <UserPlus className="w-5 h-5" />
-                                        </div>
-                                        <span className="text-xs font-bold text-gray-500 group-hover:text-indigo-600 text-center px-2">Simulate Member<br />Joining</span>
-                                    </button>
+                                {/* Webrtc Loading Status (Connecting to signaling server) */}
+                                {!connected && (
+                                    <div className="relative w-[140px] xl:w-full shrink-0 aspect-[4/3] rounded-[16px] xl:rounded-[24px] overflow-hidden bg-white/40 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 group cursor-pointer opacity-50">
+                                        <div className="w-6 h-6 rounded-full border-2 border-transparent border-t-indigo-500 animate-spin"></div>
+                                        <span className="text-xs font-bold text-gray-500 text-center px-2">Network Syncing</span>
+                                    </div>
                                 )}
                             </div>
 
@@ -498,7 +501,7 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                                         <div className="flex items-center gap-1.5 mt-0.5">
                                             <span className={`w-2 h-2 rounded-full ${sessionStatus === 'CONNECTED' ? 'bg-green-500' : 'bg-gray-400'}`}></span>
                                             <span className={`text-xs font-medium ${sessionStatus === 'CONNECTED' ? 'text-green-600' : 'text-gray-500'}`}>
-                                                {assignedMockUsers.length} People in call
+                                                {activeCallUsers.length} People in call
                                             </span>
                                         </div>
                                     </div>
@@ -566,7 +569,6 @@ export default function CallScreen({ participants, onLeave }: CallScreenProps) {
                         </div>
                     )}
                 </div>
-
             </div>
 
             {/* Decorative backdrop blobs mimicking realistic environment */}
