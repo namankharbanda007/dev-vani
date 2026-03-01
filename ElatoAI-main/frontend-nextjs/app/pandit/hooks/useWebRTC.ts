@@ -22,6 +22,29 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
     const [remoteParticipants, setRemoteParticipants] = useState<RemoteParticipant[]>([]);
     const [connected, setConnected] = useState(false);
 
+    // Track the latest localStream without re-triggering main connection effects
+    const localStreamRef = useRef<MediaStream | null>(null);
+    useEffect(() => {
+        localStreamRef.current = localStream;
+
+        // If localStream becomes available (e.g. camera permissions granted later),
+        // add tracks to any existing peer connections that don't already have them.
+        if (localStream) {
+            Object.values(peerConnectionsRef.current).forEach(pc => {
+                const senders = pc.getSenders();
+                localStream.getTracks().forEach(track => {
+                    if (!senders.find(s => s.track === track)) {
+                        try {
+                            pc.addTrack(track, localStream);
+                        } catch (e) {
+                            console.error("Error adding delayed track to peer connection:", e);
+                        }
+                    }
+                });
+            });
+        }
+    }, [localStream]);
+
     // We use a React ref so we don't trigger re-renders on every connection state change
     const channelRef = useRef<RealtimeChannel | null>(null);
     const peerConnectionsRef = useRef<Record<string, RTCPeerConnection>>({});
@@ -57,9 +80,10 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         peerConnectionsRef.current[remoteId] = pc;
 
         // Add local tracks to the connection
-        if (localStream) {
-            localStream.getTracks().forEach(track => {
-                pc.addTrack(track, localStream);
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => {
+                // Ensure we don't add duplicate tracks if the API permits, but usually getting tracks and adding them is safe
+                if (localStreamRef.current) pc.addTrack(track, localStreamRef.current);
             });
         }
 
@@ -105,11 +129,10 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         }
 
         return pc;
-    }, [localStream, removeParticipant]);
-
+    }, [removeParticipant]);
 
     useEffect(() => {
-        if (!roomId || !localStream) return;
+        if (!roomId) return;
 
         // 1. Initialize Supabase Realtime Channel
         const channel = supabase.channel(`webrtc-room-${roomId}`, {
@@ -211,7 +234,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
             peerConnectionsRef.current = {};
             setRemoteParticipants([]);
         };
-    }, [roomId, localStream, createPeerConnection, removeParticipant, supabase]);
+    }, [roomId, createPeerConnection, removeParticipant, supabase]);
 
     return {
         connected,
