@@ -5,15 +5,18 @@ import { toast } from "@/components/ui/use-toast";
 interface UseGroupCallProps {
     participants: string[];
     personalityId: string;
+    mixedAudioStream?: MediaStream | null;
 }
 
-export function useGroupCall({ participants, personalityId }: UseGroupCallProps) {
+export function useGroupCall({ participants, personalityId, mixedAudioStream }: UseGroupCallProps) {
     const [sessionStatus, setSessionStatus] = useState<"DISCONNECTED" | "CONNECTING" | "CONNECTED">("DISCONNECTED");
     const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
     const [agentActivity, setAgentActivity] = useState<'speaking' | 'listening' | 'thinking'>('thinking');
 
     const disconnectRef = useRef<(() => void) | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
+    // Reference to the AI's output stream
+    const aiOutputStreamRef = useRef<MediaStream | null>(null);
 
     const connect = useCallback(async () => {
         if (sessionStatus !== "DISCONNECTED") return;
@@ -22,6 +25,10 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         void audioContext.resume();
         audioContextRef.current = audioContext;
+
+        // Create a MediaStreamDestination to capture the AI's output audio
+        const aiDestination = audioContext.createMediaStreamDestination();
+        aiOutputStreamRef.current = aiDestination.stream;
 
         setSessionStatus("CONNECTING");
 
@@ -74,7 +81,9 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
                 },
                 () => {
                     setAgentActivity('listening');
-                }
+                },
+                mixedAudioStream,
+                aiDestination
             );
 
             disconnectRef.current = connection.disconnect;
@@ -88,9 +97,10 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
             console.error("Group Call Connection Error:", err);
             setSessionStatus("DISCONNECTED");
             if (audioContextRef.current) audioContextRef.current.close();
+            aiOutputStreamRef.current = null;
             toast({ description: "Failed to connect to Ashram.", variant: "destructive" });
         }
-    }, [participants, personalityId, sessionStatus]);
+    }, [participants, personalityId, sessionStatus, mixedAudioStream]);
 
     const disconnect = useCallback(() => {
         if (disconnectRef.current) {
@@ -101,6 +111,7 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
             audioContextRef.current.close();
             audioContextRef.current = null;
         }
+        aiOutputStreamRef.current = null;
         setSessionStatus("DISCONNECTED");
     }, []);
 
@@ -116,6 +127,7 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
         isAgentSpeaking,
         agentActivity,
         connect,
-        disconnect
+        disconnect,
+        aiOutputStream: aiOutputStreamRef.current
     };
 }

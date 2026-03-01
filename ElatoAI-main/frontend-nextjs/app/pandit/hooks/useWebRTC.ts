@@ -26,6 +26,17 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
     const channelRef = useRef<RealtimeChannel | null>(null);
     const peerConnectionsRef = useRef<Record<string, RTCPeerConnection>>({});
 
+    // Expose the channel so we can broadcast app-level events (like AI speaking status)
+    const broadcastEvent = useCallback((event: string, payload: any) => {
+        if (channelRef.current) {
+            channelRef.current.send({
+                type: 'broadcast',
+                event: event,
+                payload: payload
+            });
+        }
+    }, []);
+
     // My unique presence ID generated when joining the room
     const myIdRef = useRef<string>(Math.random().toString(36).substring(2, 15));
 
@@ -190,9 +201,11 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
 
         return () => {
             setConnected(false);
-            channel.unsubscribe().then(() => {
-                supabase.removeChannel(channel);
-            });
+            if (channelRef.current) {
+                channelRef.current.unsubscribe().then(() => {
+                    if (channelRef.current) supabase.removeChannel(channelRef.current);
+                });
+            }
             // Cleanup all peer connections
             Object.values(peerConnectionsRef.current).forEach(pc => pc.close());
             peerConnectionsRef.current = {};
@@ -202,6 +215,8 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
 
     return {
         connected,
-        remoteParticipants
+        remoteParticipants,
+        broadcastEvent,
+        channel: channelRef.current
     };
 }

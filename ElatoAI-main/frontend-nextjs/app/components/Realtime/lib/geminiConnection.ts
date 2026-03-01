@@ -87,10 +87,12 @@ export async function createGeminiConnection(
     onRemoteEvent: (event: any) => void,
     onSpeakingStateChange?: (isSpeaking: boolean) => void,
     onDisconnect?: () => void,
-    onTurnComplete?: () => void
+    onTurnComplete?: () => void,
+    externalStream?: MediaStream | null,
+    externalDestination?: MediaStreamAudioDestinationNode
 ) {
     let ws: WebSocket | null = null;
-    let mediaStream: MediaStream | null = null;
+    let finalMediaStream: MediaStream | null = null;
     let workletNode: AudioWorkletNode | null = null;
     let nextStartTime = 0;
     let speakingTimeout: NodeJS.Timeout | null = null;
@@ -106,12 +108,16 @@ export async function createGeminiConnection(
             console.warn("Worklet might already be added or failed:", e);
         }
 
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                channelCount: 1,
-                sampleRate: 16000,
-            },
-        });
+        if (externalStream) {
+            finalMediaStream = externalStream;
+        } else {
+            finalMediaStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    channelCount: 1,
+                    sampleRate: 16000,
+                },
+            });
+        }
 
         // 2. Connect to WebSocket
         const url = `${URI}?key=${apiKey}`;
@@ -136,7 +142,13 @@ export async function createGeminiConnection(
 
             const source = audioContext.createBufferSource();
             source.buffer = buffer;
-            source.connect(audioContext.destination);
+
+            // Connect to external destination if provided, otherwise the user's speakers
+            if (externalDestination) {
+                source.connect(externalDestination);
+            } else {
+                source.connect(audioContext.destination);
+            }
 
             if (nextStartTime < audioContext.currentTime) {
                 nextStartTime = audioContext.currentTime;
@@ -221,7 +233,7 @@ export async function createGeminiConnection(
         };
 
         // 3. Audio Processing Setup
-        const source = audioContext.createMediaStreamSource(mediaStream);
+        const source = audioContext.createMediaStreamSource(finalMediaStream);
         workletNode = new AudioWorkletNode(audioContext, 'pcm-processor');
 
         workletNode.port.onmessage = (event) => {
@@ -249,8 +261,10 @@ export async function createGeminiConnection(
 
     } catch (error) {
         console.error("Failed to create Gemini connection", error);
-        // Ensure cleanup if we fail during setup
-        mediaStream?.getTracks().forEach(track => track.stop());
+        // Ensure cleanup if we fail during setup (only kill tracks we created ourselves)
+        if (!externalStream) {
+            finalMediaStream?.getTracks().forEach(track => track.stop());
+        }
         throw error;
     }
 
@@ -272,7 +286,10 @@ export async function createGeminiConnection(
     return {
         disconnect: () => {
             ws?.close();
-            mediaStream?.getTracks().forEach(track => track.stop());
+            // We only stop tracks if we grabbed the mic ourselves (not passed externally)
+            if (!externalStream) {
+                finalMediaStream?.getTracks().forEach(track => track.stop());
+            }
             if (audioContext && audioContext.state !== 'closed') {
                 audioContext.close();
             }

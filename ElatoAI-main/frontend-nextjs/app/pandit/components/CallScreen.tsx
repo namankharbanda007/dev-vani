@@ -5,6 +5,14 @@ import Image from "next/image";
 import { useGroupCall } from '../hooks/useGroupCall';
 import { useWebRTC } from '../hooks/useWebRTC';
 
+// Keep track of audio contexts to prevent memory leaks
+const getSharedAudioContext = () => {
+    if (!(window as any).sharedAudioCtx) {
+        (window as any).sharedAudioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    return (window as any).sharedAudioCtx as AudioContext;
+};
+
 interface CallScreenProps {
     participants: string[];
     roomId: string;
@@ -33,8 +41,6 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     // We use the same personality ID for the Pandit as the demo session
     const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
 
-    const { sessionStatus, connect, disconnect, agentActivity } = useGroupCall({ participants, personalityId: PANDIT_PERSONALITY_ID });
-
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOff, setIsVideoOff] = useState(false);
 
@@ -52,12 +58,29 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     const [linkCopied, setLinkCopied] = useState(false);
     const [showInviteToast, setShowInviteToast] = useState(false);
 
-    // Camera State
+    // Camera/Audio States
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+    const [outboundStream, setOutboundStream] = useState<MediaStream | null>(null);
     const [cameraError, setCameraError] = useState<string | null>(null);
 
+    // Audio Mixing Refs
+    const mixerContextRef = useRef<AudioContext | null>(null);
+    const mixedAiInputStreamRef = useRef<MediaStream | null>(null);
+    const sourceNodesRef = useRef<MediaStreamAudioSourceNode[]>([]);
+
+    // Shared State: Who is the host?
+    const [isAiActiveGlobally, setIsAiActiveGlobally] = useState<boolean>(false);
+
+    // Group Call Voice Connection (Using the mixed room stream)
+    const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream } = useGroupCall({
+        participants,
+        personalityId: PANDIT_PERSONALITY_ID,
+        mixedAudioStream: mixedAiInputStreamRef.current
+    });
+
     // Initialize WebRTC P2P Mesh Network Connections
-    const { connected, remoteParticipants } = useWebRTC(roomId, localStream);
+    // We send the `outboundStream` (Local Mic + AI Voice) to other peers
+    const { connected, remoteParticipants, channel, broadcastEvent } = useWebRTC(roomId, outboundStream);
 
     // Real webcam feed
     const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -66,14 +89,40 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     const speakingVideoRef = useRef<HTMLVideoElement>(null);
     const listeningVideoRef = useRef<HTMLVideoElement>(null);
 
-    // Initialize the Voice Connection exactly once on mount
-    // EDIT: Removed auto-connect on mount to require explicit user action.
+    // Listen for AI shared state changes from other peers
     useEffect(() => {
-        // The hook handles cleanup on unmount
+        if (!channel) return;
+        channel.on('broadcast', { event: 'AI_STATE' }, ({ payload }) => {
+            if (payload.status === "STARTED") {
+                setIsAiActiveGlobally(true);
+            } else if (payload.status === "STOPPED") {
+                setIsAiActiveGlobally(false);
+            }
+        });
+    }, [channel]);
+
+    // Cleanup AI on unmount
+    useEffect(() => {
         return () => {
             disconnect();
         };
     }, [disconnect]);
+
+    // Handle "Start Live Puja" click (Become Host)
+    const handleStartPuja = () => {
+        connect();
+        setIsAiActiveGlobally(true);
+        broadcastEvent('AI_STATE', { status: "STARTED" });
+    };
+
+    // Auto-stop AI broadcast if we disconnect
+    useEffect(() => {
+        if (sessionStatus === "DISCONNECTED" && isAiActiveGlobally) {
+            // Only we can turn it off if we were the ones running it (optimistic check based on sessionStatus)
+            setIsAiActiveGlobally(false);
+            broadcastEvent('AI_STATE', { status: "STOPPED" });
+        }
+    }, [sessionStatus, broadcastEvent, isAiActiveGlobally]);
 
     // Video playback control based on agent activity
     useEffect(() => {
@@ -94,7 +143,8 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
         setCameraError(null);
 
         if (!isVideoOff) {
-            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            // We need AUDIO true to hear each other, and to feed the AI
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                 .then((stream) => {
                     if (!isMounted) {
                         stream.getTracks().forEach(track => track.stop());
@@ -102,6 +152,9 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                     }
                     activeStream = stream;
                     setLocalStream(stream);
+
+                    // Initialize the outbound stream initially as just our local mic
+                    setOutboundStream(stream);
                 })
                 .catch(err => {
                     if (isMounted) {
@@ -111,15 +164,96 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                 });
         } else {
             setLocalStream(null);
+            setOutboundStream(null);
         }
 
         return () => {
             isMounted = false;
+            // Clean up Web Audio nodes
+            sourceNodesRef.current.forEach(node => node.disconnect());
+            sourceNodesRef.current = [];
+
             if (activeStream) {
                 activeStream.getTracks().forEach(track => track.stop());
             }
         };
     }, [isVideoOff]);
+
+    // --- AUDIO MIXING ENGINE ---
+    useEffect(() => {
+        if (isMuted) return; // Wait to mix until not muted, or handle mute on the tracks
+
+        try {
+            const ctx = getSharedAudioContext();
+            mixerContextRef.current = ctx;
+
+            if (ctx.state === 'suspended') {
+                void ctx.resume();
+            }
+
+            // 1. Mix all mics together to feed the AI (Input Mixer)
+            const aiInputDest = ctx.createMediaStreamDestination();
+            mixedAiInputStreamRef.current = aiInputDest.stream;
+
+            // 2. Mix our local mic WITH the AI's returning voice to send to WebRTC peers (Output Mixer)
+            const p2pOutputDest = ctx.createMediaStreamDestination();
+
+            // Re-create the outbound stream instead of mutating it directly
+            if (localStream) {
+                // Keep the video track from the webcam
+                const outputStream = new MediaStream();
+                const videoTracks = localStream.getVideoTracks();
+                if (videoTracks.length > 0) outputStream.addTrack(videoTracks[0]);
+
+                // Add the mixed audio track
+                outputStream.addTrack(p2pOutputDest.stream.getAudioTracks()[0]);
+                setOutboundStream(outputStream);
+            }
+
+            // Clean up previous nodes
+            sourceNodesRef.current.forEach(node => {
+                try { node.disconnect(); } catch (e) { }
+            });
+            sourceNodesRef.current = [];
+
+            // Add Local Mic to both Mixers
+            if (localStream && localStream.getAudioTracks().length > 0) {
+                const localSource = ctx.createMediaStreamSource(localStream);
+
+                // If muted locally, don't pipe audio
+                if (!isMuted) {
+                    localSource.connect(aiInputDest);
+                    localSource.connect(p2pOutputDest);
+                }
+
+                sourceNodesRef.current.push(localSource);
+            }
+
+            // Add all Remote Peers to the AI Input Mixer (so the AI hears them)
+            // But we do NOT add them to the p2pOutputDest, because we don't want to echo their voice back to them!
+            remoteParticipants.forEach(participant => {
+                if (participant.stream.getAudioTracks().length > 0) {
+                    const peerContentSource = ctx.createMediaStreamSource(participant.stream);
+                    peerContentSource.connect(aiInputDest);
+                    sourceNodesRef.current.push(peerContentSource);
+                }
+            });
+
+            // Add the AI's returning voice into the WebRTC P2P Output Mixer
+            // AND also route it to ctx.destination so WE can hear it locally through our speakers!
+            if (aiOutputStream && aiOutputStream.getAudioTracks().length > 0) {
+                const aiVoiceSource = ctx.createMediaStreamSource(aiOutputStream);
+                aiVoiceSource.connect(p2pOutputDest); // Send to peers
+                aiVoiceSource.connect(ctx.destination); // Play locally
+                sourceNodesRef.current.push(aiVoiceSource);
+            }
+
+        } catch (e) {
+            console.error("Web Audio Mixing Error:", e);
+        }
+
+    }, [localStream, remoteParticipants, aiOutputStream, isMuted]);
+    // ----------------------------
 
     const handleVideoRef = useCallback((node: HTMLVideoElement | null) => {
         if (node) {
@@ -323,7 +457,7 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                             {/* Main AI Video Stage */}
                             <div className="max-xl:flex-none flex-1 w-full max-xl:mx-auto max-w-[800px] aspect-square relative rounded-[24px] xl:rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
 
-                                {sessionStatus === "DISCONNECTED" && (
+                                {sessionStatus === "DISCONNECTED" && !isAiActiveGlobally && (
                                     <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
                                         <div className="w-16 h-12 rounded-2xl bg-[#20bd5c]/20 border border-[#20bd5c]/30 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
                                             <VideoIcon className="w-6 h-6 text-[#25D366]" />
@@ -331,11 +465,18 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                                         <h2 className="text-2xl font-lora font-bold mb-3">Ready to join the Puja?</h2>
                                         <p className="text-gray-400 mb-10 max-w-sm text-center text-sm">Ensure your camera and microphone are ready.<br />The Pandit is waiting.</p>
                                         <button
-                                            onClick={() => connect()}
+                                            onClick={handleStartPuja}
                                             className="px-8 py-3.5 bg-[#1da851] hover:bg-[#199446] text-white font-bold rounded-full shadow-lg shadow-[#1da851]/20 transition-all flex items-center gap-2"
                                         >
                                             <Mic className="w-4 h-4" /> Start Live Puja
                                         </button>
+                                    </div>
+                                )}
+
+                                {sessionStatus === "DISCONNECTED" && isAiActiveGlobally && (
+                                    <div className="absolute top-4 right-4 z-40 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 flex flex-row items-center justify-center text-white gap-2 shadow-lg">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                                        <p className="font-medium text-xs text-white">Host started the Puja</p>
                                     </div>
                                 )}
 
@@ -373,7 +514,7 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
 
                                 {/* Floating Namaste indicator shown briefly after connect */}
                                 <AnimatePresence>
-                                    {sessionStatus === "CONNECTED" && agentActivity === "speaking" && (
+                                    {(sessionStatus === "CONNECTED" || isAiActiveGlobally) && agentActivity === "speaking" && (
                                         <motion.div
                                             initial={{ scale: 0.8, opacity: 0 }}
                                             animate={{ scale: 1, opacity: 1 }}
@@ -386,7 +527,7 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                                     )}
                                 </AnimatePresence>
 
-                                <div className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-white z-20 transition-colors ${agentActivity === 'listening' ? 'bg-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.5)] border border-blue-500/50' : agentActivity === 'speaking' ? 'bg-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.5)] border border-green-500/50' : 'bg-gray-500/20 border border-gray-500/50'}`}>
+                                <div className={`absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center text-white z-20 transition-colors ${agentActivity === 'listening' ? 'bg-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.5)] border border-blue-500/50' : agentActivity === 'speaking' ? 'bg-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.5)] border border-green-500/50' : 'bg-gray-500/20 border border-gray-500/50'}`}>
                                     {agentActivity === 'listening' ? <Mic className="w-5 h-5 text-blue-400" /> : <Mic className="w-5 h-5 text-green-400" />}
                                 </div>
 
