@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import JoinScreen from "./components/JoinScreen";
 import CallScreen from "./components/CallScreen";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
 
 export default function ClientPage({ initialUser }: { initialUser: string | null }) {
@@ -11,6 +11,7 @@ export default function ClientPage({ initialUser }: { initialUser: string | null
     const [hasJoined, setHasJoined] = useState(false);
     const [participants, setParticipants] = useState<string[]>(initialUser ? [initialUser] : []);
     const searchParams = useSearchParams();
+    const router = useRouter();
     const [roomId, setRoomId] = useState<string>("");
 
     useEffect(() => {
@@ -18,9 +19,12 @@ export default function ClientPage({ initialUser }: { initialUser: string | null
         if (room) {
             setRoomId(room);
         } else {
-            setRoomId(uuidv4());
+            const newRoom = uuidv4();
+            setRoomId(newRoom);
+            // Push the generated room to the URL so the user sees they are in a specific session
+            router.replace(`/pandit?room=${newRoom}`);
         }
-    }, [searchParams]);
+    }, [searchParams, router]);
 
     const handleJoin = (names: string[]) => {
         setParticipants(names);
