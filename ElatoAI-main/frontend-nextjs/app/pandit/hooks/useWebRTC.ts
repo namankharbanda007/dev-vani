@@ -22,6 +22,12 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
     const [remoteParticipants, setRemoteParticipants] = useState<RemoteParticipant[]>([]);
     const [connected, setConnected] = useState(false);
     const [channelState, setChannelState] = useState<RealtimeChannel | null>(null);
+    const [debugLogs, setDebugLogs] = useState<string[]>([]);
+
+    const addLog = useCallback((msg: string) => {
+        console.log(msg);
+        setDebugLogs(prev => [...prev.slice(-15), msg]); // keep last 15
+    }, []);
 
     // Track the latest localStream without re-triggering main connection effects
     const localStreamRef = useRef<MediaStream | null>(null);
@@ -118,15 +124,17 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
 
         // If we are the initiating party (we joined second), create the Offer
         if (isInitiator) {
+            addLog(`⏳ Creating OFFER for ${remoteId.slice(0, 4)}...`);
             pc.createOffer().then(offer => {
                 pc.setLocalDescription(offer).then(() => {
+                    addLog(`📤 Sending initial OFFER to ${remoteId.slice(0, 4)}`);
                     channelRef.current?.send({
                         type: 'broadcast',
                         event: 'offer',
                         payload: { offer, to: remoteId, from: myIdRef.current }
                     });
                 });
-            }).catch(console.error);
+            }).catch(e => addLog(`❌ Error creating offer: ${e.message}`));
         }
 
         return pc;
@@ -150,24 +158,33 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         channel.on('presence', { event: 'sync' }, () => {
             const state = channel.presenceState();
             const onlineUsers = Object.keys(state);
+            addLog(`👥 Presence Sync. Online users: ${onlineUsers.length}`);
 
             // If someone new is online, and we aren't already connected to them, WE initiate the WebRTC offer.
             onlineUsers.forEach(userId => {
                 if (userId !== myIdRef.current && !peerConnectionsRef.current[userId]) {
+                    addLog(`🚀 Found new user ${userId.slice(0, 4)}, I will initiate.`);
                     // We saw them first via presence, so we act as the initiator
                     createPeerConnection(userId, true);
                 }
             });
         });
 
-        channel.on('presence', { event: 'leave' }, ({ key }) => {
-            removeParticipant(key);
+        channel.on('presence', { event: 'leave' }, ({ leftPresences }) => {
+            if (leftPresences) {
+                leftPresences.forEach((presence: any) => {
+                    addLog(`👋 User ${presence.key.slice(0, 4)} left the room.`);
+                    removeParticipant(presence.key);
+                });
+            }
         });
 
         // 3. Listen for WebRTC Signaling Data via Broadcast
         channel.on('broadcast', { event: 'offer' }, async ({ payload }) => {
             const { offer, to, from } = payload;
             if (to !== myIdRef.current) return; // Only process offers meant for me
+
+            addLog(`📥 Received OFFER from ${from.slice(0, 4)}`);
 
             // They initiated the offer, so we are NOT the initiator.
             const pc = createPeerConnection(from, false);
@@ -176,6 +193,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
             const answer = await pc.createAnswer();
             await pc.setLocalDescription(answer);
 
+            addLog(`📤 Sending ANSWER to ${from.slice(0, 4)}`);
             channel.send({
                 type: 'broadcast',
                 event: 'answer',
@@ -187,9 +205,13 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
             const { answer, to, from } = payload;
             if (to !== myIdRef.current) return;
 
+            addLog(`📥 Received ANSWER from ${from.slice(0, 4)}`);
+
             const pc = peerConnectionsRef.current[from];
             if (pc) {
                 await pc.setRemoteDescription(new RTCSessionDescription(answer));
+            } else {
+                addLog(`⚠️ Ignored ANSWER from ${from.slice(0, 4)}`);
             }
         });
 
@@ -212,15 +234,15 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         // 4. Subscribe to the channel and track presence
         channel.subscribe(async (status, err) => {
             if (status === 'SUBSCRIBED') {
-                console.log("Successfully connected to WebRTC signaling room");
+                addLog("✅ Supabase Subscribed! Tracking presence.");
                 setConnected(true);
                 try {
                     await channel.track({ online_at: new Date().toISOString() });
-                } catch (e) {
-                    console.error("Presence tracking failed (continuing anyway):", e);
+                } catch (e: any) {
+                    addLog(`❌ Presence fault: ${e?.message}`);
                 }
             } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-                console.error(`Supabase Realtime Channel Error [${status}]:`, err);
+                addLog(`❌ Channel Error [${status}]: ${err}`);
             }
         });
 
@@ -243,6 +265,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         connected,
         remoteParticipants,
         broadcastEvent,
-        channel: channelState
+        channel: channelState,
+        debugLogs
     };
 }

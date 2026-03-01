@@ -82,9 +82,8 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     });
 
     // Initialize WebRTC P2P Mesh Network Connections
-    // We send the `outboundStream` (Local Mic + AI Voice) to other peers
-    const { connected, remoteParticipants, channel, broadcastEvent } = useWebRTC(roomId, outboundStream);
-
+    // We send the `outboundStream` (Local Mic + AI Voice)
+    const { connected, remoteParticipants, broadcastEvent, channel, debugLogs } = useWebRTC(roomId, outboundStream);
     // Real webcam feed
     const localVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -473,6 +472,18 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                                         <span className="text-xs font-bold text-gray-500 text-center px-2">Network Syncing</span>
                                     </div>
                                 )}
+
+                                {/* Connection Debug Logs (Temporary for development) */}
+                                <div className="hidden xl:flex w-full mt-4 flex-col gap-1 bg-black/80 rounded-xl p-3 max-h-[200px] overflow-y-auto text-[10px] font-mono shadow-inner border border-white/10 shrink-0">
+                                    <div className="sticky top-0 bg-black text-gray-400 font-bold mb-1 pb-1 border-b border-gray-800">Connection Logs ({roomId.slice(0, 8)})</div>
+                                    {debugLogs.length === 0 ? (
+                                        <div className="text-gray-600 italic">Waiting for connection...</div>
+                                    ) : (
+                                        debugLogs.map((log, i) => (
+                                            <div key={i} className="text-emerald-400 break-words leading-tight">{log}</div>
+                                        ))
+                                    )}
+                                </div>
                             </div>
 
                             {/* Main AI Video Stage */}
