@@ -21,6 +21,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
 
     const [remoteParticipants, setRemoteParticipants] = useState<RemoteParticipant[]>([]);
     const [connected, setConnected] = useState(false);
+    const [channelState, setChannelState] = useState<RealtimeChannel | null>(null);
 
     // Track the latest localStream without re-triggering main connection effects
     const localStreamRef = useRef<MediaStream | null>(null);
@@ -143,6 +144,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         });
 
         channelRef.current = channel;
+        setChannelState(channel);
 
         // 2. Listen for Presence Sync (when users join/leave)
         channel.on('presence', { event: 'sync' }, () => {
@@ -224,6 +226,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
 
         return () => {
             setConnected(false);
+            setChannelState(null);
             if (channelRef.current) {
                 channelRef.current.unsubscribe().then(() => {
                     if (channelRef.current) supabase.removeChannel(channelRef.current);
@@ -240,6 +243,6 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         connected,
         remoteParticipants,
         broadcastEvent,
-        channel: channelRef.current
+        channel: channelState
     };
 }

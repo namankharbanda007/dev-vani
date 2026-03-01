@@ -73,12 +73,12 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
 
     // Shared State: Who is the host?
     const [isAiActiveGlobally, setIsAiActiveGlobally] = useState<boolean>(false);
+    const [isHost, setIsHost] = useState(false); // Did THIS user start the AI?
 
-    // Group Call Voice Connection (Using the mixed room stream)
+    // Group Call Voice Connection — no mixedAudioStream at init, it's passed at connect() time
     const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream } = useGroupCall({
         participants,
-        personalityId: PANDIT_PERSONALITY_ID,
-        mixedAudioStream: mixedAiInputStreamRef.current
+        personalityId: PANDIT_PERSONALITY_ID
     });
 
     // Initialize WebRTC P2P Mesh Network Connections
@@ -113,19 +113,21 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
 
     // Handle "Start Live Puja" click (Become Host)
     const handleStartPuja = () => {
-        connect();
+        // Pass the LIVE mixed audio stream ref at call-time (it's been populated by the Device Setup effect)
+        connect(mixedAiInputStreamRef.current);
+        setIsHost(true);
         setIsAiActiveGlobally(true);
         broadcastEvent('AI_STATE', { status: "STARTED" });
     };
 
     // Auto-stop AI broadcast if we disconnect
     useEffect(() => {
-        if (sessionStatus === "DISCONNECTED" && isAiActiveGlobally) {
-            // Only we can turn it off if we were the ones running it (optimistic check based on sessionStatus)
+        if (sessionStatus === "DISCONNECTED" && isHost && isAiActiveGlobally) {
             setIsAiActiveGlobally(false);
+            setIsHost(false);
             broadcastEvent('AI_STATE', { status: "STOPPED" });
         }
-    }, [sessionStatus, broadcastEvent, isAiActiveGlobally]);
+    }, [sessionStatus, broadcastEvent, isAiActiveGlobally, isHost]);
 
     // Video playback control based on agent activity
     useEffect(() => {
@@ -217,23 +219,62 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
         };
     }, [isVideoOff]);
 
-    // 3. Mix AI Output back into P2P and Local Speakers
+    // Mix AI Output back into P2P and Local Speakers
     useEffect(() => {
         const ctx = mixerContextRef.current;
         const p2pOutputDest = p2pOutputDestRef.current;
         if (!ctx || !p2pOutputDest || !aiOutputStream) return;
 
-        if (aiOutputStream.getAudioTracks().length > 0 && !aiSourceRef.current) {
+        // Disconnect previous AI source if it exists
+        if (aiSourceRef.current) {
+            try { aiSourceRef.current.disconnect(); } catch (e) { }
+            aiSourceRef.current = null;
+        }
+
+        if (aiOutputStream.getAudioTracks().length > 0) {
             try {
                 const aiSource = ctx.createMediaStreamSource(aiOutputStream);
-                aiSource.connect(p2pOutputDest);
-                aiSource.connect(ctx.destination);
+                aiSource.connect(p2pOutputDest);  // Send AI audio to all WebRTC peers
+                aiSource.connect(ctx.destination); // Play AI audio locally through speakers
                 aiSourceRef.current = aiSource;
+                console.log("✅ AI audio routed to P2P and local speakers");
             } catch (e) {
                 console.error("Failed to connect AI output:", e);
             }
         }
     }, [aiOutputStream]);
+
+    // Mix Remote Peer audio into the AI Input (so the AI hears everyone)
+    useEffect(() => {
+        const ctx = mixerContextRef.current;
+        const aiInputDest = aiInputDestRef.current;
+        if (!ctx || !aiInputDest || !isHost) return;
+
+        // Current participant IDs
+        const remoteIds = new Set(remoteParticipants.map(p => p.id));
+
+        // Cleanup dropped peers
+        peerSourcesRef.current.forEach((source, id) => {
+            if (!remoteIds.has(id)) {
+                try { source.disconnect(); } catch (e) { }
+                peerSourcesRef.current.delete(id);
+            }
+        });
+
+        // Add new remote peer audio to the AI input mixer
+        remoteParticipants.forEach(participant => {
+            if (!peerSourcesRef.current.has(participant.id) && participant.stream.getAudioTracks().length > 0) {
+                try {
+                    const peerSource = ctx.createMediaStreamSource(participant.stream);
+                    peerSource.connect(aiInputDest);
+                    peerSourcesRef.current.set(participant.id, peerSource);
+                    console.log(`✅ Remote peer ${participant.id} audio piped to AI input`);
+                } catch (e) {
+                    console.error(`Failed to connect remote peer ${participant.id} audio:`, e);
+                }
+            }
+        });
+    }, [remoteParticipants, isHost]);
 
     const handleVideoRef = useCallback((node: HTMLVideoElement | null) => {
         if (node) {
