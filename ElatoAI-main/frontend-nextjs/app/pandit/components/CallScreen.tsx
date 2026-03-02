@@ -97,7 +97,7 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     const activeCallUsers = useMemo(() => [
         { name: localName || "You", type: 'local', id: 'local', stream: localStream },
         ...remoteParticipants.map(participant => ({
-            name: participant.name,
+            name: participant.name || "User",
             type: 'remote',
             id: participant.id,
             stream: participant.stream
@@ -112,7 +112,11 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
         // Add the remote inputs
         remoteParticipants.forEach(p => {
             // Split by comma in case remote peer typed multiple names "A, B"
-            p.name.split(',').forEach(n => names.add(n.trim()));
+            if (p.name) {
+                p.name.split(',').forEach(n => names.add(n.trim()));
+            } else {
+                names.add("User");
+            }
         });
         return Array.from(names);
     }, [participants, remoteParticipants]);
