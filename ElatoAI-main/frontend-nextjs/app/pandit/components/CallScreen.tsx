@@ -23,7 +23,18 @@ interface CallScreenProps {
 const RemoteVideo = ({ stream }: { stream: MediaStream }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     useEffect(() => {
-        if (videoRef.current) videoRef.current.srcObject = stream;
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
+
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => {
+                console.warn("Blocked by browser autoplay policy, attempting muted play... ", e);
+                // On some strict browsers, we must fall back to muted or require a tap
+                // but usually WebRTC streams are exempt if the user granted mic access.
+            });
+        }
     }, [stream]);
     return <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover bg-gray-900" />;
 };
@@ -167,58 +178,73 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
         let audioCtx: AudioContext | null = null;
         setCameraError(null);
 
-        if (!isVideoOff) {
-            // We need AUDIO true to hear each other, and to feed the AI
-            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                .then((stream) => {
-                    if (!isMounted) {
-                        stream.getTracks().forEach(track => track.stop());
-                        return;
-                    }
-                    activeStream = stream;
-                    setLocalStream(stream);
+        const setupMediaAndAudio = async () => {
+            let stream: MediaStream | null = null;
 
+            if (!isVideoOff) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                } catch (err: any) {
+                    console.error("Camera access error:", err);
+                    if (isMounted) setCameraError(err.message || "Camera access denied");
+
+                    // Fallback to audio only
                     try {
-                        const ctx = getSharedAudioContext();
-                        if (ctx.state === 'suspended') void ctx.resume();
-                        audioCtx = ctx;
-                        mixerContextRef.current = ctx;
-
-                        // Create the Input Mixer (Pipes everything to AI)
-                        const aiInputDest = ctx.createMediaStreamDestination();
-                        mixedAiInputStreamRef.current = aiInputDest.stream;
-                        aiInputDestRef.current = aiInputDest;
-
-                        // Create the Output Mixer (Pipes Your Mic + AI Audio back to WebRTC peers)
-                        const p2pOutputDest = ctx.createMediaStreamDestination();
-                        p2pOutputDestRef.current = p2pOutputDest;
-
-                        // Now create a single, stable outbound stream
-                        const outputStream = new MediaStream();
-                        if (stream.getVideoTracks().length > 0) outputStream.addTrack(stream.getVideoTracks()[0]);
-                        outputStream.addTrack(p2pOutputDest.stream.getAudioTracks()[0]);
-
-                        setOutboundStream(outputStream);
-
-                        // Attach the local mic to both destinations (except we'll mute local output dynamically down below)
-                        const localSource = ctx.createMediaStreamSource(stream);
-                        localSource.connect(aiInputDest);
-                        localSource.connect(p2pOutputDest);
-                    } catch (e) {
-                        console.error("Web Audio setup error:", e);
-                        setOutboundStream(stream); // fallback
+                        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    } catch (audioErr: any) {
+                        console.error("Audio fallback error:", audioErr);
                     }
-                })
-                .catch(err => {
-                    if (isMounted) {
-                        console.error("Camera access error:", err);
-                        setCameraError(err.message || "Camera access denied");
-                    }
-                });
-        } else {
-            setLocalStream(null);
-            setOutboundStream(null);
-        }
+                }
+            }
+
+            if (!isMounted) {
+                if (stream) stream.getTracks().forEach(track => track.stop());
+                return;
+            }
+
+            if (stream) {
+                activeStream = stream;
+                setLocalStream(stream);
+            } else {
+                setLocalStream(null);
+            }
+
+            try {
+                const ctx = getSharedAudioContext();
+                if (ctx.state === 'suspended') void ctx.resume();
+                audioCtx = ctx;
+                mixerContextRef.current = ctx;
+
+                // Create the Input Mixer (Pipes everything to AI)
+                const aiInputDest = ctx.createMediaStreamDestination();
+                mixedAiInputStreamRef.current = aiInputDest.stream;
+                aiInputDestRef.current = aiInputDest;
+
+                // Create the Output Mixer (Pipes Your Mic + AI Audio back to WebRTC peers)
+                const p2pOutputDest = ctx.createMediaStreamDestination();
+                p2pOutputDestRef.current = p2pOutputDest;
+
+                // Create a single, stable outbound stream
+                const outputStream = new MediaStream();
+                if (stream && stream.getVideoTracks().length > 0) outputStream.addTrack(stream.getVideoTracks()[0]);
+                outputStream.addTrack(p2pOutputDest.stream.getAudioTracks()[0]);
+
+                setOutboundStream(outputStream);
+
+                // Attach the local mic to both mixers
+                if (stream && stream.getAudioTracks().length > 0) {
+                    // Important constraint check: Chrome fails if the stream's audio track is silent/blocked
+                    const localSource = ctx.createMediaStreamSource(stream);
+                    localSource.connect(aiInputDest);
+                    localSource.connect(p2pOutputDest);
+                }
+            } catch (e) {
+                console.error("Web Audio setup error:", e);
+                if (stream) setOutboundStream(stream); // fallback
+            }
+        };
+
+        setupMediaAndAudio();
 
         return () => {
             isMounted = false;
