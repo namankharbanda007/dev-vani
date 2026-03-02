@@ -20,20 +20,25 @@ interface CallScreenProps {
 }
 
 // Helper component to explicitly attach incoming WebRTC React Refs to standard HTML5 video elements.
-const RemoteVideo = ({ stream }: { stream: MediaStream }) => {
+const RemoteVideo = ({ stream }: { stream: MediaStream | undefined | null }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     useEffect(() => {
         const video = videoRef.current;
-        if (!video) return;
-        video.srcObject = stream;
+        if (!video || !stream) return;
+        
+        try {
+            video.srcObject = stream;
 
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(e => {
-                console.warn("Blocked by browser autoplay policy, attempting muted play... ", e);
-                // On some strict browsers, we must fall back to muted or require a tap
-                // but usually WebRTC streams are exempt if the user granted mic access.
-            });
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                    console.warn("Blocked by browser autoplay policy, attempting muted play... ", e);
+                    // On some strict browsers, we must fall back to muted or require a tap
+                    // but usually WebRTC streams are exempt if the user granted mic access.
+                });
+            }
+        } catch (e) {
+            console.error("Failed to assign RemoteVideo stream", e);
         }
     }, [stream]);
     return <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover bg-gray-900" />;
