@@ -183,15 +183,6 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
         channelRef.current = channel;
         setChannelState(channel);
 
-        // Track presence explicitly with the localName after subscribing
-        channel.subscribe(async (status) => {
-            if (status === 'SUBSCRIBED') {
-                await channel.track({ name: localName });
-                setConnected(true);
-                addLog(`✅ Supabase Subscribed! Tracking presence as ${localName}.`);
-            }
-        });
-
         // 2. Listen for Presence Sync (when users join/leave/update)
         channel.on('presence', { event: 'sync' }, () => {
             const state = channel.presenceState();
@@ -306,10 +297,13 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
         // 4. Subscribe to the channel and track presence
         channel.subscribe(async (status, err) => {
             if (status === 'SUBSCRIBED') {
-                addLog("✅ Supabase Subscribed! Tracking presence.");
                 setConnected(true);
+                addLog(`✅ Supabase Subscribed! Tracking presence as ${localName}.`);
                 try {
-                    await channel.track({ online_at: new Date().toISOString() });
+                    await channel.track({
+                        name: localName,
+                        online_at: new Date().toISOString()
+                    });
                 } catch (e: any) {
                     addLog(`❌ Presence fault: ${e?.message}`);
                 }
