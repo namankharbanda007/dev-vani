@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Search, Bell, Video as VideoIcon, MessageSquare, Users, FolderOpen, Calendar, Settings, Sun, Moon, Maximize2, Send, ImageIcon, AudioLines, PhoneOff, VideoOff, MicOff, Mic, User, Copy, UserPlus, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -85,17 +85,45 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     // Shared State: Who is the host?
     const [isAiActiveGlobally, setIsAiActiveGlobally] = useState<boolean>(false);
     const [isHost, setIsHost] = useState(false); // Did THIS user start the AI?
+    const [sharedAgentActivity, setSharedAgentActivity] = useState<string>("idle");
 
+    const localName = useMemo(() => participants.join(", "), [participants]);
+
+    // 1. Initialize WebRTC P2P Mesh Network Connections
+    // We send the `outboundStream` (Local Mic + AI Voice)
+    const { connected, remoteParticipants, broadcastEvent, channel, debugLogs } = useWebRTC(roomId, localName, outboundStream);
+
+    // 2. Consolidate local user and actual WebRTC remote participants
+    const activeCallUsers = useMemo(() => [
+        { name: localName || "You", type: 'local', id: 'local', stream: localStream },
+        ...remoteParticipants.map(participant => ({
+            name: participant.name,
+            type: 'remote',
+            id: participant.id,
+            stream: participant.stream
+        }))
+    ], [localName, localStream, remoteParticipants]);
+
+    // 3. Compute the unique names for the AI Group Call prompt
+    const allParticipantNames = useMemo(() => {
+        const names = new Set<string>();
+        // Add the local inputs
+        participants.forEach(p => names.add(p));
+        // Add the remote inputs
+        remoteParticipants.forEach(p => {
+            // Split by comma in case remote peer typed multiple names "A, B"
+            p.name.split(',').forEach(n => names.add(n.trim()));
+        });
+        return Array.from(names);
+    }, [participants, remoteParticipants]);
+
+    // 4. Initialize the AI Group Call 
+    // This now receives ALL participants (Host + Guests) so it greets everyone correctly
     const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream } = useGroupCall({
-        participants,
+        participants: allParticipantNames,
         personalityId: PANDIT_PERSONALITY_ID
     });
 
-    const [sharedAgentActivity, setSharedAgentActivity] = useState<string>("idle");
-
-    // Initialize WebRTC P2P Mesh Network Connections
-    // We send the `outboundStream` (Local Mic + AI Voice)
-    const { connected, remoteParticipants, broadcastEvent, channel, debugLogs } = useWebRTC(roomId, outboundStream);
     // Real webcam feed
     const videoGridRef = useRef<HTMLDivElement>(null);
     const aiAudioRef = useRef<HTMLAudioElement>(null);
@@ -320,7 +348,7 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                     peerSourcesRef.current.set(participant.id, peerSource);
                     console.log(`✅ Remote peer ${participant.id} audio piped to AI input`);
                 } catch (e) {
-                    console.error(`Failed to connect remote peer ${participant.id} audio:`, e);
+                    console.error(`Failed to connect remote peer ${participant.id} audio: `, e);
                 }
             }
         });
@@ -371,16 +399,6 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
         setTimeout(() => setLinkCopied(false), 3000);
         setTimeout(() => setShowInviteToast(false), 5000);
     };
-
-    // Consolidate local user and actual WebRTC remote participants
-    const activeCallUsers = [
-        { name: participants[0] || "You", type: 'local', stream: localStream },
-        ...remoteParticipants.map(participant => ({
-            name: `User (${participant.id.slice(0, 4)})`,
-            type: 'remote',
-            stream: participant.stream
-        }))
-    ];
 
     return (
         <div className="min-h-screen w-full bg-[#E5E0F4] relative flex p-2 lg:p-[2vh] overflow-y-auto">

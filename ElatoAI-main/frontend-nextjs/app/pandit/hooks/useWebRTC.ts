@@ -12,10 +12,11 @@ const ICE_SERVERS = {
 
 export interface RemoteParticipant {
     id: string; // the remote user's realtime presence ID
+    name: string; // the synchronized remote user name
     stream: MediaStream;
 }
 
-export function useWebRTC(roomId: string, localStream: MediaStream | null) {
+export function useWebRTC(roomId: string, localName: string, localStream: MediaStream | null) {
     // Memoize the supabase client so it doesn't trigger re-renders or effect cleanups
     const supabase = useMemo(() => createClient(), []);
 
@@ -134,7 +135,8 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
                 // Check if we already have this participant
                 if (prev.find(p => p.id === remoteId)) return prev;
                 addLog(`🎥 Received Video/Audio track from ${remoteId.slice(0, 4)}`);
-                return [...prev, { id: remoteId, stream }];
+                const remoteName = remoteNamesRef.current[remoteId] || "User";
+                return [...prev, { id: remoteId, name: remoteName, stream }];
             });
         };
 
@@ -165,6 +167,8 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         return pc;
     }, [removeParticipant]);
 
+    const remoteNamesRef = useRef<Record<string, string>>({});
+
     useEffect(() => {
         if (!roomId) return;
 
@@ -179,11 +183,33 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         channelRef.current = channel;
         setChannelState(channel);
 
-        // 2. Listen for Presence Sync (when users join/leave)
+        // Track presence explicitly with the localName after subscribing
+        channel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                await channel.track({ name: localName });
+                setConnected(true);
+                addLog(`✅ Supabase Subscribed! Tracking presence as ${localName}.`);
+            }
+        });
+
+        // 2. Listen for Presence Sync (when users join/leave/update)
         channel.on('presence', { event: 'sync' }, () => {
             const state = channel.presenceState();
             const onlineUsers = Object.keys(state);
             addLog(`👥 Presence Sync. Online users: ${onlineUsers.length}`);
+
+            // Extract remote names from the presence state
+            for (const [userId, presences] of Object.entries(state)) {
+                if (presences.length > 0 && (presences[0] as any).name) {
+                    remoteNamesRef.current[userId] = (presences[0] as any).name;
+                }
+            }
+
+            // Update existing participants with their synchronized names if they arrived late
+            setRemoteParticipants(prev => prev.map(p => ({
+                ...p,
+                name: remoteNamesRef.current[p.id] || p.name
+            })));
 
             // If someone new is online, and we aren't already connected to them, WE initiate the WebRTC offer.
             onlineUsers.forEach(userId => {
@@ -191,9 +217,9 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
                     // Strict Lexicographical Ordering to resolve glare/collisions
                     const isInitiator = myIdRef.current > userId;
                     if (isInitiator) {
-                        addLog(`🚀 Found user ${userId.slice(0, 4)}, I am initiator.`);
+                        addLog(`🚀 Found user ${remoteNamesRef.current[userId] || userId.slice(0, 4)}, I am initiator.`);
                     } else {
-                        addLog(`⏳ Found user ${userId.slice(0, 4)}, awaiting their offer.`);
+                        addLog(`⏳ Found user ${remoteNamesRef.current[userId] || userId.slice(0, 4)}, awaiting their offer.`);
                     }
                     createPeerConnection(userId, isInitiator);
                 }
