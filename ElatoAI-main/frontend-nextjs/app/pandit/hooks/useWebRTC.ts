@@ -51,22 +51,41 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
     useEffect(() => {
         localStreamRef.current = localStream;
 
-        // If localStream becomes available (e.g. camera permissions granted later),
-        // add tracks to any existing peer connections that don't already have them.
-        if (localStream) {
-            Object.values(peerConnectionsRef.current).forEach(pc => {
-                const senders = pc.getSenders();
-                localStream.getTracks().forEach(track => {
-                    if (!senders.find(s => s.track === track)) {
+        Object.values(peerConnectionsRef.current).forEach(pc => {
+            const senders = pc.getSenders();
+
+            if (localStream) {
+                const localTracks = localStream.getTracks();
+
+                // 1. Remove tracks that are no longer in the local stream.
+                // This correctly triggers onnegotiationneeded to inform peers when we drop a camera
+                senders.forEach(sender => {
+                    if (sender.track && !localTracks.find(t => t.id === sender.track!.id)) {
                         try {
-                            pc.addTrack(track, localStream);
+                            pc.removeTrack(sender);
                         } catch (e) {
-                            console.error("Error adding delayed track to peer connection:", e);
+                            console.error("Error removing track:", e);
                         }
                     }
                 });
-            });
-        }
+
+                // 2. Add new tracks that aren't already being sent.
+                localTracks.forEach(track => {
+                    if (!senders.find(s => s.track?.id === track.id)) {
+                        try {
+                            pc.addTrack(track, localStream);
+                        } catch (e) {
+                            console.error("Error adding track to peer connection:", e);
+                        }
+                    }
+                });
+            } else {
+                // Remove all tracks if localStream is null
+                senders.forEach(sender => {
+                    try { pc.removeTrack(sender); } catch (e) { }
+                });
+            }
+        });
     }, [localStream]);
 
     // We use a React ref so we don't trigger re-renders on every connection state change
@@ -148,8 +167,18 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
         pc.ontrack = (event) => {
             const [stream] = event.streams;
             setRemoteParticipants(prev => {
+                const existing = prev.find(p => p.id === remoteId);
                 // Check if we already have this participant
-                if (prev.find(p => p.id === remoteId)) return prev;
+                if (existing) {
+                    // Update the stream reference if the remote peer created a new MediaStream
+                    // This is CRITICAL because the CallScreen makes a "new MediaStream()" 
+                    // whenever video is toggled, resulting in a totally new object.
+                    if (existing.stream !== stream) {
+                        addLog(`🔄 Updating stream reference for ${remoteId.slice(0, 4)}`);
+                        return prev.map(p => p.id === remoteId ? { ...p, stream } : p);
+                    }
+                    return prev;
+                }
                 addLog(`🎥 Received Video/Audio track from ${remoteId.slice(0, 4)}`);
                 const remoteName = remoteNamesRef.current[remoteId] || "User";
                 return [...prev, { id: remoteId, name: remoteName, stream }];
