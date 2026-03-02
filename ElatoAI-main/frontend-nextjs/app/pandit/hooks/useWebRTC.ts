@@ -79,17 +79,20 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         }
     }, []);
 
+    // Track negotiation state per peer to prevent collision/glare
+    const negotiationStateRef = useRef<Record<string, { makingOffer: boolean, ignoreOffer: boolean, isSettingRemoteAnswerPending: boolean }>>({});
+
     // Create a new RTCPeerConnection for a specific remote user
     const createPeerConnection = useCallback((remoteId: string, isInitiator: boolean) => {
         if (peerConnectionsRef.current[remoteId]) return peerConnectionsRef.current[remoteId];
 
         const pc = new RTCPeerConnection(ICE_SERVERS);
         peerConnectionsRef.current[remoteId] = pc;
+        negotiationStateRef.current[remoteId] = { makingOffer: false, ignoreOffer: false, isSettingRemoteAnswerPending: false };
 
         // Add local tracks to the connection
         if (localStreamRef.current) {
             localStreamRef.current.getTracks().forEach(track => {
-                // Ensure we don't add duplicate tracks if the API permits, but usually getting tracks and adding them is safe
                 if (localStreamRef.current) pc.addTrack(track, localStreamRef.current);
             });
         }
@@ -105,10 +108,11 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
             }
         };
 
-        // Automatic renegotiation mechanism whenever tracks are added/removed dynamically
+        // Perfect Negotiation: Automatic renegotiation mechanism
         pc.onnegotiationneeded = async () => {
             addLog(`🔄 Negotiation needed for ${remoteId.slice(0, 4)}`);
             try {
+                negotiationStateRef.current[remoteId].makingOffer = true;
                 const offer = await pc.createOffer();
                 await pc.setLocalDescription(offer);
                 channelRef.current?.send({
@@ -118,6 +122,8 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
                 });
             } catch (e: any) {
                 addLog(`❌ Renegotiation error: ${e?.message}`);
+            } finally {
+                negotiationStateRef.current[remoteId].makingOffer = false;
             }
         };
 
@@ -127,6 +133,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
             setRemoteParticipants(prev => {
                 // Check if we already have this participant
                 if (prev.find(p => p.id === remoteId)) return prev;
+                addLog(`🎥 Received Video/Audio track from ${remoteId.slice(0, 4)}`);
                 return [...prev, { id: remoteId, stream }];
             });
         };
@@ -202,39 +209,55 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
             }
         });
 
-        // 3. Listen for WebRTC Signaling Data via Broadcast
+        // 3. Perfect Negotiation: Listen for WebRTC Signaling Data via Broadcast
         channel.on('broadcast', { event: 'offer' }, async ({ payload }) => {
             const { offer, to, from } = payload;
             if (to !== myIdRef.current) return; // Only process offers meant for me
 
-            addLog(`📥 Received OFFER from ${from.slice(0, 4)}`);
+            // Determine polite/impolite role based on lexicographical UUID order
+            const polite = myIdRef.current < from;
 
-            // They initiated the offer, so we are NOT the initiator.
-            const pc = createPeerConnection(from, false);
-            await pc.setRemoteDescription(new RTCSessionDescription(offer));
+            const pc = peerConnectionsRef.current[from] || createPeerConnection(from, false);
+            const state = negotiationStateRef.current[from] || { makingOffer: false, ignoreOffer: false, isSettingRemoteAnswerPending: false };
 
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
+            const offerCollision = (offer.type === "offer") && (state.makingOffer || pc.signalingState !== "stable");
 
-            addLog(`📤 Sending ANSWER to ${from.slice(0, 4)}`);
-            channel.send({
-                type: 'broadcast',
-                event: 'answer',
-                payload: { answer, to: from, from: myIdRef.current }
-            });
+            state.ignoreOffer = !polite && offerCollision;
+            if (state.ignoreOffer) {
+                addLog(`🛡️ Ignored colliding OFFER from ${from.slice(0, 4)} (I am impolite)`);
+                return;
+            }
+
+            addLog(`📥 Accept OFFER from ${from.slice(0, 4)}`);
+
+            try {
+                await pc.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+
+                addLog(`📤 Sending ANSWER to ${from.slice(0, 4)}`);
+                channel.send({
+                    type: 'broadcast',
+                    event: 'answer',
+                    payload: { answer, to: from, from: myIdRef.current }
+                });
+            } catch (err: any) {
+                addLog(`❌ Failed to accept offer: ${err?.message}`);
+            }
         });
 
         channel.on('broadcast', { event: 'answer' }, async ({ payload }) => {
             const { answer, to, from } = payload;
             if (to !== myIdRef.current) return;
 
-            addLog(`📥 Received ANSWER from ${from.slice(0, 4)}`);
-
             const pc = peerConnectionsRef.current[from];
             if (pc) {
-                await pc.setRemoteDescription(new RTCSessionDescription(answer));
-            } else {
-                addLog(`⚠️ Ignored ANSWER from ${from.slice(0, 4)}`);
+                try {
+                    addLog(`📥 Received ANSWER from ${from.slice(0, 4)}`);
+                    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+                } catch (err: any) {
+                    addLog(`❌ Failed to accept answer: ${err?.message}`);
+                }
             }
         });
 
