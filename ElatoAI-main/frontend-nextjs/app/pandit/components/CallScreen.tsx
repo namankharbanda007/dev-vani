@@ -97,7 +97,8 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     // We send the `outboundStream` (Local Mic + AI Voice)
     const { connected, remoteParticipants, broadcastEvent, channel, debugLogs } = useWebRTC(roomId, outboundStream);
     // Real webcam feed
-    const localVideoRef = useRef<HTMLVideoElement>(null);
+    const videoGridRef = useRef<HTMLDivElement>(null);
+    const aiAudioRef = useRef<HTMLAudioElement>(null);
 
     // Refs for the Pandit Video looping
     const speakingVideoRef = useRef<HTMLVideoElement>(null);
@@ -265,6 +266,10 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
 
     // Mix AI Output back into P2P and Local Speakers
     useEffect(() => {
+        if (aiAudioRef.current && aiOutputStream) {
+            aiAudioRef.current.srcObject = aiOutputStream;
+        }
+
         const ctx = mixerContextRef.current;
         const p2pOutputDest = p2pOutputDestRef.current;
         if (!ctx || !p2pOutputDest || !aiOutputStream) return;
@@ -279,7 +284,8 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
             try {
                 const aiSource = ctx.createMediaStreamSource(aiOutputStream);
                 aiSource.connect(p2pOutputDest);  // Send AI audio to all WebRTC peers
-                aiSource.connect(ctx.destination); // Play AI audio locally through speakers
+                // We omit aiSource.connect(ctx.destination) here because the hidden <audio> tag 
+                // native playback handles local playback, fixing the notorious Chrome WebAudio silence bug.
                 aiSourceRef.current = aiSource;
                 console.log("✅ AI audio routed to P2P and local speakers");
             } catch (e) {
@@ -608,6 +614,9 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                                 <div className={`absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center text-white z-20 transition-colors ${sharedAgentActivity === 'listening' || sharedAgentActivity === 'idle' ? 'bg-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.5)] border border-blue-500/50' : sharedAgentActivity === 'speaking' ? 'bg-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.5)] border border-green-500/50' : 'bg-gray-500/20 border border-gray-500/50'}`}>
                                     {sharedAgentActivity === 'listening' || sharedAgentActivity === 'idle' ? <Mic className="w-5 h-5 text-blue-400" /> : <Mic className="w-5 h-5 text-green-400" />}
                                 </div>
+
+                                {/* Hidden Audio element to force Chrome's WebAudio API to recognize the stream */}
+                                <audio ref={aiAudioRef} autoPlay playsInline className="hidden" />
 
                                 {/* Internal Controls Overlay */}
                                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 backdrop-blur-md bg-white/10 border border-white/20 p-2.5 rounded-full shadow-2xl z-30 transition-opacity">
