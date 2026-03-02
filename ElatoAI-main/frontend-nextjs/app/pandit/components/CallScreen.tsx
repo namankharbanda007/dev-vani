@@ -369,6 +369,8 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
         e.preventDefault();
         if (!chatMessage.trim()) return;
 
+        // Note: ToLocaleTimeString can cause hydration issues if used in initial state, 
+        // but it is fine to use here in event handlers.
         const newMsg = {
             id: Date.now(),
             sender: "You",
