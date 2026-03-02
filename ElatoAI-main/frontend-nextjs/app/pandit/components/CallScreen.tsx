@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useGroupCall } from '../hooks/useGroupCall';
 import { useWebRTC } from '../hooks/useWebRTC';
+import { useMicrophoneVolume } from '../hooks/useMicrophoneVolume';
 
 // Keep track of audio contexts to prevent memory leaks
 export const getSharedAudioContext = () => {
@@ -17,6 +18,7 @@ interface CallScreenProps {
     participants: string[];
     roomId: string;
     onLeave: () => void;
+    isOriginalHost?: boolean;
 }
 
 // Helper component to explicitly attach incoming WebRTC React Refs to standard HTML5 video elements.
@@ -25,7 +27,7 @@ const RemoteVideo = ({ stream }: { stream: MediaStream | undefined | null }) => 
     useEffect(() => {
         const video = videoRef.current;
         if (!video || !stream) return;
-        
+
         try {
             video.srcObject = stream;
 
@@ -52,7 +54,7 @@ const mockUsers = [
     { name: "Amit Kumar", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200&h=200" },
 ];
 
-export default function CallScreen({ participants, roomId, onLeave }: CallScreenProps) {
+export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false }: CallScreenProps) {
     // Group Call Voice Connection
     // We use the same personality ID for the Pandit as the demo session
     const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
@@ -128,7 +130,7 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
 
     // 4. Initialize the AI Group Call 
     // This now receives ALL participants (Host + Guests) so it greets everyone correctly
-    const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream } = useGroupCall({
+    const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream, sendMessageToAI } = useGroupCall({
         participants: allParticipantNames,
         personalityId: PANDIT_PERSONALITY_ID
     });
@@ -140,6 +142,19 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
     // Refs for the Pandit Video looping
     const speakingVideoRef = useRef<HTMLVideoElement>(null);
     const listeningVideoRef = useRef<HTMLVideoElement>(null);
+
+    // Notify AI when a guest joins late
+    const prevParticipantsLengthRef = useRef(remoteParticipants.length);
+    useEffect(() => {
+        if (remoteParticipants.length > prevParticipantsLengthRef.current) {
+            // Someone joined
+            const newGuest = remoteParticipants[remoteParticipants.length - 1];
+            if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
+                sendMessageToAI(`System Alert: A new guest just joined our room named ${newGuest.name}. Please pause, greet them gently, make them comfortable, and ask the host if it's okay to summarize the progress of the Puja so far.`);
+            }
+        }
+        prevParticipantsLengthRef.current = remoteParticipants.length;
+    }, [remoteParticipants, isHost, sessionStatus, sendMessageToAI]);
 
     // Listen for AI shared state changes from other peers
     useEffect(() => {
@@ -158,7 +173,28 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                 setSharedAgentActivity(payload.activity);
             }
         });
-    }, [channel, isHost]);
+
+        channel.on('broadcast', { event: 'ACTIVE_SPEAKER' }, ({ payload }) => {
+            if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
+                sendMessageToAI(`System Alert: The next voice you hear is ${payload.name}.`);
+            }
+        });
+    }, [channel, isHost, sessionStatus, sendMessageToAI]);
+
+    // Track active speaking for this client
+    const handleActiveSpeakerChange = useCallback((isSpeaking: boolean) => {
+        // we only broadcast if we are unmuted
+        if (isSpeaking && !isMuted && channel) {
+            broadcastEvent('ACTIVE_SPEAKER', { name: localName });
+
+            // if we are the host and we speak, we don't need a broadcast, we can just send it
+            if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
+                sendMessageToAI(`System Alert: The next voice you hear is ${localName}.`);
+            }
+        }
+    }, [isMuted, channel, broadcastEvent, localName, isHost, sessionStatus, sendMessageToAI]);
+
+    useMicrophoneVolume(localStream, handleActiveSpeakerChange);
 
     // Cleanup AI on unmount
     useEffect(() => {
@@ -568,12 +604,12 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                             {/* Main AI Video Stage */}
                             <div className="max-xl:flex-none max-xl:h-[400px] flex-1 w-full max-xl:mx-auto max-w-[800px] aspect-square xl:aspect-auto relative rounded-[24px] xl:rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
 
-                                {sessionStatus === "DISCONNECTED" && !isAiActiveGlobally && (
+                                {sessionStatus === "DISCONNECTED" && !isAiActiveGlobally && isOriginalHost && (
                                     <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
                                         <div className="w-16 h-12 rounded-2xl bg-[#20bd5c]/20 border border-[#20bd5c]/30 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
                                             <VideoIcon className="w-6 h-6 text-[#25D366]" />
                                         </div>
-                                        <h2 className="text-2xl font-lora font-bold mb-3">Ready to join the Puja?</h2>
+                                        <h2 className="text-2xl font-lora font-bold mb-3">Ready to start the Puja?</h2>
                                         <p className="text-gray-400 mb-10 max-w-sm text-center text-sm">Ensure your camera and microphone are ready.<br />The Pandit is waiting.</p>
                                         <button
                                             onClick={handleStartPuja}
@@ -581,6 +617,16 @@ export default function CallScreen({ participants, roomId, onLeave }: CallScreen
                                         >
                                             <Mic className="w-4 h-4" /> Start Live Puja
                                         </button>
+                                    </div>
+                                )}
+
+                                {sessionStatus === "DISCONNECTED" && !isAiActiveGlobally && !isOriginalHost && (
+                                    <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
+                                        <div className="w-16 h-12 rounded-2xl bg-[#20bd5c]/20 border border-[#20bd5c]/30 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
+                                            <VideoIcon className="w-6 h-6 text-[#25D366]" />
+                                        </div>
+                                        <h2 className="text-2xl font-lora font-bold mb-3">Ashram Preparation</h2>
+                                        <p className="text-gray-400 mb-10 max-w-sm text-center text-sm">Please wait while the Host starts the Puja.<br />Ensure your camera and microphone are ready.</p>
                                     </div>
                                 )}
 

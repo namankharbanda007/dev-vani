@@ -15,6 +15,7 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
     const [aiOutputStream, setAiOutputStream] = useState<MediaStream | null>(null);
 
     const disconnectRef = useRef<(() => void) | null>(null);
+    const sendTextMessageRef = useRef<((text: string) => void) | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
 
     /**
@@ -93,6 +94,7 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
             );
 
             disconnectRef.current = connection.disconnect;
+            sendTextMessageRef.current = connection.sendTextMessage;
 
             setIsAgentSpeaking(true);
             setAgentActivity('speaking');
@@ -113,12 +115,19 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
             disconnectRef.current();
             disconnectRef.current = null;
         }
+        sendTextMessageRef.current = null;
         if (audioContextRef.current) {
             audioContextRef.current.close();
             audioContextRef.current = null;
         }
         setAiOutputStream(null);
         setSessionStatus("DISCONNECTED");
+    }, []);
+
+    const sendMessageToAI = useCallback((text: string) => {
+        if (sendTextMessageRef.current) {
+            sendTextMessageRef.current(text);
+        }
     }, []);
 
     // Cleanup on unmount
@@ -134,6 +143,7 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
         agentActivity,
         connect,
         disconnect,
-        aiOutputStream
+        aiOutputStream,
+        sendMessageToAI
     };
 }

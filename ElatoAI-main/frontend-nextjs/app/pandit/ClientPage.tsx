@@ -13,6 +13,7 @@ export default function ClientPage({ initialUser }: { initialUser: string | null
     const searchParams = useSearchParams();
     const router = useRouter();
     const [roomId, setRoomId] = useState<string>("");
+    const [isOriginalHost, setIsOriginalHost] = useState<boolean>(false);
 
     useEffect(() => {
         const room = searchParams.get('room');
@@ -21,6 +22,7 @@ export default function ClientPage({ initialUser }: { initialUser: string | null
         } else {
             const newRoom = uuidv4();
             setRoomId(newRoom);
+            setIsOriginalHost(true);
             // Push the generated room to the URL so the user sees they are in a specific session
             router.replace(`/pandit?room=${newRoom}`);
         }
@@ -51,7 +53,7 @@ export default function ClientPage({ initialUser }: { initialUser: string | null
             {!hasJoined ? (
                 <JoinScreen onJoin={handleJoin} initialName={initialUser} />
             ) : (
-                <CallScreen participants={participants} roomId={roomId} onLeave={handleLeave} />
+                <CallScreen participants={participants} roomId={roomId} onLeave={handleLeave} isOriginalHost={isOriginalHost} />
             )}
         </div>
     );
