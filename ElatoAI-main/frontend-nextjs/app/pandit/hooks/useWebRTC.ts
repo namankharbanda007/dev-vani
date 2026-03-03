@@ -360,10 +360,16 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
         return () => {
             setConnected(false);
             setChannelState(null);
-            if (channelRef.current) {
-                channelRef.current.unsubscribe().then(() => {
-                    if (channelRef.current) supabase.removeChannel(channelRef.current);
-                });
+
+            // Capture the specific channel from *this* effect instance. 
+            // Avoid using channelRef.current in the .then() as it might point 
+            // to a newly mounted channel in React strict mode!
+            if (channel) {
+                channel.unsubscribe()
+                    .catch(e => console.error("Unsubscribe error:", e))
+                    .finally(() => {
+                        supabase.removeChannel(channel);
+                    });
             }
             // Cleanup all peer connections
             Object.values(peerConnectionsRef.current).forEach(pc => pc.close());
