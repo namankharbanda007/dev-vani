@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "./submit-button";
-import { signInAction } from "@/app/actions";
+import { signInAction, signUpAction } from "@/app/actions";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GoogleLoginButton from "@/app/components/GoogleLoginButton";
@@ -17,7 +17,7 @@ interface LoginFormProps {
 export function LoginForm({ searchParams }: LoginFormProps) {
     const [loading, setLoading] = useState(false);
     const error = (searchParams?.message as string) || (searchParams?.error as string) || null;
-    const [message, setMessage] = useState<string | null>((searchParams?.success as string) || null);
+    const message = (searchParams?.success as string) || null;
 
     const toy_id = searchParams?.toy_id as string | undefined;
     const personality_id = searchParams?.personality_id as string | undefined;
@@ -184,7 +184,7 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                                 </div>
 
                                 <SubmitButton
-                                    formAction={signInAction}
+                                    formAction={signUpAction}
                                     disabled={loading}
                                     className="w-full h-12 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-pink-900/20 hover:shadow-xl hover:shadow-pink-900/30 transition-all transform hover:-translate-y-0.5"
                                     pendingText="Creating account..."

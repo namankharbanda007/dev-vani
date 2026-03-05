@@ -19,23 +19,29 @@ export async function deleteUserApiKey(userId: string) {
 export const signInAction = async (formData: FormData) => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    const toy_id = formData.get("toy_id") as string | undefined;
-    const personality_id = formData.get("personality_id") as string | undefined;
     const supabase = createClient();
 
-    // Try to sign in first
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
 
-    if (!signInError) {
-        return redirect("/home");
+    if (error) {
+        return encodedRedirect("error", "/login", error.message);
     }
 
-    // If sign in fails, try to sign up
+    return redirect("/home");
+};
+
+export const signUpAction = async (formData: FormData) => {
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const toy_id = formData.get("toy_id") as string | undefined;
+    const personality_id = formData.get("personality_id") as string | undefined;
+    const supabase = createClient();
     const origin = headers().get("origin");
-    const { error: signUpError } = await supabase.auth.signUp({
+
+    const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -47,8 +53,8 @@ export const signInAction = async (formData: FormData) => {
         },
     });
 
-    if (signUpError) {
-        return encodedRedirect("error", "/login", signUpError.message);
+    if (error) {
+        return encodedRedirect("error", "/login", error.message);
     }
 
     return encodedRedirect(
