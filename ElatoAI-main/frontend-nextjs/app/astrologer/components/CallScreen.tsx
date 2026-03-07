@@ -412,17 +412,24 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
                     {/* Navigation Tabs */}
                     <nav className="hidden md:flex items-center gap-8 text-sm font-semibold tracking-wide text-gray-500">
-                        {['PANDIT', 'ASTROLOGER', 'LOVE ADVISOR', 'MAHURAT', 'PUJA', 'SERVICE'].map(tab => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`relative px-1 py-2 transition-colors ${activeTab === tab ? 'text-gray-900' : 'hover:text-gray-700'}`}
+                        {[
+                            { label: 'PANDIT', href: '/pandit' },
+                            { label: 'ASTROLOGER', href: '/astrologer' },
+                            { label: 'LOVE ADVISOR', href: '#' },
+                            { label: 'MAHURAT', href: '#' },
+                            { label: 'PUJA', href: '#' },
+                            { label: 'SERVICE', href: '#' },
+                        ].map(tab => (
+                            <a
+                                key={tab.label}
+                                href={tab.href}
+                                className={`relative px-1 py-2 transition-colors ${activeTab === tab.label ? 'text-gray-900' : 'hover:text-gray-700'}`}
                             >
-                                {tab}
-                                {activeTab === tab && (
+                                {tab.label}
+                                {activeTab === tab.label && (
                                     <motion.div layoutId="nav-indicator-astro" className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gray-900" />
                                 )}
-                            </button>
+                            </a>
                         ))}
                     </nav>
 
