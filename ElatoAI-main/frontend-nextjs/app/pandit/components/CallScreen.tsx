@@ -72,10 +72,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     // UI States
     const [activeTab, setActiveTab] = useState('PANDIT');
     const [chatMessage, setChatMessage] = useState('');
-    const [messages, setMessages] = useState([
-        { id: 1, sender: "Pandit Ji", text: "Namaste! We will begin the Ganesh Puja shortly. Please prepare your thali.", time: "07:23 AM", isHost: true },
-        { id: 2, sender: "You", text: "Yes, absolutely! 🙏", time: "07:34 AM", isHost: false }
-    ]);
+    const [messages, setMessages] = useState<{ id: number; sender: string; text: string; time: string; isAI: boolean; avatarUrl?: string }[]>([]);
     const [isChatOpen, setIsChatOpen] = useState(true);
     const [showMuhurtaWidget, setShowMuhurtaWidget] = useState(true);
 
@@ -115,6 +112,12 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
     // Resolve avatar URL with fallback
     const resolvedAvatarUrl = userAvatarUrl || getDefaultAvatar(participants[0] || 'User');
+
+    // Chat auto-scroll ref
+    const chatEndRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
     // 1. Initialize WebRTC P2P Mesh Network Connections
     // We send the `outboundStream` (Local Mic + AI Voice)
@@ -198,6 +201,18 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                 if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
                     sendMessageToAI(`[Speaker: ${detail.payload.name}] is now speaking. Address them by name in your response.`);
                 }
+            }
+
+            // Receive chat messages from other participants
+            if (detail.event === 'CHAT_MESSAGE') {
+                setMessages(prev => [...prev, {
+                    id: Date.now() + Math.random(),
+                    sender: detail.payload.sender,
+                    text: detail.payload.text,
+                    time: detail.payload.time,
+                    isAI: false,
+                    avatarUrl: detail.payload.avatarUrl,
+                }]);
             }
         };
 
@@ -429,36 +444,35 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         }
     }, [localStream]);
 
-    // Handle Sending Chat Messages
+    // Handle Sending Chat Messages — broadcast to all via LiveKit DataChannel
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (!chatMessage.trim()) return;
 
-        // Note: ToLocaleTimeString can cause hydration issues if used in initial state, 
-        // but it is fine to use here in event handlers.
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const senderName = participants[0] || 'User';
+
         const newMsg = {
             id: Date.now(),
-            sender: "You",
+            sender: senderName,
             text: chatMessage,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            isHost: false
+            time,
+            isAI: false,
+            avatarUrl: resolvedAvatarUrl,
         };
 
-        setMessages([...messages, newMsg]);
-        setChatMessage('');
+        // Add locally
+        setMessages(prev => [...prev, newMsg]);
 
-        // Simulate response for demo purposes
-        if (messages.length === 2 && !chatMessage.toLowerCase().includes("ignore")) {
-            setTimeout(() => {
-                setMessages(prev => [...prev, {
-                    id: Date.now() + 1,
-                    sender: "Pandit Ji",
-                    text: "Excellent. Let us begin with the Shanti Mantra.",
-                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    isHost: true
-                }]);
-            }, 1000);
-        }
+        // Broadcast to all remote participants via LiveKit
+        broadcastEvent('CHAT_MESSAGE', {
+            sender: senderName,
+            text: chatMessage,
+            time,
+            avatarUrl: resolvedAvatarUrl,
+        });
+
+        setChatMessage('');
     };
 
     // Family Meet - Invite Link Logic
@@ -904,19 +918,29 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                 {/* Chat Messages */}
                                 <div className="flex-1 overflow-y-auto p-5 pb-24 flex flex-col gap-5 scrollbar-hide">
 
-                                    {messages.map((msg, i) => (
-                                        <div key={msg.id} className={`flex ${msg.isHost ? 'gap-3' : 'flex-col items-end w-full pl-8'}`}>
-                                            {msg.isHost && <img src="/assets/murtis/pandit.png" alt="Pandit" className="w-8 h-8 rounded-full bg-orange-100 object-cover shrink-0 mt-1 border border-orange-200" />}
-                                            <div className="flex flex-col w-full">
-                                                <span className={`text-xs text-gray-500 mb-1 font-medium ${!msg.isHost && 'text-right'}`}>
-                                                    {msg.sender} <span className={msg.isHost ? "float-right ml-4" : "ml-2"}>{msg.time}</span>
+                                    {messages.map((msg) => (
+                                        <div key={msg.id} className={`flex ${msg.isAI ? 'gap-3' : 'gap-3'}`}>
+                                            {/* Avatar */}
+                                            {msg.isAI ? (
+                                                <img src="/assets/Pandit Performing Aarti.jpg" alt="Pandit Ji" className="w-8 h-8 rounded-full bg-orange-100 object-cover shrink-0 mt-1 border border-orange-200" />
+                                            ) : (
+                                                <img
+                                                    src={msg.avatarUrl || getDefaultAvatar(msg.sender)}
+                                                    alt={msg.sender}
+                                                    className="w-8 h-8 rounded-full object-cover shrink-0 mt-1 border border-purple-200"
+                                                />
+                                            )}
+                                            <div className="flex flex-col flex-1 min-w-0">
+                                                <span className="text-xs text-gray-500 mb-1 font-medium">
+                                                    {msg.sender} <span className="float-right ml-4">{msg.time}</span>
                                                 </span>
-                                                <div className={`${msg.isHost ? 'bg-white text-gray-700 border border-black/[0.03] rounded-tl-sm' : 'bg-indigo-600 text-white rounded-tr-sm self-end max-w-[90%]'} p-3.5 rounded-2xl text-sm shadow-sm leading-relaxed`}>
+                                                <div className={`${msg.isAI ? 'bg-white text-gray-700 border border-black/[0.03] rounded-tl-sm' : 'bg-indigo-600 text-white rounded-tl-sm'} p-3.5 rounded-2xl text-sm shadow-sm leading-relaxed`}>
                                                     {msg.text}
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
+                                    <div ref={chatEndRef} />
 
                                     {/* Optional Muhurta Card injected into Chat (Toggleable) */}
                                     {showMuhurtaWidget && (
