@@ -156,30 +156,34 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         prevParticipantsLengthRef.current = remoteParticipants.length;
     }, [remoteParticipants, isHost, sessionStatus, sendMessageToAI]);
 
-    // Listen for AI shared state changes from other peers
+    // Listen for AI shared state changes from other peers via LiveKit DataChannel
     useEffect(() => {
-        if (!channel) return;
+        const handler = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (!detail) return;
 
-        channel.on('broadcast', { event: 'AI_STATE' }, ({ payload }) => {
-            if (payload.status === "STARTED") {
-                setIsAiActiveGlobally(true);
-            } else if (payload.status === "STOPPED") {
-                setIsAiActiveGlobally(false);
+            if (detail.event === 'AI_STATE') {
+                if (detail.payload.status === "STARTED") {
+                    setIsAiActiveGlobally(true);
+                } else if (detail.payload.status === "STOPPED") {
+                    setIsAiActiveGlobally(false);
+                }
             }
-        });
 
-        channel.on('broadcast', { event: 'AI_ACTIVITY' }, ({ payload }) => {
-            if (!isHost) {
-                setSharedAgentActivity(payload.activity);
+            if (detail.event === 'AI_ACTIVITY' && !isHost) {
+                setSharedAgentActivity(detail.payload.activity);
             }
-        });
 
-        channel.on('broadcast', { event: 'ACTIVE_SPEAKER' }, ({ payload }) => {
-            if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                sendMessageToAI(`System Alert: The next voice you hear is ${payload.name}.`);
+            if (detail.event === 'ACTIVE_SPEAKER') {
+                if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
+                    sendMessageToAI(`System Alert: The next voice you hear is ${detail.payload.name}.`);
+                }
             }
-        });
-    }, [channel, isHost, sessionStatus, sendMessageToAI]);
+        };
+
+        window.addEventListener('livekit-data', handler);
+        return () => window.removeEventListener('livekit-data', handler);
+    }, [isHost, sessionStatus, sendMessageToAI]);
 
     // Track active speaking for this client
     const handleActiveSpeakerChange = useCallback((isSpeaking: boolean) => {

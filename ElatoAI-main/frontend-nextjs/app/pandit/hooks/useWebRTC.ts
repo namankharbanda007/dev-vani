@@ -1,388 +1,261 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { RealtimeChannel } from '@supabase/supabase-js';
+import {
+    Room,
+    RoomEvent,
+    Track,
+    RemoteParticipant,
+    RemoteTrackPublication,
+    LocalParticipant,
+    ConnectionState,
+    type RemoteTrack,
+} from 'livekit-client';
 
-// WebRTC STUN/TURN servers to bypass NAT matching and strict firewalls
-const ICE_SERVERS = {
-    iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        // Public TURN servers via OpenRelayProject for cross-network (cellular/different wifi)
-        {
-            urls: 'turn:openrelay.metered.ca:80',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-        },
-        {
-            urls: 'turn:openrelay.metered.ca:443',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-        },
-        {
-            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-        }
-    ],
-};
-
-export interface RemoteParticipant {
-    id: string; // the remote user's realtime presence ID
-    name: string; // the synchronized remote user name
+export interface RemoteParticipantInfo {
+    id: string;
+    name: string;
     stream: MediaStream;
 }
 
+/**
+ * useWebRTC — now powered by LiveKit Cloud SFU.
+ *
+ * Maintains the SAME external API so CallScreen.tsx needs minimal changes:
+ *   { connected, remoteParticipants, broadcastEvent, channel, debugLogs }
+ */
 export function useWebRTC(roomId: string, localName: string, localStream: MediaStream | null) {
-    // Memoize the supabase client so it doesn't trigger re-renders or effect cleanups
-    const supabase = useMemo(() => createClient(), []);
-
-    const [remoteParticipants, setRemoteParticipants] = useState<RemoteParticipant[]>([]);
+    const [remoteParticipants, setRemoteParticipants] = useState<RemoteParticipantInfo[]>([]);
     const [connected, setConnected] = useState(false);
-    const [channelState, setChannelState] = useState<RealtimeChannel | null>(null);
     const [debugLogs, setDebugLogs] = useState<string[]>([]);
 
+    // We keep the channel/broadcastEvent API for app-level events (AI state, active speaker).
+    // These now go through LiveKit's data channel instead of Supabase broadcast.
+    const roomRef = useRef<Room | null>(null);
+
     const addLog = useCallback((msg: string) => {
-        console.log(msg);
-        setDebugLogs(prev => [...prev.slice(-15), msg]); // keep last 15
+        console.log(`[LiveKit] ${msg}`);
+        setDebugLogs(prev => [...prev.slice(-20), msg]);
     }, []);
 
-    // Track the latest localStream without re-triggering main connection effects
+    // Track latest localStream via ref (used in track publishing)
     const localStreamRef = useRef<MediaStream | null>(null);
     useEffect(() => {
         localStreamRef.current = localStream;
-
-        Object.values(peerConnectionsRef.current).forEach(pc => {
-            const senders = pc.getSenders();
-
-            if (localStream) {
-                const localTracks = localStream.getTracks();
-
-                // 1. Remove tracks that are no longer in the local stream.
-                // This correctly triggers onnegotiationneeded to inform peers when we drop a camera
-                senders.forEach(sender => {
-                    if (sender.track && !localTracks.find(t => t.id === sender.track!.id)) {
-                        try {
-                            pc.removeTrack(sender);
-                        } catch (e) {
-                            console.error("Error removing track:", e);
-                        }
-                    }
-                });
-
-                // 2. Add new tracks that aren't already being sent.
-                localTracks.forEach(track => {
-                    if (!senders.find(s => s.track?.id === track.id)) {
-                        try {
-                            pc.addTrack(track, localStream);
-                        } catch (e) {
-                            console.error("Error adding track to peer connection:", e);
-                        }
-                    }
-                });
-            } else {
-                // Remove all tracks if localStream is null
-                senders.forEach(sender => {
-                    try { pc.removeTrack(sender); } catch (e) { }
-                });
-            }
-        });
     }, [localStream]);
 
-    // We use a React ref so we don't trigger re-renders on every connection state change
-    const channelRef = useRef<RealtimeChannel | null>(null);
-    const peerConnectionsRef = useRef<Record<string, RTCPeerConnection>>({});
-
-    // Expose the channel so we can broadcast app-level events (like AI speaking status)
+    // Broadcast app-level events through LiveKit DataChannel
     const broadcastEvent = useCallback((event: string, payload: any) => {
-        if (channelRef.current) {
-            channelRef.current.send({
-                type: 'broadcast',
-                event: event,
-                payload: payload
-            });
+        const room = roomRef.current;
+        if (room && room.state === ConnectionState.Connected) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(JSON.stringify({ event, payload }));
+            room.localParticipant.publishData(data, { reliable: true });
         }
     }, []);
 
-    // My unique presence ID generated when joining the room
-    const myIdRef = useRef<string>(Math.random().toString(36).substring(2, 15));
-
-    // Handle removing a participant
-    const removeParticipant = useCallback((id: string) => {
-        setRemoteParticipants((prev) => prev.filter((p) => p.id !== id));
-        if (peerConnectionsRef.current[id]) {
-            peerConnectionsRef.current[id].close();
-            delete peerConnectionsRef.current[id];
-        }
+    // Helper: build a MediaStream from a RemoteParticipant's published tracks
+    const buildStreamForParticipant = useCallback((participant: RemoteParticipant): MediaStream => {
+        const stream = new MediaStream();
+        participant.trackPublications.forEach((pub) => {
+            if (pub.track && pub.isSubscribed) {
+                stream.addTrack(pub.track.mediaStreamTrack);
+            }
+        });
+        return stream;
     }, []);
 
-    // Track negotiation state per peer to prevent collision/glare
-    const negotiationStateRef = useRef<Record<string, { makingOffer: boolean, ignoreOffer: boolean, isSettingRemoteAnswerPending: boolean }>>({});
-
-    // Create a new RTCPeerConnection for a specific remote user
-    const createPeerConnection = useCallback((remoteId: string, isInitiator: boolean) => {
-        if (peerConnectionsRef.current[remoteId]) return peerConnectionsRef.current[remoteId];
-
-        const pc = new RTCPeerConnection(ICE_SERVERS);
-        peerConnectionsRef.current[remoteId] = pc;
-        negotiationStateRef.current[remoteId] = { makingOffer: false, ignoreOffer: false, isSettingRemoteAnswerPending: false };
-
-        // Add local tracks to the connection
-        if (localStreamRef.current) {
-            localStreamRef.current.getTracks().forEach(track => {
-                if (localStreamRef.current) pc.addTrack(track, localStreamRef.current);
-            });
-        }
-
-        // When the remote peer sends us ICE candidates, forward them via Supabase
-        pc.onicecandidate = (event) => {
-            if (event.candidate && channelRef.current) {
-                channelRef.current.send({
-                    type: 'broadcast',
-                    event: 'ice-candidate',
-                    payload: { candidate: event.candidate, to: remoteId, from: myIdRef.current }
+    // Refresh the remoteParticipants state from the Room
+    const refreshParticipants = useCallback((room: Room) => {
+        const participants: RemoteParticipantInfo[] = [];
+        room.remoteParticipants.forEach((participant) => {
+            const stream = buildStreamForParticipant(participant);
+            if (stream.getTracks().length > 0) {
+                participants.push({
+                    id: participant.identity,
+                    name: participant.name || participant.identity,
+                    stream,
                 });
             }
-        };
-
-        // Perfect Negotiation: Automatic renegotiation mechanism
-        pc.onnegotiationneeded = async () => {
-            addLog(`🔄 Negotiation needed for ${remoteId.slice(0, 4)}`);
-            try {
-                negotiationStateRef.current[remoteId].makingOffer = true;
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
-                channelRef.current?.send({
-                    type: 'broadcast',
-                    event: 'offer',
-                    payload: { offer, to: remoteId, from: myIdRef.current }
-                });
-            } catch (e: any) {
-                addLog(`❌ Renegotiation error: ${e?.message}`);
-            } finally {
-                negotiationStateRef.current[remoteId].makingOffer = false;
-            }
-        };
-
-        // When we start receiving the actual remote media streams
-        pc.ontrack = (event) => {
-            const [stream] = event.streams;
-            setRemoteParticipants(prev => {
-                const existing = prev.find(p => p.id === remoteId);
-                // Check if we already have this participant
-                if (existing) {
-                    // Update the stream reference if the remote peer created a new MediaStream
-                    // This is CRITICAL because the CallScreen makes a "new MediaStream()" 
-                    // whenever video is toggled, resulting in a totally new object.
-                    if (existing.stream !== stream) {
-                        addLog(`🔄 Updating stream reference for ${remoteId.slice(0, 4)}`);
-                        return prev.map(p => p.id === remoteId ? { ...p, stream } : p);
-                    }
-                    return prev;
-                }
-                addLog(`🎥 Received Video/Audio track from ${remoteId.slice(0, 4)}`);
-                const remoteName = remoteNamesRef.current[remoteId] || "User";
-                return [...prev, { id: remoteId, name: remoteName, stream }];
-            });
-        };
-
-        // Handle disconnections gracefully
-        pc.onconnectionstatechange = () => {
-            if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
-                removeParticipant(remoteId);
-            }
-        };
-
-        // If we are the initiating party (we joined second), create the Offer
-        // Note: the `onnegotiationneeded` event usually handles this, but creating an initial empty offer 
-        // forces the connection to start even if no local camera is active yet.
-        if (isInitiator) {
-            addLog(`⏳ Creating initial OFFER for ${remoteId.slice(0, 4)}...`);
-            pc.createOffer().then(offer => {
-                pc.setLocalDescription(offer).then(() => {
-                    addLog(`📤 Sending initial OFFER to ${remoteId.slice(0, 4)}`);
-                    channelRef.current?.send({
-                        type: 'broadcast',
-                        event: 'offer',
-                        payload: { offer, to: remoteId, from: myIdRef.current }
-                    });
-                });
-            }).catch(e => addLog(`❌ Error creating offer: ${e.message}`));
-        }
-
-        return pc;
-    }, [removeParticipant]);
-
-    const remoteNamesRef = useRef<Record<string, string>>({});
+        });
+        setRemoteParticipants(participants);
+    }, [buildStreamForParticipant]);
 
     useEffect(() => {
-        if (!roomId) return;
+        if (!roomId || !localName) return;
 
-        // 1. Initialize Supabase Realtime Channel
-        const channel = supabase.channel(`webrtc-room-${roomId}`, {
-            config: {
-                presence: { key: myIdRef.current },
-                broadcast: { self: false }
-            }
+        let cancelled = false;
+        const room = new Room({
+            adaptiveStream: true,
+            dynacast: true,
+        });
+        roomRef.current = room;
+
+        // --- Event handlers ---
+
+        room.on(RoomEvent.Connected, () => {
+            if (cancelled) return;
+            addLog('✅ Connected to LiveKit room');
+            setConnected(true);
         });
 
-        channelRef.current = channel;
-        setChannelState(channel);
-
-        // 2. Listen for Presence Sync (when users join/leave/update)
-        channel.on('presence', { event: 'sync' }, () => {
-            const state = channel.presenceState();
-            const onlineUsers = Object.keys(state);
-            addLog(`👥 Presence Sync. Online users: ${onlineUsers.length}`);
-
-            // Extract remote names from the presence state
-            for (const [userId, presences] of Object.entries(state)) {
-                if (presences.length > 0 && (presences[0] as any).name) {
-                    remoteNamesRef.current[userId] = (presences[0] as any).name;
-                }
-            }
-
-            // Update existing participants with their synchronized names if they arrived late
-            setRemoteParticipants(prev => prev.map(p => ({
-                ...p,
-                name: remoteNamesRef.current[p.id] || p.name
-            })));
-
-            // If someone new is online, and we aren't already connected to them, WE initiate the WebRTC offer.
-            onlineUsers.forEach(userId => {
-                if (userId !== myIdRef.current && !peerConnectionsRef.current[userId]) {
-                    // Strict Lexicographical Ordering to resolve glare/collisions
-                    const isInitiator = myIdRef.current > userId;
-                    if (isInitiator) {
-                        addLog(`🚀 Found user ${remoteNamesRef.current[userId] || userId.slice(0, 4)}, I am initiator.`);
-                    } else {
-                        addLog(`⏳ Found user ${remoteNamesRef.current[userId] || userId.slice(0, 4)}, awaiting their offer.`);
-                    }
-                    createPeerConnection(userId, isInitiator);
-                }
-            });
+        room.on(RoomEvent.Disconnected, () => {
+            if (cancelled) return;
+            addLog('❌ Disconnected from LiveKit room');
+            setConnected(false);
+            setRemoteParticipants([]);
         });
 
-        channel.on('presence', { event: 'leave' }, ({ leftPresences }) => {
-            if (leftPresences) {
-                leftPresences.forEach((presence: any) => {
-                    addLog(`👋 User ${presence.key.slice(0, 4)} left the room.`);
-                    removeParticipant(presence.key);
-                });
-            }
+        room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, publication: RemoteTrackPublication, participant: RemoteParticipant) => {
+            if (cancelled) return;
+            addLog(`🎥 Track subscribed: ${track.kind} from ${participant.name || participant.identity}`);
+            refreshParticipants(room);
         });
 
-        // 3. Perfect Negotiation: Listen for WebRTC Signaling Data via Broadcast
-        channel.on('broadcast', { event: 'offer' }, async ({ payload }) => {
-            const { offer, to, from } = payload;
-            if (to !== myIdRef.current) return; // Only process offers meant for me
+        room.on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack, publication: RemoteTrackPublication, participant: RemoteParticipant) => {
+            if (cancelled) return;
+            addLog(`📴 Track unsubscribed: ${track.kind} from ${participant.name || participant.identity}`);
+            refreshParticipants(room);
+        });
 
-            // Determine polite/impolite role based on lexicographical UUID order
-            const polite = myIdRef.current < from;
+        room.on(RoomEvent.ParticipantConnected, (participant: RemoteParticipant) => {
+            if (cancelled) return;
+            addLog(`👤 Participant joined: ${participant.name || participant.identity}`);
+        });
 
-            const pc = peerConnectionsRef.current[from] || createPeerConnection(from, false);
-            const state = negotiationStateRef.current[from] || { makingOffer: false, ignoreOffer: false, isSettingRemoteAnswerPending: false };
+        room.on(RoomEvent.ParticipantDisconnected, (participant: RemoteParticipant) => {
+            if (cancelled) return;
+            addLog(`👋 Participant left: ${participant.name || participant.identity}`);
+            refreshParticipants(room);
+        });
 
-            const offerCollision = (offer.type === "offer") && (state.makingOffer || pc.signalingState !== "stable");
-
-            state.ignoreOffer = !polite && offerCollision;
-            if (state.ignoreOffer) {
-                addLog(`🛡️ Ignored colliding OFFER from ${from.slice(0, 4)} (I am impolite)`);
-                return;
-            }
-
-            addLog(`📥 Accept OFFER from ${from.slice(0, 4)}`);
-
+        // Listen for app-level data messages (replaces Supabase broadcast)
+        room.on(RoomEvent.DataReceived, (payload: Uint8Array, participant?: RemoteParticipant) => {
+            if (cancelled) return;
             try {
-                await pc.setRemoteDescription(new RTCSessionDescription(offer));
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
-
-                addLog(`📤 Sending ANSWER to ${from.slice(0, 4)}`);
-                channel.send({
-                    type: 'broadcast',
-                    event: 'answer',
-                    payload: { answer, to: from, from: myIdRef.current }
-                });
-            } catch (err: any) {
-                addLog(`❌ Failed to accept offer: ${err?.message}`);
+                const decoder = new TextDecoder();
+                const message = JSON.parse(decoder.decode(payload));
+                // Dispatch a custom event so CallScreen can listen
+                window.dispatchEvent(new CustomEvent('livekit-data', { detail: message }));
+            } catch (e) {
+                // ignore malformed messages
             }
         });
 
-        channel.on('broadcast', { event: 'answer' }, async ({ payload }) => {
-            const { answer, to, from } = payload;
-            if (to !== myIdRef.current) return;
+        // --- Connect ---
+        const connectToRoom = async () => {
+            try {
+                addLog('⏳ Fetching LiveKit token...');
+                const res = await fetch(`/api/livekit-token?room=${encodeURIComponent(roomId)}&name=${encodeURIComponent(localName)}`);
+                const data = await res.json();
 
-            const pc = peerConnectionsRef.current[from];
-            if (pc) {
-                try {
-                    addLog(`📥 Received ANSWER from ${from.slice(0, 4)}`);
-                    await pc.setRemoteDescription(new RTCSessionDescription(answer));
-                } catch (err: any) {
-                    addLog(`❌ Failed to accept answer: ${err?.message}`);
+                if (data.error) {
+                    addLog(`❌ Token error: ${data.error}`);
+                    return;
                 }
-            }
-        });
 
-        channel.on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
-            const { candidate, to, from } = payload;
-            if (to !== myIdRef.current) return;
+                const livekitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://smart-murti-u1cpnjeh.livekit.cloud';
 
-            const pc = peerConnectionsRef.current[from];
-            if (pc) {
-                // If remote description isn't set yet, the ICE candidate will fail. Better to queue them in production, 
-                // but since browsers usually queue them internally we can safely attempt passing it directly.
-                try {
-                    await pc.addIceCandidate(new RTCIceCandidate(candidate));
-                } catch (e) {
-                    console.error("Error adding ice candidate:", e);
+                addLog('⏳ Connecting to LiveKit Cloud...');
+                await room.connect(livekitUrl, data.token);
+
+                if (cancelled) {
+                    room.disconnect();
+                    return;
                 }
-            }
-        });
 
-        // 4. Subscribe to the channel and track presence
-        channel.subscribe(async (status, err) => {
-            if (status === 'SUBSCRIBED') {
-                setConnected(true);
-                addLog(`✅ Supabase Subscribed! Tracking presence as ${localName}.`);
-                try {
-                    await channel.track({
-                        name: localName,
-                        online_at: new Date().toISOString()
-                    });
-                } catch (e: any) {
-                    addLog(`❌ Presence fault: ${e?.message}`);
+                // Publish local tracks
+                if (localStreamRef.current) {
+                    const tracks = localStreamRef.current.getTracks();
+                    for (const track of tracks) {
+                        try {
+                            await room.localParticipant.publishTrack(track, {
+                                name: track.kind,
+                                simulcast: track.kind === 'video',
+                            });
+                            addLog(`📤 Published ${track.kind} track`);
+                        } catch (e: any) {
+                            addLog(`⚠️ Failed to publish ${track.kind}: ${e?.message}`);
+                        }
+                    }
                 }
-            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-                addLog(`❌ Channel Error [${status}]: ${err}`);
+
+                // Also refresh any participants that connected before us
+                refreshParticipants(room);
+            } catch (e: any) {
+                addLog(`❌ Connection failed: ${e?.message}`);
             }
-        });
+        };
+
+        connectToRoom();
 
         return () => {
+            cancelled = true;
             setConnected(false);
-            setChannelState(null);
-
-            // Capture the specific channel from *this* effect instance. 
-            // Avoid using channelRef.current in the .then() as it might point 
-            // to a newly mounted channel in React strict mode!
-            if (channel) {
-                channel.unsubscribe()
-                    .catch(e => console.error("Unsubscribe error:", e))
-                    .finally(() => {
-                        supabase.removeChannel(channel);
-                    });
-            }
-            // Cleanup all peer connections
-            Object.values(peerConnectionsRef.current).forEach(pc => pc.close());
-            peerConnectionsRef.current = {};
             setRemoteParticipants([]);
+            room.disconnect();
+            roomRef.current = null;
         };
-    }, [roomId, createPeerConnection, removeParticipant, supabase]);
+    }, [roomId, localName, addLog, refreshParticipants]);
+
+    // When localStream changes (e.g. camera toggled), update published tracks
+    useEffect(() => {
+        const room = roomRef.current;
+        if (!room || room.state !== ConnectionState.Connected) return;
+
+        const updateTracks = async () => {
+            const localParticipant = room.localParticipant;
+
+            // Unpublish all existing tracks first
+            const existingPubs = Array.from(localParticipant.trackPublications.values());
+            for (const pub of existingPubs) {
+                if (pub.track) {
+                    try {
+                        await localParticipant.unpublishTrack(pub.track.mediaStreamTrack);
+                    } catch (e) { /* ignore */ }
+                }
+            }
+
+            // Publish new tracks
+            if (localStream) {
+                for (const track of localStream.getTracks()) {
+                    try {
+                        await localParticipant.publishTrack(track, {
+                            name: track.kind,
+                            simulcast: track.kind === 'video',
+                        });
+                    } catch (e: any) {
+                        console.error(`Failed to re-publish ${track.kind}:`, e);
+                    }
+                }
+            }
+        };
+
+        updateTracks();
+    }, [localStream]);
+
+    // Expose a fake "channel" object so CallScreen's event listener code can work
+    // The actual data flows through LiveKit's DataChannel via broadcastEvent + window events
+    const channel = useMemo(() => {
+        return {
+            on: (type: string, filter: any, callback: any) => {
+                // Bridge LiveKit data events to the old Supabase-style API
+                const handler = (e: Event) => {
+                    const detail = (e as CustomEvent).detail;
+                    if (detail && detail.event === filter?.event) {
+                        callback({ payload: detail.payload });
+                    }
+                };
+                window.addEventListener('livekit-data', handler);
+                // Return cleanup function
+                return () => window.removeEventListener('livekit-data', handler);
+            },
+        };
+    }, []);
 
     return {
         connected,
         remoteParticipants,
         broadcastEvent,
-        channel: channelState,
-        debugLogs
+        channel: channel as any,
+        debugLogs,
     };
 }
