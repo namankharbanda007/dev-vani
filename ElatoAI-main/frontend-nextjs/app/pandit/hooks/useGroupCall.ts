@@ -63,12 +63,19 @@ export function useGroupCall({ participants, personalityId }: UseGroupCallProps)
         ${basePrompt}
         
         CRITICAL INSTRUCTION - GROUP CALL CONTEXT:
-        You are currently on a multi-person video call. The participants in this room sharing the microphone are: ${participantList}.
-        Multiple people might speak to you. Address them as a group when appropriate, but if you hear a distinct voice, you can ask "Who is speaking?" or address them specifically by name if they identify themselves. Keep your responses warm, engaging, and aware of this group context!
+        You are currently on a live multi-person video call conducting a Puja. The participants in this room are: ${participantList}.
+        
+        SPEAKER IDENTIFICATION RULES (MUST FOLLOW):
+        1. The system will send you alerts like "[Speaker: Naman] said: 'question here'" BEFORE their audio reaches you.
+        2. When you receive such an alert, you MUST address that person BY NAME in your response. Example: "Naman beta, ...", "Haan Priya ji, ..."
+        3. ALWAYS use the speaker's name at the start of your response to show you know who is talking.
+        4. If you hear a voice WITHOUT a speaker alert, ask "Kaun bol raha hai? Please apna naam bataiye" (Who is speaking? Please tell me your name).
+        5. Keep responses warm, personal, and use the person's name naturally throughout — like a real Pandit ji who knows his devotees.
+        6. When greeting the group, address everyone by name: "Namaste ${participantList}, aaj hum sab milke..."
       `;
 
-            // Initial greeting
-            const firstMsg = `Namaste Pandit ji, we are joining you today. The people here are: ${participantList}. Please welcome us.`;
+            // Initial greeting — use ALL names
+            const firstMsg = `Namaste Pandit ji, we are joining you today. The people here are: ${participantList}. Please welcome each of us by name and ask how we are doing.`;
 
             const connection = await createGeminiConnection(
                 audioContext,

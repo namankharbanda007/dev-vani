@@ -176,7 +176,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
             if (detail.event === 'ACTIVE_SPEAKER') {
                 if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                    sendMessageToAI(`System Alert: The next voice you hear is ${detail.payload.name}.`);
+                    sendMessageToAI(`[Speaker: ${detail.payload.name}] is now speaking. Address them by name in your response.`);
                 }
             }
         };
@@ -193,7 +193,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
             // if we are the host and we speak, we don't need a broadcast, we can just send it
             if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                sendMessageToAI(`System Alert: The next voice you hear is ${localName}.`);
+                sendMessageToAI(`[Speaker: ${localName}] is now speaking. Address them by name in your response.`);
             }
         }
     }, [isMuted, channel, broadcastEvent, localName, isHost, sessionStatus, sendMessageToAI]);
