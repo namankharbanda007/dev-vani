@@ -19,6 +19,7 @@ interface CallScreenProps {
     roomId: string;
     onLeave: () => void;
     isOriginalHost?: boolean;
+    userAvatarUrl?: string | null;
 }
 
 // Helper component to explicitly attach incoming WebRTC React Refs to standard HTML5 video elements.
@@ -54,7 +55,13 @@ const mockUsers = [
     { name: "Amit Kumar", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200&h=200" },
 ];
 
-export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false }: CallScreenProps) {
+// Generate a default avatar using DiceBear API for users without a photo
+const getDefaultAvatar = (name: string) => {
+    const seed = encodeURIComponent(name || 'user');
+    return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=c084fc,f59e0b,ec4899&backgroundType=gradientLinear`;
+};
+
+export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false, userAvatarUrl }: CallScreenProps) {
     // Group Call Voice Connection
     // We use the same personality ID for the Pandit as the demo session
     const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
@@ -95,6 +102,19 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     const [sharedAgentActivity, setSharedAgentActivity] = useState<string>("idle");
 
     const localName = useMemo(() => participants.join(", "), [participants]);
+
+    // Notification state
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+    const notifications = [
+        { id: 1, text: "🪔 Your daily horoscope is ready!", time: "2 min ago", read: false },
+        { id: 2, text: "🎉 New personality added: Vastu Expert", time: "1 hr ago", read: false },
+        { id: 3, text: "🙏 Reminder: Satyanarayan Puja tomorrow", time: "3 hrs ago", read: true },
+    ];
+    const unreadCount = notifications.filter(n => !n.read).length;
+
+    // Resolve avatar URL with fallback
+    const resolvedAvatarUrl = userAvatarUrl || getDefaultAvatar(participants[0] || 'User');
 
     // 1. Initialize WebRTC P2P Mesh Network Connections
     // We send the `outboundStream` (Local Mic + AI Voice)
@@ -491,12 +511,76 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                         <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow text-gray-600 transition-all border border-gray-100" onClick={() => alert("Search functionality coming soon")}>
                             <Search className="w-5 h-5" />
                         </button>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow text-gray-600 relative transition-all border border-gray-100" onClick={() => alert("Notifications coming soon")}>
-                            <Bell className="w-5 h-5" />
-                            <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-red-500 border border-white"></span>
-                        </button>
-                        <div className="w-10 h-10 rounded-full bg-purple-100 overflow-hidden shadow-sm border-2 border-white cursor-pointer hover:opacity-90 transition-opacity">
-                            <img src={mockUsers[0].img} alt="User" className="w-full h-full object-cover" />
+
+                        {/* Notification Bell with Dropdown */}
+                        <div className="relative">
+                            <button
+                                className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow text-gray-600 relative transition-all border border-gray-100"
+                                onClick={() => { setShowNotifications(!showNotifications); setShowAvatarMenu(false); }}
+                            >
+                                <Bell className="w-5 h-5" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 border-2 border-white text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
+                                        {unreadCount}
+                                    </span>
+                                )}
+                            </button>
+                            <AnimatePresence>
+                                {showNotifications && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                                        className="absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden"
+                                    >
+                                        <div className="px-4 py-3 bg-gradient-to-r from-purple-500/10 to-amber-500/10 border-b border-gray-100">
+                                            <h3 className="font-semibold text-sm text-gray-800">Notifications</h3>
+                                        </div>
+                                        <div className="max-h-60 overflow-y-auto">
+                                            {notifications.map((n) => (
+                                                <div key={n.id} className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-50 last:border-b-0 ${!n.read ? 'bg-purple-50/40' : ''}`}>
+                                                    <p className="text-sm text-gray-700">{n.text}</p>
+                                                    <p className="text-xs text-gray-400 mt-1">{n.time}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
+                                            <button className="text-xs text-purple-600 hover:text-purple-800 font-medium w-full text-center" onClick={() => setShowNotifications(false)}>Mark all as read</button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* User Avatar with Dropdown */}
+                        <div className="relative">
+                            <button
+                                className="w-10 h-10 rounded-full overflow-hidden shadow-sm border-2 border-white cursor-pointer hover:border-purple-300 transition-all"
+                                onClick={() => { setShowAvatarMenu(!showAvatarMenu); setShowNotifications(false); }}
+                            >
+                                <img src={resolvedAvatarUrl} alt="User" className="w-full h-full object-cover" />
+                            </button>
+                            <AnimatePresence>
+                                {showAvatarMenu && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                                        className="absolute right-0 top-12 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden"
+                                    >
+                                        <div className="px-4 py-3 flex items-center gap-3 border-b border-gray-100">
+                                            <img src={resolvedAvatarUrl} alt="User" className="w-8 h-8 rounded-full object-cover border border-purple-200" />
+                                            <p className="font-semibold text-sm text-gray-800 truncate">{participants[0] || 'User'}</p>
+                                        </div>
+                                        <a href="/home/settings" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 transition-colors">
+                                            <Settings className="w-4 h-4 inline mr-2" />Profile & Settings
+                                        </a>
+                                        <a href="/home" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 transition-colors border-t border-gray-50">
+                                            <User className="w-4 h-4 inline mr-2" />Go to Home
+                                        </a>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </header>

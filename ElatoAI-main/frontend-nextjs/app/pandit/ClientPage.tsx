@@ -6,7 +6,7 @@ import CallScreen, { getSharedAudioContext } from "./components/CallScreen";
 import { useSearchParams, useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
 
-export default function ClientPage({ initialUser }: { initialUser: string | null }) {
+export default function ClientPage({ initialUser, initialAvatarUrl }: { initialUser: string | null; initialAvatarUrl?: string | null }) {
     // Always start with hasJoined = false so the user must click "Join" to capture the user gesture (prevents AudioContext crash).
     const [hasJoined, setHasJoined] = useState(false);
     const [participants, setParticipants] = useState<string[]>(initialUser ? [initialUser] : []);
@@ -53,8 +53,9 @@ export default function ClientPage({ initialUser }: { initialUser: string | null
             {!hasJoined ? (
                 <JoinScreen onJoin={handleJoin} initialName={initialUser} />
             ) : (
-                <CallScreen participants={participants} roomId={roomId} onLeave={handleLeave} isOriginalHost={isOriginalHost} />
+                <CallScreen participants={participants} roomId={roomId} onLeave={handleLeave} isOriginalHost={isOriginalHost} userAvatarUrl={initialAvatarUrl || null} />
             )}
         </div>
     );
 }
+
