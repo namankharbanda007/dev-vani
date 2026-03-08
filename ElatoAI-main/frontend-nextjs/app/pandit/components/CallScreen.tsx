@@ -149,7 +149,8 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     // This now receives ALL participants (Host + Guests) so it greets everyone correctly
     const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream, sendMessageToAI } = useGroupCall({
         participants: allParticipantNames,
-        personalityId: PANDIT_PERSONALITY_ID
+        personalityId: PANDIT_PERSONALITY_ID,
+        contextType: 'pandit'
     });
 
     // Real webcam feed

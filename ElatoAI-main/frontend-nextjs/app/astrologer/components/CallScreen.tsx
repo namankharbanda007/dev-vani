@@ -135,7 +135,8 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     // 4. Initialize AI Group Call
     const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream, sendMessageToAI } = useGroupCall({
         participants: allParticipantNames,
-        personalityId: ASTROLOGER_PERSONALITY_ID
+        personalityId: ASTROLOGER_PERSONALITY_ID,
+        contextType: 'astrologer'
     });
 
     const videoGridRef = useRef<HTMLDivElement>(null);

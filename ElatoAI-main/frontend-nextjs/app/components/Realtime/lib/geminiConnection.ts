@@ -133,7 +133,7 @@ export async function createGeminiConnection(
                 if (speakingTimeout) clearTimeout(speakingTimeout);
                 speakingTimeout = setTimeout(() => {
                     onSpeakingStateChange(false);
-                }, 300); // 300ms hangover — only bridges micro-gaps within a sentence
+                }, 800); // 800ms hangover — bridges natural pauses within sentences
             }
 
             // Gemini output is 24kHz typically

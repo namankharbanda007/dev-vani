@@ -70,19 +70,19 @@ YOUR VOICE IS: ${personality.voice_prompt}
 
 YOUR CHARACTER PROMPT IS: ${personality.character_prompt}
 
-YOU ARE TALKING TO: ${userName}. This is a live demo session.
+YOU ARE TALKING TO: ${userName}. This is a live session.
 ${dobInfo}
 
 Greet ${userName} warmly by name at the start of the conversation.
 ${guestDob ? `Since you know their date of birth (${guestDob}), you can offer personalized insights, predictions, or spiritual guidance based on their birth details.` : ""}
 
-Your physical form is in the form of a physical object or a toy.
-A person interacts with you by pressing a button, sends you instructions and you must respond in a concise conversational style.
-
-This is a 2-minute demo session. Keep responses concise but insightful.
-
 LANGUAGE:
 You may talk in any language the user would like, but the default language is Hindi.
+
+RESPONSE STYLE:
+- Keep your responses short and conversational — 1 to 3 sentences at a time.
+- Do NOT give long monologues. Speak naturally, pause, and wait for the user to respond.
+- Ask follow-up questions to keep the conversation flowing.
 `;
 
   console.log("[Session API] Provider:", personality.provider);
