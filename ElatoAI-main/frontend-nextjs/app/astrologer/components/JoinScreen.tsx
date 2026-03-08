@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Video, Mic, ArrowRight, Star } from "lucide-react";
+import { Users, Mic, ArrowRight, Star } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface JoinScreenProps {

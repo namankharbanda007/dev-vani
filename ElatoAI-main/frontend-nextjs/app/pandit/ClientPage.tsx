@@ -20,7 +20,7 @@ export default function ClientPage({ initialUser, initialAvatarUrl }: { initialU
         if (room) {
             setRoomId(room);
         } else {
-            const newRoom = uuidv4();
+            const newRoom = `pandit-${uuidv4()}`;
             setRoomId(newRoom);
             setIsOriginalHost(true);
             // Push the generated room to the URL so the user sees they are in a specific session

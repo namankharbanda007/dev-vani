@@ -898,9 +898,9 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                             {/* Top Expert Profiles Banner */}
                             <div className="w-full flex justify-end gap-2 mb-2 pr-2">
                                 <div className="flex items-center gap-2 bg-white/80 backdrop-blur rounded-full p-1.5 shadow-sm border border-white border-b-black/5 pr-4 pl-2 cursor-pointer hover:bg-white transition-colors">
-                                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=64&h=64" alt="Expert" className="w-8 h-8 rounded-full border border-gray-200 object-cover" />
+                                    <img src="/assets/Pandit Performing Aarti.jpg" alt="Pandit Ji" className="w-8 h-8 rounded-full border border-orange-200 object-cover" />
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold leading-tight">Language Coach</span>
+                                        <span className="text-[10px] font-bold leading-tight">AI Pandit Ji</span>
                                     </div>
                                 </div>
                             </div>

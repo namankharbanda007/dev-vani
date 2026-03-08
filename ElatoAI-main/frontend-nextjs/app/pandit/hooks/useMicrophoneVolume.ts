@@ -1,7 +1,19 @@
 import { useEffect, useRef } from 'react';
 
+// Module-level shared AudioContext — prevents creating multiple contexts
+// (browsers limit to ~6 concurrent AudioContexts; exceeding causes silent failures on mobile)
+let sharedVADContext: AudioContext | null = null;
+function getVADContext(): AudioContext {
+    if (!sharedVADContext || sharedVADContext.state === 'closed') {
+        sharedVADContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (sharedVADContext.state === 'suspended') {
+        sharedVADContext.resume().catch(console.error);
+    }
+    return sharedVADContext;
+}
+
 export function useMicrophoneVolume(stream: MediaStream | null, onSpeakingChange: (isSpeaking: boolean) => void) {
-    const audioContextRef = useRef<AudioContext | null>(null);
     const analyzerRef = useRef<AnalyserNode | null>(null);
     const microphoneRef = useRef<MediaStreamAudioSourceNode | null>(null);
     const animationFrameRef = useRef<number | null>(null);
@@ -14,75 +26,73 @@ export function useMicrophoneVolume(stream: MediaStream | null, onSpeakingChange
         const audioTracks = stream.getAudioTracks();
         if (audioTracks.length === 0) return;
 
-        const checkVolume = () => {
-            try {
-                const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-                audioContextRef.current = audioCtx;
+        try {
+            const audioCtx = getVADContext();
 
-                const analyzer = audioCtx.createAnalyser();
-                analyzer.fftSize = 512;
-                analyzer.minDecibels = -60;
-                analyzer.maxDecibels = -10;
-                analyzer.smoothingTimeConstant = 0.8;
-                analyzerRef.current = analyzer;
+            const analyzer = audioCtx.createAnalyser();
+            analyzer.fftSize = 512;
+            analyzer.minDecibels = -60;
+            analyzer.maxDecibels = -10;
+            analyzer.smoothingTimeConstant = 0.8;
+            analyzerRef.current = analyzer;
 
-                // We need a pristine MediaStream with ONLY the audio track for the analyzer
-                const audioStream = new MediaStream([audioTracks[0]]);
-                const microphone = audioCtx.createMediaStreamSource(audioStream);
-                microphone.connect(analyzer);
-                microphoneRef.current = microphone;
+            // We need a pristine MediaStream with ONLY the audio track for the analyzer
+            const audioStream = new MediaStream([audioTracks[0]]);
+            const microphone = audioCtx.createMediaStreamSource(audioStream);
+            microphone.connect(analyzer);
+            microphoneRef.current = microphone;
 
-                const dataArray = new Uint8Array(analyzer.frequencyBinCount);
-                let consecutiveSilence = 0;
-                let consecutiveSpeech = 0;
+            const dataArray = new Uint8Array(analyzer.frequencyBinCount);
+            let consecutiveSilence = 0;
+            let consecutiveSpeech = 0;
 
-                const update = () => {
-                    if (!analyzerRef.current) return;
-                    analyzerRef.current.getByteFrequencyData(dataArray);
+            const update = () => {
+                if (!analyzerRef.current) return;
+                analyzerRef.current.getByteFrequencyData(dataArray);
 
-                    let sum = 0;
-                    for (let i = 0; i < dataArray.length; i++) {
-                        sum += dataArray[i];
-                    }
-                    const average = sum / dataArray.length;
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / dataArray.length;
 
-                    // Simple threshold
-                    const threshold = 15; // out of 255
+                // Simple threshold
+                const threshold = 15; // out of 255
 
-                    if (average > threshold) {
-                        consecutiveSpeech++;
-                        consecutiveSilence = 0;
-                    } else {
-                        consecutiveSilence++;
-                        consecutiveSpeech = 0;
-                    }
+                if (average > threshold) {
+                    consecutiveSpeech++;
+                    consecutiveSilence = 0;
+                } else {
+                    consecutiveSilence++;
+                    consecutiveSpeech = 0;
+                }
 
-                    if (consecutiveSpeech > 5 && !isSpeakingRef.current) {
-                        isSpeakingRef.current = true;
-                        onSpeakingChange(true);
-                    } else if (consecutiveSilence > 30 && isSpeakingRef.current) {
-                        isSpeakingRef.current = false;
-                        onSpeakingChange(false);
-                    }
+                if (consecutiveSpeech > 5 && !isSpeakingRef.current) {
+                    isSpeakingRef.current = true;
+                    onSpeakingChange(true);
+                } else if (consecutiveSilence > 30 && isSpeakingRef.current) {
+                    isSpeakingRef.current = false;
+                    onSpeakingChange(false);
+                }
 
-                    animationFrameRef.current = requestAnimationFrame(update);
-                };
+                animationFrameRef.current = requestAnimationFrame(update);
+            };
 
-                update();
-            } catch (err) {
-                console.error("VAD Setup Error:", err);
-            }
-        };
-
-        checkVolume();
+            update();
+        } catch (err) {
+            console.error("VAD Setup Error:", err);
+        }
 
         return () => {
             if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-            if (microphoneRef.current) microphoneRef.current.disconnect();
-            if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-                audioContextRef.current.close().catch(console.error);
+            animationFrameRef.current = null;
+            if (microphoneRef.current) {
+                microphoneRef.current.disconnect();
+                microphoneRef.current = null;
             }
+            analyzerRef.current = null;
             isSpeakingRef.current = false;
+            // Note: we do NOT close the shared context — it's reused across calls
         };
     }, [stream, onSpeakingChange]);
 }

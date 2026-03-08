@@ -19,7 +19,7 @@ export default function ClientPage({ initialUser, initialAvatarUrl }: { initialU
         if (room) {
             setRoomId(room);
         } else {
-            const newRoom = uuidv4();
+            const newRoom = `astrologer-${uuidv4()}`;
             setRoomId(newRoom);
             setIsOriginalHost(true);
             router.replace(`/astrologer?room=${newRoom}`);

@@ -844,7 +844,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                             {/* Expert Profile Banner */}
                             <div className="w-full flex justify-end gap-2 mb-2 pr-2">
                                 <div className="flex items-center gap-2 bg-white/80 backdrop-blur rounded-full p-1.5 shadow-sm border border-white border-b-black/5 pr-4 pl-2 cursor-pointer hover:bg-white transition-colors">
-                                    <img src="/assets/landing-2/Make_the_pandit_talk_delpmaspu_.mp4" alt="Astrologer" className="w-8 h-8 rounded-full border border-amber-200 object-cover" />
+                                    <img src="/assets/Pandit Performing Aarti.jpg" alt="Astrologer" className="w-8 h-8 rounded-full border border-amber-200 object-cover" />
                                     <div className="flex flex-col">
                                         <span className="text-[10px] font-bold leading-tight">AI Astrologer</span>
                                     </div>
