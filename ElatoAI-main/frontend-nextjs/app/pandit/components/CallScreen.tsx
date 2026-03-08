@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Search, Bell, Video as VideoIcon, MessageSquare, Users, FolderOpen, Calendar, Settings, Sun, Moon, Maximize2, Send, ImageIcon, AudioLines, PhoneOff, VideoOff, MicOff, Mic, User, Copy, UserPlus, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+
 import { useGroupCall } from '../hooks/useGroupCall';
 import { useWebRTC } from '../hooks/useWebRTC';
 import { useMicrophoneVolume } from '../hooks/useMicrophoneVolume';
@@ -47,13 +47,7 @@ const RemoteVideo = ({ stream }: { stream: MediaStream | undefined | null }) => 
     return <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover bg-gray-900" />;
 };
 
-// Mock users for the realistic UI feel
-const mockUsers = [
-    { name: "You", img: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=200&h=200" },
-    { name: "Rahul Sharma", img: "https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?auto=format&fit=crop&q=80&w=200&h=200" },
-    { name: "Priya Patel", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200" },
-    { name: "Amit Kumar", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200&h=200" },
-];
+
 
 // Generate a default avatar using DiceBear API for users without a photo
 const getDefaultAvatar = (name: string) => {
@@ -284,29 +278,26 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         }
     }, [sessionStatus, isAiActiveGlobally, sharedAgentActivity]);
 
-    // Device Setup & Web Audio Bootstrap
+    // Device Setup & Web Audio Bootstrap — runs ONCE on mount
     useEffect(() => {
         let isMounted = true;
         let activeStream: MediaStream | null = null;
-        let audioCtx: AudioContext | null = null;
         setCameraError(null);
 
         const setupMediaAndAudio = async () => {
             let stream: MediaStream | null = null;
 
-            if (!isVideoOff) {
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                } catch (err: any) {
-                    console.error("Camera access error:", err);
-                    if (isMounted) setCameraError(err.message || "Camera access denied");
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            } catch (err: any) {
+                console.error("Camera access error:", err);
+                if (isMounted) setCameraError(err.message || "Camera access denied");
 
-                    // Fallback to audio only
-                    try {
-                        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    } catch (audioErr: any) {
-                        console.error("Audio fallback error:", audioErr);
-                    }
+                // Fallback to audio only
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch (audioErr: any) {
+                    console.error("Audio fallback error:", audioErr);
                 }
             }
 
@@ -325,7 +316,6 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
             try {
                 const ctx = getSharedAudioContext();
                 if (ctx.state === 'suspended') void ctx.resume();
-                audioCtx = ctx;
                 mixerContextRef.current = ctx;
 
                 // Create the Input Mixer (Pipes everything to AI)
@@ -346,7 +336,6 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
                 // Attach the local mic to both mixers
                 if (stream && stream.getAudioTracks().length > 0) {
-                    // Important constraint check: Chrome fails if the stream's audio track is silent/blocked
                     const localSource = ctx.createMediaStreamSource(stream);
                     localSource.connect(aiInputDest);
                     localSource.connect(p2pOutputDest);
@@ -366,7 +355,6 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
             }
             if (p2pOutputDestRef.current) p2pOutputDestRef.current = null;
             if (aiInputDestRef.current) aiInputDestRef.current = null;
-            // Disconnect all peer sources
             peerSourcesRef.current.forEach(source => source.disconnect());
             peerSourcesRef.current.clear();
             if (aiSourceRef.current) {
@@ -374,7 +362,15 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                 aiSourceRef.current = null;
             }
         };
-    }, [isVideoOff]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Toggle video track on/off without recreating media pipeline
+    useEffect(() => {
+        if (!localStream) return;
+        localStream.getVideoTracks().forEach(track => {
+            track.enabled = !isVideoOff;
+        });
+    }, [isVideoOff, localStream]);
 
     // Mix AI Output back into P2P and Local Speakers
     useEffect(() => {
@@ -814,7 +810,11 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                         <AudioLines className="w-5 h-5" />
                                     </button>
                                     <button
-                                        onClick={() => setIsMuted(!isMuted)}
+                                        onClick={() => {
+                                            const newMuted = !isMuted;
+                                            setIsMuted(newMuted);
+                                            localStream?.getAudioTracks().forEach(t => t.enabled = !newMuted);
+                                        }}
                                         className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isMuted ? 'bg-white text-gray-900' : 'bg-white/20 text-white hover:bg-white/30'}`}
                                     >
                                         {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}

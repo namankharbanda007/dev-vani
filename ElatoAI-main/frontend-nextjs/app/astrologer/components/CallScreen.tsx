@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Search, Bell, Video as VideoIcon, MessageSquare, Users, FolderOpen, Calendar, Settings, Sun, Moon, Maximize2, Send, ImageIcon, AudioLines, PhoneOff, VideoOff, MicOff, Mic, User, Copy, UserPlus, CheckCircle2, Star } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+
 import { useGroupCall } from '../../pandit/hooks/useGroupCall';
 import { useWebRTC } from '../../pandit/hooks/useWebRTC';
 import { useMicrophoneVolume } from '../../pandit/hooks/useMicrophoneVolume';
@@ -164,9 +164,13 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
             if (!detail) return;
 
             if (detail.event === 'AI_STATE') {
-                setIsAiActiveGlobally(detail.payload.active);
+                if (detail.payload.status === "STARTED") {
+                    setIsAiActiveGlobally(true);
+                } else if (detail.payload.status === "STOPPED") {
+                    setIsAiActiveGlobally(false);
+                }
             }
-            if (detail.event === 'AI_ACTIVITY') {
+            if (detail.event === 'AI_ACTIVITY' && !isHost) {
                 setSharedAgentActivity(detail.payload.activity);
             }
             if (detail.event === 'ACTIVE_SPEAKER') {
@@ -190,6 +194,18 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         return () => window.removeEventListener('livekit-data', handler);
     }, [isHost, sessionStatus, sendMessageToAI]);
 
+    // Track active speaking for this client
+    const handleActiveSpeakerChange = useCallback((isSpeaking: boolean) => {
+        if (isSpeaking && !isMuted && channel) {
+            broadcastEvent('ACTIVE_SPEAKER', { name: localName });
+            if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
+                sendMessageToAI(`[Speaker: ${localName}] is now speaking. Address them by name in your response.`);
+            }
+        }
+    }, [isMuted, channel, broadcastEvent, localName, isHost, sessionStatus, sendMessageToAI]);
+
+    useMicrophoneVolume(localStream, handleActiveSpeakerChange);
+
     // Start/Stop the AI session
     const handleStartSession = useCallback(async () => {
         if (!mixedAiInputStreamRef.current) {
@@ -198,7 +214,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         }
         setIsHost(true);
         setIsAiActiveGlobally(true);
-        broadcastEvent('AI_STATE', { active: true });
+        broadcastEvent('AI_STATE', { status: "STARTED" });
         await connect(mixedAiInputStreamRef.current);
     }, [connect, broadcastEvent]);
 
@@ -206,7 +222,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         await disconnect();
         setIsHost(false);
         setIsAiActiveGlobally(false);
-        broadcastEvent('AI_STATE', { active: false });
+        broadcastEvent('AI_STATE', { status: "STOPPED" });
     }, [disconnect, broadcastEvent]);
 
     // Host broadcasts activity
@@ -230,7 +246,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         }
     }, [sessionStatus, isAiActiveGlobally, sharedAgentActivity]);
 
-    // Device Setup & Web Audio Bootstrap
+    // Device Setup & Web Audio Bootstrap — runs ONCE on mount
     useEffect(() => {
         let isMounted = true;
         let activeStream: MediaStream | null = null;
@@ -238,17 +254,16 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
         const setupMediaAndAudio = async () => {
             let stream: MediaStream | null = null;
-            if (!isVideoOff) {
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            } catch (err: any) {
+                console.error("Camera access error:", err);
+                if (isMounted) setCameraError(err.message || "Camera access denied");
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                } catch (err: any) {
-                    console.error("Camera access error:", err);
-                    if (isMounted) setCameraError(err.message || "Camera access denied");
-                    try {
-                        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    } catch (audioErr: any) {
-                        console.error("Audio fallback error:", audioErr);
-                    }
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch (audioErr: any) {
+                    console.error("Audio fallback error:", audioErr);
                 }
             }
 
@@ -306,7 +321,15 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                 aiSourceRef.current = null;
             }
         };
-    }, [isVideoOff]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Toggle video track on/off without recreating media pipeline
+    useEffect(() => {
+        if (!localStream) return;
+        localStream.getVideoTracks().forEach(track => {
+            track.enabled = !isVideoOff;
+        });
+    }, [isVideoOff, localStream]);
 
     // Mix AI Output
     useEffect(() => {
@@ -331,12 +354,24 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         }
     }, [aiOutputStream]);
 
-    // Mix remote peers into AI input
+    // Mix remote peers into AI input (with cleanup of stale peers)
     useEffect(() => {
         const ctx = mixerContextRef.current;
         const aiInputDest = aiInputDestRef.current;
         if (!ctx || !aiInputDest || !isHost) return;
 
+        // Current participant IDs
+        const remoteIds = new Set(remoteParticipants.map(p => p.id));
+
+        // Cleanup dropped peers
+        peerSourcesRef.current.forEach((source, id) => {
+            if (!remoteIds.has(id)) {
+                try { source.disconnect(); } catch (e) { }
+                peerSourcesRef.current.delete(id);
+            }
+        });
+
+        // Add new remote peer audio to the AI input mixer
         remoteParticipants.forEach(participant => {
             if (!peerSourcesRef.current.has(participant.id) && participant.stream.getAudioTracks().length > 0) {
                 try {
@@ -722,7 +757,11 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                         <AudioLines className="w-5 h-5" />
                                     </button>
                                     <button
-                                        onClick={() => setIsMuted(!isMuted)}
+                                        onClick={() => {
+                                            const newMuted = !isMuted;
+                                            setIsMuted(newMuted);
+                                            localStream?.getAudioTracks().forEach(t => t.enabled = !newMuted);
+                                        }}
                                         className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isMuted ? 'bg-white text-gray-900' : 'bg-white/20 text-white hover:bg-white/30'}`}
                                     >
                                         {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
