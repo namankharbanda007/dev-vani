@@ -78,6 +78,9 @@ const HOST = "generativelanguage.googleapis.com";
 const URI = `wss://${HOST}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
 const MODEL = "models/gemini-2.5-flash-native-audio-preview-12-2025";
 
+// Worklet module cache — avoid re-adding on every connection (~50-100ms saved)
+let workletModuleAdded = false;
+
 export async function createGeminiConnection(
     audioContext: AudioContext,
     apiKey: string,
@@ -103,7 +106,10 @@ export async function createGeminiConnection(
         console.log(`AudioContext Sample Rate: ${audioContext.sampleRate}`);
 
         try {
-            await audioContext.audioWorklet.addModule('data:text/javascript;base64,' + btoa(workletCode));
+            if (!workletModuleAdded) {
+                await audioContext.audioWorklet.addModule('data:text/javascript;base64,' + btoa(workletCode));
+                workletModuleAdded = true;
+            }
         } catch (e) {
             console.warn("Worklet might already be added or failed:", e);
         }
@@ -157,6 +163,9 @@ export async function createGeminiConnection(
             nextStartTime += buffer.duration;
         }
 
+        // Track whether setup is complete — we defer the initial message until ACK
+        let setupComplete = false;
+
         // Event Handlers - Assigned IMMEDIATELY
         ws.onopen = () => {
             console.log("Gemini WebSocket Connected");
@@ -181,9 +190,23 @@ export async function createGeminiConnection(
             };
             if (ws) {
                 ws.send(JSON.stringify(setupMessage));
+                // NOTE: initial message is now deferred until setup ACK (see onmessage)
+            }
+        };
 
-                // Send Initial Message if provided
-                if (initialMessage) {
+        ws.onmessage = async (event) => {
+            let data;
+            if (event.data instanceof Blob) {
+                data = JSON.parse(await event.data.text());
+            } else {
+                data = JSON.parse(event.data as string);
+            }
+
+            // Detect setup complete ACK — now safe to send initial message
+            if (data.setupComplete && !setupComplete) {
+                setupComplete = true;
+                console.log("Gemini setup ACK received");
+                if (initialMessage && ws && ws.readyState === WebSocket.OPEN) {
                     const msg = {
                         client_content: {
                             turns: [{
@@ -195,15 +218,7 @@ export async function createGeminiConnection(
                     };
                     ws.send(JSON.stringify(msg));
                 }
-            }
-        };
-
-        ws.onmessage = async (event) => {
-            let data;
-            if (event.data instanceof Blob) {
-                data = JSON.parse(await event.data.text());
-            } else {
-                data = JSON.parse(event.data as string);
+                return; // setup ACK has no audio data
             }
 
             if (data.serverContent?.modelTurn?.parts) {
