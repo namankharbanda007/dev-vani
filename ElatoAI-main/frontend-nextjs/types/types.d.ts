@@ -57,6 +57,10 @@ declare global {
         // device
         device?: IDevice;
         device_id: string | null;
+
+        // astrology
+        date_of_birth?: string | null;
+        zodiac_sign?: string | null;
     }
 
     type UserInfo =

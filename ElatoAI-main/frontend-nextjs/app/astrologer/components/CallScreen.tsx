@@ -20,6 +20,7 @@ interface CallScreenProps {
     onLeave: () => void;
     isOriginalHost?: boolean;
     userAvatarUrl?: string | null;
+    userProfile?: { name: string; dateOfBirth: string | null; zodiacSign: string | null; birthPlace: string | null; birthTime: string | null; rashi: string | null };
 }
 
 // Helper component for remote video
