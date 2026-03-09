@@ -421,9 +421,20 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         setChatMessage('');
     };
 
-    // Invite Link Logic
-    const copyInviteLink = () => {
+    const copyInviteLink = async () => {
         const url = `${window.location.origin}/astrologer?room=${roomId}`;
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Join my Astrology Session ✨',
+                    text: 'Join me for a live astrology session with AI Astrologer Ji!',
+                    url,
+                });
+                return;
+            } catch (e) {
+                // User cancelled or share failed — fall through to clipboard
+            }
+        }
         navigator.clipboard.writeText(url);
         setLinkCopied(true);
         setShowInviteToast(true);
@@ -471,9 +482,9 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                     </nav>
 
                     <div className="flex items-center gap-4">
-                        <button className="hidden sm:flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-full font-bold text-sm hover:bg-amber-100 transition-colors" onClick={copyInviteLink}>
+                        <button className="flex items-center gap-2 bg-amber-50 text-amber-700 px-3 sm:px-4 py-2 rounded-full font-bold text-xs sm:text-sm hover:bg-amber-100 transition-colors" onClick={copyInviteLink}>
                             {linkCopied ? <CheckCircle2 className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-                            {linkCopied ? 'Copied!' : 'Invite Family'}
+                            <span className="hidden sm:inline">{linkCopied ? 'Copied!' : 'Invite Family'}</span>
                         </button>
                         <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow text-gray-600 transition-all border border-gray-100" onClick={() => alert("Search functionality coming soon")}>
                             <Search className="w-5 h-5" />
@@ -642,17 +653,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                     </div>
                                 )}
 
-                                {/* Connection Debug Logs */}
-                                <div className="hidden xl:flex w-full mt-4 flex-col gap-1 bg-black/80 rounded-xl p-3 max-h-[200px] overflow-y-auto text-[10px] font-mono shadow-inner border border-white/10 shrink-0">
-                                    <div className="sticky top-0 bg-black text-gray-400 font-bold mb-1 pb-1 border-b border-gray-800">Connection Logs ({roomId.slice(0, 8)})</div>
-                                    {debugLogs.length === 0 ? (
-                                        <div className="text-gray-600 italic">Waiting for connection...</div>
-                                    ) : (
-                                        debugLogs.map((log, i) => (
-                                            <div key={i} className="text-emerald-400 break-words leading-tight">{log}</div>
-                                        ))
-                                    )}
-                                </div>
+
                             </div>
 
                             {/* Main AI Video Stage */}
