@@ -563,9 +563,12 @@ function DailyAshramSection() {
                         </div>
 
                         <div className="relative z-10">
-                            <button className="flex items-center gap-2 text-indigo-600 font-bold hover:text-indigo-800 transition-colors">
+                            <Link
+                                href="/horoscope"
+                                className="flex items-center gap-2 text-indigo-600 font-bold hover:text-indigo-800 transition-colors"
+                            >
                                 View Sample Report →
-                            </button>
+                            </Link>
                         </div>
                     </motion.div>
 
@@ -594,9 +597,12 @@ function DailyAshramSection() {
                         </div>
 
                         <div className="relative z-10">
-                            <button className="flex items-center gap-2 text-orange-600 font-bold hover:text-orange-800 transition-colors">
+                            <Link
+                                href="/bhajan"
+                                className="flex items-center gap-2 text-orange-600 font-bold hover:text-orange-800 transition-colors"
+                            >
                                 Listen Now →
-                            </button>
+                            </Link>
                         </div>
                     </motion.div>
                 </div>
