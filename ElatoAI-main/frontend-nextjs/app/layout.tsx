@@ -11,29 +11,23 @@ import {
     Borel,
     Silkscreen,
     Luckiest_Guy,
+    Karla,
 } from "next/font/google";
+import { Metadata, Viewport } from "next";
+import Script from "next/script";
+import NextTopLoader from "nextjs-toploader";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { createClient } from "@/utils/supabase/server";
 import { Toaster } from "@/components/ui/toaster";
-import { Analytics } from "@vercel/analytics/react";
-import Footer from "./components/Footer";
-
-import { Metadata, Viewport } from "next";
-import NextTopLoader from "nextjs-toploader";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { Karla } from "next/font/google";
+import { getUserById } from "@/db/users";
+import TawkToScript from "@/app/components/TawkToScript";
+import LayoutWrapper from "@/app/components/LayoutWrapper";
 
 const karla = Karla({
     subsets: ["latin"],
     variable: "--font-karla",
 });
-
-
-import Script from "next/script";
-import { Navbar } from "./components/Nav/Navbar";
-import { getUserById } from "@/db/users";
-import TawkToScript from "@/app/components/TawkToScript";
-import LayoutWrapper from "@/app/components/LayoutWrapper";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -41,7 +35,7 @@ const inter = Inter({
     variable: "--font-inter",
 });
 
-const inter_tight = Inter_Tight({
+const interTight = Inter_Tight({
     weight: ["500", "600", "700"],
     style: ["normal", "italic"],
     subsets: ["latin"],
@@ -101,20 +95,15 @@ const luckiestGuy = Luckiest_Guy({
     weight: ["400"],
 });
 
-const fonts = `${inter.variable} ${inter_tight.variable} ${baloo2.variable} ${comicNeue.variable} ${quicksand.variable} ${fredoka.variable} ${lora.variable} ${karla.variable} ${borel.variable} ${silkscreen.variable} ${luckiestGuy.variable}`;
+const fonts = `${inter.variable} ${interTight.variable} ${baloo2.variable} ${comicNeue.variable} ${quicksand.variable} ${fredoka.variable} ${lora.variable} ${karla.variable} ${borel.variable} ${silkscreen.variable} ${luckiestGuy.variable}`;
 
 const siteUrl = "https://smartmurti.com";
-const defaultUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : siteUrl;
 
 export const metadata: Metadata = {
-    metadataBase: new URL(defaultUrl),
+    metadataBase: new URL(siteUrl),
     title: {
-        default:
-            "SMART मूर्ति: World's First Devotional Ecosystem",
-        template:
-            "%s | SMART मूर्ति: World's First Devotional Ecosystem",
+        default: "SMART मूर्ति: World's First Devotional Ecosystem",
+        template: "%s | SMART मूर्ति: World's First Devotional Ecosystem",
     },
     applicationName: "SMART मूर्ति",
     description:
@@ -122,25 +111,27 @@ export const metadata: Metadata = {
     authors: [
         {
             name: "Naman Kharbanda",
-            url: siteUrl,
+            url: `${siteUrl}/about`,
         },
     ],
     keywords: [
+        "AI bhagwan",
+        "AI bhagwan murti",
+        "AI smart murti",
         "smart murti",
-        "smartmurti",
-        "faith tech",
-        "spiritual ai",
-        "ai pandit",
-        "ai astrologer",
-        "digital puja",
-        "vedic astrology app",
-        "daily horoscope",
-        "bhajan app",
-        "hindu spiritual guidance",
-        "devotional ecosystem",
-        "smart mandir",
-        "smart base",
-        "whatsapp spiritual assistant",
+        "ai krishna",
+        "ai ram bhagwan",
+        "emotional growth",
+        "Smart Murti AI",
+        "conversational AI",
+        "google home",
+        "amazon echo",
+        "smart speaker",
+        "AI speaker",
+        "emotional support",
+        "AI for adults",
+        "AI assistant",
+        "smart AI device",
     ],
     openGraph: {
         title: "SMART मूर्ति: World's First Devotional Ecosystem",
@@ -173,7 +164,7 @@ export const metadata: Metadata = {
         },
     },
     icons: {
-        icon: "/logos/smartmurti-icon.jpg",
+        icon: "/favicon.ico",
         apple: "/apple-touch-icon.png",
     },
     twitter: {
@@ -192,8 +183,8 @@ export const metadata: Metadata = {
         title: "SMART मूर्ति",
         statusBarStyle: "black-translucent",
     },
-    category: "Faith technology",
-    classification: "Devotional AI platform",
+    category: "AI device",
+    classification: "Interactive, conversational AI Devices",
 };
 
 export const viewport: Viewport = {
@@ -301,7 +292,7 @@ const jsonLd: WithContext<Product> = {
         },
     ],
     image: `${siteUrl}/logos/smartmurti-icon.jpg`,
-    category: "Devotional AI platform",
+    category: "Interactive AI Device",
 };
 
 export default async function RootLayout({
@@ -335,19 +326,8 @@ export default async function RootLayout({
             </head>
             <body className="bg-background text-foreground flex flex-col min-h-screen bg-gray-50 font-karla">
                 <NextTopLoader showSpinner={false} color="#facc15" />
-
-                {/* <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                > */}
-                <LayoutWrapper user={dbUser ?? null}>
-                    {children}
-                </LayoutWrapper>
-                {/* <Analytics /> */}
+                <LayoutWrapper user={dbUser ?? null}>{children}</LayoutWrapper>
                 <Toaster />
-                {/* </ThemeProvider> */}
             </body>
             <TawkToScript />
             <GoogleAnalytics gaId="G-CR07NVH6CN" />
