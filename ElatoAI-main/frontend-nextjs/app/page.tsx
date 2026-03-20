@@ -1,5 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default function LandingPage() {
-    redirect("/landing-2");
-}
+export { default } from "./landing/page";
