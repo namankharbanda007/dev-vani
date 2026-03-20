@@ -36,54 +36,10 @@ const CHARACTER_CATEGORIES: { [key: string]: { title: string; emoji: string; cha
             "the educational guide",
         ]
     },
-    seniors: {
-        title: "👴 Seniors",
-        emoji: "👴",
-        characters: [
-            "old age friend",
-            "old days friend",
-            "the tech translator",
-        ]
-    },
-    adult: {
-        title: "👨 Adults",
-        emoji: "👨",
-        characters: [
-            "the advocate",
-            "the travel guide",
-            "sports commentator",
-            "the chef's assistant",
-            "chef's assistant",
-            "the gift guru",
-            "the interviewer",
-            "the fitness coach",
-        ]
-    },
-    students: {
-        title: "🎓 Students",
-        emoji: "🎓",
-        characters: [
-            "the exam coach",
-            "the language exchange",
-            "the debate partner",
-            "the career counselor",
-        ]
-    },
-    children: {
-        title: "👶 Children",
-        emoji: "👶",
-        characters: [
-            "the phonics parrot",
-            "the dino-historians",
-            "bedtime stories by grandma",
-            "the time traveler from 3025",
-            "buddy",
-        ]
-    },
 };
 
 // Order of categories to display
-const CATEGORY_ORDER = ["spiritual", "astrology", "seniors", "adult", "students", "children"];
+const CATEGORY_ORDER = ["spiritual", "astrology"];
 
 interface UserPersonalitiesProps {
     onPersonalityPicked: (personalityIdPicked: string) => void;
@@ -131,13 +87,10 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
     selectedFilters,
     myPersonalities,
 }) => {
-    // Separate premade personalities (creator_id is null) from user-created ones
     const premadePersonalities = allPersonalities.filter(p => p.creator_id === null);
-    const userCreatedPersonalities = allPersonalities.filter(p => p.creator_id !== null);
 
     // Group premade personalities by category
     const categorizedPersonalities: { [key: string]: IPersonality[] } = {};
-    const uncategorizedPersonalities: IPersonality[] = [];
 
     premadePersonalities.forEach(personality => {
         const category = findCategory(personality);
@@ -146,8 +99,6 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
                 categorizedPersonalities[category] = [];
             }
             categorizedPersonalities[category].push(personality);
-        } else {
-            uncategorizedPersonalities.push(personality);
         }
     });
 
@@ -165,37 +116,7 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
 
     return (
         <div className="flex flex-col gap-8 w-full">
-            {/* My Characters Section */}
-            {myPersonalities.length > 0 && (
-                <CharacterSection
-                    selectedFilters={selectedFilters}
-                    allPersonalities={myPersonalities}
-                    languageState={languageState}
-                    personalityIdState={personalityIdState}
-                    onPersonalityPicked={onPersonalityPicked}
-                    onCallCharacter={onCallCharacter}
-                    onChatCharacter={onChatCharacter}
-                    title={"My Characters"}
-                    disableButtons={disableButtons}
-                />
-            )}
-
-            {/* User Created Characters (if any separate from "My Characters") */}
-            {userCreatedPersonalities.length > 0 && (
-                <CharacterSection
-                    selectedFilters={selectedFilters}
-                    allPersonalities={userCreatedPersonalities}
-                    languageState={languageState}
-                    personalityIdState={personalityIdState}
-                    onPersonalityPicked={onPersonalityPicked}
-                    onCallCharacter={onCallCharacter}
-                    onChatCharacter={onChatCharacter}
-                    title={"Community Characters"}
-                    disableButtons={disableButtons}
-                />
-            )}
-
-            {/* Categorized Premade Characters - Netflix Style */}
+            {/* Faith-tech only character shelves */}
             {CATEGORY_ORDER.map(categoryKey => {
                 const personalities = categorizedPersonalities[categoryKey];
                 if (!personalities || personalities.length === 0) return null;
@@ -217,21 +138,6 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
                     />
                 );
             })}
-
-            {/* Uncategorized Characters (fallback) */}
-            {uncategorizedPersonalities.length > 0 && (
-                <CharacterSection
-                    selectedFilters={selectedFilters}
-                    allPersonalities={uncategorizedPersonalities}
-                    languageState={languageState}
-                    personalityIdState={personalityIdState}
-                    onPersonalityPicked={onPersonalityPicked}
-                    onCallCharacter={onCallCharacter}
-                    onChatCharacter={onChatCharacter}
-                    title={"Other Characters"}
-                    disableButtons={disableButtons}
-                />
-            )}
         </div>
     );
 };

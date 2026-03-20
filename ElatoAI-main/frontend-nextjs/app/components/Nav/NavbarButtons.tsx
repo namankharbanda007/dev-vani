@@ -6,8 +6,7 @@ import { NavbarDropdownMenu } from "./NavbarDropdownMenu";
 import PremiumBadge from "../PremiumBadge";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname } from "next/navigation";
-import GetInTouchButton from "../GetInTouch";
-import { CalendarCheck, Users, Settings, Plus, Music, CreditCard } from "lucide-react";
+import { Users, Settings, Music, CreditCard } from "lucide-react";
 
 interface NavbarButtonsProps {
     user: IUser | null;
@@ -36,7 +35,7 @@ const NavbarButtons: React.FC<NavbarButtonsProps> = ({
                                     className={`flex flex-row gap-2 items-center ${pathname === "/home" ? "text-primary" : "text-muted-foreground"}`}
                                 >
                                     <Users size={20} />
-                                    <span>Avatars</span>
+                                    <span>Guides</span>
                                 </Button>
                             </Link>
                             <Link href="/bhajan" passHref>
@@ -64,15 +63,6 @@ const NavbarButtons: React.FC<NavbarButtonsProps> = ({
                                 >
                                     <Settings size={20} />
                                     <span>Settings</span>
-                                </Button>
-                            </Link>
-                            <Link href="/home/create" passHref>
-                                <Button
-                                    variant="ghost"
-                                    className={`flex flex-row gap-2 items-center ${pathname === "/home/create" ? "text-primary" : "text-muted-foreground"}`}
-                                >
-                                    <Plus size={20} />
-                                    <span>Create New</span>
                                 </Button>
                             </Link>
                         </>

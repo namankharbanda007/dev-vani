@@ -96,7 +96,7 @@ const Playground: React.FC<PlaygroundProps> = ({
                                 <p className="text-sm md:text-base text-gray-500 max-w-lg leading-relaxed">
                                     {isDoctor
                                         ? "Your patients are waiting. Start a healing conversation."
-                                        : "Choose an avatar below to call or chat instantly."
+                                        : "Choose a spiritual guide below to begin your call or chat."
                                     }
                                 </p>
                             </div>
@@ -117,7 +117,7 @@ const Playground: React.FC<PlaygroundProps> = ({
                 {/* ===== Divider ===== */}
                 <div className="flex items-center gap-4 px-4 md:px-0">
                     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
-                    <span className="text-xs font-medium text-gray-400 tracking-widest uppercase">Choose an Avatar</span>
+                    <span className="text-xs font-medium text-gray-400 tracking-widest uppercase">Choose a Guide</span>
                     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
                 </div>
 
@@ -125,10 +125,7 @@ const Playground: React.FC<PlaygroundProps> = ({
                 <div className="flex flex-col gap-6 px-2 md:px-0">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <h2 className="text-xl md:text-2xl font-bold text-gray-800 font-lora tracking-tight">Your Avatars</h2>
-                            <div className="px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
-                                {allPersonalities.length}
-                            </div>
+                            <h2 className="text-xl md:text-2xl font-bold text-gray-800 font-lora tracking-tight">Faith Guides</h2>
                         </div>
                         <PersonalityFilters
                             setSelectedFilters={setSelectedFilters}

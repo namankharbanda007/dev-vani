@@ -7,13 +7,12 @@ import {
 } from "@/components/ui/sheet";
 import Image from "next/image";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { Airplay, Check, MonitorSmartphone, Phone, Edit } from "lucide-react";
+import { Airplay, Check, MonitorSmartphone, Phone } from "lucide-react";
 import { useState } from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { getPersonalityImageSrc } from "@/lib/utils";
 import { EmojiComponent } from "./EmojiImage";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 
 interface ModifyCharacterSheetProps {
     openPersonality: IPersonality;
@@ -61,18 +60,6 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
                         ? "Live character"
                         : "Click to chat"}
                 </Button>
-                {isPersonalCharacter && (
-                    <Link href={`/home/create?edit=true&id=${openPersonality.personality_id}`} className="w-full">
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            className="w-full rounded-full text-sm md:text-lg flex flex-row items-center gap-1 md:gap-2"
-                        >
-                            <Edit className="flex-shrink-0 h-5 w-5 md:h-6 md:w-6" />
-                            Edit
-                        </Button>
-                    </Link>
-                )}
             </div>
         );
     };

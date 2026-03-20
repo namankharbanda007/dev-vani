@@ -12,10 +12,10 @@ export default function ProductsPage() {
                 <section className="w-full py-12 md:py-32 bg-gradient-to-br from-purple-100 via-pink-100 to-amber-100">
                     <div className="container px-4 md:px-6 max-w-screen-xl mx-auto text-center">
                         <h1 className="text-4xl md:text-6xl font-bold font-lora text-transparent bg-clip-text bg-gradient-to-r from-purple-900 via-pink-800 to-amber-700 mb-6">
-                            Choose Your Perfect Companion
+                            Choose Your Faith-Tech Experience
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto">
-                            From spiritual guidance to personalized friendship, find the AI companion that's right for you.
+                            Explore spiritual guidance, devotional rituals, and connected home temple products built for daily practice.
                         </p>
                     </div>
                 </section>
@@ -101,15 +101,15 @@ export default function ProductsPage() {
                                 </div>
 
                                 <p className="text-lg text-purple-800 font-semibold mb-2">
-                                    Bring Any Murti to Life
+                                    Upgrade Your Existing Murti
                                 </p>
 
                                 <p className="text-2xl font-bold text-purple-600 mb-4">
-                                    ₹5,000 <span className="text-sm font-normal text-green-600">+ FREE 3D Print</span>
+                                    ₹5,000
                                 </p>
 
                                 <p className="text-gray-700 mb-6 leading-relaxed">
-                                    Place any murti, 3D model, or statue on this smart base. Select a character from our app and your idol comes to life!
+                                    Place your existing murti on the Smart Base to unlock devotional audio, guided rituals, and spiritual conversations at home.
                                 </p>
 
                                 <ul className="space-y-2 mb-6">
@@ -119,11 +119,11 @@ export default function ProductsPage() {
                                     </li>
                                     <li className="flex items-start text-sm text-gray-700">
                                         <span className="text-purple-500 mr-2">✦</span>
-                                        <span>FREE customized 3D print model</span>
+                                        <span>Guided puja and aarti support</span>
                                     </li>
                                     <li className="flex items-start text-sm text-gray-700">
                                         <span className="text-purple-500 mr-2">✦</span>
-                                        <span>50+ AI character voices</span>
+                                        <span>Built for devotional use at home</span>
                                     </li>
                                 </ul>
 

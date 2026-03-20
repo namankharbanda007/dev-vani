@@ -47,7 +47,7 @@ const DoctorPersonalities: React.FC<DoctorPersonalitiesProps> = ({
                     languageState={languageState}
                     personalityIdState={personalityIdState}
                     onPersonalityPicked={onPersonalityPicked}
-                    title={"My Characters"}
+                    title={"Saved Guides"}
                     disableButtons={disableButtons}
                 />
             )}
