@@ -74,6 +74,8 @@ function base64ToFloat32(base64: string) {
     return float32Array;
 }
 
+const initializedWorkletContexts = new WeakSet<AudioContext>();
+
 export async function createElevenLabsConnection(
     audioContext: AudioContext,
     signedUrl: string,
@@ -97,7 +99,10 @@ export async function createElevenLabsConnection(
         console.log(`AudioContext Sample Rate: ${audioContext.sampleRate}`);
 
         try {
-            await audioContext.audioWorklet.addModule('data:text/javascript;base64,' + btoa(workletCode));
+            if (!initializedWorkletContexts.has(audioContext)) {
+                await audioContext.audioWorklet.addModule('data:text/javascript;base64,' + btoa(workletCode));
+                initializedWorkletContexts.add(audioContext);
+            }
         } catch (e) {
             console.warn("Worklet might already be added or failed:", e);
         }

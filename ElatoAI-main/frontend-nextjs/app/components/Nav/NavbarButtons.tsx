@@ -6,7 +6,7 @@ import { NavbarDropdownMenu } from "./NavbarDropdownMenu";
 import PremiumBadge from "../PremiumBadge";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname } from "next/navigation";
-import { Users, Settings, Music, CreditCard } from "lucide-react";
+import { Users, Settings, Music, CreditCard, Sparkles, Phone } from "lucide-react";
 
 interface NavbarButtonsProps {
     user: IUser | null;
@@ -72,18 +72,44 @@ const NavbarButtons: React.FC<NavbarButtonsProps> = ({
             )}
 
             {!isHome && !isMobile && (
-                <Link href="/pricing" passHref tabIndex={-1}>
-                    <Button
-                        size="sm"
-                        variant="secondary"
-                        className="flex flex-row gap-2 items-center rounded-full bg-nav-bar focus:shadow-none focus-visible:shadow-none"
-                    >
-                        <CreditCard size={20} />
-                        <span className="hidden sm:flex font-normal">
-                            Pricing
-                        </span>
-                    </Button>
-                </Link>
+                <>
+                    <Link href="/pandit" passHref tabIndex={-1}>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="flex flex-row gap-2 items-center rounded-full text-muted-foreground"
+                        >
+                            <Phone size={18} />
+                            <span className="hidden sm:flex font-normal">
+                                Pandit
+                            </span>
+                        </Button>
+                    </Link>
+                    <Link href="/astrologer" passHref tabIndex={-1}>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="flex flex-row gap-2 items-center rounded-full text-muted-foreground"
+                        >
+                            <Sparkles size={18} />
+                            <span className="hidden sm:flex font-normal">
+                                Astrologer
+                            </span>
+                        </Button>
+                    </Link>
+                    <Link href="/pricing" passHref tabIndex={-1}>
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            className="flex flex-row gap-2 items-center rounded-full bg-nav-bar focus:shadow-none focus-visible:shadow-none"
+                        >
+                            <CreditCard size={20} />
+                            <span className="hidden sm:flex font-normal">
+                                Pricing
+                            </span>
+                        </Button>
+                    </Link>
+                </>
             )}
             <NavbarDropdownMenu user={user} />
         </div>

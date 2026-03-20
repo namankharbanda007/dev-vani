@@ -2,84 +2,81 @@
 
 import { motion } from "framer-motion";
 import { BookOpen, Music, PlayCircle, Star } from "lucide-react";
+import Link from "next/link";
 
 export default function DailySpirituality() {
     return (
-        <section className="py-24 px-6 md:px-10 bg-soft-paper relative overflow-hidden">
+        <section className="relative overflow-hidden bg-soft-paper px-6 py-24 md:px-10">
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-16 max-w-3xl mx-auto">
-                    <h2 className="text-4xl md:text-5xl font-serif font-bold text-murti-stone mb-6">
+                <div className="mx-auto mb-16 max-w-3xl text-center">
+                    <h2 className="mb-6 text-4xl font-serif font-bold text-murti-stone md:text-5xl">
                         Your Daily Digital Ashram
                     </h2>
                     <p className="text-lg text-murti-stone/70">
-                        Cultivate a consistent spiritual path with our daily tools and vast library of devotional music.
+                        Cultivate a consistent spiritual path with our daily tools and devotional music library.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-                    {/* Daily Horoscope */}
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
-                        className="relative overflow-hidden rounded-[2.5rem] bg-indigo-50 border border-indigo-100 p-8 md:p-12 flex flex-col justify-between group"
+                        className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-indigo-100 bg-indigo-50 p-8 md:p-12"
                     >
-                        <div className="absolute top-0 right-0 -transtale-y-10 translate-x-10 text-indigo-400 opacity-10 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none">
-                            <Star className="w-80 h-80" />
+                        <div className="pointer-events-none absolute right-0 top-0 -translate-y-10 translate-x-10 text-indigo-400 opacity-10 transition-opacity duration-700 group-hover:opacity-20">
+                            <Star className="h-80 w-80" />
                         </div>
 
-                        <div className="relative z-10 mb-20 whitespace-normal">
-                            <div className="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-600 mb-8 shadow-sm">
-                                <BookOpen className="w-8 h-8" />
+                        <div className="relative z-10 mb-20">
+                            <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600 shadow-sm">
+                                <BookOpen className="h-8 w-8" />
                             </div>
-                            <h3 className="text-3xl font-serif font-bold text-indigo-950 mb-4 whitespace-normal">
-                                Daily Horoscope &<br />Detailed Reports
+                            <h3 className="mb-4 text-3xl font-serif font-bold text-indigo-950">
+                                Daily Horoscope and Detailed Reports
                             </h3>
-                            <p className="text-lg text-indigo-900/70 font-medium max-w-md whitespace-normal">
-                                Receive personalized daily forecasts. Understand your planetary movements and get actionable spiritual remedies directly to your phone.
+                            <p className="max-w-md text-lg font-medium text-indigo-900/70">
+                                Receive personalized daily forecasts, understand your planetary movements, and get actionable spiritual remedies.
                             </p>
                         </div>
 
                         <div className="relative z-10">
-                            <button className="flex items-center gap-2 text-indigo-600 font-bold hover:text-indigo-800 transition-colors">
-                                View Sample Report →
-                            </button>
+                            <Link href="/horoscope" className="flex items-center gap-2 font-bold text-indigo-600 transition-colors hover:text-indigo-800">
+                                View Daily Horoscope
+                            </Link>
                         </div>
                     </motion.div>
 
-                    {/* Free Bhajans */}
                     <motion.div
                         initial={{ opacity: 0, x: 30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
-                        className="relative overflow-hidden rounded-[2.5rem] bg-orange-50 border border-orange-100 p-8 md:p-12 flex flex-col justify-between group"
+                        className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-orange-100 bg-orange-50 p-8 md:p-12"
                     >
-                        <div className="absolute top-0 right-0 -transtale-y-10 translate-x-10 text-orange-400 opacity-10 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none">
-                            <Music className="w-80 h-80" />
+                        <div className="pointer-events-none absolute right-0 top-0 -translate-y-10 translate-x-10 text-orange-400 opacity-10 transition-opacity duration-700 group-hover:opacity-20">
+                            <Music className="h-80 w-80" />
                         </div>
 
-                        <div className="relative z-10 mb-20 whitespace-normal">
-                            <div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600 mb-8 shadow-sm">
-                                <PlayCircle className="w-8 h-8" />
+                        <div className="relative z-10 mb-20">
+                            <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 text-orange-600 shadow-sm">
+                                <PlayCircle className="h-8 w-8" />
                             </div>
-                            <h3 className="text-3xl font-serif font-bold text-orange-950 mb-4 whitespace-normal">
-                                Unlimited Free Bhajans &<br />Aarti Library
+                            <h3 className="mb-4 text-3xl font-serif font-bold text-orange-950">
+                                Unlimited Free Bhajans and Aarti Library
                             </h3>
-                            <p className="text-lg text-orange-900/70 font-medium max-w-md whitespace-normal">
-                                Immerse yourself in devotion. Stream thousands of high-quality, ad-free Bhajans, Mantras, and Aartis designed to elevate your environment.
+                            <p className="max-w-md text-lg font-medium text-orange-900/70">
+                                Stream high-quality bhajans, mantras, and aartis designed to deepen your daily devotion.
                             </p>
                         </div>
 
                         <div className="relative z-10">
-                            <button className="flex items-center gap-2 text-orange-600 font-bold hover:text-orange-800 transition-colors">
-                                Listen Now →
-                            </button>
+                            <Link href="/bhajan" className="flex items-center gap-2 font-bold text-orange-600 transition-colors hover:text-orange-800">
+                                Listen Now
+                            </Link>
                         </div>
                     </motion.div>
-
                 </div>
             </div>
         </section>

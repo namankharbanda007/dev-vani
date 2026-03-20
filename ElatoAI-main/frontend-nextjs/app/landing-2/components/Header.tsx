@@ -58,7 +58,7 @@ export default function Header() {
                     <Link href="/landing-2" className="flex items-center gap-2">
                         <div className="relative h-10 w-auto">
                             <img
-                                src="https://www.smartmurti.com/_next/image?url=%2Fassets%2Flanding%2Flogo.png&w=1920&q=75"
+                                src="/assets/landing/logo.png"
                                 alt="Smart Murti"
                                 className="h-full w-auto object-contain"
                             />
@@ -67,8 +67,9 @@ export default function Header() {
 
                     {/* Desktop Nav */}
                     <nav className="hidden md:flex items-center space-x-8">
-                        <NavLink href="/products/smart-pandit" label="Shop" />
-                        <NavLink href="#story" label="Our Story" />
+                        <NavLink href="#features" label="Features" />
+                        <NavLink href="/pandit" label="Pandit" />
+                        <NavLink href="/astrologer" label="Astrologer" />
                         <NavLink href="/pricing" label="Pricing" />
                         <NavLink href="#contact" label="Contact" />
                     </nav>
@@ -118,8 +119,9 @@ function AnimateMobileMenu({ isOpen, onClose, isLoggedIn }: { isOpen: boolean; o
             </button>
 
             <nav className="flex flex-col items-center space-y-6 text-2xl font-serif">
-                <Link href="/products/smart-pandit" onClick={onClose}>Shop</Link>
-                <Link href="#story" onClick={onClose}>Our Story</Link>
+                <Link href="#features" onClick={onClose}>Features</Link>
+                <Link href="/pandit" onClick={onClose}>Pandit</Link>
+                <Link href="/astrologer" onClick={onClose}>Astrologer</Link>
                 <Link href="/pricing" onClick={onClose}>Pricing</Link>
                 <Link href="#contact" onClick={onClose}>Contact</Link>
                 <Link

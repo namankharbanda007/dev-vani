@@ -1,52 +1,25 @@
 import { Button } from "@/components/ui/button";
-import { Home, Sparkle, ChevronDown, Dog, Bird, Hop, Plus, Blocks, Gamepad2 } from "lucide-react";
-import {
-    DropdownMenuSeparator,
-    DropdownMenu,
-    DropdownMenuItem,
-    DropdownMenuGroup,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-    DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
-import { usePathname } from "next/navigation";
-import Image from "next/image";
-
-const ICON_SIZE = 22;
+import Link from "next/link";
 
 interface LeftNavbarButtonsProps {
     user: IUser | null;
 }
 
 export default function LeftNavbarButtons({ user }: LeftNavbarButtonsProps) {
-    const isDoctor = user?.user_info.user_type === "doctor";
-    const pathname = usePathname();
-
-    let firstWordOfHospital = '';
-    if (isDoctor) {
-        const hospitalName = (user?.user_info.user_metadata as IDoctorMetadata).hospital_name;
-        firstWordOfHospital = hospitalName ? hospitalName.split(' ')[0] : '';
-    }
-
-    const isRoot = pathname === "/";
-    const isHome = pathname.includes("/home");
-
-    const shouldShowHospital = isDoctor && firstWordOfHospital.length && isHome;
-
     return (
-        <div className="flex flex-row gap-4 sm:gap-10 items-center">
+        <div className="flex flex-row items-center gap-4 sm:gap-10">
             <Button
                 variant="ghost"
-                className="flex flex-row gap-2 items-center px-2 hover:bg-transparent"
+                className="flex flex-row items-center gap-2 px-2 hover:bg-transparent"
                 asChild
-                aria-label="Go to Home page"
-                title="Click to go to Home page"
+                aria-label="Go to home page"
+                title="Click to go to home page"
             >
-                <a href="https://www.smartmurti.com">
-                    <p className="flex items-center font-luckiestGuy tracking-widest text-2xl">
-                        <span>SMART मूर्ति</span>
+                <Link href={user ? "/home" : "/landing-2"}>
+                    <p className="flex items-center font-luckiestGuy text-2xl tracking-widest">
+                        <span>SMART MURTI</span>
                     </p>
-                </a>
+                </Link>
             </Button>
         </div>
     );

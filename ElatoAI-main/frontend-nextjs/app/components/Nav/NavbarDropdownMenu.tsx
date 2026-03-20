@@ -15,6 +15,7 @@ import {
     Bell,
     Settings,
     User,
+    Phone,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -253,6 +254,26 @@ export function NavbarDropdownMenu({ user }: NavbarMenuButtonProps) {
                             >
                                 <CreditCard size={ICON_SIZE} />
                                 <span>Pricing</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Link
+                                href="/pandit"
+                                passHref
+                                className="flex flex-row gap-2 w-full"
+                            >
+                                <Phone size={ICON_SIZE} />
+                                <span>Pandit</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Link
+                                href="/astrologer"
+                                passHref
+                                className="flex flex-row gap-2 w-full"
+                            >
+                                <Star size={ICON_SIZE} />
+                                <span>Astrologer</span>
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuGroup>

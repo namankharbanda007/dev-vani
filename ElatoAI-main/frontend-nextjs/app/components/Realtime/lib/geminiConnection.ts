@@ -79,7 +79,7 @@ const URI = `wss://${HOST}/ws/google.ai.generativelanguage.v1alpha.GenerativeSer
 const MODEL = "models/gemini-2.5-flash-native-audio-preview-12-2025";
 
 // Worklet module cache — avoid re-adding on every connection (~50-100ms saved)
-let workletModuleAdded = false;
+const initializedWorkletContexts = new WeakSet<AudioContext>();
 
 export async function createGeminiConnection(
     audioContext: AudioContext,
@@ -110,9 +110,9 @@ export async function createGeminiConnection(
         console.log(`AudioContext Sample Rate: ${audioContext.sampleRate}`);
 
         try {
-            if (!workletModuleAdded) {
+            if (!initializedWorkletContexts.has(audioContext)) {
                 await audioContext.audioWorklet.addModule('data:text/javascript;base64,' + btoa(workletCode));
-                workletModuleAdded = true;
+                initializedWorkletContexts.add(audioContext);
             }
         } catch (e) {
             console.warn("Worklet might already be added or failed:", e);
