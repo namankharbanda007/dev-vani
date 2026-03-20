@@ -99,6 +99,10 @@ export async function createGeminiConnection(
     let workletNode: AudioWorkletNode | null = null;
     let nextStartTime = 0;
     let speakingTimeout: NodeJS.Timeout | null = null;
+    let readyResolved = false;
+    let readyTimeout: NodeJS.Timeout | null = null;
+    let resolveReady: (() => void) | null = null;
+    let rejectReady: ((error: Error) => void) | null = null;
 
     try {
         // 1. Setup Audio Context & Mic Permissions FIRST (prevents WS timeout while waiting)
@@ -128,6 +132,20 @@ export async function createGeminiConnection(
         // 2. Connect to WebSocket
         const url = `${URI}?key=${apiKey}`;
         ws = new WebSocket(url);
+
+        const markReady = () => {
+            if (readyResolved) return;
+            readyResolved = true;
+            if (readyTimeout) clearTimeout(readyTimeout);
+            resolveReady?.();
+        };
+
+        const failBeforeReady = (message: string) => {
+            if (readyResolved) return;
+            readyResolved = true;
+            if (readyTimeout) clearTimeout(readyTimeout);
+            rejectReady?.(new Error(message));
+        };
 
         // Define helpers inside to access closure variables
         function playAudioChunk(audioData: Float32Array) {
@@ -206,6 +224,7 @@ export async function createGeminiConnection(
             if (data.setupComplete && !setupComplete) {
                 setupComplete = true;
                 console.log("Gemini setup ACK received");
+                markReady();
                 if (initialMessage && ws && ws.readyState === WebSocket.OPEN) {
                     const msg = {
                         client_content: {
@@ -241,9 +260,13 @@ export async function createGeminiConnection(
             onRemoteEvent(data);
         };
 
-        ws.onerror = (err) => console.error("Gemini WS Error", err);
+        ws.onerror = (err) => {
+            console.error("Gemini WS Error", err);
+            failBeforeReady("Unable to connect to Gemini realtime session.");
+        };
         ws.onclose = () => {
             console.log("Gemini WS Closed");
+            failBeforeReady("Gemini realtime session closed before it was ready.");
             if (onDisconnect) onDisconnect();
         };
 
@@ -274,8 +297,17 @@ export async function createGeminiConnection(
 
         source.connect(workletNode);
 
+        await new Promise<void>((resolve, reject) => {
+            resolveReady = resolve;
+            rejectReady = reject;
+            readyTimeout = setTimeout(() => {
+                failBeforeReady("Gemini realtime session timed out during startup.");
+            }, 10000);
+        });
+
     } catch (error) {
         console.error("Failed to create Gemini connection", error);
+        ws?.close();
         // Ensure cleanup if we fail during setup (only kill tracks we created ourselves)
         if (!externalStream) {
             finalMediaStream?.getTracks().forEach(track => track.stop());
@@ -300,6 +332,7 @@ export async function createGeminiConnection(
 
     return {
         disconnect: () => {
+            if (readyTimeout) clearTimeout(readyTimeout);
             ws?.close();
             // We only stop tracks if we grabbed the mic ourselves (not passed externally)
             if (!externalStream) {

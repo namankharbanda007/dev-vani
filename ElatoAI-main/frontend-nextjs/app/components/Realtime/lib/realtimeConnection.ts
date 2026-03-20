@@ -32,6 +32,13 @@ export async function createRealtimeConnection(
     },
   });
 
+  if (!sdpResponse.ok) {
+    const errorText = await sdpResponse.text();
+    throw new Error(
+      errorText || `OpenAI realtime connection failed with ${sdpResponse.status}`
+    );
+  }
+
   const answerSdp = await sdpResponse.text();
   const answer: RTCSessionDescriptionInit = {
     type: "answer",

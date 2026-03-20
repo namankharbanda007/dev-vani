@@ -214,10 +214,14 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
             console.error("No mixed audio stream available yet");
             return;
         }
+        const connectedToAi = await connect(mixedAiInputStreamRef.current);
+        if (!connectedToAi) {
+            return;
+        }
+
         setIsHost(true);
         setIsAiActiveGlobally(true);
         broadcastEvent('AI_STATE', { status: "STARTED" });
-        await connect(mixedAiInputStreamRef.current);
     }, [connect, broadcastEvent]);
 
     const handleStopSession = useCallback(async () => {
@@ -226,6 +230,14 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         setIsAiActiveGlobally(false);
         broadcastEvent('AI_STATE', { status: "STOPPED" });
     }, [disconnect, broadcastEvent]);
+
+    useEffect(() => {
+        if (sessionStatus === "DISCONNECTED" && isHost && isAiActiveGlobally) {
+            setIsAiActiveGlobally(false);
+            setIsHost(false);
+            broadcastEvent('AI_STATE', { status: "STOPPED" });
+        }
+    }, [sessionStatus, broadcastEvent, isAiActiveGlobally, isHost]);
 
     // Host broadcasts activity
     useEffect(() => {

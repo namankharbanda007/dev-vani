@@ -43,6 +43,24 @@ interface AppProps {
   children?: React.ReactNode;
 }
 
+function getErrorDescription(error: unknown, details?: unknown) {
+  const primary =
+    typeof error === "string"
+      ? error
+      : typeof error === "object" && error && "message" in error && typeof (error as { message?: unknown }).message === "string"
+        ? (error as { message: string }).message
+        : null;
+
+  const secondary =
+    typeof details === "string"
+      ? details
+      : typeof details === "object" && details && "message" in details && typeof (details as { message?: unknown }).message === "string"
+        ? (details as { message: string }).message
+        : null;
+
+  return [primary, secondary].filter(Boolean).join(": ") || "Failed to connect";
+}
+
 function App({ personalityIdState, isDoctor, userData, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false, disconnectRef, pendingAction, onActionHandled, children }: AppProps) {
   const supabase = createClient();
 
@@ -269,7 +287,7 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
         audioContext.close();
         setSessionStatus("DISCONNECTED");
         toast({
-          description: `Failed to connect: ${sessionData.error}`,
+          description: getErrorDescription(sessionData.error, sessionData.details),
           variant: "destructive"
         });
         return;
@@ -289,7 +307,7 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
           audioContext.close(); // Clean up if failing
           setSessionStatus("DISCONNECTED");
           toast({
-            description: "Connection configuration invalid or API key missing.",
+            description: getErrorDescription(keyData.error, keyData.details || "Connection configuration invalid or API key missing."),
             variant: "destructive"
           });
           return;
@@ -326,7 +344,7 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
             console.log("Gemini connection disconnected");
             setSessionStatus("DISCONNECTED");
             if (!intentionalDisconnectRef.current) {
-              toast({ description: "Connection lost", variant: "destructive" });
+              toast({ description: "Connection lost. Please try again.", variant: "destructive" });
             }
             intentionalDisconnectRef.current = false;
           },
@@ -376,7 +394,8 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
         );
 
         geminiDisconnectRef.current = elevenLabsConnection.disconnect;
-        setIsAgentSpeaking(true); // Assuming immediate interaction
+        setIsAgentSpeaking(false);
+        setAgentActivity('listening');
         setSessionStatus("CONNECTED");
         toast({ description: "Connected" });
 
@@ -422,8 +441,9 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
       }
     } catch (err) {
       console.error("Error connecting to realtime:", err);
+      audioContext.close();
       setSessionStatus("DISCONNECTED");
-      toast({ description: "Failed to connect", variant: "destructive" });
+      toast({ description: getErrorDescription(err), variant: "destructive" });
     }
   };
 

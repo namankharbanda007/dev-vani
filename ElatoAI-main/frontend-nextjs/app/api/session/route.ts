@@ -4,6 +4,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserById } from "@/db/users";
 import { createSystemPrompt } from "@/app/lib/prompt-utils";
 
+async function readUpstreamError(response: Response) {
+  try {
+    const payload = await response.json();
+    return (
+      payload?.error?.message ||
+      payload?.error ||
+      payload?.message ||
+      `${response.status} ${response.statusText}`
+    );
+  } catch {
+    return `${response.status} ${response.statusText}`;
+  }
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const isGuest = searchParams.get("guest") === "true";
@@ -126,6 +140,13 @@ RESPONSE STYLE:
 
   // Fallback: OpenAI
   const openAiApiKey = process.env.OPENAI_API_KEY;
+  if (!openAiApiKey) {
+    return NextResponse.json(
+      { error: "OpenAI API Key not configured" },
+      { status: 500 }
+    );
+  }
+
   const response = await fetch("https://api.openai.com/v1/realtime/sessions", {
     method: "POST",
     headers: {
@@ -138,6 +159,13 @@ RESPONSE STYLE:
       voice: personality.oai_voice ?? "ballad",
     }),
   });
+  if (!response.ok) {
+    const details = await readUpstreamError(response);
+    return NextResponse.json(
+      { error: "Failed to create OpenAI realtime session", details },
+      { status: response.status }
+    );
+  }
   const data = await response.json();
   return NextResponse.json({ ...data, provider: "openai" });
 }
@@ -215,6 +243,13 @@ async function handleAuthenticatedSession() {
   }
 
   try {
+    if (!openAiApiKey) {
+      return NextResponse.json(
+        { error: "OpenAI API Key not configured" },
+        { status: 500 }
+      );
+    }
+
     const response = await fetch(
       "https://api.openai.com/v1/realtime/sessions",
       {
@@ -230,8 +265,15 @@ async function handleAuthenticatedSession() {
         }),
       }
     );
+    if (!response.ok) {
+      const details = await readUpstreamError(response);
+      return NextResponse.json(
+        { error: "Failed to create OpenAI realtime session", details },
+        { status: response.status }
+      );
+    }
     const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json({ ...data, provider: "openai" });
   } catch (error) {
     console.error("Error in /session:", error);
     return NextResponse.json(

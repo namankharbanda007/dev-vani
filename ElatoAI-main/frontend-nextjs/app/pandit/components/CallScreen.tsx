@@ -239,9 +239,12 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     }, [disconnect]);
 
     // Handle "Start Live Puja" click (Become Host)
-    const handleStartPuja = () => {
-        // Pass the LIVE mixed audio stream ref at call-time (it's been populated by the Device Setup effect)
-        connect(mixedAiInputStreamRef.current);
+    const handleStartPuja = async () => {
+        const connectedToAi = await connect(mixedAiInputStreamRef.current);
+        if (!connectedToAi) {
+            return;
+        }
+
         setIsHost(true);
         setIsAiActiveGlobally(true);
         broadcastEvent('AI_STATE', { status: "STARTED" });

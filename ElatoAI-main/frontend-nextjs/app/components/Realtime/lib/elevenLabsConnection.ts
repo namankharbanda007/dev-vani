@@ -86,6 +86,10 @@ export async function createElevenLabsConnection(
     let workletNode: AudioWorkletNode | null = null;
     let nextStartTime = 0;
     let speakingTimeout: NodeJS.Timeout | null = null;
+    let readyResolved = false;
+    let readyTimeout: NodeJS.Timeout | null = null;
+    let resolveReady: (() => void) | null = null;
+    let rejectReady: ((error: Error) => void) | null = null;
 
     try {
         // 1. Setup Audio Context & Mic Permissions FIRST
@@ -107,6 +111,20 @@ export async function createElevenLabsConnection(
 
         // 2. Connect to WebSocket
         ws = new WebSocket(signedUrl);
+
+        const markReady = () => {
+            if (readyResolved) return;
+            readyResolved = true;
+            if (readyTimeout) clearTimeout(readyTimeout);
+            resolveReady?.();
+        };
+
+        const failBeforeReady = (message: string) => {
+            if (readyResolved) return;
+            readyResolved = true;
+            if (readyTimeout) clearTimeout(readyTimeout);
+            rejectReady?.(new Error(message));
+        };
 
         // Define helpers inside to access closure variables
         function playAudioChunk(audioData: Float32Array) {
@@ -143,6 +161,7 @@ export async function createElevenLabsConnection(
         // Event Handlers
         ws.onopen = () => {
             console.log("ElevenLabs WebSocket Connected");
+            markReady();
         };
 
         ws.onmessage = (event) => {
@@ -157,9 +176,13 @@ export async function createElevenLabsConnection(
             }
         };
 
-        ws.onerror = (err) => console.error("ElevenLabs WS Error", err);
+        ws.onerror = (err) => {
+            console.error("ElevenLabs WS Error", err);
+            failBeforeReady("Unable to connect to ElevenLabs realtime session.");
+        };
         ws.onclose = () => {
             console.log("ElevenLabs WS Closed");
+            failBeforeReady("ElevenLabs realtime session closed before it was ready.");
             if (onDisconnect) onDisconnect();
         };
 
@@ -185,8 +208,17 @@ export async function createElevenLabsConnection(
 
         source.connect(workletNode);
 
+        await new Promise<void>((resolve, reject) => {
+            resolveReady = resolve;
+            rejectReady = reject;
+            readyTimeout = setTimeout(() => {
+                failBeforeReady("ElevenLabs realtime session timed out during startup.");
+            }, 10000);
+        });
+
     } catch (error) {
         console.error("Failed to create ElevenLabs connection", error);
+        ws?.close();
         mediaStream?.getTracks().forEach(track => track.stop());
         throw error;
     }
@@ -197,6 +229,7 @@ export async function createElevenLabsConnection(
 
     return {
         disconnect: () => {
+            if (readyTimeout) clearTimeout(readyTimeout);
             ws?.close();
             mediaStream?.getTracks().forEach(track => track.stop());
             if (audioContext && audioContext.state !== 'closed') {

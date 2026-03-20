@@ -25,7 +25,7 @@ export function useGroupCall({ participants, personalityId, contextType }: UseGr
      *   Passed at call-time so it's guaranteed to be non-null (the ref will have been populated by then).
      */
     const connect = useCallback(async (mixedAudioStream?: MediaStream | null) => {
-        if (sessionStatus !== "DISCONNECTED") return;
+        if (sessionStatus !== "DISCONNECTED") return false;
 
         // Create AudioContext synchronously on user interaction
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -40,22 +40,15 @@ export function useGroupCall({ participants, personalityId, contextType }: UseGr
         setSessionStatus("CONNECTING");
 
         try {
-            // Parallelized: fetch session data AND Gemini key simultaneously (saves ~200-400ms)
-            const [sessionResponse, keyResponse] = await Promise.all([
-                fetch(`/api/session?personalityId=${personalityId}&guest=true`),
-                fetch('/api/voice/get-gemini-key', { method: 'POST' })
-            ]);
-
-            const [sessionData, keyData] = await Promise.all([
-                sessionResponse.json(),
-                keyResponse.json()
-            ]);
+            const sessionResponse = await fetch(`/api/session?personalityId=${personalityId}&guest=true`);
+            const sessionData = await sessionResponse.json();
 
             if (sessionData.error) {
-                throw new Error(sessionData.error);
-            }
-            if (!keyResponse.ok || !keyData.gemini_api_key) {
-                throw new Error("Missing Gemini API Key");
+                throw new Error(
+                    sessionData.details
+                        ? `${sessionData.error}: ${sessionData.details}`
+                        : sessionData.error
+                );
             }
 
             // Group Call System Prompt Injection — context-aware per persona
@@ -63,7 +56,6 @@ export function useGroupCall({ participants, personalityId, contextType }: UseGr
             const participantList = participants.join(", ");
 
             const isPandit = contextType === 'pandit';
-            const roleName = isPandit ? "Pandit ji" : "Astrologer ji";
             const sessionType = isPandit ? "a live Puja" : "a live Astrology Reading session";
             const exampleGreeting = isPandit
                 ? `"Namaste ${participantList}, aaj hum sab milke puja karenge..."`
@@ -84,28 +76,45 @@ RESPONSE STYLE: 1-2 short sentences max. Be ${personalStyle}. Be conversational,
                 ? `Namaste Pandit ji, we are joining you today. The people here are: ${participantList}. Please welcome each of us by name and ask how we are doing.`
                 : `Namaste Astrologer ji, we are joining you today. The people here are: ${participantList}. Please welcome each of us by name and ask about our zodiac signs or birth details.`;
 
-            const connection = await createGeminiConnection(
-                audioContext,
-                keyData.gemini_api_key,
-                groupContextPrompt,
-                sessionData.voice,
-                firstMsg,
-                () => { },  // No-op: removed verbose per-chunk event logging (was ~40-60x/sec)
-                (speaking) => {
-                    setIsAgentSpeaking(speaking);
-                    setAgentActivity(speaking ? 'speaking' : 'thinking');
-                },
-                () => {
-                    setSessionStatus("DISCONNECTED");
-                    setAiOutputStream(null);
-                    audioContext.close();
-                },
-                () => {
-                    setAgentActivity('listening');
-                },
-                mixedAudioStream || undefined,
-                aiDestination
-            );
+            let connection;
+
+            if (sessionData.provider === "gemini") {
+                const keyResponse = await fetch('/api/voice/get-gemini-key', { method: 'POST' });
+                const keyData = await keyResponse.json();
+
+                if (!keyResponse.ok || !keyData.gemini_api_key) {
+                    throw new Error(keyData.error || "Missing Gemini API Key");
+                }
+
+                connection = await createGeminiConnection(
+                    audioContext,
+                    keyData.gemini_api_key,
+                    groupContextPrompt,
+                    sessionData.voice,
+                    firstMsg,
+                    () => { },
+                    (speaking) => {
+                        setIsAgentSpeaking(speaking);
+                        setAgentActivity(speaking ? 'speaking' : 'thinking');
+                    },
+                    () => {
+                        setSessionStatus("DISCONNECTED");
+                        setAiOutputStream(null);
+                        audioContext.close();
+                    },
+                    () => {
+                        setAgentActivity('listening');
+                    },
+                    mixedAudioStream || undefined,
+                    aiDestination
+                );
+            } else {
+                throw new Error(
+                    sessionData.provider === "elevenlabs"
+                        ? "Live group calls currently support Gemini-based guides only."
+                        : "This guide does not support live group calling yet."
+                );
+            }
 
             disconnectRef.current = connection.disconnect;
             sendTextMessageRef.current = connection.sendTextMessage;
@@ -114,15 +123,17 @@ RESPONSE STYLE: 1-2 short sentences max. Be ${personalStyle}. Be conversational,
             setAgentActivity('speaking');
             setSessionStatus("CONNECTED");
             toast({ description: "Connected to Ashram" });
+            return true;
 
         } catch (err: any) {
             console.error("Group Call Connection Error:", err);
             setSessionStatus("DISCONNECTED");
             if (audioContextRef.current) audioContextRef.current.close();
             setAiOutputStream(null);
-            toast({ description: "Failed to connect to Ashram.", variant: "destructive" });
+            toast({ description: err?.message || "Failed to connect to Ashram.", variant: "destructive" });
+            return false;
         }
-    }, [participants, personalityId, sessionStatus]);
+    }, [contextType, participants, personalityId, sessionStatus]);
 
     const disconnect = useCallback(() => {
         if (disconnectRef.current) {

@@ -103,9 +103,10 @@ const luckiestGuy = Luckiest_Guy({
 
 const fonts = `${inter.variable} ${inter_tight.variable} ${baloo2.variable} ${comicNeue.variable} ${quicksand.variable} ${fredoka.variable} ${lora.variable} ${karla.variable} ${borel.variable} ${silkscreen.variable} ${luckiestGuy.variable}`;
 
+const siteUrl = "https://smartmurti.com";
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
+    : siteUrl;
 
 export const metadata: Metadata = {
     metadataBase: new URL(defaultUrl),
@@ -121,27 +122,25 @@ export const metadata: Metadata = {
     authors: [
         {
             name: "Naman Kharbanda",
-            url: "https://smartmurti.com/about",
+            url: siteUrl,
         },
     ],
     keywords: [
-        "AI bhagwan",
-        "AI bhagwan murti",
-        "AI smart murti",
         "smart murti",
-        "ai krishna",
-        "ai ram bhagwan",
-        "emotional growth",
-        "Smart Murti AI",
-        "conversational AI",
-        "google home",
-        "amazon echo",
-        "smart speaker",
-        "AI speaker",
-        "emotional support",
-        "AI for adults",
-        "AI assistant",
-        "smart AI device",
+        "smartmurti",
+        "faith tech",
+        "spiritual ai",
+        "ai pandit",
+        "ai astrologer",
+        "digital puja",
+        "vedic astrology app",
+        "daily horoscope",
+        "bhajan app",
+        "hindu spiritual guidance",
+        "devotional ecosystem",
+        "smart mandir",
+        "smart base",
+        "whatsapp spiritual assistant",
     ],
     openGraph: {
         title: "SMART मूर्ति: World's First Devotional Ecosystem",
@@ -152,7 +151,7 @@ export const metadata: Metadata = {
         type: "website",
         images: [
             {
-                url: "https://smartmurti.com/logos/smartmurti-icon.jpg",
+                url: `${siteUrl}/logos/smartmurti-icon.jpg`,
                 width: 1200,
                 height: 630,
                 alt: "SMART मूर्ति - AI Devotional Ecosystem",
@@ -167,10 +166,10 @@ export const metadata: Metadata = {
     creator: "SMART मूर्ति Team",
     publisher: "SMART मूर्ति Ltd.",
     alternates: {
-        canonical: "https://smartmurti.com",
+        canonical: siteUrl,
         languages: {
-            "en-US": "https://smartmurti.com",
-            "hi-IN": "https://smartmurti.com",
+            "en-US": siteUrl,
+            "hi-IN": siteUrl,
         },
     },
     icons: {
@@ -182,9 +181,9 @@ export const metadata: Metadata = {
         title: "SMART मूर्ति - An AI-powered device that brings Murti to life through engaging, conversational experiences",
         description:
             "More than a device, SMART मूर्ति is your gateway to a world where AI brings spirituality to life through engaging learning and interactive experiences.",
-        images: ["https://smartmurti.com/logos/smartmurti-icon.jpg"],
+        images: [`${siteUrl}/logos/smartmurti-icon.jpg`],
     },
-    assets: "https://smartmurti.com/images",
+    assets: `${siteUrl}/images`,
     formatDetection: {
         telephone: false,
     },
@@ -193,8 +192,8 @@ export const metadata: Metadata = {
         title: "SMART मूर्ति",
         statusBarStyle: "black-translucent",
     },
-    category: "AI device",
-    classification: "Interactive, conversational AI Devices",
+    category: "Faith technology",
+    classification: "Devotional AI platform",
 };
 
 export const viewport: Viewport = {
@@ -215,7 +214,7 @@ const jsonLd: WithContext<Product> = {
     },
     offers: {
         "@type": "Offer",
-        url: "https://smartmurti.com",
+        url: siteUrl,
         priceCurrency: "USD",
         price: "57.99",
         priceValidUntil: "2025-12-31",
@@ -301,8 +300,8 @@ const jsonLd: WithContext<Product> = {
                 "Really cool project you've got going on, hoping one day it might use a local llm",
         },
     ],
-    image: "https://smartmurti.com/logos/smartmurti-icon.jpg",
-    category: "Interactive AI Device",
+    image: `${siteUrl}/logos/smartmurti-icon.jpg`,
+    category: "Devotional AI platform",
 };
 
 export default async function RootLayout({
@@ -325,7 +324,7 @@ export default async function RootLayout({
             suppressHydrationWarning
         >
             <head>
-                <link rel="canonical" href="https://www.smartmurti.com" />
+                <link rel="canonical" href={siteUrl} />
                 <Script
                     id="product-schema"
                     type="application/ld+json"
