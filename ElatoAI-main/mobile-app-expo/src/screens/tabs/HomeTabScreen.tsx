@@ -1,4 +1,14 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRef } from "react";
+import {
+  Animated,
+  Image,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { DbUser, Personality } from "../../models/types";
@@ -15,6 +25,8 @@ interface HomeTabScreenProps {
   onOpenHoroscope: () => void;
   onOpenBhajan: () => void;
   onOpenWallet: () => void;
+  refreshing?: boolean;
+  onRefresh?: () => void;
 }
 
 const shortcutItems = [
@@ -47,6 +59,8 @@ export function HomeTabScreen({
   onOpenHoroscope,
   onOpenBhajan,
   onOpenWallet,
+  refreshing = false,
+  onRefresh,
 }: HomeTabScreenProps) {
   const myGuides = personalities.filter((guide) => guide.creator_id);
   const premadeGuides = personalities.filter((guide) => !guide.creator_id);
@@ -55,6 +69,9 @@ export function HomeTabScreen({
     myGuides[0] ||
     premadeGuides[0] ||
     personalities[0];
+
+  // Animated shortcut press
+  const shortcutAnims = useRef(shortcutItems.map(() => new Animated.Value(1))).current;
 
   const handleShortcutPress = (key: string) => {
     if (key === "horoscope") {
@@ -70,11 +87,23 @@ export function HomeTabScreen({
     onOpenWallet();
   };
 
+  const animateIn = (index: number) => {
+    Animated.spring(shortcutAnims[index], { toValue: 0.95, useNativeDriver: true, tension: 200, friction: 10 }).start();
+  };
+  const animateOut = (index: number) => {
+    Animated.spring(shortcutAnims[index], { toValue: 1, useNativeDriver: true, tension: 200, friction: 10 }).start();
+  };
+
   return (
     <ScrollView
       style={styles.scroll}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        onRefresh ? (
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.purple900]} />
+        ) : undefined
+      }
     >
       <LinearGradient colors={gradients.homeHero} style={styles.heroCard}>
         <View style={styles.heroCopy}>
@@ -100,7 +129,8 @@ export function HomeTabScreen({
           <View style={styles.heroActionsRow}>
             <Pressable
               onPress={() => currentGuide && onOpenCall(currentGuide)}
-              style={styles.primaryAction}
+              android_ripple={{ color: "rgba(255,255,255,0.2)" }}
+              style={({ pressed }) => [styles.primaryAction, pressed && styles.pressedAction]}
             >
               <Ionicons name="call" size={18} color={colors.white} />
               <Text style={styles.primaryActionText}>Live Call</Text>
@@ -111,7 +141,8 @@ export function HomeTabScreen({
                   onOpenGuide(currentGuide);
                 }
               }}
-              style={styles.secondaryAction}
+              android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+              style={({ pressed }) => [styles.secondaryAction, pressed && styles.pressedAction]}
             >
               <Text style={styles.secondaryActionText}>Open Chat</Text>
             </Pressable>
@@ -131,19 +162,22 @@ export function HomeTabScreen({
       </View>
 
       <View style={styles.shortcutsRow}>
-        {shortcutItems.map((item) => (
-          <Pressable
-            key={item.key}
-            onPress={() => handleShortcutPress(item.key)}
-            style={styles.shortcutCard}
-          >
-            <LinearGradient colors={item.colors} style={styles.shortcutGradient}>
-              <View style={styles.shortcutIconWrap}>
-                <Ionicons name={item.icon} size={24} color={colors.gray900} />
-              </View>
-              <Text style={styles.shortcutLabel}>{item.label}</Text>
-            </LinearGradient>
-          </Pressable>
+        {shortcutItems.map((item, index) => (
+          <Animated.View key={item.key} style={[styles.shortcutCard, { transform: [{ scale: shortcutAnims[index] }] }]}>
+            <Pressable
+              onPress={() => handleShortcutPress(item.key)}
+              onPressIn={() => animateIn(index)}
+              onPressOut={() => animateOut(index)}
+              android_ripple={{ color: "rgba(0,0,0,0.08)" }}
+            >
+              <LinearGradient colors={item.colors} style={styles.shortcutGradient}>
+                <View style={styles.shortcutIconWrap}>
+                  <Ionicons name={item.icon} size={24} color={colors.gray900} />
+                </View>
+                <Text style={styles.shortcutLabel}>{item.label}</Text>
+              </LinearGradient>
+            </Pressable>
+          </Animated.View>
         ))}
       </View>
 
@@ -173,11 +207,19 @@ export function HomeTabScreen({
                 </View>
 
                 <View style={styles.guideActionsRow}>
-                  <Pressable onPress={() => onOpenCall(guide)} style={styles.guideCallButton}>
+                  <Pressable
+                    onPress={() => onOpenCall(guide)}
+                    android_ripple={{ color: "rgba(255,255,255,0.2)" }}
+                    style={({ pressed }) => [styles.guideCallButton, pressed && { opacity: 0.85 }]}
+                  >
                     <Ionicons name="call" size={16} color={colors.white} />
                     <Text style={styles.guideCallButtonText}>Call</Text>
                   </Pressable>
-                  <Pressable onPress={() => onOpenGuide(guide)} style={styles.guideChatButton}>
+                  <Pressable
+                    onPress={() => onOpenGuide(guide)}
+                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                    style={({ pressed }) => [styles.guideChatButton, pressed && { opacity: 0.85 }]}
+                  >
                     <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.gray900} />
                     <Text style={styles.guideChatButtonText}>Chat</Text>
                   </Pressable>
@@ -193,39 +235,58 @@ export function HomeTabScreen({
           <Text style={styles.sectionTitle}>Pandits & Astrologers</Text>
           <Text style={styles.sectionSubtitle}>The full faith-tech guide catalog from your website</Text>
         </View>
-        <View style={styles.guidesColumn}>
-          {premadeGuides.map((guide, index) => (
-            <View
-              key={guide.personality_id}
-              style={[
-                styles.guideCard,
-                index === 0 && !myGuides.length && styles.featuredGuideCard,
-              ]}
-            >
-              <View style={styles.guideTopRow}>
-                <Image source={{ uri: getGuideImageAsset(guide) }} style={styles.guidePortrait} />
-                <View style={styles.guideCopy}>
-                  <Text style={styles.guideTitle}>{guide.title}</Text>
-                  <Text style={styles.guideSubtitle}>
-                    {getGuideDisplaySubtitle(guide) || "Spiritual guidance"}
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.gray400} />
-              </View>
 
-              <View style={styles.guideActionsRow}>
-                <Pressable onPress={() => onOpenCall(guide)} style={styles.guideCallButton}>
-                  <Ionicons name="call" size={16} color={colors.white} />
-                  <Text style={styles.guideCallButtonText}>Call</Text>
-                </Pressable>
-                <Pressable onPress={() => onOpenGuide(guide)} style={styles.guideChatButton}>
-                  <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.gray900} />
-                  <Text style={styles.guideChatButtonText}>Chat</Text>
-                </Pressable>
-              </View>
-            </View>
-          ))}
-        </View>
+        {premadeGuides.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="people-outline" size={40} color={colors.gray400} />
+            <Text style={styles.emptyTitle}>No guides available</Text>
+            <Text style={styles.emptyText}>Pull down to refresh, or check back later.</Text>
+          </View>
+        ) : (
+          <View style={styles.guidesColumn}>
+            {premadeGuides.map((guide, index) => (
+              <Pressable
+                key={guide.personality_id}
+                android_ripple={{ color: "rgba(0,0,0,0.04)" }}
+                style={({ pressed }) => [
+                  styles.guideCard,
+                  index === 0 && !myGuides.length && styles.featuredGuideCard,
+                  pressed && { opacity: 0.92 },
+                ]}
+              >
+                <View style={styles.guideTopRow}>
+                  <Image source={{ uri: getGuideImageAsset(guide) }} style={styles.guidePortrait} />
+                  <View style={styles.guideCopy}>
+                    <Text style={styles.guideTitle}>{guide.title}</Text>
+                    <Text style={styles.guideSubtitle}>
+                      {getGuideDisplaySubtitle(guide) || "Spiritual guidance"}
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={colors.gray400} />
+                </View>
+
+                <View style={styles.guideActionsRow}>
+                  <Pressable
+                    onPress={() => onOpenCall(guide)}
+                    android_ripple={{ color: "rgba(255,255,255,0.2)" }}
+                    style={({ pressed }) => [styles.guideCallButton, pressed && { opacity: 0.85 }]}
+                  >
+                    <Ionicons name="call" size={16} color={colors.white} />
+                    <Text style={styles.guideCallButtonText}>Call</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => onOpenGuide(guide)}
+                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                    style={({ pressed }) => [styles.guideChatButton, pressed && { opacity: 0.85 }]}
+                  >
+                    <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.gray900} />
+                    <Text style={styles.guideChatButtonText}>Chat</Text>
+                  </Pressable>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        )}
       </View>
 
       <View style={styles.valueCard}>
@@ -324,6 +385,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
+  },
+  pressedAction: {
+    opacity: 0.85,
   },
   primaryActionText: {
     color: colors.white,
@@ -461,6 +525,25 @@ const styles = StyleSheet.create({
     color: colors.gray900,
     fontFamily: fonts.bodyBold,
     fontSize: 13,
+  },
+  emptyState: {
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    borderRadius: 24,
+    backgroundColor: colors.white,
+  },
+  emptyTitle: {
+    color: colors.gray700,
+    fontFamily: fonts.bodyBold,
+    fontSize: 16,
+  },
+  emptyText: {
+    color: colors.gray400,
+    fontFamily: fonts.body,
+    fontSize: 14,
+    textAlign: "center",
   },
   valueCard: {
     flexDirection: "row",

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
   ImageBackground,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -227,7 +228,21 @@ export function AuthScreen() {
 
                 <View style={styles.footer}>
                   <Text style={styles.footerText}>
-                    By continuing, you agree to our Terms of Service and Privacy Policy.
+                    By continuing, you agree to our{" "}
+                    <Text
+                      style={styles.footerLink}
+                      onPress={() => Linking.openURL("https://www.smartmurti.com/terms")}
+                    >
+                      Terms of Service
+                    </Text>
+                    {" "}and{" "}
+                    <Text
+                      style={styles.footerLink}
+                      onPress={() => Linking.openURL("https://www.smartmurti.com/privacy")}
+                    >
+                      Privacy Policy
+                    </Text>
+                    .
                   </Text>
                 </View>
               </View>
@@ -376,5 +391,9 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     fontSize: 12,
     lineHeight: 18,
+  },
+  footerLink: {
+    color: colors.purple900,
+    textDecorationLine: "underline",
   },
 });

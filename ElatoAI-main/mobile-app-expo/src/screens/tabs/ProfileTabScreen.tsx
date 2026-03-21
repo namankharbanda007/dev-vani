@@ -1,15 +1,18 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Alert, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Session } from "@supabase/supabase-js";
 import { DbUser } from "../../models/types";
-import { supabase } from "../../lib/supabase";
+import { supabase, supabaseConfigError } from "../../lib/supabase";
+import { getUserMetadata, getRemoteAsset } from "../../lib/smartMurtiApi";
 import { colors } from "../../theme/colors";
 import { fonts } from "../../theme/typography";
-import { getRemoteAsset } from "../../lib/smartMurtiApi";
 
 interface ProfileTabScreenProps {
   session: Session;
   dbUser: DbUser | null;
   onEditProfile: () => void;
+  refreshing?: boolean;
+  onRefresh?: () => void;
 }
 
 function ProfileField({ label, value }: { label: string; value: string | number }) {
@@ -21,22 +24,49 @@ function ProfileField({ label, value }: { label: string; value: string | number 
   );
 }
 
-export function ProfileTabScreen({ session, dbUser, onEditProfile }: ProfileTabScreenProps) {
-  const metadata = ((dbUser?.user_info as Record<string, unknown> | null)?.user_metadata ||
-    {}) as Record<string, string | undefined>;
+export function ProfileTabScreen({ session, dbUser, onEditProfile, refreshing = false, onRefresh }: ProfileTabScreenProps) {
+  const metadata = getUserMetadata(dbUser);
+  const [signingOut, setSigningOut] = useState(false);
 
-  const handleSignOut = async () => {
-    if (!supabase) {
-      return;
-    }
+  const handleSignOut = () => {
+    Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out of Smart Murti?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: async () => {
+            if (supabaseConfigError || !supabase) {
+              return;
+            }
 
-    await supabase.auth.signOut();
+            setSigningOut(true);
+            try {
+              await supabase.auth.signOut();
+            } catch {
+              setSigningOut(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const displayName = dbUser?.supervisee_name || dbUser?.supervisor_name || "Smart Murti user";
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        onRefresh ? (
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.purple900]} />
+        ) : undefined
+      }
+    >
       <View style={styles.profileHero}>
         <Image source={{ uri: getRemoteAsset("/assets/landing/logo.png") }} style={styles.logo} resizeMode="contain" />
         <Image
@@ -49,7 +79,11 @@ export function ProfileTabScreen({ session, dbUser, onEditProfile }: ProfileTabS
         />
         <Text style={styles.nameText}>{displayName}</Text>
         <Text style={styles.emailText}>{session.user.email}</Text>
-        <Pressable onPress={onEditProfile} style={styles.editButton}>
+        <Pressable
+          onPress={onEditProfile}
+          android_ripple={{ color: "rgba(255,255,255,0.2)" }}
+          style={({ pressed }) => [styles.editButton, pressed && { opacity: 0.85 }]}
+        >
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </Pressable>
       </View>
@@ -72,8 +106,13 @@ export function ProfileTabScreen({ session, dbUser, onEditProfile }: ProfileTabS
       <ProfileField label="Wallet Balance" value={`Rs. ${Number(dbUser?.wallet_balance ?? 0).toLocaleString("en-IN")}`} />
       <ProfileField label="Plan" value={dbUser?.is_premium ? "Premium" : "Free"} />
 
-      <Pressable onPress={handleSignOut} style={styles.signOutButton}>
-        <Text style={styles.signOutText}>Sign Out</Text>
+      <Pressable
+        onPress={handleSignOut}
+        disabled={signingOut}
+        android_ripple={{ color: "rgba(255,255,255,0.2)" }}
+        style={({ pressed }) => [styles.signOutButton, pressed && { opacity: 0.85 }, signingOut && { opacity: 0.6 }]}
+      >
+        <Text style={styles.signOutText}>{signingOut ? "Signing out..." : "Sign Out"}</Text>
       </Pressable>
     </ScrollView>
   );

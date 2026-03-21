@@ -1,5 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { AppState, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef } from "react";
+import {
+  AppState,
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Animated,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import { bhajans } from "../../data/bhajans";
@@ -20,19 +29,47 @@ async function configureAudioMode() {
   });
 }
 
-export function BhajanTabScreen() {
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+interface BhajanPlayerState {
+  soundRef: React.MutableRefObject<Audio.Sound | null>;
+  activeTrackId: string | null;
+  setActiveTrackId: (id: string | null) => void;
+  playing: boolean;
+  setPlaying: (playing: boolean) => void;
+}
+
+interface BhajanTabScreenProps {
+  playerState: BhajanPlayerState;
+}
+
+export function BhajanTabScreen({ playerState }: BhajanTabScreenProps) {
+  const { soundRef, activeTrackId, setActiveTrackId, playing, setPlaying } = playerState;
+  const errorState = useRef<string | null>(null);
+  const [error, setError] = [errorState.current, (e: string | null) => { errorState.current = e; }];
+
+  // Track-level animations
+  const scaleAnims = useRef(bhajans.map(() => new Animated.Value(1))).current;
 
   useEffect(() => {
     configureAudioMode().catch(() => null);
-
-    return () => {
-      soundRef.current?.unloadAsync().catch(() => null);
-    };
   }, []);
+
+  const animatePressIn = (index: number) => {
+    Animated.spring(scaleAnims[index], {
+      toValue: 0.97,
+      useNativeDriver: true,
+      tension: 200,
+      friction: 10,
+    }).start();
+  };
+
+  const animatePressOut = (index: number) => {
+    Animated.spring(scaleAnims[index], {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 200,
+      friction: 10,
+    }).start();
+  };
 
   const startTrack = async (track: BhajanTrack) => {
     try {
@@ -116,9 +153,19 @@ export function BhajanTabScreen() {
         <Text style={styles.heroEyebrow}>Daily Ashram</Text>
         <Text style={styles.heroTitle}>Bhajan and mantra library</Text>
         <Text style={styles.heroText}>
-          Play devotional music directly inside the app while you read your horoscope or chat with your guide.
+          Play devotional music directly inside the app — music continues even while you switch tabs.
         </Text>
       </ImageBackground>
+
+      {/* Now-playing mini bar */}
+      {activeTrackId ? (
+        <View style={styles.miniPlayer}>
+          <View style={styles.miniPlayerDot} />
+          <Text style={styles.miniPlayerText} numberOfLines={1}>
+            {bhajans.find((t) => t.id === activeTrackId)?.title || "Playing"} — {playing ? "Playing" : "Paused"}
+          </Text>
+        </View>
+      ) : null}
 
       {error ? (
         <View style={styles.errorCard}>
@@ -127,23 +174,35 @@ export function BhajanTabScreen() {
       ) : null}
 
       <View style={styles.listCard}>
-        {bhajans.map((track) => {
+        {bhajans.map((track, index) => {
           const active = activeTrackId === track.id;
           return (
-            <Pressable key={track.id} onPress={() => toggleTrack(track)} style={[styles.trackRow, active && styles.trackRowActive]}>
-              <View style={[styles.trackIcon, active && styles.trackIconActive]}>
-                <Ionicons name={active && playing ? "pause" : "play"} size={20} color={active ? colors.white : colors.gray900} />
-              </View>
+            <Animated.View key={track.id} style={{ transform: [{ scale: scaleAnims[index] }] }}>
+              <Pressable
+                onPress={() => toggleTrack(track)}
+                onPressIn={() => animatePressIn(index)}
+                onPressOut={() => animatePressOut(index)}
+                android_ripple={{ color: "rgba(252, 211, 77, 0.3)" }}
+                style={[styles.trackRow, active && styles.trackRowActive]}
+              >
+                <View style={[styles.trackIcon, active && styles.trackIconActive]}>
+                  <Ionicons name={active && playing ? "pause" : "play"} size={20} color={active ? colors.white : colors.gray900} />
+                </View>
 
-              <View style={styles.trackCopy}>
-                <Text style={[styles.trackTitle, active && styles.trackTitleActive]}>{track.title}</Text>
-                <Text style={styles.trackMeta}>
-                  {track.artist} • {track.duration}
-                </Text>
-              </View>
+                <View style={styles.trackCopy}>
+                  <Text style={[styles.trackTitle, active && styles.trackTitleActive]}>{track.title}</Text>
+                  <Text style={styles.trackMeta}>
+                    {track.artist} • {track.duration}
+                  </Text>
+                </View>
 
-              {active ? <Text style={styles.nowPlaying}>{playing ? "Playing" : "Paused"}</Text> : null}
-            </Pressable>
+                {active ? (
+                  <View style={styles.nowPlayingBadge}>
+                    <Text style={styles.nowPlayingText}>{playing ? "▶ Playing" : "⏸ Paused"}</Text>
+                  </View>
+                ) : null}
+              </Pressable>
+            </Animated.View>
           );
         })}
       </View>
@@ -193,6 +252,29 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     fontSize: 14,
     lineHeight: 21,
+  },
+  miniPlayer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderRadius: 20,
+    backgroundColor: "#FEF3C7",
+    borderWidth: 1,
+    borderColor: "#FCD34D",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  miniPlayerDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#16A34A",
+  },
+  miniPlayerText: {
+    flex: 1,
+    color: colors.gray900,
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
   },
   errorCard: {
     borderRadius: 20,
@@ -252,9 +334,15 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     fontSize: 13,
   },
-  nowPlaying: {
-    color: colors.gray900,
+  nowPlayingBadge: {
+    borderRadius: 12,
+    backgroundColor: "rgba(22, 163, 74, 0.1)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  nowPlayingText: {
+    color: "#16A34A",
     fontFamily: fonts.bodyBold,
-    fontSize: 12,
+    fontSize: 11,
   },
 });

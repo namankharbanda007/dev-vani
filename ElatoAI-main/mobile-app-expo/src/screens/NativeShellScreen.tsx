@@ -1,9 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, BackHandler, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  BackHandler,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Session } from "@supabase/supabase-js";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Audio } from "expo-av";
 import { BottomTabBar, AppTab } from "../components/BottomTabBar";
-import { DbUser, Personality } from "../models/types";
+import { DbUser, Personality, BhajanTrack } from "../models/types";
 import { fetchCurrentUserBundle, fetchFaithPersonalities } from "../lib/smartMurtiApi";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/typography";
@@ -23,12 +34,53 @@ interface NativeShellScreenProps {
 export function NativeShellScreen({ session }: NativeShellScreenProps) {
   const [activeTab, setActiveTab] = useState<AppTab>("home");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dbUser, setDbUser] = useState<DbUser | null>(null);
   const [personalities, setPersonalities] = useState<Personality[]>([]);
   const [selectedGuide, setSelectedGuide] = useState<Personality | null>(null);
   const [selectedCallGuide, setSelectedCallGuide] = useState<Personality | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
+
+  // Bhajan player state — lifted to persist across tab switches
+  const bhajanSoundRef = useRef<Audio.Sound | null>(null);
+  const [bhajanActiveTrackId, setBhajanActiveTrackId] = useState<string | null>(null);
+  const [bhajanPlaying, setBhajanPlaying] = useState(false);
+
+  // Screen transition animation
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  const animateTabSwitch = useCallback((nextTab: AppTab) => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 8,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setActiveTab(nextTab);
+      slideAnim.setValue(-8);
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 80,
+          friction: 12,
+        }),
+      ]).start();
+    });
+  }, [fadeAnim, slideAnim]);
 
   const loadBundle = useCallback(async () => {
     try {
@@ -44,6 +96,7 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
       setError(nextError instanceof Error ? nextError.message : "Failed to load Smart Murti.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -75,15 +128,15 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
       }
 
       if (activeTab !== "home") {
-        setActiveTab("home");
+        animateTabSwitch("home");
         return true;
       }
 
-      return true;
+      return false;
     });
 
     return () => subscription.remove();
-  }, [activeTab, editingProfile, needsOnboarding, selectedCallGuide, selectedGuide]);
+  }, [activeTab, animateTabSwitch, editingProfile, needsOnboarding, selectedCallGuide, selectedGuide]);
 
   const userName = useMemo(() => {
     return (
@@ -94,6 +147,20 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
       "Devotee"
     );
   }, [dbUser?.supervisee_name, dbUser?.supervisor_name, session.user.email, session.user.user_metadata]);
+
+  const handlePullRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadBundle();
+  }, [loadBundle]);
+
+  // Bhajan player callbacks for BhajanTabScreen
+  const bhajanPlayerState = useMemo(() => ({
+    soundRef: bhajanSoundRef,
+    activeTrackId: bhajanActiveTrackId,
+    setActiveTrackId: setBhajanActiveTrackId,
+    playing: bhajanPlaying,
+    setPlaying: setBhajanPlaying,
+  }), [bhajanActiveTrackId, bhajanPlaying]);
 
   if (selectedCallGuide) {
     return (
@@ -136,16 +203,30 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
         </View>
       </View>
 
-      <View style={styles.content}>
+      <Animated.View
+        style={[
+          styles.content,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
         {loading ? (
           <View style={styles.centerState}>
             <ActivityIndicator color={colors.purple900} />
             <Text style={styles.centerText}>Loading Smart Murti...</Text>
           </View>
         ) : error ? (
-          <View style={styles.centerState}>
+          <ScrollView
+            contentContainerStyle={styles.centerState}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={handlePullRefresh} colors={[colors.purple900]} />
+            }
+          >
             <Text style={styles.errorText}>{error}</Text>
-          </View>
+            <Text style={styles.retryHint}>Pull down to retry</Text>
+          </ScrollView>
         ) : activeTab === "home" ? (
           <HomeTabScreen
             userName={userName}
@@ -153,14 +234,16 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
             personalities={personalities}
             onOpenGuide={setSelectedGuide}
             onOpenCall={setSelectedCallGuide}
-            onOpenHoroscope={() => setActiveTab("horoscope")}
-            onOpenBhajan={() => setActiveTab("bhajan")}
-            onOpenWallet={() => setActiveTab("wallet")}
+            onOpenHoroscope={() => animateTabSwitch("horoscope")}
+            onOpenBhajan={() => animateTabSwitch("bhajan")}
+            onOpenWallet={() => animateTabSwitch("wallet")}
+            refreshing={refreshing}
+            onRefresh={handlePullRefresh}
           />
         ) : activeTab === "horoscope" ? (
           <HoroscopeTabScreen userName={userName} dbUser={dbUser} />
         ) : activeTab === "bhajan" ? (
-          <BhajanTabScreen />
+          <BhajanTabScreen playerState={bhajanPlayerState} />
         ) : activeTab === "wallet" ? (
           <WalletTabScreen dbUser={dbUser} onBalanceChange={loadBundle} />
         ) : (
@@ -168,11 +251,13 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
             session={session}
             dbUser={dbUser}
             onEditProfile={() => setEditingProfile(true)}
+            refreshing={refreshing}
+            onRefresh={handlePullRefresh}
           />
         )}
-      </View>
+      </Animated.View>
 
-      <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />
+      <BottomTabBar activeTab={activeTab} onSelect={animateTabSwitch} />
     </SafeAreaView>
   );
 }
@@ -220,5 +305,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     textAlign: "center",
+  },
+  retryHint: {
+    color: colors.gray400,
+    fontFamily: fonts.body,
+    fontSize: 13,
+    marginTop: 4,
   },
 });

@@ -23,10 +23,7 @@
     "android": {
       "package": "com.smartmurti.mobile",
       "permissions": [
-        "CAMERA",
         "RECORD_AUDIO",
-        "READ_EXTERNAL_STORAGE",
-        "READ_MEDIA_IMAGES",
         "MODIFY_AUDIO_SETTINGS",
         "android.permission.RECORD_AUDIO"
       ],

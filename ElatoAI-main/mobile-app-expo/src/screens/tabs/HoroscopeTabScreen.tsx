@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { DbUser, HoroscopePayload } from "../../models/types";
-import { fetchHoroscope, getRemoteAsset } from "../../lib/smartMurtiApi";
+import { fetchHoroscope, getRemoteAsset, getUserMetadata } from "../../lib/smartMurtiApi";
 import { colors } from "../../theme/colors";
 import { fonts } from "../../theme/typography";
 
@@ -29,10 +29,7 @@ interface HoroscopeTabScreenProps {
   dbUser: DbUser | null;
 }
 
-function getUserMetadata(dbUser: DbUser | null) {
-  return ((dbUser?.user_info as Record<string, unknown> | null)?.user_metadata ||
-    {}) as Record<string, string | undefined>;
-}
+
 
 function getSunSignName(dateString?: string) {
   if (!dateString) return "Aries";
@@ -290,7 +287,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   signPill: {
-    width: "22%",
+    width: "23%",
+    flexShrink: 0,
     borderRadius: 18,
     backgroundColor: colors.white,
     paddingHorizontal: 8,

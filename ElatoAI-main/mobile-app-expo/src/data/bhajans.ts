@@ -16,6 +16,6 @@ export const bhajans: BhajanTrack[] = [
   { id: "11", title: "Mera Aapki Kripa Se", artist: "Bhajan", src: `${site}/bhajans/Mera%20Aapki%20Kripa%20Se.mp3`, duration: "5:00" },
   { id: "12", title: "Om Ganapataye Namo Namah", artist: "Mantra", src: `${site}/bhajans/Om%20Ganapataye%20Namo%20Namah%20108%20Times%20Ganpati%20MantraJaap%20108%20Ganesh%20mantra.mp3`, duration: "15:00" },
   { id: "13", title: "Shiv Tandav Stotram", artist: "Stotram", src: `${site}/bhajans/Shiv%20tandav%20stotram.mp3`, duration: "4:00" },
-  { id: "14", title: "Shree Hanuman Chalisa", artist: "Chalisa", src: `${site}/bhajans/Shree%20Hanuman%20chalisa.mp3`, duration: "9:45" },
+
   { id: "15", title: "Tarak Mantra Ram Shree Ram", artist: "Mantra", src: `${site}/bhajans/Tarak%20Mantra%20RamShreeRam.mp3`, duration: "4:00" },
 ];

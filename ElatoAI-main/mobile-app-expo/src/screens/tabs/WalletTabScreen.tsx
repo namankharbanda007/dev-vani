@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRef, useState } from "react";
+import { Alert, Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { DbUser } from "../../models/types";
 import { rechargeWallet } from "../../lib/smartMurtiApi";
 import { colors } from "../../theme/colors";
@@ -17,22 +17,44 @@ export function WalletTabScreen({ dbUser, onBalanceChange }: WalletTabScreenProp
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleRecharge = async (amount: number) => {
-    try {
-      setLoadingAmount(amount);
-      setMessage(null);
-      setError(null);
+  // Card press animations
+  const cardAnims = useRef(rechargeOptions.map(() => new Animated.Value(1))).current;
 
-      const result = await rechargeWallet(amount);
-      await onBalanceChange();
-      setMessage(
-        `Recharge complete. Your new balance is Rs. ${Number(result.newBalance ?? 0).toLocaleString("en-IN")}.`
-      );
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "Recharge failed.");
-    } finally {
-      setLoadingAmount(null);
-    }
+  const animateIn = (index: number) => {
+    Animated.spring(cardAnims[index], { toValue: 0.95, useNativeDriver: true, tension: 200, friction: 10 }).start();
+  };
+  const animateOut = (index: number) => {
+    Animated.spring(cardAnims[index], { toValue: 1, useNativeDriver: true, tension: 200, friction: 10 }).start();
+  };
+
+  const handleRecharge = (amount: number) => {
+    Alert.alert(
+      "Confirm Recharge",
+      `Add Rs. ${amount} credits to your wallet?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: `Add Rs. ${amount}`,
+          onPress: async () => {
+            try {
+              setLoadingAmount(amount);
+              setMessage(null);
+              setError(null);
+
+              const result = await rechargeWallet(amount);
+              await onBalanceChange();
+              setMessage(
+                `Recharge complete. Your new balance is Rs. ${Number(result.newBalance ?? 0).toLocaleString("en-IN")}.`
+              );
+            } catch (nextError) {
+              setError(nextError instanceof Error ? nextError.message : "Recharge failed.");
+            } finally {
+              setLoadingAmount(null);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -72,25 +94,29 @@ export function WalletTabScreen({ dbUser, onBalanceChange }: WalletTabScreenProp
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Recharge wallet</Text>
-        <Text style={styles.sectionSubtitle}>Choose an amount to add instantly</Text>
+        <Text style={styles.sectionSubtitle}>Choose an amount to add</Text>
       </View>
 
       <View style={styles.rechargeGrid}>
-        {rechargeOptions.map((amount) => (
-          <Pressable
-            key={amount}
-            onPress={() => handleRecharge(amount)}
-            disabled={loadingAmount !== null}
-            style={[
-              styles.rechargeCard,
-              loadingAmount === amount && styles.rechargeCardActive,
-            ]}
-          >
-            <Text style={styles.rechargeAmount}>Rs. {amount}</Text>
-            <Text style={styles.rechargeAction}>
-              {loadingAmount === amount ? "Processing..." : "Add Credits"}
-            </Text>
-          </Pressable>
+        {rechargeOptions.map((amount, index) => (
+          <Animated.View key={amount} style={[styles.rechargeCardWrap, { transform: [{ scale: cardAnims[index] }] }]}>
+            <Pressable
+              onPress={() => handleRecharge(amount)}
+              onPressIn={() => animateIn(index)}
+              onPressOut={() => animateOut(index)}
+              disabled={loadingAmount !== null}
+              android_ripple={{ color: "rgba(124, 58, 237, 0.1)" }}
+              style={[
+                styles.rechargeCard,
+                loadingAmount === amount && styles.rechargeCardActive,
+              ]}
+            >
+              <Text style={styles.rechargeAmount}>Rs. {amount}</Text>
+              <Text style={styles.rechargeAction}>
+                {loadingAmount === amount ? "Processing..." : "Add Credits"}
+              </Text>
+            </Pressable>
+          </Animated.View>
         ))}
       </View>
     </ScrollView>
@@ -193,8 +219,10 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 12,
   },
-  rechargeCard: {
+  rechargeCardWrap: {
     width: "47%",
+  },
+  rechargeCard: {
     borderRadius: 24,
     backgroundColor: colors.white,
     padding: 18,

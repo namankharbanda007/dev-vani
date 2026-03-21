@@ -62,6 +62,7 @@ function clampLevel(level: number) {
 
 export function LiveCallScreen({
   personality,
+  languageCode,
   onClose,
 }: LiveCallScreenProps) {
   const [callStarted, setCallStarted] = useState(false);

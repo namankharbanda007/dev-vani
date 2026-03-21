@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import {
+  Animated,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
@@ -95,9 +96,13 @@ export function GuideChatScreen({
     scrollToBottom();
 
     try {
+      const historyForApi = nextMessages
+        .slice(-20)
+        .map(({ role, content }) => ({ role, content }));
+
       const response = await sendGuideMessage(
         message,
-        nextMessages.map(({ role, content }) => ({ role, content })),
+        historyForApi,
         personality.personality_id
       );
 
@@ -162,7 +167,8 @@ export function GuideChatScreen({
               <Pressable
                 key={prompt}
                 onPress={() => submitMessage(prompt)}
-                style={styles.quickPrompt}
+                android_ripple={{ color: "rgba(124, 58, 237, 0.1)" }}
+                style={({ pressed }) => [styles.quickPrompt, pressed && { opacity: 0.8 }]}
               >
                 <Text style={styles.quickPromptText}>{prompt}</Text>
               </Pressable>
@@ -190,6 +196,12 @@ export function GuideChatScreen({
               </View>
             );
           })}
+
+          {submitting ? (
+            <View style={[styles.messageBubble, styles.assistantBubble, styles.typingBubble]}>
+              <Text style={styles.typingDots}>● ● ●</Text>
+            </View>
+          ) : null}
 
           {error ? (
             <View style={styles.errorCard}>
@@ -401,5 +413,14 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     opacity: 0.5,
+  },
+  typingBubble: {
+    paddingVertical: 14,
+  },
+  typingDots: {
+    color: colors.gray400,
+    fontFamily: fonts.bodyBold,
+    fontSize: 18,
+    letterSpacing: 3,
   },
 });

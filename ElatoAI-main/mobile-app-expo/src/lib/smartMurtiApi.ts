@@ -4,7 +4,7 @@ import { ChatMessage, DbUser, HoroscopePayload, Personality } from "../models/ty
 
 const DEFAULT_PERSONALITY_ID = "a1c073e6-653d-40cf-acc1-891331689409";
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"];
+const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"];
 const SITE_ORIGIN = "https://www.smartmurti.com";
 const IMAGE_URL_PATTERN = /^https?:\/\/\S+/i;
 
@@ -30,7 +30,7 @@ const HIDDEN_PERSONALITIES = new Set([
   "Math wiz",
 ]);
 
-interface PersonalityDetails extends Personality {}
+type PersonalityDetails = Personality;
 
 function requireSupabase() {
   if (!supabase) {
@@ -183,7 +183,7 @@ async function geminiGenerate({
   throw new Error(lastError);
 }
 
-function getUserMetadata(dbUser: DbUser | null) {
+export function getUserMetadata(dbUser: DbUser | null) {
   return ((dbUser?.user_info as Record<string, unknown> | null)?.user_metadata ||
     {}) as Record<string, string | undefined>;
 }
@@ -277,7 +277,7 @@ async function ensureDbUser(authUser: User): Promise<DbUser | null> {
     supervisor_name: (authUser.user_metadata?.name as string) || authUser.email?.split("@")[0] || "Devotee",
     supervisee_name: "",
     supervisee_persona: "",
-    supervisee_age: 14,
+    supervisee_age: 0,
     personality_id: DEFAULT_PERSONALITY_ID,
     language_code: "en-US",
     session_time: 0,

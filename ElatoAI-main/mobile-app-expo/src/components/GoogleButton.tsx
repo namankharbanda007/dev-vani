@@ -41,7 +41,13 @@ export function GoogleButton({ onError }: GoogleButtonProps) {
         return;
       }
 
-      const code = new URL(result.url).searchParams.get("code");
+      let code: string | null = null;
+      try {
+        code = new URL(result.url).searchParams.get("code");
+      } catch {
+        const codeMatch = result.url.match(/[?&]code=([^&]+)/);
+        code = codeMatch ? decodeURIComponent(codeMatch[1]) : null;
+      }
 
       if (!code) {
         throw new Error("Google sign in did not return an auth code.");

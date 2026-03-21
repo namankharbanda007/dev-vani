@@ -129,7 +129,7 @@ export function UserSetupScreen({
                         <View style={styles.progressTrack}>
                           <View style={styles.progressFill} />
                         </View>
-                        <Text style={styles.progressText}>Step 1 of 2</Text>
+                        <Text style={styles.progressText}>Getting Started</Text>
                       </View>
                     ) : null}
                     <Text style={styles.heroTitle}>{heading}</Text>
@@ -196,13 +196,37 @@ export function UserSetupScreen({
                     onChangeText={setRashi}
                     placeholder="Mesha (Aries)"
                   />
-                  <TextField
-                    label="Language Code"
-                    value={languageCode}
-                    onChangeText={setLanguageCode}
-                    placeholder="en-IN"
-                    autoCapitalize="none"
-                  />
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Preferred Language</Text>
+                    <View style={styles.languageGrid}>
+                      {[
+                        { code: "en-US", label: "English" },
+                        { code: "hi-IN", label: "Hindi" },
+                        { code: "en-IN", label: "Hinglish" },
+                        { code: "te-IN", label: "Telugu" },
+                        { code: "ta-IN", label: "Tamil" },
+                        { code: "bn-IN", label: "Bengali" },
+                      ].map((lang) => (
+                        <Pressable
+                          key={lang.code}
+                          onPress={() => setLanguageCode(lang.code)}
+                          style={[
+                            styles.languageChip,
+                            languageCode === lang.code && styles.languageChipActive,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.languageChipText,
+                              languageCode === lang.code && styles.languageChipTextActive,
+                            ]}
+                          >
+                            {lang.label}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
                 </View>
 
                 {error ? (
@@ -289,7 +313,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   progressFill: {
-    width: "50%",
+    width: "100%",
     height: "100%",
     backgroundColor: "#F59E0B",
   },
@@ -369,5 +393,30 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: 13,
     lineHeight: 20,
+  },
+  languageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  languageChip: {
+    borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    borderWidth: 1,
+    borderColor: colors.gray200,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  languageChipActive: {
+    backgroundColor: "#F3E8FF",
+    borderColor: "#D8B4FE",
+  },
+  languageChipText: {
+    color: colors.gray700,
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+  },
+  languageChipTextActive: {
+    color: colors.purple900,
   },
 });
