@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createClient } from "@/utils/supabase/server";
+import { getSupabaseForRouteAuth } from "@/utils/supabase/route-auth";
 
 export async function POST(req: Request) {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user } = await getSupabaseForRouteAuth(req);
 
     if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

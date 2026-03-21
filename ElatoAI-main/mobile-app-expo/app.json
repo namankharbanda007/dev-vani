@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "Smart Murti",
+    "slug": "smartmurti-mobile",
+    "scheme": "smartmurti",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.smartmurti.mobile",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Allow Smart Murti to convert your voice into text during live calls.",
+        "NSMicrophoneUsageDescription": "Allow Smart Murti to use the microphone for live spiritual guidance."
+      }
+    },
+    "android": {
+      "package": "com.smartmurti.mobile",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES",
+        "MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow Smart Murti to use the microphone for live spiritual guidance.",
+          "speechRecognitionPermission": "Allow Smart Murti to convert your voice into text during live calls.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox",
+            "com.google.android.as"
+          ]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "26bc0f69-226e-4517-9d4c-61d9fdf05da0"
+      }
+    },
+    "owner": "smartmurti"
+  }
+}

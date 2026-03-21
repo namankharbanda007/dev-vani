@@ -1,0 +1,32 @@
+export const colors = {
+  softPaper: "#FDFBF7",
+  murtiStone: "#2A2A2A",
+  divineSaffron: "#FF9933",
+  purple900: "#4C1D95",
+  purple700: "#6D28D9",
+  purple600: "#7C3AED",
+  indigo600: "#4F46E5",
+  pink600: "#DB2777",
+  rose600: "#E11D48",
+  gray50: "#F9FAFB",
+  gray100: "#F3F4F6",
+  gray200: "#E5E7EB",
+  gray400: "#9CA3AF",
+  gray500: "#6B7280",
+  gray700: "#374151",
+  gray900: "#111827",
+  white: "#FFFFFF",
+  successBg: "#ECFDF5",
+  successBorder: "#BBF7D0",
+  successText: "#047857",
+  errorBg: "#FEF2F2",
+  errorBorder: "#FECACA",
+  errorText: "#DC2626",
+};
+
+export const gradients = {
+  page: ["#EEF2FF", "#FFFFFF", "#F5F3FF"] as const,
+  login: ["#7C3AED", "#4F46E5"] as const,
+  signup: ["#DB2777", "#E11D48"] as const,
+  homeHero: ["#1F2937", "#111827"] as const,
+};

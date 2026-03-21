@@ -1,0 +1,28 @@
+
+> mobile-app-expo@1.0.0 start:tunnel
+> expo start --tunnel
+
+env: load .env
+env: export EXPO_PUBLIC_SUPABASE_ANON_KEY EXPO_PUBLIC_SUPABASE_URL
+Starting project at C:\Users\NAMAN KHARBANDA\Downloads\ElatoAI-main (2)\ElatoAI-main\mobile-app-expo
+Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
+Starting Metro Bundler
+
+Tunnel connected.
+Tunnel ready.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Android .\index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android .\index.ts ▓▓░░░░░░░░░░░░░░ 13.2% ( 21/150)
+Android .\index.ts ▓▓▓▓▓▓▓▓▓░░░░░░░ 58.3% (413/541)
+Android .\index.ts ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 94.1% (717/739)
+Android Bundled 13851ms index.ts (844 modules)
+ ERROR  [TypeError: Network request failed]
+ ERROR  [TypeError: Network request failed]
+Tunnel connected.
+Tunnel connected.
+Tunnel connected.
+Tunnel connected.
+Tunnel connected.
+Tunnel connected.
+Tunnel connected.

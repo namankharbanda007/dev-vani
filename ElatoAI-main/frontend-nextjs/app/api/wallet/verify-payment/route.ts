@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
-import { createClient } from "@/utils/supabase/server";
+import { getSupabaseForRouteAuth } from "@/utils/supabase/route-auth";
 
 export async function POST(req: Request) {
     // Note: If verifying webhooks, we'd use a service_role client. 
     // If the frontend calls this securely after checkout, we can use the user's session.
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { supabase, user } = await getSupabaseForRouteAuth(req);
 
     if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

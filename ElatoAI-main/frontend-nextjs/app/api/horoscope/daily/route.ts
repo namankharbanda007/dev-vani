@@ -1,11 +1,11 @@
-import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getPlanetaryTransits, getPlanetaryHour, getDailyNumerology } from "@/lib/astrology";
 import { toZonedTime, format } from 'date-fns-tz';
+import { getSupabaseForRouteAuth } from "@/utils/supabase/route-auth";
 
 export async function GET(req: Request) {
-    const supabase = createClient();
+    const { supabase, user } = await getSupabaseForRouteAuth(req);
     const { searchParams } = new URL(req.url);
 
     // 1. Parse Query Params
@@ -24,7 +24,6 @@ export async function GET(req: Request) {
     const targetDate = format(targetDateObj, 'yyyy-MM-dd', { timeZone: userTimezone });
 
     // Auth Check
-    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {

@@ -1,0 +1,24 @@
+
+> mobile-app-expo@1.0.0 start:tunnel
+> expo start --tunnel --port 8083
+
+env: load .env
+env: export EXPO_PUBLIC_SUPABASE_ANON_KEY EXPO_PUBLIC_SUPABASE_URL
+Starting project at C:\Users\NAMAN KHARBANDA\Downloads\ElatoAI-main (2)\ElatoAI-main\mobile-app-expo
+Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
+Starting Metro Bundler
+
+Tunnel connected.
+Tunnel ready.
+Waiting on http://localhost:8083
+Logs for your project will appear below.
+Android .\index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android .\index.ts ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (696/696)
+Android Bundled 6338ms index.ts (717 modules)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context
+Tunnel connected.
+Tunnel connected.
+Tunnel connected.
+Tunnel connected.
+Tunnel connected.
+Tunnel connected.

@@ -1,0 +1,498 @@
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { DbUser, Personality } from "../../models/types";
+import { getGuideDisplaySubtitle, getGuideImageAsset } from "../../lib/smartMurtiApi";
+import { gradients, colors } from "../../theme/colors";
+import { fonts } from "../../theme/typography";
+
+interface HomeTabScreenProps {
+  userName: string;
+  dbUser: DbUser | null;
+  personalities: Personality[];
+  onOpenGuide: (personality: Personality) => void;
+  onOpenCall: (personality: Personality) => void;
+  onOpenHoroscope: () => void;
+  onOpenBhajan: () => void;
+  onOpenWallet: () => void;
+}
+
+const shortcutItems = [
+  {
+    key: "horoscope",
+    label: "Horoscope",
+    icon: "sparkles-outline" as const,
+    colors: ["#FEF3C7", "#FFF7ED"] as const,
+  },
+  {
+    key: "bhajan",
+    label: "Bhajans",
+    icon: "musical-notes-outline" as const,
+    colors: ["#EDE9FE", "#F5F3FF"] as const,
+  },
+  {
+    key: "wallet",
+    label: "Wallet",
+    icon: "wallet-outline" as const,
+    colors: ["#DBEAFE", "#EFF6FF"] as const,
+  },
+];
+
+export function HomeTabScreen({
+  userName,
+  dbUser,
+  personalities,
+  onOpenGuide,
+  onOpenCall,
+  onOpenHoroscope,
+  onOpenBhajan,
+  onOpenWallet,
+}: HomeTabScreenProps) {
+  const myGuides = personalities.filter((guide) => guide.creator_id);
+  const premadeGuides = personalities.filter((guide) => !guide.creator_id);
+  const currentGuide =
+    personalities.find((guide) => guide.personality_id === dbUser?.personality_id) ||
+    myGuides[0] ||
+    premadeGuides[0] ||
+    personalities[0];
+
+  const handleShortcutPress = (key: string) => {
+    if (key === "horoscope") {
+      onOpenHoroscope();
+      return;
+    }
+
+    if (key === "bhajan") {
+      onOpenBhajan();
+      return;
+    }
+
+    onOpenWallet();
+  };
+
+  return (
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      <LinearGradient colors={gradients.homeHero} style={styles.heroCard}>
+        <View style={styles.heroCopy}>
+          <Text style={styles.heroEyebrow}>Smart Murti</Text>
+          <Text style={styles.heroTitle}>Namaste, {userName.split(" ")[0] || "Devotee"}</Text>
+          <Text style={styles.heroBody}>
+            Your Pandit, astrologer, horoscope, bhajans, and wallet are all available in one place now.
+          </Text>
+
+          <View style={styles.heroMetaRow}>
+            <View style={styles.heroMetaCard}>
+              <Text style={styles.heroMetaLabel}>Wallet</Text>
+              <Text style={styles.heroMetaValue}>
+                Rs. {Number(dbUser?.wallet_balance ?? 0).toLocaleString("en-IN")}
+              </Text>
+            </View>
+            <View style={styles.heroMetaCard}>
+              <Text style={styles.heroMetaLabel}>Plan</Text>
+              <Text style={styles.heroMetaValue}>{dbUser?.is_premium ? "Premium" : "Free"}</Text>
+            </View>
+          </View>
+
+          <View style={styles.heroActionsRow}>
+            <Pressable
+              onPress={() => currentGuide && onOpenCall(currentGuide)}
+              style={styles.primaryAction}
+            >
+              <Ionicons name="call" size={18} color={colors.white} />
+              <Text style={styles.primaryActionText}>Live Call</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                if (currentGuide) {
+                  onOpenGuide(currentGuide);
+                }
+              }}
+              style={styles.secondaryAction}
+            >
+              <Text style={styles.secondaryActionText}>Open Chat</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <Image
+          source={require("../../../assets/branding/smart-pandit-home.jpg")}
+          style={styles.heroImage}
+          resizeMode="cover"
+        />
+      </LinearGradient>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Quick Access</Text>
+        <Text style={styles.sectionSubtitle}>Jump straight into your daily practice</Text>
+      </View>
+
+      <View style={styles.shortcutsRow}>
+        {shortcutItems.map((item) => (
+          <Pressable
+            key={item.key}
+            onPress={() => handleShortcutPress(item.key)}
+            style={styles.shortcutCard}
+          >
+            <LinearGradient colors={item.colors} style={styles.shortcutGradient}>
+              <View style={styles.shortcutIconWrap}>
+                <Ionicons name={item.icon} size={24} color={colors.gray900} />
+              </View>
+              <Text style={styles.shortcutLabel}>{item.label}</Text>
+            </LinearGradient>
+          </Pressable>
+        ))}
+      </View>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Talk To Your Guides</Text>
+        <Text style={styles.sectionSubtitle}>Every guide from your Smart Murti account is available here</Text>
+      </View>
+
+      {myGuides.length ? (
+        <View style={styles.guideSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Your Guides</Text>
+            <Text style={styles.sectionSubtitle}>Custom personalities from your own Smart Murti dashboard</Text>
+          </View>
+          <View style={styles.guidesColumn}>
+            {myGuides.map((guide) => (
+              <View key={guide.personality_id} style={[styles.guideCard, styles.featuredGuideCard]}>
+                <View style={styles.guideTopRow}>
+                  <Image source={{ uri: getGuideImageAsset(guide) }} style={styles.guidePortrait} />
+                  <View style={styles.guideCopy}>
+                    <Text style={styles.guideTitle}>{guide.title}</Text>
+                    <Text style={styles.guideSubtitle}>
+                      {getGuideDisplaySubtitle(guide) || "Personalized spiritual guide"}
+                    </Text>
+                  </View>
+                  <Ionicons name="sparkles" size={18} color="#CA8A04" />
+                </View>
+
+                <View style={styles.guideActionsRow}>
+                  <Pressable onPress={() => onOpenCall(guide)} style={styles.guideCallButton}>
+                    <Ionicons name="call" size={16} color={colors.white} />
+                    <Text style={styles.guideCallButtonText}>Call</Text>
+                  </Pressable>
+                  <Pressable onPress={() => onOpenGuide(guide)} style={styles.guideChatButton}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.gray900} />
+                    <Text style={styles.guideChatButtonText}>Chat</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
+      <View style={styles.guideSection}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Pandits & Astrologers</Text>
+          <Text style={styles.sectionSubtitle}>The full faith-tech guide catalog from your website</Text>
+        </View>
+        <View style={styles.guidesColumn}>
+          {premadeGuides.map((guide, index) => (
+            <View
+              key={guide.personality_id}
+              style={[
+                styles.guideCard,
+                index === 0 && !myGuides.length && styles.featuredGuideCard,
+              ]}
+            >
+              <View style={styles.guideTopRow}>
+                <Image source={{ uri: getGuideImageAsset(guide) }} style={styles.guidePortrait} />
+                <View style={styles.guideCopy}>
+                  <Text style={styles.guideTitle}>{guide.title}</Text>
+                  <Text style={styles.guideSubtitle}>
+                    {getGuideDisplaySubtitle(guide) || "Spiritual guidance"}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.gray400} />
+              </View>
+
+              <View style={styles.guideActionsRow}>
+                <Pressable onPress={() => onOpenCall(guide)} style={styles.guideCallButton}>
+                  <Ionicons name="call" size={16} color={colors.white} />
+                  <Text style={styles.guideCallButtonText}>Call</Text>
+                </Pressable>
+                <Pressable onPress={() => onOpenGuide(guide)} style={styles.guideChatButton}>
+                  <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.gray900} />
+                  <Text style={styles.guideChatButtonText}>Chat</Text>
+                </Pressable>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.valueCard}>
+        <View style={styles.valueIconWrap}>
+          <Ionicons name="logo-whatsapp" size={22} color="#22C55E" />
+        </View>
+        <View style={styles.valueCopy}>
+          <Text style={styles.valueTitle}>Daily devotional flow</Text>
+          <Text style={styles.valueText}>
+            Use horoscope for the day, play bhajans in the background, and chat with your Pandit without leaving the app.
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+  },
+  content: {
+    padding: 18,
+    gap: 18,
+    paddingBottom: 28,
+  },
+  heroCard: {
+    borderRadius: 30,
+    overflow: "hidden",
+  },
+  heroCopy: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    gap: 10,
+  },
+  heroEyebrow: {
+    color: "#6EE7B7",
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  heroTitle: {
+    color: colors.white,
+    fontFamily: fonts.heading,
+    fontSize: 32,
+    lineHeight: 40,
+  },
+  heroBody: {
+    color: "rgba(255,255,255,0.82)",
+    fontFamily: fonts.body,
+    fontSize: 15,
+    lineHeight: 22,
+    maxWidth: 320,
+  },
+  heroMetaRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 8,
+  },
+  heroActionsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 10,
+  },
+  heroMetaCard: {
+    flex: 1,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  heroMetaLabel: {
+    color: "rgba(255,255,255,0.72)",
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    textTransform: "uppercase",
+  },
+  heroMetaValue: {
+    marginTop: 5,
+    color: colors.white,
+    fontFamily: fonts.bodyBold,
+    fontSize: 18,
+  },
+  heroImage: {
+    width: "100%",
+    height: 230,
+    marginTop: 14,
+  },
+  primaryAction: {
+    flex: 1,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#16A34A",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  primaryActionText: {
+    color: colors.white,
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+  },
+  secondaryAction: {
+    flex: 1,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  secondaryActionText: {
+    color: colors.white,
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+  },
+  sectionHeader: {
+    gap: 2,
+  },
+  sectionTitle: {
+    color: colors.gray900,
+    fontFamily: fonts.heading,
+    fontSize: 24,
+  },
+  sectionSubtitle: {
+    color: colors.gray500,
+    fontFamily: fonts.body,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  shortcutsRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  shortcutCard: {
+    flex: 1,
+  },
+  shortcutGradient: {
+    borderRadius: 22,
+    padding: 14,
+    minHeight: 110,
+    justifyContent: "space-between",
+  },
+  shortcutIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(255,255,255,0.7)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  shortcutLabel: {
+    color: colors.gray900,
+    fontFamily: fonts.bodyBold,
+    fontSize: 15,
+  },
+  guidesColumn: {
+    gap: 10,
+  },
+  guideSection: {
+    gap: 10,
+  },
+  guideCard: {
+    borderRadius: 24,
+    backgroundColor: colors.white,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 14,
+  },
+  featuredGuideCard: {
+    borderWidth: 1,
+    borderColor: "#FDE68A",
+  },
+  guideTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  guidePortrait: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: colors.gray100,
+  },
+  guideCopy: {
+    flex: 1,
+    gap: 4,
+  },
+  guideTitle: {
+    color: colors.gray900,
+    fontFamily: fonts.bodyBold,
+    fontSize: 17,
+  },
+  guideSubtitle: {
+    color: colors.gray500,
+    fontFamily: fonts.body,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  guideActionsRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  guideCallButton: {
+    flex: 1,
+    height: 42,
+    borderRadius: 16,
+    backgroundColor: "#16A34A",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  guideCallButtonText: {
+    color: colors.white,
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+  },
+  guideChatButton: {
+    flex: 1,
+    height: 42,
+    borderRadius: 16,
+    backgroundColor: colors.gray50,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  guideChatButtonText: {
+    color: colors.gray900,
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+  },
+  valueCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 14,
+    borderRadius: 24,
+    backgroundColor: "#F0FDF4",
+    borderWidth: 1,
+    borderColor: "#BBF7D0",
+    padding: 18,
+  },
+  valueIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  valueCopy: {
+    flex: 1,
+    gap: 6,
+  },
+  valueTitle: {
+    color: colors.gray900,
+    fontFamily: fonts.bodyBold,
+    fontSize: 17,
+  },
+  valueText: {
+    color: colors.gray700,
+    fontFamily: fonts.body,
+    fontSize: 14,
+    lineHeight: 21,
+  },
+});
