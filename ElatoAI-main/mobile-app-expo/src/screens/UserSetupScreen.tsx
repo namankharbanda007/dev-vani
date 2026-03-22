@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import {
   ImageBackground,
   KeyboardAvoidingView,
@@ -33,6 +33,8 @@ export function UserSetupScreen({
   onSaved,
   onClose,
 }: UserSetupScreenProps) {
+  const birthDatePattern = /^\d{4}-\d{2}-\d{2}$/;
+  const birthTimePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
   const metadata = useMemo(
     () =>
       ((dbUser?.user_info as Record<string, unknown> | null)?.user_metadata ||
@@ -72,6 +74,24 @@ export function UserSetupScreen({
 
     if (!numericAge || numericAge < 1 || numericAge > 120) {
       setError("Please enter a valid age.");
+      return;
+    }
+
+    if (birthDate.trim() && !birthDatePattern.test(birthDate.trim())) {
+      setError("Birth date must be in YYYY-MM-DD format.");
+      return;
+    }
+
+    if (birthDate.trim()) {
+      const parsedDate = new Date(`${birthDate.trim()}T00:00:00Z`);
+      if (Number.isNaN(parsedDate.getTime())) {
+        setError("Please enter a valid birth date.");
+        return;
+      }
+    }
+
+    if (birthTime.trim() && !birthTimePattern.test(birthTime.trim())) {
+      setError("Birth time must be in HH:MM format.");
       return;
     }
 

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { DbUser, HoroscopePayload } from "../../models/types";
 import { fetchHoroscope, getRemoteAsset, getUserMetadata } from "../../lib/smartMurtiApi";
@@ -23,6 +23,7 @@ const signs = [
 
 const dateOptions = ["Yesterday", "Today", "Tomorrow"] as const;
 type HoroscopeDate = (typeof dateOptions)[number];
+const horoscopeCache = new Map<string, HoroscopePayload>();
 
 interface HoroscopeTabScreenProps {
   userName: string;
@@ -57,46 +58,65 @@ export function HoroscopeTabScreen({ userName, dbUser }: HoroscopeTabScreenProps
   const [sign, setSign] = useState<string>(defaultSign);
   const [date, setDate] = useState<HoroscopeDate>("Today");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [payload, setPayload] = useState<HoroscopePayload | null>(null);
 
   const activeSign = useMemo(() => signs.find((item) => item.name === sign) || signs[0], [sign]);
+  const cacheKey = useMemo(() => `${sign}:${date}`, [date, sign]);
 
   useEffect(() => {
     setSign(defaultSign);
   }, [defaultSign]);
 
-  useEffect(() => {
-    let mounted = true;
+  const loadHoroscope = useCallback(
+    async (forceRefresh = false) => {
+      const cachedPayload = horoscopeCache.get(cacheKey);
+      if (cachedPayload && !forceRefresh) {
+        setPayload(cachedPayload);
+        setError(null);
+        setLoading(false);
+        return;
+      }
 
-    const load = async () => {
       try {
-        setLoading(true);
+        if (forceRefresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
+
         setError(null);
         const nextPayload = await fetchHoroscope(sign, date);
-        if (mounted) {
-          setPayload(nextPayload);
-        }
+        horoscopeCache.set(cacheKey, nextPayload);
+        setPayload(nextPayload);
       } catch (nextError) {
-        if (mounted) {
-          setError(nextError instanceof Error ? nextError.message : "Failed to fetch horoscope.");
-        }
+        setError(nextError instanceof Error ? nextError.message : "Failed to fetch horoscope.");
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        setLoading(false);
+        setRefreshing(false);
       }
-    };
+    },
+    [cacheKey, date, sign]
+  );
 
-    void load();
-
-    return () => {
-      mounted = false;
-    };
-  }, [date, sign]);
+  useEffect(() => {
+    void loadHoroscope();
+  }, [loadHoroscope]);
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => void loadHoroscope(true)}
+          colors={[colors.purple900]}
+        />
+      }
+    >
       <View style={styles.heroCard}>
         <View style={styles.heroTextWrap}>
           <Text style={styles.heroEyebrow}>Daily Horoscope</Text>
@@ -287,7 +307,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   signPill: {
-    width: "23%",
+    width: "31%",
     flexShrink: 0,
     borderRadius: 18,
     backgroundColor: colors.white,

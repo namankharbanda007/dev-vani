@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import {
   AppState,
   ImageBackground,
@@ -43,8 +43,7 @@ interface BhajanTabScreenProps {
 
 export function BhajanTabScreen({ playerState }: BhajanTabScreenProps) {
   const { soundRef, activeTrackId, setActiveTrackId, playing, setPlaying } = playerState;
-  const errorState = useRef<string | null>(null);
-  const [error, setError] = [errorState.current, (e: string | null) => { errorState.current = e; }];
+  const [error, setError] = useState<string | null>(null);
 
   // Track-level animations
   const scaleAnims = useRef(bhajans.map(() => new Animated.Value(1))).current;
@@ -81,11 +80,20 @@ export function BhajanTabScreen({ playerState }: BhajanTabScreenProps) {
       await configureAudioMode();
 
       if (soundRef.current) {
+        soundRef.current.setOnPlaybackStatusUpdate(null);
         await soundRef.current.unloadAsync();
         soundRef.current = null;
       }
 
-      const { sound } = await Audio.Sound.createAsync({ uri: track.src }, { shouldPlay: false }, undefined, false);
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: track.src },
+        {
+          shouldPlay: true,
+          progressUpdateIntervalMillis: 250,
+        },
+        undefined,
+        false
+      );
 
       sound.setOnPlaybackStatusUpdate((status) => {
         if (!status.isLoaded) {
@@ -102,7 +110,6 @@ export function BhajanTabScreen({ playerState }: BhajanTabScreenProps) {
 
       soundRef.current = sound;
       setActiveTrackId(track.id);
-      await sound.playAsync();
       setPlaying(true);
     } catch (nextError) {
       setPlaying(false);
@@ -131,10 +138,10 @@ export function BhajanTabScreen({ playerState }: BhajanTabScreenProps) {
       }
 
       if (status.isPlaying) {
-        await soundRef.current.pauseAsync();
+        await soundRef.current.setStatusAsync({ shouldPlay: false });
         setPlaying(false);
       } else {
-        await soundRef.current.playAsync();
+        await soundRef.current.setStatusAsync({ shouldPlay: true });
         setPlaying(true);
       }
     } catch (nextError) {
@@ -153,18 +160,32 @@ export function BhajanTabScreen({ playerState }: BhajanTabScreenProps) {
         <Text style={styles.heroEyebrow}>Daily Ashram</Text>
         <Text style={styles.heroTitle}>Bhajan and mantra library</Text>
         <Text style={styles.heroText}>
-          Play devotional music directly inside the app — music continues even while you switch tabs.
+          Play devotional music directly inside the app - music continues even while you switch tabs.
         </Text>
       </ImageBackground>
 
       {/* Now-playing mini bar */}
       {activeTrackId ? (
-        <View style={styles.miniPlayer}>
+        <Pressable
+          onPress={() => {
+            const activeTrack = bhajans.find((track) => track.id === activeTrackId);
+            if (activeTrack) {
+              void toggleTrack(activeTrack);
+            }
+          }}
+          android_ripple={{ color: "rgba(252, 211, 77, 0.25)" }}
+          style={styles.miniPlayer}
+        >
           <View style={styles.miniPlayerDot} />
           <Text style={styles.miniPlayerText} numberOfLines={1}>
-            {bhajans.find((t) => t.id === activeTrackId)?.title || "Playing"} — {playing ? "Playing" : "Paused"}
+            {bhajans.find((t) => t.id === activeTrackId)?.title || "Playing"} - {playing ? "Playing" : "Paused"}
           </Text>
-        </View>
+          <Ionicons
+            name={playing ? "pause-circle" : "play-circle"}
+            size={24}
+            color={colors.gray900}
+          />
+        </Pressable>
       ) : null}
 
       {error ? (
@@ -198,7 +219,7 @@ export function BhajanTabScreen({ playerState }: BhajanTabScreenProps) {
 
                 {active ? (
                   <View style={styles.nowPlayingBadge}>
-                    <Text style={styles.nowPlayingText}>{playing ? "▶ Playing" : "⏸ Paused"}</Text>
+                    <Text style={styles.nowPlayingText}>{playing ? "Playing" : "Paused"}</Text>
                   </View>
                 ) : null}
               </Pressable>

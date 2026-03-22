@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +20,7 @@ import { colors } from "../theme/colors";
 import { fonts } from "../theme/typography";
 import { GuideChatScreen } from "./GuideChatScreen";
 import { LiveCallScreen } from "./LiveCallScreen";
+import { PanditVideoScreen } from "./PanditVideoScreen";
 import { HomeTabScreen } from "./tabs/HomeTabScreen";
 import { HoroscopeTabScreen } from "./tabs/HoroscopeTabScreen";
 import { BhajanTabScreen } from "./tabs/BhajanTabScreen";
@@ -40,9 +41,10 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
   const [personalities, setPersonalities] = useState<Personality[]>([]);
   const [selectedGuide, setSelectedGuide] = useState<Personality | null>(null);
   const [selectedCallGuide, setSelectedCallGuide] = useState<Personality | null>(null);
+  const [selectedVideoGuide, setSelectedVideoGuide] = useState<Personality | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
 
-  // Bhajan player state — lifted to persist across tab switches
+  // Bhajan player state - lifted to persist across tab switches
   const bhajanSoundRef = useRef<Audio.Sound | null>(null);
   const [bhajanActiveTrackId, setBhajanActiveTrackId] = useState<string | null>(null);
   const [bhajanPlaying, setBhajanPlaying] = useState(false);
@@ -113,6 +115,11 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
         return true;
       }
 
+      if (selectedVideoGuide) {
+        setSelectedVideoGuide(null);
+        return true;
+      }
+
       if (selectedGuide) {
         setSelectedGuide(null);
         return true;
@@ -136,7 +143,7 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
     });
 
     return () => subscription.remove();
-  }, [activeTab, animateTabSwitch, editingProfile, needsOnboarding, selectedCallGuide, selectedGuide]);
+  }, [activeTab, animateTabSwitch, editingProfile, needsOnboarding, selectedCallGuide, selectedGuide, selectedVideoGuide]);
 
   const userName = useMemo(() => {
     return (
@@ -162,12 +169,28 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
     setPlaying: setBhajanPlaying,
   }), [bhajanActiveTrackId, bhajanPlaying]);
 
+  useEffect(() => {
+    return () => {
+      void bhajanSoundRef.current?.unloadAsync();
+      bhajanSoundRef.current = null;
+    };
+  }, []);
+
   if (selectedCallGuide) {
     return (
       <LiveCallScreen
         personality={selectedCallGuide}
         languageCode={dbUser?.language_code}
         onClose={() => setSelectedCallGuide(null)}
+      />
+    );
+  }
+
+  if (selectedVideoGuide) {
+    return (
+      <PanditVideoScreen
+        personality={selectedVideoGuide}
+        onClose={() => setSelectedVideoGuide(null)}
       />
     );
   }
@@ -234,6 +257,7 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
             personalities={personalities}
             onOpenGuide={setSelectedGuide}
             onOpenCall={setSelectedCallGuide}
+            onOpenVideoCall={setSelectedVideoGuide}
             onOpenHoroscope={() => animateTabSwitch("horoscope")}
             onOpenBhajan={() => animateTabSwitch("bhajan")}
             onOpenWallet={() => animateTabSwitch("wallet")}

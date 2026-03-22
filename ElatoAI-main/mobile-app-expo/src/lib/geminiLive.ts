@@ -125,11 +125,14 @@ export async function createGeminiLiveSession({
               },
             },
             realtimeInputConfig: {
+              activityHandling: "START_OF_ACTIVITY_INTERRUPTS",
+              turnCoverage: "TURN_INCLUDES_ONLY_ACTIVITY",
               automaticActivityDetection: {
-                startOfSpeechSensitivity: "START_SENSITIVITY_HIGH",
-                endOfSpeechSensitivity: "END_SENSITIVITY_HIGH",
-                prefixPaddingMs: 120,
-                silenceDurationMs: 600,
+                disabled: false,
+                startOfSpeechSensitivity: "START_SENSITIVITY_LOW",
+                endOfSpeechSensitivity: "END_SENSITIVITY_LOW",
+                prefixPaddingMs: 20,
+                silenceDurationMs: 120,
               },
             },
             systemInstruction: {

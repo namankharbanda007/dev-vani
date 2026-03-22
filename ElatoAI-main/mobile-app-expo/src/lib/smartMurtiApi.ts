@@ -1,4 +1,4 @@
-import { User } from "@supabase/supabase-js";
+﻿import { User } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import { ChatMessage, DbUser, HoroscopePayload, Personality } from "../models/types";
 
@@ -218,7 +218,8 @@ async function fetchPersonalityDetails(personalityId: string): Promise<Personali
 function buildGuideSystemInstruction(
   authUser: User,
   dbUser: DbUser | null,
-  personality: PersonalityDetails
+  personality: PersonalityDetails,
+  languageCodeOverride?: string | null
 ) {
   const metadata = getUserMetadata(dbUser);
   const userName = getDisplayName(authUser, dbUser);
@@ -237,13 +238,13 @@ Known user details:
 - Birth time: ${metadata.birth_time || "Unknown"}
 - Birth place: ${metadata.birth_place || "Unknown"}
 - Rashi: ${metadata.rashi || "Unknown"}
-- Preferred language: ${dbUser?.language_code || "en-IN"}
+- Preferred language: ${languageCodeOverride || dbUser?.language_code || "en-IN"}
 
 Rules:
 - Never mention demo limits, trial time, guest mode, or test mode.
 - Stay fully in character as the selected guide from Supabase.
 - Give devotional, astrological, or ritual guidance in the tone of this guide.
-- Use Hindi, English, or Hinglish depending on the user's tone.
+- Match the devotee's preferred language naturally unless they switch on their own.
 - Keep chat replies to 1-4 short spoken-friendly sentences unless the user explicitly asks for depth.
 `.trim();
 }
@@ -589,7 +590,10 @@ export async function sendGuideMessage(message: string, messages: ChatMessage[],
   return { response };
 }
 
-export async function getGuideSessionConfig(personalityId: string) {
+export async function getGuideSessionConfig(
+  personalityId: string,
+  languageCodeOverride?: string | null
+) {
   const authUser = await getAuthUser();
   if (!authUser) {
     throw new Error("Unauthorized");
@@ -603,7 +607,12 @@ export async function getGuideSessionConfig(personalityId: string) {
     personality,
     voiceName: personality.oai_voice?.trim() || "Fenrir",
     openingLine: getGuideOpeningLine(personality),
-    systemInstruction: buildGuideSystemInstruction(authUser, dbUser, personality),
+    systemInstruction: buildGuideSystemInstruction(
+      authUser,
+      dbUser,
+      personality,
+      languageCodeOverride
+    ),
   };
 }
 

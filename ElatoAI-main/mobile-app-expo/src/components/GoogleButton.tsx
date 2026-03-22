@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
+import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/typography";
 import { supabase } from "../lib/supabase";
@@ -70,7 +71,7 @@ export function GoogleButton({ onError }: GoogleButtonProps) {
   return (
     <Pressable onPress={handlePress} style={styles.button}>
       <View style={styles.iconContainer}>
-        <Text style={styles.icon}>G</Text>
+        <Ionicons name="logo-google" size={26} color="#EA4335" />
       </View>
       <Text style={styles.label}>Continue with Google</Text>
     </Pressable>
@@ -79,32 +80,26 @@ export function GoogleButton({ onError }: GoogleButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    height: 52,
-    borderRadius: 16,
+    height: 58,
+    borderRadius: 18,
     backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.gray200,
+    borderWidth: 1.4,
+    borderColor: "#B8ADA0",
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     gap: 12,
   },
   iconContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#FEE2E2",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  icon: {
-    color: "#DC2626",
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-  },
   label: {
-    color: colors.gray700,
+    color: "#111111",
     fontFamily: fonts.bodyBold,
-    fontSize: 16,
+    fontSize: 17,
   },
 });

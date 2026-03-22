@@ -115,7 +115,12 @@ export function LiveCallScreen({
         return;
       }
 
-      session.sendAudioChunk(Buffer.from(event.data).toString("base64"), 16000);
+      const chunk = Buffer.from(event.data).toString("base64");
+      if (!chunk) {
+        return;
+      }
+
+      session.sendAudioChunk(chunk, 16000);
     }, [])
   );
 
@@ -126,8 +131,16 @@ export function LiveCallScreen({
         return;
       }
 
-      setInputLevel(clampLevel(Number(event.data) || 0));
-      if (callStartedRef.current && !mutedRef.current && !speakingRef.current) {
+      const level = clampLevel(Number(event.data) || 0);
+      setInputLevel(level);
+
+      if (!callStartedRef.current || mutedRef.current) {
+        return;
+      }
+
+      if (level > 0.08) {
+        setStatusText("Listening...");
+      } else if (!speakingRef.current) {
         setStatusText("Listening...");
       }
     }, [])
@@ -173,7 +186,10 @@ export function LiveCallScreen({
       await initialize();
       bypassVoiceProcessing(false);
 
-      const guideSession = await getGuideSessionConfig(personality.personality_id);
+      const guideSession = await getGuideSessionConfig(
+        personality.personality_id,
+        languageCode
+      );
       const session = await createGeminiLiveSession({
         systemInstruction: guideSession.systemInstruction,
         voiceName: guideSession.voiceName,
@@ -230,7 +246,7 @@ export function LiveCallScreen({
         setConnecting(false);
       }
     }
-  }, [personality.personality_id, stopNativeAudio, updateStatus]);
+  }, [languageCode, personality.personality_id, stopNativeAudio, updateStatus]);
 
   const handleMuteToggle = useCallback(() => {
     const nextMuted = !mutedRef.current;

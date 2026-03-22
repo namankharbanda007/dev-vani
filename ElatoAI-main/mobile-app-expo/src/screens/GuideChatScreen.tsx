@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+﻿import { useMemo, useRef, useState } from "react";
 import {
   Animated,
   ImageBackground,
@@ -199,7 +199,7 @@ export function GuideChatScreen({
 
           {submitting ? (
             <View style={[styles.messageBubble, styles.assistantBubble, styles.typingBubble]}>
-              <Text style={styles.typingDots}>● ● ●</Text>
+              <Text style={styles.typingDots}>• • •</Text>
             </View>
           ) : null}
 

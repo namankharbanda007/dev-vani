@@ -22,6 +22,7 @@ interface HomeTabScreenProps {
   personalities: Personality[];
   onOpenGuide: (personality: Personality) => void;
   onOpenCall: (personality: Personality) => void;
+  onOpenVideoCall: (personality: Personality) => void;
   onOpenHoroscope: () => void;
   onOpenBhajan: () => void;
   onOpenWallet: () => void;
@@ -56,6 +57,7 @@ export function HomeTabScreen({
   personalities,
   onOpenGuide,
   onOpenCall,
+  onOpenVideoCall,
   onOpenHoroscope,
   onOpenBhajan,
   onOpenWallet,
@@ -146,6 +148,13 @@ export function HomeTabScreen({
             >
               <Text style={styles.secondaryActionText}>Open Chat</Text>
             </Pressable>
+            <Pressable
+              onPress={() => currentGuide && onOpenVideoCall(currentGuide)}
+              android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+              style={({ pressed }) => [styles.secondaryAction, pressed && styles.pressedAction]}
+            >
+              <Text style={styles.secondaryActionText}>Video Puja</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -223,6 +232,14 @@ export function HomeTabScreen({
                     <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.gray900} />
                     <Text style={styles.guideChatButtonText}>Chat</Text>
                   </Pressable>
+                  <Pressable
+                    onPress={() => onOpenVideoCall(guide)}
+                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                    style={({ pressed }) => [styles.guideChatButton, pressed && { opacity: 0.85 }]}
+                  >
+                    <Ionicons name="videocam-outline" size={16} color={colors.gray900} />
+                    <Text style={styles.guideChatButtonText}>Video</Text>
+                  </Pressable>
                 </View>
               </View>
             ))}
@@ -281,6 +298,14 @@ export function HomeTabScreen({
                   >
                     <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.gray900} />
                     <Text style={styles.guideChatButtonText}>Chat</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => onOpenVideoCall(guide)}
+                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                    style={({ pressed }) => [styles.guideChatButton, pressed && { opacity: 0.85 }]}
+                  >
+                    <Ionicons name="videocam-outline" size={16} color={colors.gray900} />
+                    <Text style={styles.guideChatButtonText}>Video</Text>
                   </Pressable>
                 </View>
               </Pressable>
@@ -351,6 +376,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     marginTop: 10,
+    flexWrap: "wrap",
   },
   heroMetaCard: {
     flex: 1,
@@ -377,6 +403,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   primaryAction: {
+    minWidth: 100,
     flex: 1,
     height: 48,
     borderRadius: 24,
@@ -395,6 +422,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   secondaryAction: {
+    minWidth: 100,
     flex: 1,
     height: 48,
     borderRadius: 24,
@@ -495,8 +523,10 @@ const styles = StyleSheet.create({
   guideActionsRow: {
     flexDirection: "row",
     gap: 10,
+    flexWrap: "wrap",
   },
   guideCallButton: {
+    minWidth: 92,
     flex: 1,
     height: 42,
     borderRadius: 16,
@@ -512,6 +542,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   guideChatButton: {
+    minWidth: 92,
     flex: 1,
     height: 42,
     borderRadius: 16,
