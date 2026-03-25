@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Alert, Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Animated, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { DbUser } from "../../models/types";
 import { rechargeWallet } from "../../lib/smartMurtiApi";
 import { colors } from "../../theme/colors";
@@ -14,6 +14,7 @@ const rechargeOptions = [99, 199, 499, 999];
 
 export function WalletTabScreen({ dbUser, onBalanceChange }: WalletTabScreenProps) {
   const [loadingAmount, setLoadingAmount] = useState<number | null>(null);
+  const [customAmount, setCustomAmount] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,6 +23,16 @@ export function WalletTabScreen({ dbUser, onBalanceChange }: WalletTabScreenProp
 
   const animateIn = (index: number) => {
     Animated.spring(cardAnims[index], { toValue: 0.95, useNativeDriver: true, tension: 200, friction: 10 }).start();
+  };
+
+  const handleCustomRecharge = () => {
+    const amount = Number(customAmount);
+    if (!amount || amount < 10) {
+      setError("Enter a valid custom amount of at least Rs. 10.");
+      return;
+    }
+
+    void handleRecharge(amount);
   };
   const animateOut = (index: number) => {
     Animated.spring(cardAnims[index], { toValue: 1, useNativeDriver: true, tension: 200, friction: 10 }).start();
@@ -95,6 +106,37 @@ export function WalletTabScreen({ dbUser, onBalanceChange }: WalletTabScreenProp
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Recharge wallet</Text>
         <Text style={styles.sectionSubtitle}>Choose an amount to add</Text>
+      </View>
+
+      <View style={styles.customCard}>
+        <Text style={styles.customTitle}>Custom amount</Text>
+        <Text style={styles.customText}>Add the exact number of wallet credits you want.</Text>
+
+        <View style={styles.customInputRow}>
+          <View style={styles.currencyPill}>
+            <Text style={styles.currencyText}>Rs.</Text>
+          </View>
+          <TextInput
+            value={customAmount}
+            onChangeText={setCustomAmount}
+            keyboardType="number-pad"
+            placeholder="Enter amount"
+            placeholderTextColor={colors.gray400}
+            style={styles.customInput}
+          />
+        </View>
+
+        <Pressable
+          onPress={handleCustomRecharge}
+          disabled={loadingAmount !== null}
+          style={({ pressed }) => [
+            styles.customButton,
+            pressed && { opacity: 0.88 },
+            loadingAmount !== null && styles.customButtonDisabled,
+          ]}
+        >
+          <Text style={styles.customButtonText}>Add Custom Amount</Text>
+        </Pressable>
       </View>
 
       <View style={styles.rechargeGrid}>
@@ -213,6 +255,66 @@ const styles = StyleSheet.create({
     color: colors.gray500,
     fontFamily: fonts.body,
     fontSize: 13,
+  },
+  customCard: {
+    borderRadius: 24,
+    backgroundColor: colors.white,
+    padding: 18,
+    gap: 12,
+  },
+  customTitle: {
+    color: colors.gray900,
+    fontFamily: fonts.bodyBold,
+    fontSize: 17,
+  },
+  customText: {
+    color: colors.gray500,
+    fontFamily: fonts.body,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  customInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  currencyPill: {
+    width: 56,
+    height: 50,
+    borderRadius: 16,
+    backgroundColor: "#F3E8FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  currencyText: {
+    color: colors.purple900,
+    fontFamily: fonts.bodyBold,
+    fontSize: 16,
+  },
+  customInput: {
+    flex: 1,
+    height: 50,
+    borderRadius: 16,
+    backgroundColor: colors.gray50,
+    paddingHorizontal: 16,
+    color: colors.gray900,
+    fontFamily: fonts.bodyBold,
+    fontSize: 16,
+  },
+  customButton: {
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: colors.purple900,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  customButtonDisabled: {
+    opacity: 0.6,
+  },
+  customButtonText: {
+    color: colors.white,
+    fontFamily: fonts.bodyBold,
+    fontSize: 15,
   },
   rechargeGrid: {
     flexDirection: "row",

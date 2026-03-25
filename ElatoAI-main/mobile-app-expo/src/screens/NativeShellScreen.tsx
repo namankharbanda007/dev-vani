@@ -15,7 +15,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Audio } from "expo-av";
 import { BottomTabBar, AppTab } from "../components/BottomTabBar";
 import { DbUser, Personality, BhajanTrack } from "../models/types";
-import { fetchCurrentUserBundle, fetchFaithPersonalities } from "../lib/smartMurtiApi";
+import {
+  fetchCurrentUserBundle,
+  fetchFaithPersonalities,
+  LIVE_PUJA_PANDIT_PERSONALITY_ID,
+} from "../lib/smartMurtiApi";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/typography";
 import { GuideChatScreen } from "./GuideChatScreen";
@@ -160,6 +164,32 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
     await loadBundle();
   }, [loadBundle]);
 
+  const handleOpenVideoCall = useCallback(
+    (guide: Personality) => {
+      const lowerTitle = guide.title.toLowerCase();
+
+      if (lowerTitle.includes("pandit")) {
+        const livePujaGuide =
+          personalities.find(
+            (candidate) =>
+              candidate.personality_id === LIVE_PUJA_PANDIT_PERSONALITY_ID
+          ) ||
+          personalities.find(
+            (candidate) =>
+              !candidate.creator_id &&
+              candidate.title.toLowerCase().includes("pandit")
+          ) ||
+          guide;
+
+        setSelectedVideoGuide(livePujaGuide);
+        return;
+      }
+
+      setSelectedVideoGuide(guide);
+    },
+    [personalities]
+  );
+
   // Bhajan player callbacks for BhajanTabScreen
   const bhajanPlayerState = useMemo(() => ({
     soundRef: bhajanSoundRef,
@@ -190,6 +220,8 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
     return (
       <PanditVideoScreen
         personality={selectedVideoGuide}
+        participantName={userName}
+        languageCode={dbUser?.language_code}
         onClose={() => setSelectedVideoGuide(null)}
       />
     );
@@ -257,7 +289,7 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
             personalities={personalities}
             onOpenGuide={setSelectedGuide}
             onOpenCall={setSelectedCallGuide}
-            onOpenVideoCall={setSelectedVideoGuide}
+            onOpenVideoCall={handleOpenVideoCall}
             onOpenHoroscope={() => animateTabSwitch("horoscope")}
             onOpenBhajan={() => animateTabSwitch("bhajan")}
             onOpenWallet={() => animateTabSwitch("wallet")}

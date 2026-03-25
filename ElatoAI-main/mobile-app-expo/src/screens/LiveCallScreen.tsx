@@ -17,9 +17,10 @@ import {
   toggleRecording,
   useExpoTwoWayAudioEventListener,
 } from "@speechmatics/expo-two-way-audio";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { createGeminiLiveSession, type GeminiLiveSession } from "../lib/geminiLive";
 import { getGuideDisplaySubtitle, getGuideImageAsset, getGuideSessionConfig } from "../lib/smartMurtiApi";
+import { downsamplePcm16, clampAudioLevel } from "../lib/audioUtils";
 import { Personality } from "../models/types";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/typography";
@@ -30,41 +31,14 @@ interface LiveCallScreenProps {
   onClose: () => void;
 }
 
-function downsamplePcm16(inputBytes: Uint8Array, inputRate: number, outputRate: number) {
-  if (inputRate === outputRate) {
-    return inputBytes;
-  }
-
-  const inputSamples = new Int16Array(
-    inputBytes.buffer,
-    inputBytes.byteOffset,
-    Math.floor(inputBytes.byteLength / 2)
-  );
-  const outputLength = Math.max(1, Math.round((inputSamples.length * outputRate) / inputRate));
-  const outputSamples = new Int16Array(outputLength);
-
-  for (let index = 0; index < outputLength; index += 1) {
-    const sourcePosition = (index * inputRate) / outputRate;
-    const leftIndex = Math.floor(sourcePosition);
-    const rightIndex = Math.min(leftIndex + 1, inputSamples.length - 1);
-    const blend = sourcePosition - leftIndex;
-    const left = inputSamples[leftIndex] || 0;
-    const right = inputSamples[rightIndex] || left;
-    outputSamples[index] = Math.round(left + (right - left) * blend);
-  }
-
-  return new Uint8Array(outputSamples.buffer);
-}
-
-function clampLevel(level: number) {
-  return Math.max(0.04, Math.min(1, level));
-}
+// downsamplePcm16 and clampAudioLevel are imported from shared audioUtils
 
 export function LiveCallScreen({
   personality,
   languageCode,
   onClose,
 }: LiveCallScreenProps) {
+  const insets = useSafeAreaInsets();
   const [callStarted, setCallStarted] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -131,7 +105,7 @@ export function LiveCallScreen({
         return;
       }
 
-      const level = clampLevel(Number(event.data) || 0);
+      const level = clampAudioLevel(Number(event.data) || 0);
       setInputLevel(level);
 
       if (!callStartedRef.current || mutedRef.current) {
@@ -139,7 +113,9 @@ export function LiveCallScreen({
       }
 
       if (level > 0.08) {
-        setStatusText("Listening...");
+        if (!speakingRef.current) {
+          setStatusText("Listening...");
+        }
       } else if (!speakingRef.current) {
         setStatusText("Listening...");
       }
@@ -153,7 +129,7 @@ export function LiveCallScreen({
         return;
       }
 
-      const level = clampLevel(Number(event.data) || 0);
+      const level = clampAudioLevel(Number(event.data) || 0);
       setOutputLevel(level);
 
       if (level > 0.06) {
@@ -193,6 +169,7 @@ export function LiveCallScreen({
       const session = await createGeminiLiveSession({
         systemInstruction: guideSession.systemInstruction,
         voiceName: guideSession.voiceName,
+        startupRetries: 2,
         callbacks: {
           onReady: () => {
             updateStatus("Call connected");
@@ -215,7 +192,11 @@ export function LiveCallScreen({
           },
           onClose: () => {
             if (mountedRef.current && callStartedRef.current) {
-              setError("Live call ended unexpectedly.");
+              callStartedRef.current = false;
+              setCallStarted(false);
+              setError("Live call ended unexpectedly. Tap Start to reconnect.");
+              stopNativeAudio();
+              updateStatus("Tap start to begin");
             }
           },
         },
@@ -229,6 +210,7 @@ export function LiveCallScreen({
       updateStatus("Guide is joining...");
 
       toggleRecording(true);
+      updateStatus("Listening...");
       session.sendTextTurn(
         guideSession.openingLine ||
           "Begin this call with a short devotional welcome and invite the devotee to speak."
@@ -269,9 +251,6 @@ export function LiveCallScreen({
     setError(null);
     updateStatus("Tap start to begin");
 
-    try {
-      liveSessionRef.current?.endAudioStream();
-    } catch {}
     liveSessionRef.current?.close();
     liveSessionRef.current = null;
     stopNativeAudio();
@@ -311,7 +290,7 @@ export function LiveCallScreen({
           source={{
             uri: getGuideImageAsset(personality),
           }}
-          style={styles.heroCard}
+        style={styles.heroCard}
           imageStyle={styles.heroImage}
         >
           <View style={styles.heroOverlay} />
@@ -360,7 +339,7 @@ export function LiveCallScreen({
         ) : null}
       </View>
 
-      <View style={styles.controls}>
+      <View style={[styles.controls, { paddingBottom: Math.max(insets.bottom, 18) }]}>
         {!callStarted ? (
           <Pressable
             onPress={() => void handleStartCall()}

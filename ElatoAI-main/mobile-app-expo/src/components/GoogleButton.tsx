@@ -1,5 +1,4 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../theme/colors";
@@ -19,7 +18,7 @@ export function GoogleButton({ onError }: GoogleButtonProps) {
         throw new Error("Supabase is not configured yet.");
       }
 
-      const redirectTo = Linking.createURL("auth/callback");
+      const redirectTo = "smartmurti://auth/callback";
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

@@ -174,10 +174,6 @@ export function AuthScreen() {
 
   return (
     <View style={styles.page}>
-      <Image
-        source={require("../../assets/branding/login-hero.jpg")}
-        style={styles.absoluteBg}
-      />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -189,14 +185,16 @@ export function AuthScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.heroPanel}>
-              <Image
-                source={require("../../assets/branding/smart-murti-logo.png")}
-                resizeMode="contain"
-                style={styles.heroLogo}
-              />
+              <Text style={styles.heroHeading}>Spirituality Meets Companionship</Text>
+              <View style={styles.heroArtCard}>
+                <Image
+                  source={require("../../assets/branding/login-hero.jpg")}
+                  style={styles.heroArt}
+                  resizeMode="cover"
+                />
+              </View>
               <Text style={styles.heroSubcopy}>
-                Join thousands of families discovering AI-{"\n"}
-                powered spiritual guidance and companionship.
+                Join thousands of families discovering AI-powered spiritual guidance and companionship.
               </Text>
             </View>
 
@@ -283,8 +281,6 @@ export function AuthScreen() {
                 </Text>
                 .
               </Text>
-              
-              <SafeAreaView edges={['bottom']} style={{ height: 0 }} />
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -296,15 +292,7 @@ export function AuthScreen() {
 const styles = StyleSheet.create({
   page: {
     flex: 1,
-    backgroundColor: '#FAF5ED',
-  },
-  absoluteBg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+    backgroundColor: "#FBF6E9",
   },
   safeArea: {
     flex: 1,
@@ -314,39 +302,55 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'flex-end',
+    paddingHorizontal: 18,
+    paddingTop: 12,
+    paddingBottom: 24,
   },
   heroPanel: {
-    alignItems: "center",
-    paddingHorizontal: 24,
-    marginTop: 'auto',
-    marginBottom: 20,
+    gap: 12,
   },
-  heroLogo: {
-    width: 200,
-    height: 38,
-    tintColor: "#3B312A",
-    marginBottom: 8,
+  heroHeading: {
+    color: "#21160F",
+    fontFamily: fonts.heading,
+    fontSize: 28,
+    lineHeight: 34,
+    paddingHorizontal: 10,
+  },
+  heroArtCard: {
+    borderRadius: 34,
+    overflow: "hidden",
+    backgroundColor: "#EAB95C",
+    minHeight: 280,
+    borderWidth: 1,
+    borderColor: "rgba(194, 160, 97, 0.16)",
+  },
+  heroArt: {
+    width: "100%",
+    height: 280,
   },
   heroSubcopy: {
     textAlign: "center",
-    color: "#4A3F35",
+    color: "#3E3024",
     fontFamily: fonts.body,
-    fontSize: 14,
-    lineHeight: 20,
-    paddingHorizontal: 16,
+    fontSize: 15,
+    lineHeight: 22,
+    paddingHorizontal: 18,
   },
   formCard: {
     backgroundColor: "#FFFDF8",
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
+    borderRadius: 32,
     paddingHorizontal: 24,
     paddingTop: 32,
     paddingBottom: 40,
     gap: 18,
     borderWidth: 1,
-    borderBottomWidth: 0,
     borderColor: "rgba(123, 94, 50, 0.08)",
+    marginTop: -22,
+    shadowColor: "#C5A66B",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
   },
   brandTitle: {
     textAlign: "center",

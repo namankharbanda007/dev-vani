@@ -12,7 +12,13 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { DbUser, Personality } from "../../models/types";
-import { getGuideDisplaySubtitle, getGuideImageAsset } from "../../lib/smartMurtiApi";
+import {
+  canGuideUseVideo,
+  filterHomeGuides,
+  getGuideDisplaySubtitle,
+  getGuideImageAsset,
+  getGuideShortTitle,
+} from "../../lib/smartMurtiApi";
 import { gradients, colors } from "../../theme/colors";
 import { fonts } from "../../theme/typography";
 
@@ -64,13 +70,15 @@ export function HomeTabScreen({
   refreshing = false,
   onRefresh,
 }: HomeTabScreenProps) {
-  const myGuides = personalities.filter((guide) => guide.creator_id);
-  const premadeGuides = personalities.filter((guide) => !guide.creator_id);
+  const homeGuides = filterHomeGuides(personalities);
+  const panditGuide = homeGuides.find((guide) => guide.title.toLowerCase().includes("pandit"));
   const currentGuide =
-    personalities.find((guide) => guide.personality_id === dbUser?.personality_id) ||
-    myGuides[0] ||
-    premadeGuides[0] ||
+    panditGuide ||
+    homeGuides.find((guide) => guide.personality_id === dbUser?.personality_id) ||
+    homeGuides[0] ||
     personalities[0];
+  const featuredGuideName = currentGuide ? getGuideShortTitle(currentGuide) : "Pandit Ji";
+  const currentGuideSupportsVideo = currentGuide ? canGuideUseVideo(currentGuide) : false;
 
   // Animated shortcut press
   const shortcutAnims = useRef(shortcutItems.map(() => new Animated.Value(1))).current;
@@ -111,6 +119,10 @@ export function HomeTabScreen({
         <View style={styles.heroCopy}>
           <Text style={styles.heroEyebrow}>Smart Murti</Text>
           <Text style={styles.heroTitle}>Namaste, {userName.split(" ")[0] || "Devotee"}</Text>
+          <View style={styles.featuredGuideChip}>
+            <Ionicons name="sparkles" size={14} color="#FDE68A" />
+            <Text style={styles.featuredGuideChipText}>{featuredGuideName}</Text>
+          </View>
           <Text style={styles.heroBody}>
             Your Pandit, astrologer, horoscope, bhajans, and wallet are all available in one place now.
           </Text>
@@ -148,13 +160,15 @@ export function HomeTabScreen({
             >
               <Text style={styles.secondaryActionText}>Open Chat</Text>
             </Pressable>
-            <Pressable
-              onPress={() => currentGuide && onOpenVideoCall(currentGuide)}
-              android_ripple={{ color: "rgba(255,255,255,0.15)" }}
-              style={({ pressed }) => [styles.secondaryAction, pressed && styles.pressedAction]}
-            >
-              <Text style={styles.secondaryActionText}>Video Puja</Text>
-            </Pressable>
+            {currentGuideSupportsVideo ? (
+              <Pressable
+                onPress={() => currentGuide && onOpenVideoCall(currentGuide)}
+                android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+                style={({ pressed }) => [styles.secondaryAction, pressed && styles.pressedAction]}
+              >
+                <Text style={styles.secondaryActionText}>Video Puja</Text>
+              </Pressable>
+            ) : null}
           </View>
         </View>
 
@@ -192,68 +206,11 @@ export function HomeTabScreen({
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Talk To Your Guides</Text>
-        <Text style={styles.sectionSubtitle}>Every guide from your Smart Murti account is available here</Text>
+        <Text style={styles.sectionSubtitle}>The same core guides featured on your website home page</Text>
       </View>
 
-      {myGuides.length ? (
-        <View style={styles.guideSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Your Guides</Text>
-            <Text style={styles.sectionSubtitle}>Custom personalities from your own Smart Murti dashboard</Text>
-          </View>
-          <View style={styles.guidesColumn}>
-            {myGuides.map((guide) => (
-              <View key={guide.personality_id} style={[styles.guideCard, styles.featuredGuideCard]}>
-                <View style={styles.guideTopRow}>
-                  <Image source={{ uri: getGuideImageAsset(guide) }} style={styles.guidePortrait} />
-                  <View style={styles.guideCopy}>
-                    <Text style={styles.guideTitle}>{guide.title}</Text>
-                    <Text style={styles.guideSubtitle}>
-                      {getGuideDisplaySubtitle(guide) || "Personalized spiritual guide"}
-                    </Text>
-                  </View>
-                  <Ionicons name="sparkles" size={18} color="#CA8A04" />
-                </View>
-
-                <View style={styles.guideActionsRow}>
-                  <Pressable
-                    onPress={() => onOpenCall(guide)}
-                    android_ripple={{ color: "rgba(255,255,255,0.2)" }}
-                    style={({ pressed }) => [styles.guideCallButton, pressed && { opacity: 0.85 }]}
-                  >
-                    <Ionicons name="call" size={16} color={colors.white} />
-                    <Text style={styles.guideCallButtonText}>Call</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => onOpenGuide(guide)}
-                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                    style={({ pressed }) => [styles.guideChatButton, pressed && { opacity: 0.85 }]}
-                  >
-                    <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.gray900} />
-                    <Text style={styles.guideChatButtonText}>Chat</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => onOpenVideoCall(guide)}
-                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                    style={({ pressed }) => [styles.guideChatButton, pressed && { opacity: 0.85 }]}
-                  >
-                    <Ionicons name="videocam-outline" size={16} color={colors.gray900} />
-                    <Text style={styles.guideChatButtonText}>Video</Text>
-                  </Pressable>
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-      ) : null}
-
       <View style={styles.guideSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Pandits & Astrologers</Text>
-          <Text style={styles.sectionSubtitle}>The full faith-tech guide catalog from your website</Text>
-        </View>
-
-        {premadeGuides.length === 0 ? (
+        {homeGuides.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="people-outline" size={40} color={colors.gray400} />
             <Text style={styles.emptyTitle}>No guides available</Text>
@@ -261,13 +218,14 @@ export function HomeTabScreen({
           </View>
         ) : (
           <View style={styles.guidesColumn}>
-            {premadeGuides.map((guide, index) => (
+            {homeGuides.map((guide, index) => (
               <Pressable
                 key={guide.personality_id}
+                onPress={() => onOpenGuide(guide)}
                 android_ripple={{ color: "rgba(0,0,0,0.04)" }}
                 style={({ pressed }) => [
                   styles.guideCard,
-                  index === 0 && !myGuides.length && styles.featuredGuideCard,
+                  index === 0 && styles.featuredGuideCard,
                   pressed && { opacity: 0.92 },
                 ]}
               >
@@ -299,14 +257,16 @@ export function HomeTabScreen({
                     <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.gray900} />
                     <Text style={styles.guideChatButtonText}>Chat</Text>
                   </Pressable>
-                  <Pressable
-                    onPress={() => onOpenVideoCall(guide)}
-                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                    style={({ pressed }) => [styles.guideChatButton, pressed && { opacity: 0.85 }]}
-                  >
-                    <Ionicons name="videocam-outline" size={16} color={colors.gray900} />
-                    <Text style={styles.guideChatButtonText}>Video</Text>
-                  </Pressable>
+                  {canGuideUseVideo(guide) ? (
+                    <Pressable
+                      onPress={() => onOpenVideoCall(guide)}
+                      android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                      style={({ pressed }) => [styles.guideChatButton, pressed && { opacity: 0.85 }]}
+                    >
+                      <Ionicons name="videocam-outline" size={16} color={colors.gray900} />
+                      <Text style={styles.guideChatButtonText}>Video</Text>
+                    </Pressable>
+                  ) : null}
                 </View>
               </Pressable>
             ))}
@@ -366,6 +326,23 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     maxWidth: 320,
+  },
+  featuredGuideChip: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  featuredGuideChipText: {
+    color: colors.white,
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
   },
   heroMetaRow: {
     flexDirection: "row",

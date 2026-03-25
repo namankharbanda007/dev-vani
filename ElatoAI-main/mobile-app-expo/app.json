@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Smart Murti",
-    "slug": "smartmurti-mobile",
+    "slug": "smartmurti-codex-build",
     "scheme": "smartmurti",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -28,6 +28,23 @@
         "MODIFY_AUDIO_SETTINGS",
         "android.permission.RECORD_AUDIO"
       ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": false,
+          "data": [
+            {
+              "scheme": "smartmurti",
+              "host": "auth",
+              "pathPrefix": "/callback"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#F8F4EC",
         "foregroundImage": "./assets/android-icon-foreground.png"
@@ -37,12 +54,24 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [],
+    "plugins": [
+      [
+        "@livekit/react-native-expo-plugin",
+        {
+          "android": {
+            "audioType": "communication"
+          }
+        }
+      ]
+    ],
     "extra": {
       "eas": {
-        "projectId": "26bc0f69-226e-4517-9d4c-61d9fdf05da0"
+        "projectId": "f923fb0c-d8ff-404c-812a-4fdc49a667a9"
       }
     },
-    "owner": "smartmurti"
+    "owner": "smartmurti.com",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }

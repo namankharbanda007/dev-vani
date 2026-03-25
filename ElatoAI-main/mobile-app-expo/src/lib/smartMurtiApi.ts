@@ -1,12 +1,60 @@
-﻿import { User } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
+import { Buffer } from "buffer";
 import { supabase } from "./supabase";
 import { ChatMessage, DbUser, HoroscopePayload, Personality } from "../models/types";
+import * as FileSystem from "expo-file-system";
 
 const DEFAULT_PERSONALITY_ID = "a1c073e6-653d-40cf-acc1-891331689409";
+export const LIVE_PUJA_PANDIT_PERSONALITY_ID = "8cfaa34a-e887-41cd-b880-c0b6169bf9cd";
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"];
+const GEMINI_MODELS = ["gemini-2.5-flash"];
 const SITE_ORIGIN = "https://www.smartmurti.com";
 const IMAGE_URL_PATTERN = /^https?:\/\/\S+/i;
+const SUPPORTED_GEMINI_LIVE_VOICES = new Set([
+  "Achird",
+  "Aoede",
+  "Charon",
+  "Enceladus",
+  "Fenrir",
+  "Iapetus",
+  "Kore",
+  "Leda",
+  "Orus",
+  "Puck",
+  "Umbriel",
+  "Zephyr",
+]);
+const WEBSITE_HOME_GUIDE_SECTIONS = {
+  spiritual: [
+    "pandit ji",
+    "the spiritual guide",
+    "ganpati havan by pandit ji",
+    "sundarkand path",
+    "navagraha shanti havan",
+    "shri satyanarayan puja",
+    "smart pandit ankshastri",
+    "smart pandit margdarshak",
+    "smart pandit vastu",
+    "smart pandit lalit",
+  ],
+  astrology: [
+    "the horoscope astrologer",
+    "the relationship advisor",
+    "the financial advisor",
+    "the navigator of love stories",
+    "the salaried employee",
+    "the govt. job aspirant",
+    "the career healer",
+    "the business scaler",
+    "the path decider",
+    "the educational guide",
+  ],
+} as const;
+const WEBSITE_HOME_GUIDE_ORDER = [
+  ...WEBSITE_HOME_GUIDE_SECTIONS.spiritual,
+  ...WEBSITE_HOME_GUIDE_SECTIONS.astrology,
+];
+const VIDEO_ENABLED_GUIDE_TITLES = new Set(["pandit ji", "the horoscope astrologer"]);
 
 const HIDDEN_PERSONALITIES = new Set([
   "Anya",
@@ -29,6 +77,15 @@ const HIDDEN_PERSONALITIES = new Set([
   "Blood test pal",
   "Math wiz",
 ]);
+
+export const LANGUAGE_OPTIONS = [
+  { code: "en-US", label: "English" },
+  { code: "hi-IN", label: "Hindi" },
+  { code: "en-IN", label: "Hinglish" },
+  { code: "te-IN", label: "Telugu" },
+  { code: "ta-IN", label: "Tamil" },
+  { code: "bn-IN", label: "Bengali" },
+] as const;
 
 type PersonalityDetails = Personality;
 
@@ -119,6 +176,52 @@ function isLikelyImageUrl(value?: string | null) {
   }
 
   return IMAGE_URL_PATTERN.test(value.trim());
+}
+
+function normalizeGuideTitle(title: string) {
+  return title.toLowerCase().trim();
+}
+
+function findWebsiteHomeGuideMatch(title: string) {
+  const normalizedTitle = normalizeGuideTitle(title);
+  return WEBSITE_HOME_GUIDE_ORDER.find(
+    (candidate) =>
+      normalizedTitle === candidate ||
+      normalizedTitle.includes(candidate) ||
+      candidate.includes(normalizedTitle)
+  );
+}
+
+function resolveGeminiLiveVoice(personality: PersonalityDetails) {
+  const configuredVoice = personality.oai_voice?.trim();
+  if (configuredVoice && SUPPORTED_GEMINI_LIVE_VOICES.has(configuredVoice)) {
+    return configuredVoice;
+  }
+
+  const normalizedTitle = normalizeGuideTitle(personality.title);
+
+  if (normalizedTitle.includes("astrolog")) {
+    return "Achird";
+  }
+
+  if (
+    normalizedTitle.includes("relationship") ||
+    normalizedTitle.includes("love") ||
+    normalizedTitle.includes("financial")
+  ) {
+    return "Aoede";
+  }
+
+  return "Enceladus";
+}
+
+function inferFileExtension(uri: string, mimeType?: string | null) {
+  if (mimeType?.includes("/")) {
+    return mimeType.split("/")[1].replace("jpeg", "jpg");
+  }
+
+  const match = uri.match(/\.([a-zA-Z0-9]+)(?:\?|$)/);
+  return match?.[1]?.toLowerCase() || "jpg";
 }
 
 async function geminiGenerate({
@@ -464,6 +567,77 @@ export async function updateCurrentUserProfile(values: {
   return fetchCurrentUserBundle();
 }
 
+export async function updateCurrentUserLanguage(languageCode: string) {
+  const client = requireSupabase();
+  const authUser = await getAuthUser();
+
+  if (!authUser) {
+    throw new Error("Unauthorized");
+  }
+
+  const { error } = await client
+    .from("users")
+    .update({ language_code: languageCode })
+    .eq("user_id", authUser.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return fetchCurrentUserBundle();
+}
+
+export async function uploadCurrentUserAvatar(uri: string, mimeType?: string | null) {
+  const client = requireSupabase();
+  const authUser = await getAuthUser();
+
+  if (!authUser) {
+    throw new Error("Unauthorized");
+  }
+
+  await ensureDbUser(authUser);
+
+  const extension = inferFileExtension(uri, mimeType);
+  const filePath = `profile-photos/${authUser.id}-${Date.now()}.${extension}`;
+  const base64Data = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+  const resolvedMimeType = mimeType || `image/${extension}`;
+
+  // Decode base64 into a proper Uint8Array. The Buffer polyfill's output is
+  // not compatible with React Native's fetch() body serialization, which
+  // previously caused "Network request failed". Uint8Array works correctly.
+  const binaryString = atob(base64Data);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+
+  const { error: uploadError } = await client.storage
+    .from("avatars")
+    .upload(filePath, bytes.buffer, {
+      contentType: resolvedMimeType,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.warn("Avatar upload failed, using data URI fallback", uploadError.message);
+  }
+
+  const avatarUrl = uploadError
+    ? `data:${resolvedMimeType};base64,${base64Data}`
+    : client.storage.from("avatars").getPublicUrl(filePath).data.publicUrl;
+
+  const { error: profileError } = await client
+    .from("users")
+    .update({ avatar_url: avatarUrl })
+    .eq("user_id", authUser.id);
+
+  if (profileError) {
+    throw new Error(profileError.message);
+  }
+
+  return avatarUrl;
+}
+
 export async function fetchHoroscope(sign: string, date: "Yesterday" | "Today" | "Tomorrow") {
   try {
     const authUser = await getAuthUser();
@@ -605,7 +779,8 @@ export async function getGuideSessionConfig(
   return {
     dbUser,
     personality,
-    voiceName: personality.oai_voice?.trim() || "Fenrir",
+    voiceName: resolveGeminiLiveVoice(personality),
+    provider: personality.provider?.trim() || "gemini",
     openingLine: getGuideOpeningLine(personality),
     systemInstruction: buildGuideSystemInstruction(
       authUser,
@@ -632,6 +807,55 @@ export function getGuideDisplaySubtitle(personality: Personality) {
   }
 
   return "";
+}
+
+export function getGuideShortTitle(personality: Personality | string) {
+  const title = typeof personality === "string" ? personality : personality.title;
+  const lowerTitle = title.toLowerCase();
+
+  if (findWebsiteHomeGuideMatch(lowerTitle) === "pandit ji" || lowerTitle.includes("pandit")) {
+    return "Pandit Ji";
+  }
+
+  if (findWebsiteHomeGuideMatch(lowerTitle) === "the horoscope astrologer" || lowerTitle.includes("astrolog")) {
+    return "Astrologer";
+  }
+
+  return title;
+}
+
+export function canGuideUseVideo(personality: Personality | string) {
+  if (typeof personality !== "string" && personality.personality_id === LIVE_PUJA_PANDIT_PERSONALITY_ID) {
+    return true;
+  }
+
+  const matchedTitle = findWebsiteHomeGuideMatch(
+    typeof personality === "string" ? personality : personality.title
+  );
+  return matchedTitle ? VIDEO_ENABLED_GUIDE_TITLES.has(matchedTitle) : false;
+}
+
+export function isHomeGuide(personality: Personality) {
+  return !personality.creator_id && Boolean(findWebsiteHomeGuideMatch(personality.title));
+}
+
+export function filterHomeGuides(personalities: Personality[]) {
+  return personalities
+    .filter((guide) => !guide.creator_id)
+    .filter((guide) => !HIDDEN_PERSONALITIES.has(guide.title))
+    .filter((guide) => Boolean(findWebsiteHomeGuideMatch(guide.title)))
+    .sort((left, right) => {
+      const leftMatch = findWebsiteHomeGuideMatch(left.title);
+      const rightMatch = findWebsiteHomeGuideMatch(right.title);
+      const leftIndex = leftMatch ? WEBSITE_HOME_GUIDE_ORDER.indexOf(leftMatch) : Number.MAX_SAFE_INTEGER;
+      const rightIndex = rightMatch ? WEBSITE_HOME_GUIDE_ORDER.indexOf(rightMatch) : Number.MAX_SAFE_INTEGER;
+
+      if (leftIndex !== rightIndex) {
+        return leftIndex - rightIndex;
+      }
+
+      return left.title.localeCompare(right.title);
+    });
 }
 
 export function getGuideImageAsset(

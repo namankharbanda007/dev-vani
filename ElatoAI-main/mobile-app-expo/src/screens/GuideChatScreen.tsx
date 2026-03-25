@@ -1,4 +1,4 @@
-﻿import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Animated,
   ImageBackground,
@@ -47,10 +47,9 @@ export function GuideChatScreen({
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      role: "assistant",
-      content:
-        personality.first_message_prompt?.trim() ||
-        `Namaste. I am ${personality.title}. Ask anything about your spiritual practice, guidance, or today's path.`,
+        role: "assistant",
+        content:
+          `Namaste. I am ${personality.title}. Ask anything about your spiritual practice, guidance, or today's path.`,
     },
   ]);
 
@@ -145,6 +144,7 @@ export function GuideChatScreen({
           ref={scrollRef}
           contentContainerStyle={styles.messages}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
         >
           <ImageBackground

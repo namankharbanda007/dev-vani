@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Animated, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/typography";
 
@@ -101,8 +102,20 @@ function TabButton({
 }
 
 export function BottomTabBar({ activeTab, onSelect }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.bar}>
+    <View
+      style={[
+        styles.bar,
+        {
+          paddingBottom:
+            Platform.OS === "ios"
+              ? Math.max(insets.bottom, 20)
+              : Math.max(insets.bottom, 12),
+        },
+      ]}
+    >
       {tabs.map((tab) => (
         <TabButton
           key={tab.key}
@@ -121,7 +134,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderTopWidth: 1,
     borderTopColor: colors.gray100,
-    paddingBottom: Platform.OS === "ios" ? 20 : 8,
     paddingTop: 8,
     paddingHorizontal: 4,
     elevation: 12,
