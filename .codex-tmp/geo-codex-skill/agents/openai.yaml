@@ -1,0 +1,6 @@
+interface:
+  display_name: "GEO SEO"
+  short_description: "Audit sites for AI search visibility"
+  icon_large: "./assets/banner.svg"
+  brand_color: "#0f3460"
+  default_prompt: "Use $geo to audit a website for GEO, AI visibility, llms.txt, schema, and technical SEO."

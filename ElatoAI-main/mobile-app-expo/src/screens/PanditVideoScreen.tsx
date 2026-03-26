@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -21,6 +21,7 @@ import {
   useExpoTwoWayAudioEventListener,
 } from "@speechmatics/expo-two-way-audio";
 import {
+  buildLiveOpeningTurn,
   canGuideUseVideo,
   getGuideSessionConfig,
   getGuideImageAsset,
@@ -79,6 +80,8 @@ export function PanditVideoScreen({
   const mutedRef = useRef(false);
   const speakingRef = useRef(false);
   const mountedRef = useRef(true);
+  const userActivityRef = useRef(false);
+  const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Audio callbacks ──────────────────────────────────────────────
   const updateStatus = useCallback((next: string) => {
@@ -88,6 +91,10 @@ export function PanditVideoScreen({
   }, []);
 
   const stopNativeAudio = useCallback(() => {
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current);
+      silenceTimeoutRef.current = null;
+    }
     try {
       toggleRecording(false);
     } catch {}
@@ -95,6 +102,7 @@ export function PanditVideoScreen({
       tearDown();
     } catch {}
     speakingRef.current = false;
+    userActivityRef.current = false;
     if (mountedRef.current) {
       setInputLevel(0.08);
       setOutputLevel(0.08);
@@ -125,6 +133,27 @@ export function PanditVideoScreen({
       if (!mountedRef.current) return;
       const level = clampAudioLevel(Number(event.data) || 0);
       setInputLevel(level);
+
+      if (!callStartedRef.current || mutedRef.current) {
+        return;
+      }
+
+      if (level > 0.08) {
+        if (!userActivityRef.current) {
+          userActivityRef.current = true;
+          liveSessionRef.current?.startActivity();
+        }
+        if (silenceTimeoutRef.current) {
+          clearTimeout(silenceTimeoutRef.current);
+          silenceTimeoutRef.current = null;
+        }
+      } else if (userActivityRef.current && !silenceTimeoutRef.current) {
+        silenceTimeoutRef.current = setTimeout(() => {
+          liveSessionRef.current?.endActivity();
+          userActivityRef.current = false;
+          silenceTimeoutRef.current = null;
+        }, 420);
+      }
     }, [])
   );
 
@@ -236,11 +265,12 @@ Keep every response short, devotional, and easy to follow in real-time.
       toggleRecording(true);
       updateStatus("Pandit Ji is listening...");
 
-      // Send opening instruction so pandit speaks first
       session.sendTextTurn(
-        guideSession.openingLine ||
-          personality.first_message_prompt?.trim() ||
-          `Namaste ${participantName}. Welcome them warmly, begin the ritual naturally, and keep your response devotional and concise.`
+        buildLiveOpeningTurn(
+          guideSession.openingLine || personality.first_message_prompt?.trim(),
+          participantName,
+          "puja"
+        )
       );
     } catch (nextError) {
       const msg = nextError instanceof Error ? nextError.message : "Could not start the live puja.";
@@ -272,6 +302,14 @@ Keep every response short, devotional, and easy to follow in real-time.
     try {
       toggleRecording(!nextMuted);
     } catch {}
+    if (nextMuted && userActivityRef.current) {
+      liveSessionRef.current?.endActivity();
+      userActivityRef.current = false;
+      if (silenceTimeoutRef.current) {
+        clearTimeout(silenceTimeoutRef.current);
+        silenceTimeoutRef.current = null;
+      }
+    }
     updateStatus(nextMuted ? "Muted" : "Pandit Ji is listening...");
   }, [updateStatus]);
 

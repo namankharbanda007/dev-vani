@@ -2,6 +2,20 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Camera, Video, Sparkles, AlertCircle } from "lucide-react";
 import Image from "next/image";
+import { buildMetadata } from "@/app/lib/seo";
+
+export const metadata = buildMetadata({
+    title: "AI Palm Reading",
+    description:
+        "Explore SMART Murti's AI palm reading experience for spiritual insights, personality interpretation, and guided analysis.",
+    path: "/palm-reading",
+    keywords: [
+        "ai palm reading",
+        "smart murti palm reading",
+        "palmistry ai",
+        "spiritual palm reading",
+    ],
+});
 
 export default function PalmReadingPage() {
     return (

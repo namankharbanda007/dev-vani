@@ -3,6 +3,20 @@ import ClientPage from "./ClientPage";
 import { Suspense } from "react";
 import { getSimpleUserById } from "@/db/users";
 import type { UserProfileData } from "@/app/types/UserProfileData";
+import { buildMetadata } from "@/app/lib/seo";
+
+export const metadata = buildMetadata({
+    title: "AI Astrologer",
+    description:
+        "Talk to SMART Murti's AI astrologer for spiritual guidance, horoscope support, and personalized astrology conversations.",
+    path: "/astrologer",
+    keywords: [
+        "ai astrologer",
+        "vedic astrology ai",
+        "smart murti astrologer",
+        "online astrology chat",
+    ],
+});
 
 export default async function AstrologerCallPage() {
     const supabase = createClient();

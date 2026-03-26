@@ -1,13 +1,60 @@
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Sparkles, Heart, Shield, Zap } from "lucide-react";
 import PreorderForm from "@/app/components/PreorderForm";
+import { absoluteUrl, buildMetadata } from "@/app/lib/seo";
+
+export const metadata = buildMetadata({
+    title: "Smart Pandit",
+    description:
+        "Pre-order Smart Pandit, SMART Murti's AI spiritual guide for guided puja, mantra recitation, and devotional conversations at home.",
+    path: "/products/smart-pandit",
+    keywords: [
+        "smart pandit",
+        "ai pandit device",
+        "guided puja device",
+        "devotional ai hardware",
+    ],
+    images: ["/products/smart-pandit-home.webp"],
+});
+
+const smartPanditJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "Smart Pandit",
+    description:
+        "AI spiritual guide for guided puja, mantra recitation, and devotional conversations at home.",
+    brand: {
+        "@type": "Brand",
+        name: "SMART Murti",
+    },
+    category: "AI devotional device",
+    image: [absoluteUrl("/products/smart-pandit-home.webp")],
+    url: absoluteUrl("/products/smart-pandit"),
+    offers: {
+        "@type": "Offer",
+        priceCurrency: "INR",
+        price: "5000",
+        availability: "https://schema.org/PreOrder",
+        itemCondition: "https://schema.org/NewCondition",
+        url: absoluteUrl("/products/smart-pandit"),
+    },
+};
 
 export default function SmartPanditPage() {
     return (
-        <div className="flex min-h-screen flex-col bg-gradient-to-b from-amber-50 via-yellow-50 to-white">
-            <main className="flex-1">
+        <>
+            <Script
+                id="smart-pandit-schema"
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify(smartPanditJsonLd),
+                }}
+            />
+            <div className="flex min-h-screen flex-col bg-gradient-to-b from-amber-50 via-yellow-50 to-white">
+                <main className="flex-1">
                 <section className="relative w-full overflow-hidden bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-50 py-12 md:py-32">
                     <div className="absolute inset-0 opacity-20">
                         <div className="absolute left-10 top-20 h-96 w-96 rounded-full bg-amber-300 blur-3xl" />
@@ -118,7 +165,8 @@ export default function SmartPanditPage() {
                         </div>
                     </div>
                 </section>
-            </main>
-        </div>
+                </main>
+            </div>
+        </>
     );
 }

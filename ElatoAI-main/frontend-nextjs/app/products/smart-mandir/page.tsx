@@ -1,13 +1,60 @@
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Sparkles, Music, Home, Check, Flame } from "lucide-react";
 import PreorderForm from "@/app/components/PreorderForm";
+import { absoluteUrl, buildMetadata } from "@/app/lib/seo";
+
+export const metadata = buildMetadata({
+    title: "Smart Mandir",
+    description:
+        "Discover Smart Mandir, SMART Murti's AI-powered home temple experience with devotional audio, guided rituals, and interactive spiritual support.",
+    path: "/products/smart-mandir",
+    keywords: [
+        "smart mandir",
+        "ai home temple",
+        "connected mandir",
+        "devotional home temple",
+    ],
+    images: ["/products/smart-mandir.webp"],
+});
+
+const smartMandirJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "Smart Mandir",
+    description:
+        "AI-powered home temple experience with devotional audio, guided rituals, and interactive spiritual support.",
+    brand: {
+        "@type": "Brand",
+        name: "SMART Murti",
+    },
+    category: "AI-powered home temple",
+    image: [absoluteUrl("/products/smart-mandir.webp")],
+    url: absoluteUrl("/products/smart-mandir"),
+    offers: {
+        "@type": "Offer",
+        priceCurrency: "INR",
+        price: "6499",
+        availability: "https://schema.org/PreOrder",
+        itemCondition: "https://schema.org/NewCondition",
+        url: absoluteUrl("/products/smart-mandir"),
+    },
+};
 
 export default function SmartMandirPage() {
     return (
-        <div className="flex min-h-screen flex-col bg-gradient-to-b from-orange-50 via-red-50 to-white">
-            <main className="flex-1">
+        <>
+            <Script
+                id="smart-mandir-schema"
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify(smartMandirJsonLd),
+                }}
+            />
+            <div className="flex min-h-screen flex-col bg-gradient-to-b from-orange-50 via-red-50 to-white">
+                <main className="flex-1">
                 <section className="relative w-full overflow-hidden bg-gradient-to-br from-orange-100 via-red-50 to-amber-50 py-12 md:py-32">
                     <div className="absolute inset-0 opacity-20">
                         <div className="absolute left-10 top-20 h-96 w-96 rounded-full bg-orange-300 blur-3xl" />
@@ -155,7 +202,8 @@ export default function SmartMandirPage() {
                         </div>
                     </div>
                 </section>
-            </main>
-        </div>
+                </main>
+            </div>
+        </>
     );
 }

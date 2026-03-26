@@ -19,7 +19,12 @@ import {
 } from "@speechmatics/expo-two-way-audio";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { createGeminiLiveSession, type GeminiLiveSession } from "../lib/geminiLive";
-import { getGuideDisplaySubtitle, getGuideImageAsset, getGuideSessionConfig } from "../lib/smartMurtiApi";
+import {
+  buildLiveOpeningTurn,
+  getGuideDisplaySubtitle,
+  getGuideImageAsset,
+  getGuideSessionConfig,
+} from "../lib/smartMurtiApi";
 import { downsamplePcm16, clampAudioLevel } from "../lib/audioUtils";
 import { Personality } from "../models/types";
 import { colors } from "../theme/colors";
@@ -51,6 +56,8 @@ export function LiveCallScreen({
   const mutedRef = useRef(false);
   const speakingRef = useRef(false);
   const mountedRef = useRef(true);
+  const userActivityRef = useRef(false);
+  const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const guideDescription = useMemo(
     () =>
@@ -66,6 +73,10 @@ export function LiveCallScreen({
   }, []);
 
   const stopNativeAudio = useCallback(() => {
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current);
+      silenceTimeoutRef.current = null;
+    }
     try {
       toggleRecording(false);
     } catch {}
@@ -75,6 +86,7 @@ export function LiveCallScreen({
     } catch {}
 
     speakingRef.current = false;
+    userActivityRef.current = false;
     if (mountedRef.current) {
       setInputLevel(0.08);
       setOutputLevel(0.08);
@@ -113,11 +125,29 @@ export function LiveCallScreen({
       }
 
       if (level > 0.08) {
+        if (!userActivityRef.current) {
+          userActivityRef.current = true;
+          liveSessionRef.current?.startActivity();
+        }
+        if (silenceTimeoutRef.current) {
+          clearTimeout(silenceTimeoutRef.current);
+          silenceTimeoutRef.current = null;
+        }
         if (!speakingRef.current) {
           setStatusText("Listening...");
         }
-      } else if (!speakingRef.current) {
-        setStatusText("Listening...");
+      } else {
+        if (userActivityRef.current && !silenceTimeoutRef.current) {
+          silenceTimeoutRef.current = setTimeout(() => {
+            liveSessionRef.current?.endActivity();
+            userActivityRef.current = false;
+            silenceTimeoutRef.current = null;
+          }, 420);
+        }
+
+        if (!speakingRef.current) {
+          setStatusText("Listening...");
+        }
       }
     }, [])
   );
@@ -211,10 +241,7 @@ export function LiveCallScreen({
 
       toggleRecording(true);
       updateStatus("Listening...");
-      session.sendTextTurn(
-        guideSession.openingLine ||
-          "Begin this call with a short devotional welcome and invite the devotee to speak."
-      );
+      session.sendTextTurn(buildLiveOpeningTurn(guideSession.openingLine, "the devotee", "call"));
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not start the live call.");
       liveSessionRef.current?.close();
@@ -238,6 +265,15 @@ export function LiveCallScreen({
     try {
       toggleRecording(!nextMuted);
     } catch {}
+
+    if (nextMuted && userActivityRef.current) {
+      liveSessionRef.current?.endActivity();
+      userActivityRef.current = false;
+      if (silenceTimeoutRef.current) {
+        clearTimeout(silenceTimeoutRef.current);
+        silenceTimeoutRef.current = null;
+      }
+    }
 
     updateStatus(nextMuted ? "Muted" : "Listening...");
   }, [updateStatus]);

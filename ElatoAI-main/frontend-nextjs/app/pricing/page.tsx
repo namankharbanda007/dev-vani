@@ -1,6 +1,20 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Wallet, MessageCircle, Phone, Sparkles, Star } from "lucide-react";
+import { buildMetadata } from "@/app/lib/seo";
+
+export const metadata = buildMetadata({
+    title: "Pricing",
+    description:
+        "View SMART Murti's prepaid wallet pricing for AI chat, AI call sessions, horoscope readings, and spiritual guidance experiences.",
+    path: "/pricing",
+    keywords: [
+        "smart murti pricing",
+        "ai pandit pricing",
+        "ai astrologer pricing",
+        "horoscope pricing",
+    ],
+});
 
 export default function PricingPage() {
     return (

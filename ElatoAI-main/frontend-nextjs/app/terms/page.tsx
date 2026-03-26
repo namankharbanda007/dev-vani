@@ -1,5 +1,13 @@
 
 import React from 'react';
+import { buildMetadata } from "@/app/lib/seo";
+
+export const metadata = buildMetadata({
+    title: "Terms and Conditions",
+    description:
+        "Read SMART Murti's terms and conditions for website, mobile app, and AI-enabled hardware devices.",
+    path: "/terms",
+});
 
 export default function TermsPage() {
     return (

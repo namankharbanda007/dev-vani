@@ -32,6 +32,7 @@ import DemoSession from "@/app/landing-2/components/DemoSession";
 import DivinationServices from "@/app/landing-2/components/DivinationServices";
 import WhatsappIntegration from "@/app/components/LandingPage/WhatsappIntegration";
 import YoutubeDemo from "@/app/components/LandingPage/YoutubeDemo";
+import { homeFaqs } from "@/app/lib/seo";
 
 const lenisOptions = {
     lerp: 0.1,
@@ -178,6 +179,41 @@ const trustCards = [
     },
 ];
 
+const platformOverviewItems = [
+    {
+        title: "AI Pandit Guidance",
+        description:
+            "Talk with a spiritual guide for puja support, mantra explanations, and devotional conversations.",
+        href: "/pandit",
+        icon: Sparkles,
+        accent: "bg-amber-100 text-amber-700",
+    },
+    {
+        title: "AI Astrology Tools",
+        description:
+            "Get horoscope insights, spiritual remedies, and live astrologer guidance built for daily practice.",
+        href: "/astrologer",
+        icon: Star,
+        accent: "bg-indigo-100 text-indigo-700",
+    },
+    {
+        title: "Bhajans and Ritual Audio",
+        description:
+            "Stream devotional music, aartis, and immersive audio experiences for your home and personal routine.",
+        href: "/bhajan",
+        icon: Music,
+        accent: "bg-orange-100 text-orange-700",
+    },
+    {
+        title: "Connected Devotional Products",
+        description:
+            "Explore Smart Pandit, Smart Base, and Smart Mandir for AI-powered home temple experiences.",
+        href: "/products",
+        icon: BookOpen,
+        accent: "bg-rose-100 text-rose-700",
+    },
+];
+
 export default function RootHomePage() {
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -227,9 +263,11 @@ export default function RootHomePage() {
                     <DemoSection onStartDemo={handleStartDemo} />
                     <DivinationServices />
                     <DailyAshramSection />
+                    <PlatformOverviewSection />
                     <LanguageSection />
                     <WhatsappIntegration />
                     <HowItWorksSection />
+                    <FaqSection />
                     <TrustSection />
                     <section
                         id="contact"
@@ -611,6 +649,55 @@ function DailyAshramSection() {
     );
 }
 
+function PlatformOverviewSection() {
+    return (
+        <section className="w-full bg-white py-16 md:py-24">
+            <div className="container mx-auto max-w-screen-xl px-4 md:px-6">
+                <div className="mx-auto mb-12 max-w-3xl text-center">
+                    <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">
+                        What SMART Murti Does
+                    </p>
+                    <h2 className="mb-6 font-lora text-4xl font-bold text-gray-900 md:text-5xl">
+                        One devotional ecosystem for prayer, guidance, astrology, and ritual support
+                    </h2>
+                    <p className="text-lg leading-relaxed text-gray-700">
+                        SMART Murti brings together AI spiritual conversations, guided puja help,
+                        horoscope and astrology experiences, devotional audio, and connected home
+                        temple products for families and individual daily practice.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    {platformOverviewItems.map((item) => {
+                        const Icon = item.icon;
+
+                        return (
+                            <Link
+                                key={item.title}
+                                href={item.href}
+                                className="group rounded-3xl border border-gray-100 bg-gradient-to-br from-white to-amber-50/40 p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                            >
+                                <div className={`mb-5 inline-flex rounded-2xl p-4 ${item.accent}`}>
+                                    <Icon className="h-7 w-7" />
+                                </div>
+                                <h3 className="mb-3 text-2xl font-bold text-gray-900">
+                                    {item.title}
+                                </h3>
+                                <p className="mb-4 text-base leading-relaxed text-gray-700">
+                                    {item.description}
+                                </p>
+                                <span className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">
+                                    Explore
+                                </span>
+                            </Link>
+                        );
+                    })}
+                </div>
+            </div>
+        </section>
+    );
+}
+
 function LanguageSection() {
     return (
         <section className="w-full py-12 md:py-20 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 relative overflow-hidden">
@@ -801,6 +888,38 @@ function TrustSection() {
                             </div>
                         );
                     })}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function FaqSection() {
+    return (
+        <section className="w-full bg-gradient-to-b from-purple-50 to-white py-16 md:py-24">
+            <div className="container mx-auto max-w-screen-lg px-4 md:px-6">
+                <div className="mx-auto mb-12 max-w-3xl text-center">
+                    <h2 className="mb-4 font-lora text-4xl font-bold text-gray-900 md:text-5xl">
+                        Frequently Asked Questions
+                    </h2>
+                    <p className="text-lg text-gray-700">
+                        Clear answers for people and AI systems trying to understand what SMART
+                        Murti offers.
+                    </p>
+                </div>
+
+                <div className="space-y-4">
+                    {homeFaqs.map((faq) => (
+                        <article
+                            key={faq.question}
+                            className="rounded-3xl border border-purple-100 bg-white p-6 shadow-sm md:p-8"
+                        >
+                            <h3 className="mb-3 text-xl font-bold text-gray-900">
+                                {faq.question}
+                            </h3>
+                            <p className="leading-relaxed text-gray-700">{faq.answer}</p>
+                        </article>
+                    ))}
                 </div>
             </div>
         </section>

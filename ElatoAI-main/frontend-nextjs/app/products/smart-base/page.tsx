@@ -1,13 +1,60 @@
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Sparkles, Zap, Check } from "lucide-react";
 import PreorderForm from "@/app/components/PreorderForm";
+import { absoluteUrl, buildMetadata } from "@/app/lib/seo";
+
+export const metadata = buildMetadata({
+    title: "Smart Base",
+    description:
+        "Explore Smart Base, SMART Murti's devotional smart base that upgrades your existing murti with guided rituals, audio, and spiritual support.",
+    path: "/products/smart-base",
+    keywords: [
+        "smart base",
+        "smart murti base",
+        "home murti upgrade",
+        "devotional smart base",
+    ],
+    images: ["/products/smart-base.webp"],
+});
+
+const smartBaseJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "Smart Base",
+    description:
+        "Smart devotional base that upgrades an existing murti with audio, guided rituals, and spiritual guidance.",
+    brand: {
+        "@type": "Brand",
+        name: "SMART Murti",
+    },
+    category: "Connected devotional hardware",
+    image: [absoluteUrl("/products/smart-base.webp")],
+    url: absoluteUrl("/products/smart-base"),
+    offers: {
+        "@type": "Offer",
+        priceCurrency: "INR",
+        price: "5000",
+        availability: "https://schema.org/PreOrder",
+        itemCondition: "https://schema.org/NewCondition",
+        url: absoluteUrl("/products/smart-base"),
+    },
+};
 
 export default function SmartBasePage() {
     return (
-        <div className="flex min-h-screen flex-col bg-gradient-to-b from-purple-50 via-indigo-50 to-white">
-            <main className="flex-1">
+        <>
+            <Script
+                id="smart-base-schema"
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify(smartBaseJsonLd),
+                }}
+            />
+            <div className="flex min-h-screen flex-col bg-gradient-to-b from-purple-50 via-indigo-50 to-white">
+                <main className="flex-1">
                 <section className="relative w-full overflow-hidden bg-gradient-to-br from-purple-100 via-indigo-50 to-violet-50 py-12 md:py-32">
                     <div className="absolute inset-0 opacity-20">
                         <div className="absolute left-10 top-20 h-96 w-96 rounded-full bg-purple-300 blur-3xl"></div>
@@ -214,7 +261,8 @@ export default function SmartBasePage() {
                         </div>
                     </div>
                 </section>
-            </main>
-        </div>
+                </main>
+            </div>
+        </>
     );
 }

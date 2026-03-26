@@ -1,5 +1,4 @@
 import { GeistSans } from "geist/font/sans";
-import { Product, WithContext } from "schema-dts";
 import {
     Inter,
     Baloo_2,
@@ -23,6 +22,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { getUserById } from "@/db/users";
 import TawkToScript from "@/app/components/TawkToScript";
 import LayoutWrapper from "@/app/components/LayoutWrapper";
+import { absoluteUrl, siteConfig } from "@/app/lib/seo";
 
 const karla = Karla({
     subsets: ["latin"],
@@ -97,70 +97,56 @@ const luckiestGuy = Luckiest_Guy({
 
 const fonts = `${inter.variable} ${interTight.variable} ${baloo2.variable} ${comicNeue.variable} ${quicksand.variable} ${fredoka.variable} ${lora.variable} ${karla.variable} ${borel.variable} ${silkscreen.variable} ${luckiestGuy.variable}`;
 
-const siteUrl = "https://smartmurti.com";
-
 export const metadata: Metadata = {
-    metadataBase: new URL(siteUrl),
+    metadataBase: new URL(siteConfig.url),
     title: {
-        default: "SMART मूर्ति: World's First Devotional Ecosystem",
-        template: "%s | SMART मूर्ति: World's First Devotional Ecosystem",
+        default: siteConfig.name,
+        template: `%s | ${siteConfig.name}`,
     },
-    applicationName: "SMART मूर्ति",
-    description:
-        "SMART मूर्ति is the world's first devotional ecosystem that brings Murti to life with AI-powered interactive experiences, fostering spiritual growth and connection.",
+    applicationName: siteConfig.name,
+    description: siteConfig.description,
     authors: [
         {
             name: "Naman Kharbanda",
-            url: `${siteUrl}/about`,
+            url: siteConfig.url,
         },
     ],
-    keywords: [
-        "AI bhagwan",
-        "AI bhagwan murti",
-        "AI smart murti",
-        "smart murti",
-        "ai krishna",
-        "ai ram bhagwan",
-        "emotional growth",
-        "Smart Murti AI",
-        "conversational AI",
-        "google home",
-        "amazon echo",
-        "smart speaker",
-        "AI speaker",
-        "emotional support",
-        "AI for adults",
-        "AI assistant",
-        "smart AI device",
-    ],
+    keywords: [...siteConfig.keywords],
     openGraph: {
-        title: "SMART मूर्ति: World's First Devotional Ecosystem",
-        description:
-            "SMART मूर्ति brings Murti to life through engaging, conversational AI experiences. More than a device, it's your gateway to a world where AI brings spirituality to life.",
-        siteName: "SMART मूर्ति",
-        locale: "en-US",
+        title: siteConfig.name,
+        description: siteConfig.description,
+        url: siteConfig.url,
+        siteName: siteConfig.name,
+        locale: siteConfig.locale,
         type: "website",
         images: [
             {
-                url: `${siteUrl}/logos/smartmurti-icon.jpg`,
+                url: absoluteUrl(siteConfig.defaultOgImage),
                 width: 1200,
                 height: 630,
-                alt: "SMART मूर्ति - AI Devotional Ecosystem",
+                alt: `${siteConfig.name} - AI devotional ecosystem`,
             },
         ],
     },
     robots: {
         index: true,
         follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+            "max-video-preview": -1,
+        },
     },
     generator: "Next.js",
-    creator: "SMART मूर्ति Team",
-    publisher: "SMART मूर्ति Ltd.",
+    creator: siteConfig.creator,
+    publisher: siteConfig.publisher,
     alternates: {
-        canonical: siteUrl,
+        canonical: siteConfig.url,
         languages: {
-            "en-US": siteUrl,
-            "hi-IN": siteUrl,
+            "en-US": siteConfig.url,
+            "hi-IN": siteConfig.url,
         },
     },
     icons: {
@@ -169,22 +155,23 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "SMART मूर्ति - An AI-powered device that brings Murti to life through engaging, conversational experiences",
-        description:
-            "More than a device, SMART मूर्ति is your gateway to a world where AI brings spirituality to life through engaging learning and interactive experiences.",
-        images: [`${siteUrl}/logos/smartmurti-icon.jpg`],
+        title: siteConfig.name,
+        description: siteConfig.description,
+        images: [absoluteUrl(siteConfig.defaultOgImage)],
     },
-    assets: `${siteUrl}/images`,
+    assets: absoluteUrl("/images"),
     formatDetection: {
         telephone: false,
+        email: false,
+        address: false,
     },
     appleWebApp: {
         capable: true,
-        title: "SMART मूर्ति",
+        title: siteConfig.name,
         statusBarStyle: "black-translucent",
     },
-    category: "AI device",
-    classification: "Interactive, conversational AI Devices",
+    category: "Spiritual technology",
+    classification: "AI devotional platform",
 };
 
 export const viewport: Viewport = {
@@ -193,106 +180,62 @@ export const viewport: Viewport = {
     maximumScale: 1,
 };
 
-const jsonLd: WithContext<Product> = {
+const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Product",
-    name: "SMART मूर्ति",
-    description:
-        "SMART मूर्ति is an AI-enabled device that brings murti to life through conversational AI. More than a device, it's your gateway to a world where AI brings spirituality to life.",
-    brand: {
-        "@type": "Brand",
-        name: "SMART मूर्ति",
-    },
-    offers: {
-        "@type": "Offer",
-        url: siteUrl,
-        priceCurrency: "USD",
-        price: "57.99",
-        priceValidUntil: "2025-12-31",
-        availability: "https://schema.org/InStock",
-        seller: {
+    "@graph": [
+        {
             "@type": "Organization",
-            name: "SMART मूर्ति Ltd.",
-        },
-        hasMerchantReturnPolicy: {
-            "@type": "MerchantReturnPolicy",
-            returnPolicyCategory:
-                "https://schema.org/MerchantReturnUnspecified",
-            merchantReturnDays: 30,
-        },
-        shippingDetails: {
-            "@type": "OfferShippingDetails",
-            shippingDestination: {
-                "@type": "DefinedRegion",
-                name: "Worldwide",
-            },
-            shippingRate: {
-                "@type": "MonetaryAmount",
-                value: "0.00",
-                currency: "USD",
-            },
-        },
-    },
-    aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "4.9",
-        reviewCount: "14",
-    },
-    review: [
-        {
-            "@type": "Review",
-            author: {
-                "@type": "Person",
-                name: "Kai L.",
-            },
-            reviewRating: {
-                "@type": "Rating",
-                ratingValue: "5",
-            },
-            reviewBody:
-                "I wished to have a toy for my friends kids, chatting just for fun ... and hearing all is 'out-of-the-.box' is a unbelievable awesome",
+            "@id": absoluteUrl("/#organization"),
+            name: siteConfig.name,
+            alternateName: siteConfig.alternateName,
+            url: siteConfig.url,
+            logo: absoluteUrl(siteConfig.defaultOgImage),
+            description: siteConfig.description,
+            knowsAbout: [
+                "AI spiritual guidance",
+                "Guided puja",
+                "Vedic astrology",
+                "Bhajans and devotional audio",
+                "Connected home temple products",
+            ],
         },
         {
-            "@type": "Review",
-            author: {
-                "@type": "Person",
-                name: "Lauren A. W.",
+            "@type": "WebSite",
+            "@id": absoluteUrl("/#website"),
+            url: siteConfig.url,
+            name: siteConfig.name,
+            alternateName: siteConfig.alternateName,
+            description: siteConfig.description,
+            publisher: {
+                "@id": absoluteUrl("/#organization"),
             },
-            reviewRating: {
-                "@type": "Rating",
-                ratingValue: "5",
-            },
-            reviewBody:
-                "I want to make my mother happy. I think this box will really help!",
+            inLanguage: ["en", "hi"],
         },
         {
-            "@type": "Review",
-            author: {
-                "@type": "Person",
-                name: "Steven Z.",
+            "@type": "CollectionPage",
+            "@id": absoluteUrl("/#collection-page"),
+            url: siteConfig.url,
+            name: siteConfig.name,
+            description: siteConfig.description,
+            isPartOf: {
+                "@id": absoluteUrl("/#website"),
             },
-            reviewRating: {
-                "@type": "Rating",
-                ratingValue: "5",
-            },
-            reviewBody: "this is fantastic, extremely useful. Thanks so much.",
-        },
-        {
-            "@type": "Review",
-            author: {
-                "@type": "Person",
-                name: "Big cube",
-            },
-            reviewRating: {
-                "@type": "Rating",
-                ratingValue: "4.5",
-            },
-            reviewBody:
-                "Really cool project you've got going on, hoping one day it might use a local llm",
+            about: [
+                {
+                    "@type": "Thing",
+                    name: "AI devotional ecosystem",
+                },
+                {
+                    "@type": "Thing",
+                    name: "Spiritual guidance",
+                },
+                {
+                    "@type": "Thing",
+                    name: "Vedic astrology",
+                },
+            ],
         },
     ],
-    image: `${siteUrl}/logos/smartmurti-icon.jpg`,
-    category: "Interactive AI Device",
 };
 
 export default async function RootLayout({
@@ -315,16 +258,15 @@ export default async function RootLayout({
             suppressHydrationWarning
         >
             <head>
-                <link rel="canonical" href={siteUrl} />
                 <Script
-                    id="product-schema"
+                    id="site-schema"
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{
                         __html: JSON.stringify(jsonLd),
                     }}
                 />
             </head>
-            <body className="bg-background text-foreground flex flex-col min-h-screen bg-gray-50 font-karla">
+            <body className="bg-background text-foreground flex min-h-screen flex-col bg-gray-50 font-karla">
                 <NextTopLoader showSpinner={false} color="#facc15" />
                 <LayoutWrapper user={dbUser ?? null}>{children}</LayoutWrapper>
                 <Toaster />

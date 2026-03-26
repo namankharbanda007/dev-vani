@@ -2,6 +2,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Sparkles, Zap, Home } from "lucide-react";
+import { buildMetadata } from "@/app/lib/seo";
+
+export const metadata = buildMetadata({
+    title: "Products",
+    description:
+        "Explore SMART Murti products including Smart Pandit, Smart Base, and Smart Mandir for AI-powered spiritual guidance and connected home worship.",
+    path: "/products",
+    keywords: [
+        "smart murti products",
+        "smart pandit",
+        "smart base",
+        "smart mandir",
+        "ai devotional device",
+    ],
+});
 
 export default function ProductsPage() {
     return (

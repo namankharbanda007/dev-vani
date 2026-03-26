@@ -1,5 +1,13 @@
 
 import React from 'react';
+import { buildMetadata } from "@/app/lib/seo";
+
+export const metadata = buildMetadata({
+    title: "Privacy Policy",
+    description:
+        "Read SMART Murti's privacy policy covering personal data, voice data, usage data, and how information is handled across the platform.",
+    path: "/privacy",
+});
 
 export default function PrivacyPage() {
     return (

@@ -1,13 +1,13 @@
-import { User } from "@supabase/supabase-js";
 import { Buffer } from "buffer";
+import { User } from "@supabase/supabase-js";
+
 import { supabase } from "./supabase";
 import { ChatMessage, DbUser, HoroscopePayload, Personality } from "../models/types";
-import * as FileSystem from "expo-file-system";
 
 const DEFAULT_PERSONALITY_ID = "a1c073e6-653d-40cf-acc1-891331689409";
 export const LIVE_PUJA_PANDIT_PERSONALITY_ID = "8cfaa34a-e887-41cd-b880-c0b6169bf9cd";
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-const GEMINI_MODELS = ["gemini-2.5-flash"];
+const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-1.5-flash"] as const;
 const SITE_ORIGIN = "https://www.smartmurti.com";
 const IMAGE_URL_PATTERN = /^https?:\/\/\S+/i;
 const SUPPORTED_GEMINI_LIVE_VOICES = new Set([
@@ -359,6 +359,28 @@ function getGuideOpeningLine(personality: PersonalityDetails) {
   );
 }
 
+export function buildLiveOpeningTurn(
+  openingLine: string | null | undefined,
+  participantName: string,
+  mode: "call" | "puja" = "call"
+) {
+  const normalizedName = participantName.trim() || "devotee";
+  const personalizedLine = (openingLine || "")
+    .replace(/\[(name|user)\]/gi, normalizedName)
+    .replace(/\{name\}/gi, normalizedName)
+    .trim();
+
+  if (personalizedLine) {
+    return mode === "puja"
+      ? `Begin the live puja now. Greet ${normalizedName} warmly and naturally. Use this opening style: "${personalizedLine}"`
+      : `Begin the live call now. Greet ${normalizedName} warmly and naturally. Use this opening style: "${personalizedLine}"`;
+  }
+
+  return mode === "puja"
+    ? `Begin the live puja now. Offer a short devotional welcome to ${normalizedName} and invite them to ask their question.`
+    : `Begin the live call now. Offer a short devotional welcome to ${normalizedName} and invite them to speak.`;
+}
+
 async function ensureDbUser(authUser: User): Promise<DbUser | null> {
   const client = requireSupabase();
 
@@ -599,21 +621,19 @@ export async function uploadCurrentUserAvatar(uri: string, mimeType?: string | n
 
   const extension = inferFileExtension(uri, mimeType);
   const filePath = `profile-photos/${authUser.id}-${Date.now()}.${extension}`;
-  const base64Data = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
   const resolvedMimeType = mimeType || `image/${extension}`;
-
-  // Decode base64 into a proper Uint8Array. The Buffer polyfill's output is
-  // not compatible with React Native's fetch() body serialization, which
-  // previously caused "Network request failed". Uint8Array works correctly.
-  const binaryString = atob(base64Data);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
+  const fileResponse = await fetch(uri);
+  if (!fileResponse.ok) {
+    throw new Error("Could not read the selected profile image.");
   }
+
+  const fileBuffer = await fileResponse.arrayBuffer();
+  const bytes = new Uint8Array(fileBuffer);
+  const base64Data = Buffer.from(bytes).toString("base64");
 
   const { error: uploadError } = await client.storage
     .from("avatars")
-    .upload(filePath, bytes.buffer, {
+    .upload(filePath, bytes, {
       contentType: resolvedMimeType,
       upsert: true,
     });

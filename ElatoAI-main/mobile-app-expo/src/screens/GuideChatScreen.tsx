@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState } from "react";
 import {
-  Animated,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
@@ -12,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Personality } from "../models/types";
 import { getGuideDisplaySubtitle, getGuideImageAsset, sendGuideMessage } from "../lib/smartMurtiApi";
 import { colors } from "../theme/colors";
@@ -40,6 +39,7 @@ export function GuideChatScreen({
   personality,
   onClose,
 }: GuideChatScreenProps) {
+  const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView | null>(null);
   const [input, setInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -199,7 +199,7 @@ export function GuideChatScreen({
 
           {submitting ? (
             <View style={[styles.messageBubble, styles.assistantBubble, styles.typingBubble]}>
-              <Text style={styles.typingDots}>• • •</Text>
+              <Text style={styles.typingDots}>...</Text>
             </View>
           ) : null}
 
@@ -210,7 +210,7 @@ export function GuideChatScreen({
           ) : null}
         </ScrollView>
 
-        <View style={styles.composerShell}>
+        <View style={[styles.composerShell, { paddingBottom: Math.max(insets.bottom, 14) }]}>
           <View style={styles.inputWrap}>
             <TextInput
               value={input}

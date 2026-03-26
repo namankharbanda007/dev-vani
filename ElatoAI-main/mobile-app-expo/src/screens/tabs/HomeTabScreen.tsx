@@ -71,7 +71,9 @@ export function HomeTabScreen({
   onRefresh,
 }: HomeTabScreenProps) {
   const homeGuides = filterHomeGuides(personalities);
-  const panditGuide = homeGuides.find((guide) => guide.title.toLowerCase().includes("pandit"));
+  const panditGuide =
+    homeGuides.find((guide) => guide.title.toLowerCase().trim() === "pandit ji") ||
+    homeGuides.find((guide) => guide.title.toLowerCase().includes("pandit"));
   const currentGuide =
     panditGuide ||
     homeGuides.find((guide) => guide.personality_id === dbUser?.personality_id) ||
