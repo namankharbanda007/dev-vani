@@ -127,6 +127,7 @@ export function LiveCallScreen({
       if (level > 0.08) {
         if (!userActivityRef.current) {
           userActivityRef.current = true;
+          liveSessionRef.current?.startActivity();
         }
         if (silenceTimeoutRef.current) {
           clearTimeout(silenceTimeoutRef.current);
@@ -138,6 +139,7 @@ export function LiveCallScreen({
       } else {
         if (userActivityRef.current && !silenceTimeoutRef.current) {
           silenceTimeoutRef.current = setTimeout(() => {
+            liveSessionRef.current?.endActivity();
             userActivityRef.current = false;
             silenceTimeoutRef.current = null;
           }, 420);
@@ -196,7 +198,6 @@ export function LiveCallScreen({
       );
       const session = await createGeminiLiveSession({
         systemInstruction: guideSession.systemInstruction,
-        apiKey: guideSession.geminiApiKey,
         voiceName: guideSession.voiceName,
         startupRetries: 2,
         callbacks: {
@@ -266,6 +267,7 @@ export function LiveCallScreen({
     } catch {}
 
     if (nextMuted && userActivityRef.current) {
+      liveSessionRef.current?.endActivity();
       userActivityRef.current = false;
       if (silenceTimeoutRef.current) {
         clearTimeout(silenceTimeoutRef.current);

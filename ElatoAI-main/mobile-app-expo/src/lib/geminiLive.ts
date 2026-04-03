@@ -82,6 +82,7 @@ async function parseWebSocketMessage(rawData: unknown) {
 
 export async function createGeminiLiveSession({
   systemInstruction,
+  apiKey,
   voiceName,
   responseModalities = ["AUDIO"],
   enableOutputTranscription = false,
@@ -89,13 +90,15 @@ export async function createGeminiLiveSession({
   callbacks,
 }: {
   systemInstruction: string;
+  apiKey?: string | null;
   voiceName?: string | null;
   responseModalities?: Array<"AUDIO" | "TEXT">;
   enableOutputTranscription?: boolean;
   startupRetries?: number;
   callbacks?: GeminiLiveSessionCallbacks;
 }): Promise<GeminiLiveSession> {
-  if (!GEMINI_LIVE_API_KEY) {
+  const resolvedApiKey = apiKey?.trim() || GEMINI_LIVE_API_KEY;
+  if (!resolvedApiKey) {
     throw new Error("Gemini API key is not configured for live calls.");
   }
 
@@ -104,7 +107,7 @@ export async function createGeminiLiveSession({
 
   const connectOnce = () =>
     new Promise<GeminiLiveSession>((resolve, reject) => {
-      const ws = new WebSocket(`${GEMINI_LIVE_URI}?key=${GEMINI_LIVE_API_KEY}`);
+      const ws = new WebSocket(`${GEMINI_LIVE_URI}?key=${resolvedApiKey}`);
       let setupComplete = false;
       let closed = false;
 
@@ -219,30 +222,13 @@ export async function createGeminiLiveSession({
                 );
               },
               startActivity: () => {
-                if (!ensureSessionReady()) {
-                  return;
-                }
-
-                ws.send(
-                  JSON.stringify({
-                    realtime_input: {
-                      activity_start: {},
-                    },
-                  })
-                );
+                // The Smart Murti web runtime relies on Gemini's automatic
+                // activity detection for native-audio sessions. Sending
+                // manual activity markers on that session shape causes
+                // unstable follow-up turns, so mobile keeps these as no-ops.
               },
               endActivity: () => {
-                if (!ensureSessionReady()) {
-                  return;
-                }
-
-                ws.send(
-                  JSON.stringify({
-                    realtime_input: {
-                      activity_end: {},
-                    },
-                  })
-                );
+                // See startActivity comment above.
               },
               close: () => {
                 if (closed) {

@@ -7,7 +7,7 @@ import { ChatMessage, DbUser, HoroscopePayload, Personality } from "../models/ty
 const DEFAULT_PERSONALITY_ID = "a1c073e6-653d-40cf-acc1-891331689409";
 export const LIVE_PUJA_PANDIT_PERSONALITY_ID = "8cfaa34a-e887-41cd-b880-c0b6169bf9cd";
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"] as const;
+const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-1.5-flash"] as const;
 const SITE_ORIGIN = "https://www.smartmurti.com";
 export const LIVEKIT_SERVER_URL =
   process.env.EXPO_PUBLIC_LIVEKIT_URL || "wss://smart-murti-u1cpnjeh.livekit.cloud";
@@ -123,37 +123,6 @@ async function getSession() {
   } = await client.auth.getSession();
 
   return session;
-}
-
-async function getSiteAuthHeaders(extraHeaders?: Record<string, string>) {
-  const session = await getSession();
-  const token = session?.access_token;
-
-  return {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...extraHeaders,
-  };
-}
-
-async function fetchSiteJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers = await getSiteAuthHeaders({
-    ...(init?.body && !(init.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
-    ...(init?.headers as Record<string, string> | undefined),
-  });
-
-  const response = await fetch(`${SITE_ORIGIN}${path}`, {
-    ...init,
-    headers,
-  });
-
-  const payload = await response.json().catch(() => null);
-  if (!response.ok) {
-    throw new Error(
-      payload?.error || payload?.message || `Request failed with status ${response.status}`
-    );
-  }
-
-  return payload as T;
 }
 
 function extractGeminiText(payload: any) {
@@ -520,25 +489,57 @@ export async function fetchCurrentUserBundle() {
     throw new Error("Not authenticated");
   }
 
-  const payload = await fetchSiteJson<{ dbUser: DbUser | null }>("/api/mobile/bootstrap");
+  const dbUser = await ensureDbUser(user);
 
   return {
     authUser: user,
-    dbUser: payload.dbUser,
+    dbUser,
   };
 }
 
-export async function fetchMobileBootstrap() {
-  const payload = await fetchSiteJson<{ dbUser: DbUser | null; personalities: Personality[] }>(
-    "/api/mobile/bootstrap"
+export async function fetchFaithPersonalities() {
+  const client = requireSupabase();
+  const authUser = await getAuthUser();
+
+  const { data: premadeData, error: premadeError } = await client
+    .from("personalities")
+    .select(
+      "personality_id,title,subtitle,short_description,provider,creator_id,key,oai_voice,character_prompt,voice_prompt,first_message_prompt"
+    )
+    .is("creator_id", null)
+    .order("created_at", { ascending: false });
+
+  if (premadeError) {
+    throw new Error(premadeError.message);
+  }
+
+  let customData: Personality[] = [];
+  if (authUser?.id) {
+    const { data, error } = await client
+      .from("personalities")
+      .select(
+        "personality_id,title,subtitle,short_description,provider,creator_id,key,oai_voice,character_prompt,voice_prompt,first_message_prompt"
+      )
+      .eq("creator_id", authUser.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.warn("Could not load custom guides", error.message);
+    } else {
+      customData = (data as Personality[]) ?? [];
+    }
+  }
+
+  const mergedCatalog = [...customData, ...((premadeData as Personality[]) ?? []).filter(
+    (item) => !HIDDEN_PERSONALITIES.has(item.title)
+  )];
+
+  const deduped = mergedCatalog.filter(
+    (guide, index, list) =>
+      list.findIndex((candidate) => candidate.personality_id === guide.personality_id) === index
   );
 
-  return payload;
-}
-
-export async function fetchFaithPersonalities() {
-  const payload = await fetchMobileBootstrap();
-  return sortGuideCatalog(payload.personalities ?? []);
+  return sortGuideCatalog(deduped);
 }
 
 export async function updateCurrentUserProfile(values: {
@@ -551,49 +552,163 @@ export async function updateCurrentUserProfile(values: {
   rashi?: string;
   language_code?: string;
 }) {
-  await fetchSiteJson("/api/mobile/profile", {
-    method: "POST",
-    body: JSON.stringify(values),
-  });
+  const client = requireSupabase();
+  const authUser = await getAuthUser();
+
+  if (!authUser) {
+    throw new Error("Unauthorized");
+  }
+
+  const existing = await ensureDbUser(authUser);
+  const existingMetadata = getUserMetadata(existing);
+
+  const nextMetadata = {
+    ...existingMetadata,
+    birth_place: values.birth_place || "",
+    birth_date: values.birth_date || "",
+    birth_time: values.birth_time || "",
+    rashi: values.rashi || "",
+  };
+
+  const { error } = await client
+    .from("users")
+    .update({
+      supervisee_name: values.supervisee_name.trim(),
+      supervisee_age: values.supervisee_age,
+      supervisee_persona: values.supervisee_persona?.trim() || "",
+      language_code: values.language_code || existing?.language_code || "en-US",
+      user_info: {
+        user_type: "user",
+        user_metadata: nextMetadata,
+      },
+    })
+    .eq("user_id", authUser.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 
   return fetchCurrentUserBundle();
 }
 
 export async function updateCurrentUserLanguage(languageCode: string) {
-  await fetchSiteJson("/api/mobile/profile", {
-    method: "POST",
-    body: JSON.stringify({ language_code: languageCode }),
-  });
+  const client = requireSupabase();
+  const authUser = await getAuthUser();
+
+  if (!authUser) {
+    throw new Error("Unauthorized");
+  }
+
+  const { error } = await client
+    .from("users")
+    .update({ language_code: languageCode })
+    .eq("user_id", authUser.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 
   return fetchCurrentUserBundle();
 }
 
 export async function uploadCurrentUserAvatar(uri: string, mimeType?: string | null) {
+  const client = requireSupabase();
+  const authUser = await getAuthUser();
+
+  if (!authUser) {
+    throw new Error("Unauthorized");
+  }
+
+  await ensureDbUser(authUser);
+
   const extension = inferFileExtension(uri, mimeType);
+  const filePath = `profile-photos/${authUser.id}-${Date.now()}.${extension}`;
   const resolvedMimeType = mimeType || `image/${extension}`;
-  const formData = new FormData();
-  formData.append("file", {
-    uri,
-    name: `avatar.${extension}`,
-    type: resolvedMimeType,
-  } as any);
+  const fileResponse = await fetch(uri);
+  if (!fileResponse.ok) {
+    throw new Error("Could not read the selected profile image.");
+  }
 
-  const payload = await fetchSiteJson<{ avatarUrl: string }>("/api/mobile/avatar", {
-    method: "POST",
-    body: formData,
-  });
+  const fileBuffer = await fileResponse.arrayBuffer();
+  const bytes = new Uint8Array(fileBuffer);
+  const base64Data = Buffer.from(bytes).toString("base64");
 
-  return payload.avatarUrl;
+  const { error: uploadError } = await client.storage
+    .from("avatars")
+    .upload(filePath, bytes, {
+      contentType: resolvedMimeType,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.warn("Avatar upload failed, using data URI fallback", uploadError.message);
+  }
+
+  const avatarUrl = uploadError
+    ? `data:${resolvedMimeType};base64,${base64Data}`
+    : client.storage.from("avatars").getPublicUrl(filePath).data.publicUrl;
+
+  const { error: profileError } = await client
+    .from("users")
+    .update({ avatar_url: avatarUrl })
+    .eq("user_id", authUser.id);
+
+  if (profileError) {
+    throw new Error(profileError.message);
+  }
+
+  return avatarUrl;
 }
 
 export async function fetchHoroscope(sign: string, date: "Yesterday" | "Today" | "Tomorrow") {
   try {
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Calcutta";
-    return await fetchSiteJson<HoroscopePayload>(
-      `/api/horoscope/daily?sign=${encodeURIComponent(sign)}&date=${encodeURIComponent(
-        date
-      )}&timezone=${encodeURIComponent(timezone)}`
-    );
+    const authUser = await getAuthUser();
+    if (!authUser) {
+      throw new Error("Unauthorized");
+    }
+
+    const dbUser = await ensureDbUser(authUser);
+    const metadata = getUserMetadata(dbUser);
+    const prompt = `
+You are an expert Vedic astrologer for Smart Murti.
+Generate a daily horoscope for ${sign} for ${date} (${getDateLabel(date)}).
+
+User context:
+- Name: ${getDisplayName(authUser, dbUser)}
+- Birth date: ${metadata.birth_date || "Unknown"}
+- Birth time: ${metadata.birth_time || "Unknown"}
+- Birth place: ${metadata.birth_place || "Unknown"}
+- Rashi: ${metadata.rashi || "Unknown"}
+
+Return valid JSON with this exact structure:
+{
+  "mood": "single emoji",
+  "content": "2-3 sentence horoscope",
+  "lucky_number": "string",
+  "lucky_color": "string",
+  "lucky_time": "string",
+  "love": { "text": "string", "percentage": 0 },
+  "career": { "text": "string", "percentage": 0 },
+  "money": { "text": "string", "percentage": 0 },
+  "health": { "text": "string", "percentage": 0 },
+  "travel": { "text": "string", "percentage": 0 }
+}
+Keep it warm, specific, and practical.
+`;
+
+    const raw = await geminiGenerate({
+      systemInstruction: "You create clean, accurate horoscope JSON for Smart Murti users.",
+      message: prompt,
+      responseMimeType: "application/json",
+    });
+
+    const parsed = JSON.parse(raw) as Omit<HoroscopePayload, "date" | "sign">;
+
+    return {
+      date: getDateLabel(date),
+      sign,
+      ...parsed,
+    } as HoroscopePayload;
   } catch (error) {
     console.warn("Horoscope fallback used", error);
     return fallbackHoroscope(sign, date);
@@ -601,67 +716,100 @@ export async function fetchHoroscope(sign: string, date: "Yesterday" | "Today" |
 }
 
 export async function rechargeWallet(amount: number) {
-  return await fetchSiteJson<{ success: boolean; newBalance: number }>(
-    "/api/mobile/wallet/recharge",
-    {
-      method: "POST",
-      body: JSON.stringify({ amount }),
-    }
-  );
+  const client = requireSupabase();
+  const authUser = await getAuthUser();
+
+  if (!authUser) {
+    throw new Error("Unauthorized");
+  }
+
+  await ensureDbUser(authUser);
+
+  const { data: existing, error: fetchError } = await client
+    .from("users")
+    .select("wallet_balance")
+    .eq("user_id", authUser.id)
+    .single();
+
+  if (fetchError || !existing) {
+    throw new Error(fetchError?.message || "Unable to load wallet balance.");
+  }
+
+  const newBalance = Number(existing.wallet_balance ?? 0) + amount;
+
+  const { error: updateError } = await client
+    .from("users")
+    .update({ wallet_balance: newBalance })
+    .eq("user_id", authUser.id);
+
+  if (updateError) {
+    throw new Error(updateError.message);
+  }
+
+  const { error: transactionError } = await client.from("wallet_transactions").insert({
+    user_id: authUser.id,
+    type: "credit",
+    amount,
+    service_name: "Wallet Recharge",
+    status: "completed",
+  });
+
+  if (transactionError) {
+    console.warn("Wallet transaction log insert failed", transactionError.message);
+  }
+
+  return { success: true, newBalance };
 }
 
 export async function sendGuideMessage(message: string, messages: ChatMessage[], personalityId: string) {
+  const authUser = await getAuthUser();
+  if (!authUser) {
+    throw new Error("Unauthorized");
+  }
+
+  const dbUser = await ensureDbUser(authUser);
+  const personality = await fetchPersonalityDetails(personalityId);
   const history =
     messages[messages.length - 1]?.role === "user" &&
     messages[messages.length - 1]?.content.trim() === message.trim()
       ? messages.slice(0, -1)
       : messages;
 
-  return await fetchSiteJson<{ response: string }>("/api/chat", {
-    method: "POST",
-    body: JSON.stringify({
-      message,
-      messages: history.slice(-12),
-      personalityId,
-    }),
+  const systemInstruction = buildGuideSystemInstruction(authUser, dbUser, personality);
+
+  const response = await geminiGenerate({
+    systemInstruction,
+    history,
+    message,
   });
+
+  return { response };
 }
 
 export async function getGuideSessionConfig(
   personalityId: string,
   languageCodeOverride?: string | null
 ) {
-  const sessionConfig = await fetchSiteJson<{
-    provider: string;
-    system_prompt: string;
-    voice?: string | null;
-    live_voice?: string | null;
-    opening_line?: string | null;
-    live_model?: string | null;
-  }>(
-    `/api/session?personalityId=${encodeURIComponent(personalityId)}${
-      languageCodeOverride ? `&languageCode=${encodeURIComponent(languageCodeOverride)}` : ""
-    }`
-  );
-
-  const personality = await fetchPersonalityDetails(personalityId);
-  let geminiApiKey: string | undefined;
-  if (sessionConfig.provider === "gemini") {
-    const keyPayload = await fetchSiteJson<{ gemini_api_key: string }>("/api/voice/get-gemini-key", {
-      method: "POST",
-      body: JSON.stringify({ source: "mobile-app" }),
-    });
-    geminiApiKey = keyPayload.gemini_api_key;
+  const authUser = await getAuthUser();
+  if (!authUser) {
+    throw new Error("Unauthorized");
   }
 
+  const dbUser = await ensureDbUser(authUser);
+  const personality = await fetchPersonalityDetails(personalityId);
+
   return {
+    dbUser,
     personality,
-    voiceName: sessionConfig.live_voice || resolveGeminiLiveVoice(personality),
-    provider: sessionConfig.provider?.trim() || personality.provider?.trim() || "gemini",
-    openingLine: sessionConfig.opening_line || getGuideOpeningLine(personality),
-    systemInstruction: sessionConfig.system_prompt,
-    liveModel: sessionConfig.live_model,
-    geminiApiKey,
+    voiceName: resolveGeminiLiveVoice(personality),
+    provider: personality.provider?.trim() || "gemini",
+    openingLine: getGuideOpeningLine(personality),
+    systemInstruction: buildGuideSystemInstruction(
+      authUser,
+      dbUser,
+      personality,
+      languageCodeOverride
+    ),
   };
 }
 
@@ -711,13 +859,13 @@ export function getGuideDisplaySubtitle(personality: Personality) {
 
 export function getGuideShortTitle(personality: Personality | string) {
   const title = typeof personality === "string" ? personality : personality.title;
-  const matchedTitle = findWebsiteHomeGuideMatch(title);
+  const lowerTitle = title.toLowerCase();
 
-  if (matchedTitle === "pandit ji") {
+  if (findWebsiteHomeGuideMatch(lowerTitle) === "pandit ji" || lowerTitle.includes("pandit")) {
     return "Pandit Ji";
   }
 
-  if (matchedTitle === "the horoscope astrologer") {
+  if (findWebsiteHomeGuideMatch(lowerTitle) === "the horoscope astrologer" || lowerTitle.includes("astrolog")) {
     return "Astrologer";
   }
 

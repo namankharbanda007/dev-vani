@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getSupabaseForRouteAuth } from "@/utils/supabase/route-auth";
 
 function getOrigin(value: string | null) {
     if (!value) return null;
@@ -11,6 +12,7 @@ function getOrigin(value: string | null) {
 
 export async function POST(req: Request) {
     try {
+        const { user } = await getSupabaseForRouteAuth(req);
         const origin = getOrigin(req.headers.get('origin'));
         const refererOrigin = getOrigin(req.headers.get('referer'));
         const expectedOrigin = getOrigin(req.url);
@@ -19,7 +21,7 @@ export async function POST(req: Request) {
             expectedOrigin &&
             (origin === expectedOrigin || refererOrigin === expectedOrigin);
 
-        if (process.env.NODE_ENV === 'production' && !hasTrustedOrigin) {
+        if (process.env.NODE_ENV === 'production' && !hasTrustedOrigin && !user) {
             return NextResponse.json(
                 { error: 'Forbidden origin for Gemini key request' },
                 { status: 403 }

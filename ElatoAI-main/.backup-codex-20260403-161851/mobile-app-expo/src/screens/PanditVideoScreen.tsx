@@ -172,11 +172,11 @@ export function PanditVideoScreen({ personality, participantName, languageCode, 
     const level = clampAudioLevel(Number(event.data) || 0); setInputLevel(level);
     if (!callStartedRef.current || mutedRef.current) return;
     if (level > 0.08) {
-      if (!userActiveRef.current) { userActiveRef.current = true; }
+      if (!userActiveRef.current) { userActiveRef.current = true; liveSessionRef.current?.startActivity(); }
       if (silenceRef.current) clearTimeout(silenceRef.current);
       silenceRef.current = null;
     } else if (userActiveRef.current && !silenceRef.current) {
-      silenceRef.current = setTimeout(() => { userActiveRef.current = false; silenceRef.current = null; }, 420);
+      silenceRef.current = setTimeout(() => { liveSessionRef.current?.endActivity(); userActiveRef.current = false; silenceRef.current = null; }, 420);
     }
   }, []));
   useExpoTwoWayAudioEventListener("onOutputVolumeLevelData", useCallback((event) => {
@@ -196,7 +196,6 @@ export function PanditVideoScreen({ personality, participantName, languageCode, 
       const guide = await getGuideSessionConfig(personality.personality_id, languageCode);
       const session = await createGeminiLiveSession({
         systemInstruction: `${guide.systemInstruction}\n\nLIVE PUJA MODE:\nYou are leading a live family puja with ${participantName}. Speak in short, devotional voice responses.`,
-        apiKey: guide.geminiApiKey,
         voiceName: guide.voiceName,
         startupRetries: 2,
         callbacks: {
@@ -222,7 +221,7 @@ export function PanditVideoScreen({ personality, participantName, languageCode, 
   const toggleMute = useCallback(() => {
     const next = !mutedRef.current; mutedRef.current = next; setMuted(next);
     try { toggleRecording(!next); } catch {}
-    if (next && userActiveRef.current) { userActiveRef.current = false; }
+    if (next && userActiveRef.current) { liveSessionRef.current?.endActivity(); userActiveRef.current = false; }
     setStatusText(next ? "Muted" : "Pandit Ji is listening...");
   }, []);
   const shareInvite = useCallback(async () => { const link = buildLivePujaInviteLink(roomCode); await Share.share({ title: `${personality.title} live puja`, message: `Join our Smart Murti live puja room: ${link}`, url: link }); }, [personality.title, roomCode]);

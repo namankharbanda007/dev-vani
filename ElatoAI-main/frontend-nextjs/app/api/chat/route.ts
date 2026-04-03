@@ -1,13 +1,13 @@
-import { createClient } from "@/utils/supabase/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 import { getUserById } from "@/db/users";
 import { createSystemPrompt } from "@/app/lib/prompt-utils";
+import { getSupabaseForRouteAuth } from "@/utils/supabase/route-auth";
+import { getPersonalityById } from "@/db/personalities";
+import { buildGuideSystemInstruction } from "@/app/api/mobile/_lib";
 
 export async function POST(request: NextRequest) {
-    const supabase = createClient();
-
-    const { data: { user } } = await supabase.auth.getUser();
+    const { supabase, user } = await getSupabaseForRouteAuth(request);
     if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { message, messages } = await request.json();
+    const { message, messages, personalityId, languageCode } = await request.json();
 
     if (!message) {
         return NextResponse.json({ error: "Message is required" }, { status: 400 });
@@ -29,16 +29,27 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        // Generate the system prompt using the shared logic
-        const systemInstruction = await createSystemPrompt({
-            user: dbUser,
-            supabase,
-            timestamp: new Date().toISOString(),
-        });
+        const selectedPersonality =
+            personalityId && personalityId !== dbUser.personality_id
+                ? await getPersonalityById(supabase, personalityId)
+                : dbUser.personality;
+
+        const systemInstruction = selectedPersonality
+            ? buildGuideSystemInstruction(
+                user,
+                { ...dbUser, personality: selectedPersonality } as IUser,
+                selectedPersonality,
+                languageCode
+            )
+            : await createSystemPrompt({
+                user: dbUser,
+                supabase,
+                timestamp: new Date().toISOString(),
+            });
 
         const genAI = new GoogleGenerativeAI(apiKey);
         // Use the requested model or fallback
-        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview", systemInstruction });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", systemInstruction });
 
         // Convert previous messages to Gemini format if provided, or start fresh
         // Note: createSystemPrompt already includes recent chat history from DB in the instructions,
@@ -48,11 +59,13 @@ export async function POST(request: NextRequest) {
         // Let's rely on the client passing the current session history for immediate continuity,
         // and the system prompt for long-term / personality context.
 
+        const recentMessages = Array.isArray(messages) ? messages.slice(-12) : [];
+
         const chat = model.startChat({
-            history: messages?.map((m: any) => ({
+            history: recentMessages.map((m: any) => ({
                 role: m.role === 'user' ? 'user' : 'model',
                 parts: [{ text: m.content }],
-            })) || [],
+            })),
         });
 
         const result = await chat.sendMessage(message);
@@ -65,16 +78,16 @@ export async function POST(request: NextRequest) {
             user_id: user.id,
             content: message,
             role: "user",
-            personality_key: dbUser.personality?.key || "default", // Assuming we track this
-            personality_id: dbUser.personality_id // Fallback
+            personality_key: selectedPersonality?.key || dbUser.personality?.key || "default",
+            personality_id: selectedPersonality?.personality_id || dbUser.personality_id
         });
 
         const { error: aiMsgError } = await supabase.from("conversations").insert({
             user_id: user.id,
             content: text,
             role: "assistant",
-            personality_key: dbUser.personality?.key || "default",
-            personality_id: dbUser.personality_id
+            personality_key: selectedPersonality?.key || dbUser.personality?.key || "default",
+            personality_id: selectedPersonality?.personality_id || dbUser.personality_id
         });
 
         return NextResponse.json({ response: text });

@@ -16,7 +16,8 @@ import { Audio } from "expo-av";
 import { BottomTabBar, AppTab } from "../components/BottomTabBar";
 import { DbUser, Personality, BhajanTrack } from "../models/types";
 import {
-  fetchMobileBootstrap,
+  fetchCurrentUserBundle,
+  fetchFaithPersonalities,
   LIVE_PUJA_PANDIT_PERSONALITY_ID,
 } from "../lib/smartMurtiApi";
 import { colors } from "../theme/colors";
@@ -90,9 +91,13 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
   const loadBundle = useCallback(async () => {
     try {
       setError(null);
-      const payload = await fetchMobileBootstrap();
-      setDbUser(payload.dbUser);
-      setPersonalities(payload.personalities);
+      const [userBundle, faithPersonalities] = await Promise.all([
+        fetchCurrentUserBundle(),
+        fetchFaithPersonalities(),
+      ]);
+
+      setDbUser(userBundle.dbUser);
+      setPersonalities(faithPersonalities);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Failed to load Smart Murti.");
     } finally {

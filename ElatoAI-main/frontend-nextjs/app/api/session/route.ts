@@ -1,8 +1,15 @@
-import { createClient } from "@/utils/supabase/server";
 import { createClient as createSupabaseDirectClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { getUserById } from "@/db/users";
 import { createSystemPrompt } from "@/app/lib/prompt-utils";
+import { getSupabaseForRouteAuth } from "@/utils/supabase/route-auth";
+import {
+  buildGuideSystemInstruction,
+  GEMINI_LIVE_MODEL,
+  getGuideOpeningLine,
+  getPersonalityForSession,
+  resolveGeminiLiveVoice,
+} from "@/app/api/mobile/_lib";
 
 async function readUpstreamError(response: Response) {
   try {
@@ -29,7 +36,7 @@ export async function GET(request: NextRequest) {
     if (isGuest && personalityId) {
       return await handleGuestSession(personalityId, guestName, guestDob);
     } else {
-      return await handleAuthenticatedSession();
+      return await handleAuthenticatedSession(request);
     }
   } catch (error: any) {
     console.error("[Session API] Unhandled error:", error);
@@ -103,10 +110,14 @@ RESPONSE STYLE:
 
   if (personality.provider === "gemini") {
     console.log("[Session API] Returning gemini session data for guest");
+    const liveVoice = resolveGeminiLiveVoice(personality);
     return NextResponse.json({
       provider: "gemini",
       system_prompt: systemPrompt,
-      voice: personality.oai_voice,
+      voice: liveVoice,
+      live_voice: liveVoice,
+      opening_line: getGuideOpeningLine(personality),
+      live_model: GEMINI_LIVE_MODEL,
     });
   }
 
@@ -171,12 +182,8 @@ RESPONSE STYLE:
 }
 
 // ======== AUTHENTICATED SESSION (uses cookies) ========
-async function handleAuthenticatedSession() {
-  const supabase = createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+async function handleAuthenticatedSession(request: NextRequest) {
+  const { supabase, user } = await getSupabaseForRouteAuth(request);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -187,23 +194,44 @@ async function handleAuthenticatedSession() {
   }
 
   const openAiApiKey = process.env.OPENAI_API_KEY;
-  const geminiApiKey = process.env.GEMINI_API_KEY;
+  const requestedPersonalityId = request.nextUrl.searchParams.get("personalityId");
+  const requestedLanguageCode = request.nextUrl.searchParams.get("languageCode");
 
-  const systemPrompt = await createSystemPrompt({
-    user: dbUser,
-    supabase,
-    timestamp: new Date().toISOString(),
-  });
+  const selectedPersonality =
+    (await getPersonalityForSession(supabase, dbUser, requestedPersonalityId)) ||
+    dbUser.personality;
 
-  if (dbUser.personality?.provider === "gemini") {
+  if (!selectedPersonality) {
+    return NextResponse.json({ error: "Personality not found" }, { status: 404 });
+  }
+
+  const useOverridePrompt = Boolean(requestedPersonalityId || requestedLanguageCode);
+  const systemPrompt = useOverridePrompt
+    ? buildGuideSystemInstruction(
+        user,
+        { ...dbUser, personality: selectedPersonality } as IUser,
+        selectedPersonality,
+        requestedLanguageCode
+      )
+    : await createSystemPrompt({
+        user: dbUser,
+        supabase,
+        timestamp: new Date().toISOString(),
+      });
+
+  if (selectedPersonality.provider === "gemini") {
+    const liveVoice = resolveGeminiLiveVoice(selectedPersonality);
     return NextResponse.json({
       provider: "gemini",
       system_prompt: systemPrompt,
-      voice: dbUser.personality.oai_voice,
+      voice: liveVoice,
+      live_voice: liveVoice,
+      opening_line: getGuideOpeningLine(selectedPersonality),
+      live_model: GEMINI_LIVE_MODEL,
     });
   }
 
-  if (dbUser.personality?.provider === "elevenlabs") {
+  if (selectedPersonality.provider === "elevenlabs") {
     const apiKey = process.env.ELEVENLABS_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
@@ -212,7 +240,7 @@ async function handleAuthenticatedSession() {
       );
     }
 
-    const agentId = dbUser.personality.oai_voice;
+    const agentId = selectedPersonality.oai_voice;
     if (!agentId) {
       return NextResponse.json(
         { error: "Agent ID not found in personality" },
@@ -235,7 +263,11 @@ async function handleAuthenticatedSession() {
       }
 
       const { signed_url } = await signedUrlResponse.json();
-      return NextResponse.json({ provider: "elevenlabs", signed_url });
+      return NextResponse.json({
+        provider: "elevenlabs",
+        signed_url,
+        opening_line: getGuideOpeningLine(selectedPersonality),
+      });
     } catch (error: any) {
       console.error("Error fetching ElevenLabs signed URL:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -261,7 +293,7 @@ async function handleAuthenticatedSession() {
         body: JSON.stringify({
           model: "gpt-4o-realtime-preview-2024-12-17",
           instructions: systemPrompt,
-          voice: dbUser.personality?.oai_voice ?? "ballad",
+          voice: selectedPersonality.oai_voice ?? "ballad",
         }),
       }
     );
@@ -273,7 +305,11 @@ async function handleAuthenticatedSession() {
       );
     }
     const data = await response.json();
-    return NextResponse.json({ ...data, provider: "openai" });
+    return NextResponse.json({
+      ...data,
+      provider: "openai",
+      opening_line: getGuideOpeningLine(selectedPersonality),
+    });
   } catch (error) {
     console.error("Error in /session:", error);
     return NextResponse.json(
