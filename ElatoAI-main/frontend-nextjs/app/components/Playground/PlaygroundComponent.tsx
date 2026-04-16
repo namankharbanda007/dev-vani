@@ -10,7 +10,6 @@ import { EventProvider } from "../Realtime/contexts/EventContext";
 import App from "../Realtime/App";
 import { defaultPersonalityId } from "@/lib/data";
 import UserPersonalities from "./UserPersonalities";
-import HoroscopeHero from "../HoroscopeHero";
 import {
   ArrowRight,
   AudioLines,
@@ -211,37 +210,36 @@ export default function Playground({
   return (
     <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-[1600px] flex-col py-4 md:py-8">
       <div className="flex w-full flex-col gap-8">
-        <div className="relative mx-2 overflow-hidden rounded-[28px] md:mx-0">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.22),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(139,92,246,0.18),_transparent_38%)]" />
-          <div className="relative z-10 overflow-hidden rounded-[28px] border border-white/70 bg-white/75 shadow-[0_18px_80px_rgba(88,60,30,0.10)] backdrop-blur-xl">
-            <div className="grid gap-8 p-6 md:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.9fr)] md:p-8 lg:p-10">
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/70 bg-amber-50/90 px-3 py-1.5 text-sm font-medium text-amber-900">
-                    {greeting.icon}
-                    <span>{greeting.text}</span>
-                  </div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-purple-200/60 bg-purple-50/90 px-3 py-1.5 text-sm font-medium text-purple-700">
-                    <Sparkles className="h-4 w-4" />
-                    <span>Smart Pandit is ready</span>
-                  </div>
-                </div>
+        <div className="relative mx-2 overflow-hidden rounded-[30px] border border-[#eadfce] bg-[linear-gradient(135deg,#fffaf3_0%,#fff6eb_48%,#f7f0ff_100%)] shadow-[0_18px_70px_rgba(104,76,41,0.10)] md:mx-0">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(139,92,246,0.14),_transparent_30%),radial-gradient(circle_at_left_center,_rgba(251,191,36,0.16),_transparent_28%)]" />
+          <div className="relative z-10 flex flex-col gap-8 p-6 md:p-8 lg:p-10">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white/80 px-3 py-1.5 text-sm font-medium text-amber-900">
+                {greeting.icon}
+                <span>{greeting.text}</span>
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/80 px-3 py-1.5 text-sm font-medium text-purple-700">
+                <Sparkles className="h-4 w-4" />
+                <span>Smart Pandit concierge</span>
+              </div>
+            </div>
 
-                <div className="space-y-4">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.75fr)] lg:items-end">
+              <div className="space-y-5">
+                <div className="space-y-3">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
                     One trusted spiritual front door
                   </p>
-                  <h1 className="max-w-3xl text-3xl font-bold leading-tight text-gray-950 md:text-5xl font-lora">
+                  <h1 className="max-w-3xl font-lora text-3xl font-bold leading-tight text-gray-950 md:text-5xl">
                     Namaste,{" "}
                     <span className="bg-gradient-to-r from-purple-700 via-purple-600 to-amber-700 bg-clip-text text-transparent">
                       {firstName}
                     </span>
-                    . Talk to Smart Pandit now.
+                    . Get the right guidance now.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-gray-600 md:text-lg">
-                    Start one calm spiritual conversation now. Move into puja,
-                    astrology, or family guidance only when you need something
-                    deeper.
+                    Start with Smart Pandit. Move into chat, specialist advice,
+                    or live family puja only when you need more.
                   </p>
                 </div>
 
@@ -258,102 +256,84 @@ export default function Playground({
                     className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white/90 px-6 py-4 text-sm font-semibold text-gray-800 transition hover:border-purple-200 hover:bg-purple-50/40"
                   >
                     <ArrowRight className="h-4 w-4" />
-                    Open chat instead
+                    Open chat
                   </button>
-                  <Link
-                    href="/pandit"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-200/80 bg-amber-50/80 px-6 py-4 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
-                  >
-                    <Users className="h-4 w-4" />
-                    Start live family puja
-                  </Link>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-white/80 bg-white/72 px-4 py-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
-                      Current Guide
-                    </p>
-                    <p className="mt-2 text-base font-semibold text-gray-900">
-                      {currentPersonality?.title || "Pandit Ji"}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-white/80 bg-white/72 px-4 py-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
-                      Best For
-                    </p>
-                    <p className="mt-2 text-base font-semibold text-gray-900">
-                      Urgent guidance, rituals, family questions
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-white/80 bg-white/72 px-4 py-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
-                      Format
-                    </p>
-                    <p className="mt-2 text-base font-semibold text-gray-900">
-                      Call, chat, or shared live puja
-                    </p>
-                  </div>
                 </div>
               </div>
 
-              <div className="rounded-[26px] border border-white/70 bg-[linear-gradient(180deg,rgba(255,250,242,0.95),rgba(246,239,255,0.88))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
-                  What do you need today?
-                </p>
-                <h2 className="mt-2 text-2xl font-bold text-gray-900 font-lora">
-                  Choose your lane
-                </h2>
-                <div className="mt-5 grid gap-3">
-                  {intentLanes.map((lane) => {
-                    const Icon = lane.icon;
-                    return (
-                      <button
-                        key={lane.key}
-                        onClick={() => void launchIntent(lane.guide, lane.action)}
-                        className={`group rounded-[24px] border bg-gradient-to-r px-4 py-4 text-left transition hover:-translate-y-0.5 hover:shadow-lg ${lane.accent}`}
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="rounded-2xl bg-white/80 p-3 text-gray-900 shadow-sm">
-                            <Icon className="h-5 w-5" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="text-base font-semibold text-gray-900">
-                                {lane.title}
-                              </p>
-                              <ArrowRight className="h-4 w-4 text-gray-500 transition group-hover:translate-x-0.5" />
-                            </div>
-                            <p className="mt-1 text-sm leading-6 text-gray-600">
-                              {lane.body}
-                            </p>
-                            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
-                              {lane.guide?.title || "Smart Pandit"}
-                            </p>
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
+              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                <div className="rounded-2xl border border-white/80 bg-white/74 px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+                    Current Guide
+                  </p>
+                  <p className="mt-2 text-base font-semibold text-gray-900">
+                    {currentPersonality?.title || "Pandit Ji"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/80 bg-white/74 px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+                    Best For
+                  </p>
+                  <p className="mt-2 text-base font-semibold text-gray-900">
+                    Urgent guidance, rituals, family questions
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/80 bg-white/74 px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+                    Main Flow
+                  </p>
+                  <p className="mt-2 text-base font-semibold text-gray-900">
+                    Call first, deepen later
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-4 px-2 md:px-0 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.9fr)]">
-          <div className="rounded-[28px] border border-gray-100 bg-white/80 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.05)]">
+        <div className="grid gap-4 px-2 md:px-0 md:grid-cols-2 xl:grid-cols-4">
+          {intentLanes.map((lane) => {
+            const Icon = lane.icon;
+            return (
+              <button
+                key={lane.key}
+                onClick={() => void launchIntent(lane.guide, lane.action)}
+                className={`group rounded-[26px] border bg-gradient-to-r p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${lane.accent}`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="rounded-2xl bg-white/85 p-3 text-gray-900 shadow-sm">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-base font-semibold text-gray-900">
+                        {lane.title}
+                      </p>
+                      <ArrowRight className="h-4 w-4 text-gray-500 transition group-hover:translate-x-0.5" />
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-gray-600">
+                      {lane.body}
+                    </p>
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                      {lane.guide?.title || "Smart Pandit"}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="grid gap-4 px-2 md:px-0 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div className="rounded-[28px] border border-gray-100 bg-white/85 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.05)]">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
                   Continue your journey
                 </p>
-                <h2 className="mt-2 text-2xl font-bold text-gray-900 font-lora">
-                  Pick up where you left off
+                <h2 className="mt-2 font-lora text-2xl font-bold text-gray-900">
+                  Choose the next best action
                 </h2>
-              </div>
-              <div className="hidden rounded-2xl bg-purple-50 p-3 text-purple-700 md:block">
-                <AudioLines className="h-5 w-5" />
               </div>
             </div>
 
@@ -366,20 +346,9 @@ export default function Playground({
                   Resume with {currentPersonality?.title || "Smart Pandit"}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Return to your main guide for a live spiritual conversation.
+                  Go straight back into a live spiritual conversation.
                 </p>
               </button>
-              <Link
-                href="/pandit"
-                className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-left transition hover:border-amber-200 hover:bg-amber-50/40"
-              >
-                <p className="text-sm font-semibold text-gray-900">
-                  Open family puja room
-                </p>
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Bring relatives into one shared Smart Pandit session.
-                </p>
-              </Link>
               <button
                 onClick={() => void launchGuide(currentPersonality, "chat")}
                 className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-left transition hover:border-purple-200 hover:bg-purple-50/40"
@@ -388,37 +357,61 @@ export default function Playground({
                   Ask a quick question
                 </p>
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Use chat for shorter guidance without entering a full call.
+                  Stay lightweight when you only need one answer.
                 </p>
               </button>
+              <Link
+                href="/pandit"
+                className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-left transition hover:border-amber-200 hover:bg-amber-50/40"
+              >
+                <p className="text-sm font-semibold text-gray-900">
+                  Start live family puja
+                </p>
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  Bring family together in one shared Smart Pandit session.
+                </p>
+              </Link>
               <Link
                 href="/astrologer"
                 className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50/40"
               >
                 <p className="text-sm font-semibold text-gray-900">
-                  Go deeper with astrology
+                  Go to astrology specialist
                 </p>
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Use the astrologer lane when the question needs birth-chart
-                  context.
+                  Use the astrologer lane when the question needs chart context.
                 </p>
               </Link>
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-gray-100 bg-white/80 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.05)]">
+          <div className="rounded-[28px] border border-gray-100 bg-white/85 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.05)]">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
-              Daily devotion
+              Daily layer
             </p>
-            <h2 className="mt-2 text-2xl font-bold text-gray-900 font-lora">
-              Gentle daily layer
+            <h2 className="mt-2 font-lora text-2xl font-bold text-gray-900">
+              Horoscope, without taking over the page
             </h2>
             <p className="mt-3 text-sm leading-6 text-gray-600">
-              Horoscope is useful, but it should support your spiritual
-              relationship, not replace the front door.
+              Daily astrology is useful, but the front door stays Smart Pandit.
             </p>
-            <div className="mt-5">
-              <HoroscopeHero currentUser={currentUser} />
+            <div className="mt-5 rounded-[24px] border border-amber-100 bg-[linear-gradient(135deg,#fff8ec_0%,#fffaf3_100%)] p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+                Daily insight
+              </p>
+              <p className="mt-2 text-lg font-semibold text-gray-900">
+                Your horoscope is ready
+              </p>
+              <p className="mt-2 text-sm leading-6 text-gray-600">
+                Check your sign, mood, lucky time, and guidance for today without letting horoscope become the whole product.
+              </p>
+              <Link
+                href="/horoscope"
+                className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-amber-900 shadow-sm ring-1 ring-amber-200 transition hover:bg-amber-50"
+              >
+                Open horoscope
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </div>
