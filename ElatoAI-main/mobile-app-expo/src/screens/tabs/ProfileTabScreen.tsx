@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Image,
@@ -55,11 +55,14 @@ export function ProfileTabScreen({
   const [savingLanguage, setSavingLanguage] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [avatarOverride, setAvatarOverride] = useState<string | null>(null);
+  const [languageOverride, setLanguageOverride] = useState<string | null>(null);
 
   const displayName = dbUser?.supervisee_name || dbUser?.supervisor_name || "Smart Murti user";
-  const activeLanguage = dbUser?.language_code || "en-US";
+  const activeLanguage = languageOverride || dbUser?.language_code || "en-US";
   const currentGuide = dbUser?.personality?.title ? getGuideShortTitle(dbUser.personality.title) : "Pandit Ji";
   const avatarUrl =
+    avatarOverride ||
     dbUser?.avatar_url ||
     `https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(session.user.email || "smartmurti")}`;
 
@@ -72,6 +75,11 @@ export function ProfileTabScreen({
     setMessage(null);
     setError(null);
   };
+
+  useEffect(() => {
+    setAvatarOverride(dbUser?.avatar_url || null);
+    setLanguageOverride(dbUser?.language_code || null);
+  }, [dbUser?.avatar_url, dbUser?.language_code]);
 
   const handleAvatarUpload = async () => {
     resetBanners();
@@ -95,7 +103,8 @@ export function ProfileTabScreen({
 
       const asset = result.assets[0];
       setUploadingPhoto(true);
-      await uploadCurrentUserAvatar(asset.uri, asset.mimeType || "image/jpeg");
+      const nextAvatarUrl = await uploadCurrentUserAvatar(asset.uri, asset.mimeType || "image/jpeg");
+      setAvatarOverride(nextAvatarUrl);
       setMessage("Profile photo updated.");
       await onRefresh?.();
     } catch (nextError) {
@@ -114,6 +123,7 @@ export function ProfileTabScreen({
     setSavingLanguage(languageCode);
     try {
       await updateCurrentUserLanguage(languageCode);
+      setLanguageOverride(languageCode);
       setMessage(`Language preference updated to ${LANGUAGE_OPTIONS.find((item) => item.code === languageCode)?.label || languageCode}.`);
       await onRefresh?.();
     } catch (nextError) {
@@ -161,10 +171,10 @@ export function ProfileTabScreen({
         ) : undefined
       }
     >
-      <LinearGradient colors={["#1F1A3D", "#4C1D95", "#6D28D9"]} style={styles.heroCard}>
+      <LinearGradient colors={["#5B3823", "#512A73"]} style={styles.heroCard}>
         <View style={styles.heroTopRow}>
-          <View>
-            <Text style={styles.heroEyebrow}>Profile & Settings</Text>
+          <View style={styles.heroCopy}>
+            <Text style={styles.heroEyebrow}>Profile and settings</Text>
             <Text style={styles.heroHeading}>{displayName}</Text>
             <Text style={styles.heroSubheading}>{session.user.email}</Text>
           </View>
@@ -177,15 +187,28 @@ export function ProfileTabScreen({
           </Pressable>
         </View>
 
-        <View style={styles.heroAvatarWrap}>
-          <Image source={{ uri: avatarUrl }} style={styles.heroAvatar} />
-          <Pressable
-            onPress={handleAvatarUpload}
-            disabled={uploadingPhoto}
-            style={({ pressed }) => [styles.avatarBadge, pressed && styles.pressed]}
-          >
-            <Ionicons name="image-outline" size={16} color={colors.white} />
-          </Pressable>
+        <View style={styles.identityRow}>
+          <View style={styles.heroAvatarWrap}>
+            <Image source={{ uri: avatarUrl }} style={styles.heroAvatar} />
+            <Pressable
+              onPress={handleAvatarUpload}
+              disabled={uploadingPhoto}
+              style={({ pressed }) => [styles.avatarBadge, pressed && styles.pressed]}
+            >
+              <Ionicons name="image-outline" size={16} color={colors.white} />
+            </Pressable>
+          </View>
+
+          <View style={styles.identityMeta}>
+            <View style={styles.quickStat}>
+              <Text style={styles.quickStatLabel}>Guide</Text>
+              <Text style={styles.quickStatValue}>{currentGuide}</Text>
+            </View>
+            <View style={styles.quickStat}>
+              <Text style={styles.quickStatLabel}>Language</Text>
+              <Text style={styles.quickStatValue}>{languageLabel}</Text>
+            </View>
+          </View>
         </View>
 
         <View style={styles.statsRow}>
@@ -194,12 +217,8 @@ export function ProfileTabScreen({
             <Text style={styles.statValue}>Rs. {Number(dbUser?.wallet_balance ?? 0).toLocaleString("en-IN")}</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statLabel}>Guide</Text>
-            <Text style={styles.statValue}>{currentGuide}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statLabel}>Language</Text>
-            <Text style={styles.statValue}>{languageLabel}</Text>
+            <Text style={styles.statLabel}>Plan</Text>
+            <Text style={styles.statValue}>{dbUser?.is_premium ? "Premium" : "Free"}</Text>
           </View>
         </View>
       </LinearGradient>
@@ -219,8 +238,8 @@ export function ProfileTabScreen({
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <View>
-            <Text style={styles.cardTitle}>Language Preference</Text>
-            <Text style={styles.cardSubtitle}>Use the same devotional language setting you expect on the website.</Text>
+            <Text style={styles.cardTitle}>Language preference</Text>
+            <Text style={styles.cardSubtitle}>Choose the devotional language Smart Murti should default to across sessions.</Text>
           </View>
         </View>
 
@@ -250,16 +269,16 @@ export function ProfileTabScreen({
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <View>
-            <Text style={styles.cardTitle}>Devotee Details</Text>
-            <Text style={styles.cardSubtitle}>These are the core profile settings used across Smart Murti.</Text>
+            <Text style={styles.cardTitle}>Devotee details</Text>
+            <Text style={styles.cardSubtitle}>These details shape your core Smart Pandit experience.</Text>
           </View>
           <Pressable onPress={onEditProfile} style={({ pressed }) => [styles.inlineButton, pressed && styles.pressed]}>
             <Text style={styles.inlineButtonText}>Edit</Text>
           </Pressable>
         </View>
 
-        <InfoRow label="Your Name" value={dbUser?.supervisee_name || "Not set"} />
-        <InfoRow label="Guardian Name" value={dbUser?.supervisor_name || "Not set"} />
+        <InfoRow label="Your name" value={dbUser?.supervisee_name || "Not set"} />
+        <InfoRow label="Guardian name" value={dbUser?.supervisor_name || "Not set"} />
         <InfoRow label="Age" value={dbUser?.supervisee_age || "Not set"} />
         <InfoRow label="Persona" value={dbUser?.supervisee_persona || "Not set"} />
       </View>
@@ -267,28 +286,28 @@ export function ProfileTabScreen({
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <View>
-            <Text style={styles.cardTitle}>Horoscope Inputs</Text>
-            <Text style={styles.cardSubtitle}>These fields power your zodiac guidance and personalized readings.</Text>
+            <Text style={styles.cardTitle}>Jyotish inputs</Text>
+            <Text style={styles.cardSubtitle}>These fields power your horoscope guidance and personalized readings.</Text>
           </View>
         </View>
 
-        <InfoRow label="Birth Place" value={metadata.birth_place || "Not set"} />
-        <InfoRow label="Birth Date" value={metadata.birth_date || "Not set"} />
-        <InfoRow label="Birth Time" value={metadata.birth_time || "Not set"} />
+        <InfoRow label="Birth place" value={metadata.birth_place || "Not set"} />
+        <InfoRow label="Birth date" value={metadata.birth_date || "Not set"} />
+        <InfoRow label="Birth time" value={metadata.birth_time || "Not set"} />
         <InfoRow label="Rashi" value={metadata.rashi || "Not set"} />
       </View>
 
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <View>
-            <Text style={styles.cardTitle}>Account</Text>
-            <Text style={styles.cardSubtitle}>Manage your profile, uploads, and session preferences.</Text>
+            <Text style={styles.cardTitle}>Account actions</Text>
+            <Text style={styles.cardSubtitle}>Keep your profile current and your family identity visible inside sessions.</Text>
           </View>
         </View>
 
         <Pressable onPress={onEditProfile} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}>
           <Ionicons name="create-outline" size={18} color={colors.white} />
-          <Text style={styles.primaryButtonText}>Open Full Profile Editor</Text>
+          <Text style={styles.primaryButtonText}>Open full profile editor</Text>
         </Pressable>
 
         <Pressable
@@ -297,7 +316,7 @@ export function ProfileTabScreen({
           style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed, uploadingPhoto && styles.disabled]}
         >
           <Ionicons name="cloud-upload-outline" size={18} color={colors.gray900} />
-          <Text style={styles.secondaryButtonText}>{uploadingPhoto ? "Uploading..." : "Upload Profile Photo"}</Text>
+          <Text style={styles.secondaryButtonText}>{uploadingPhoto ? "Uploading..." : "Upload profile photo"}</Text>
         </Pressable>
       </View>
 
@@ -307,44 +326,35 @@ export function ProfileTabScreen({
         style={({ pressed }) => [styles.signOutButton, pressed && styles.pressed, signingOut && styles.disabled]}
       >
         <Ionicons name="log-out-outline" size={18} color={colors.white} />
-        <Text style={styles.signOutText}>{signingOut ? "Signing out..." : "Sign Out"}</Text>
+        <Text style={styles.signOutText}>{signingOut ? "Signing out..." : "Sign out"}</Text>
       </Pressable>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    padding: 18,
-    gap: 16,
-    paddingBottom: 32,
-  },
-  heroCard: {
-    borderRadius: 30,
-    padding: 20,
-    gap: 18,
-  },
+  scroll: { flex: 1 },
+  content: { padding: 18, gap: 16, paddingBottom: 32 },
+  heroCard: { borderRadius: 32, padding: 20, gap: 18 },
   heroTopRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 16,
   },
+  heroCopy: { flex: 1 },
   heroEyebrow: {
-    color: "#DDD6FE",
+    color: "#E8D6B8",
     fontFamily: fonts.bodyBold,
     fontSize: 12,
     textTransform: "uppercase",
     letterSpacing: 1,
   },
   heroHeading: {
-    marginTop: 6,
+    marginTop: 8,
     color: colors.white,
     fontFamily: fonts.heading,
-    fontSize: 30,
+    fontSize: 32,
   },
   heroSubheading: {
     marginTop: 4,
@@ -360,17 +370,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  heroAvatarWrap: {
-    alignSelf: "center",
-    position: "relative",
-  },
+  identityRow: { flexDirection: "row", alignItems: "center", gap: 16 },
+  heroAvatarWrap: { position: "relative" },
   heroAvatar: {
-    width: 108,
-    height: 108,
-    borderRadius: 54,
+    width: 104,
+    height: 104,
+    borderRadius: 52,
     borderWidth: 3,
-    borderColor: "rgba(255,255,255,0.28)",
-    backgroundColor: "rgba(255,255,255,0.14)",
+    borderColor: "rgba(255,255,255,0.24)",
+    backgroundColor: "rgba(255,255,255,0.12)",
   },
   avatarBadge: {
     position: "absolute",
@@ -379,18 +387,34 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#F59E0B",
+    backgroundColor: colors.divineSaffron,
     alignItems: "center",
     justifyContent: "center",
   },
-  statsRow: {
-    flexDirection: "row",
-    gap: 10,
+  identityMeta: { flex: 1, gap: 10 },
+  quickStat: {
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
+  quickStatLabel: {
+    color: "rgba(255,255,255,0.7)",
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    textTransform: "uppercase",
+  },
+  quickStatValue: {
+    marginTop: 4,
+    color: colors.white,
+    fontFamily: fonts.bodyBold,
+    fontSize: 15,
+  },
+  statsRow: { flexDirection: "row", gap: 10 },
   statCard: {
     flex: 1,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.14)",
+    backgroundColor: "rgba(255,255,255,0.1)",
     paddingHorizontal: 14,
     paddingVertical: 12,
     gap: 4,
@@ -404,13 +428,15 @@ const styles = StyleSheet.create({
   statValue: {
     color: colors.white,
     fontFamily: fonts.bodyBold,
-    fontSize: 15,
+    fontSize: 16,
   },
   card: {
-    borderRadius: 26,
+    borderRadius: 24,
     backgroundColor: colors.white,
     padding: 18,
     gap: 16,
+    borderWidth: 1,
+    borderColor: "rgba(106,74,44,0.08)",
   },
   cardHeader: {
     flexDirection: "row",
@@ -421,44 +447,38 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: colors.gray900,
     fontFamily: fonts.heading,
-    fontSize: 23,
+    fontSize: 22,
   },
   cardSubtitle: {
     marginTop: 4,
     color: colors.gray500,
     fontFamily: fonts.body,
     fontSize: 13,
-    lineHeight: 19,
+    lineHeight: 20,
     maxWidth: 260,
   },
-  languageGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
+  languageGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   languageChip: {
     borderRadius: 16,
-    backgroundColor: colors.gray50,
+    backgroundColor: "#F8F0E3",
     borderWidth: 1,
     borderColor: colors.gray200,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
   languageChipActive: {
-    backgroundColor: "#F3E8FF",
-    borderColor: "#C4B5FD",
+    backgroundColor: "#EEE2F8",
+    borderColor: "#B798D2",
   },
   languageChipText: {
     color: colors.gray700,
     fontFamily: fonts.bodyBold,
     fontSize: 13,
   },
-  languageChipTextActive: {
-    color: colors.purple900,
-  },
+  languageChipTextActive: { color: colors.purple900 },
   infoRow: {
-    borderRadius: 18,
-    backgroundColor: colors.gray50,
+    borderRadius: 16,
+    backgroundColor: "#FCF7EF",
     paddingHorizontal: 16,
     paddingVertical: 14,
     gap: 4,
@@ -477,7 +497,7 @@ const styles = StyleSheet.create({
   },
   inlineButton: {
     borderRadius: 999,
-    backgroundColor: colors.gray50,
+    backgroundColor: "#F8F0E3",
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
@@ -487,8 +507,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   primaryButton: {
-    height: 50,
-    borderRadius: 18,
+    height: 52,
+    borderRadius: 16,
     backgroundColor: colors.purple900,
     alignItems: "center",
     justifyContent: "center",
@@ -501,11 +521,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   secondaryButton: {
-    height: 50,
-    borderRadius: 18,
-    backgroundColor: "#FFF7ED",
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: "#F8F0E3",
     borderWidth: 1,
-    borderColor: "#FED7AA",
+    borderColor: colors.gray200,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
@@ -518,7 +538,7 @@ const styles = StyleSheet.create({
   },
   signOutButton: {
     height: 54,
-    borderRadius: 22,
+    borderRadius: 18,
     backgroundColor: colors.rose600,
     alignItems: "center",
     justifyContent: "center",
@@ -531,7 +551,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   successCard: {
-    borderRadius: 18,
+    borderRadius: 16,
     backgroundColor: colors.successBg,
     borderWidth: 1,
     borderColor: colors.successBorder,
@@ -544,7 +564,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   errorCard: {
-    borderRadius: 18,
+    borderRadius: 16,
     backgroundColor: colors.errorBg,
     borderWidth: 1,
     borderColor: colors.errorBorder,
@@ -556,10 +576,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
   },
-  pressed: {
-    opacity: 0.88,
-  },
-  disabled: {
-    opacity: 0.6,
-  },
+  pressed: { opacity: 0.88 },
+  disabled: { opacity: 0.6 },
 });

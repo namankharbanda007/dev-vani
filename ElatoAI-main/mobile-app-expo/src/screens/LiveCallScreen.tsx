@@ -62,7 +62,7 @@ export function LiveCallScreen({
   const guideDescription = useMemo(
     () =>
       getGuideDisplaySubtitle(personality) ||
-      "A direct Gemini Live voice call with your Smart Murti guide.",
+      "A live spiritual guidance call inside the Smart Murti voice experience.",
     [personality]
   );
 
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   heroCard: {
-    borderRadius: 30,
+    borderRadius: 28,
     alignItems: "center",
     padding: 24,
     gap: 10,
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(17,24,39,0.58)",
+    backgroundColor: "rgba(31,23,17,0.5)",
   },
   avatarRing: {
     width: 150,
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     width: 92,
     height: 92,
     borderRadius: 46,
-    backgroundColor: colors.purple900,
+    backgroundColor: colors.divineSaffron,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -502,10 +502,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   signalCard: {
-    borderRadius: 24,
+    borderRadius: 20,
     backgroundColor: colors.white,
     padding: 18,
     gap: 14,
+    borderWidth: 1,
+    borderColor: "rgba(106,74,44,0.08)",
   },
   signalRow: {
     gap: 8,
@@ -528,7 +530,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.purple900,
   },
   signalFillGuide: {
-    backgroundColor: "#16A34A",
+    backgroundColor: colors.divineSaffron,
   },
   signalHint: {
     color: colors.gray500,
@@ -557,14 +559,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 12,
     paddingBottom: 18,
-    backgroundColor: "rgba(253,251,247,0.96)",
+    backgroundColor: "rgba(251,245,234,0.96)",
     borderTopWidth: 1,
     borderTopColor: colors.gray100,
   },
   startButton: {
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#16A34A",
+    backgroundColor: colors.divineSaffron,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -585,10 +587,10 @@ const styles = StyleSheet.create({
     gap: 22,
   },
   roundButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.gray900,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: colors.purple900,
     alignItems: "center",
     justifyContent: "center",
   },

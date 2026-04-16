@@ -1,0 +1,120 @@
+{
+  "version": "2.0.0",
+  "date": "2026-04-11T19:15:00+05:30",
+  "mode": "daily",
+  "scope": "full",
+  "diff_mode": false,
+  "phases_run": [0, 1, 2, 5, 6, 7, 9, 13, 14],
+  "attack_surface": {
+    "code": {
+      "public_endpoints": 6,
+      "authenticated": 12,
+      "admin": 0,
+      "api": 18,
+      "uploads": 1,
+      "integrations": 4,
+      "background_jobs": 0,
+      "websockets": 2
+    },
+    "infrastructure": {
+      "ci_workflows": 0,
+      "webhook_receivers": 2,
+      "container_configs": 1,
+      "iac_configs": 1,
+      "deploy_targets": 1,
+      "secret_management": "mixed"
+    }
+  },
+  "findings": [
+    {
+      "id": 1,
+      "severity": "CRITICAL",
+      "confidence": 10,
+      "status": "VERIFIED",
+      "phase": 6,
+      "phase_name": "Integrations & Webhooks",
+      "category": "Business Logic",
+      "fingerprint": "business-logic-wallet-self-credit-verify-payment-route",
+      "title": "Authenticated users can credit their own wallet without any real payment verification",
+      "file": "frontend-nextjs/app/api/wallet/verify-payment/route.ts",
+      "line": 21,
+      "commit": null,
+      "description": "The wallet verification route accepts client-supplied orderId, amount, paymentId, and signature, then hardcodes `isSignatureValid = true` before incrementing wallet balance.",
+      "exploit_scenario": "An attacker signs into a normal account, sends a POST request to `/api/wallet/verify-payment` with any large `amount`, and the server immediately credits that amount to their wallet because no Razorpay or Stripe signature is checked.",
+      "impact": "Direct balance inflation, free paid sessions, revenue loss, and corrupted financial records.",
+      "recommendation": "Disable this route in production until real gateway verification exists. Validate the gateway signature server-side, bind the amount to a server-created order record, and perform the balance update and ledger insert atomically.",
+      "playbook": "1. Disable the route or block production traffic. 2. Audit wallet top-ups for impossible credits. 3. Reverse fraudulent balances. 4. Replace mock verification with real gateway webhook/order verification before re-enabling.",
+      "verification": "self-verified"
+    },
+    {
+      "id": 2,
+      "severity": "HIGH",
+      "confidence": 10,
+      "status": "VERIFIED",
+      "phase": 2,
+      "phase_name": "Secrets Archaeology",
+      "category": "Secrets",
+      "fingerprint": "secrets-gemini-key-exposed-to-clients",
+      "title": "Production Gemini API key is exposed to clients through both API and mobile bundle paths",
+      "file": "frontend-nextjs/app/api/voice/get-gemini-key/route.ts",
+      "line": 37,
+      "commit": null,
+      "description": "The server returns `process.env.GEMINI_API_KEY` directly to callers, and the Expo app also supports a public `EXPO_PUBLIC_GEMINI_API_KEY` fallback in client code.",
+      "exploit_scenario": "A normal signed-in user calls `/api/voice/get-gemini-key` and receives the raw provider key. Separately, if the Expo public env is populated, an attacker can extract the same key from the mobile JS bundle or APK and use it outside Smart Murti for arbitrary Gemini calls.",
+      "impact": "Provider key theft, quota exhaustion, direct billing abuse, and loss of control over model usage.",
+      "recommendation": "Stop returning raw Gemini provider keys to clients. Move all Gemini access behind server-issued ephemeral session tokens or fully server-side proxying. Remove the `EXPO_PUBLIC_GEMINI_API_KEY` path from mobile builds entirely.",
+      "playbook": "1. Rotate the Gemini API key. 2. Remove client exposure paths. 3. Review provider usage logs for abuse. 4. Ship an app update that no longer embeds any provider key.",
+      "verification": "self-verified"
+    },
+    {
+      "id": 3,
+      "severity": "MEDIUM",
+      "confidence": 10,
+      "status": "VERIFIED",
+      "phase": 14,
+      "phase_name": "Save Report",
+      "category": "Operational",
+      "fingerprint": "operational-security-reports-not-ignored",
+      "title": "Local security reports are not protected from accidental commit",
+      "file": ".gitignore",
+      "line": 1,
+      "commit": null,
+      "description": "The repo `.gitignore` does not ignore `.gstack/`, even though this audit writes local security reports there.",
+      "exploit_scenario": "A developer runs `/cso`, stages changes broadly, and accidentally commits `.gstack/security-reports/...json` into the repo, leaking internal audit notes and attack-surface details.",
+      "impact": "Security posture details can leak into git history or shared PRs, making future exploitation easier.",
+      "recommendation": "Add `.gstack/` to `.gitignore` immediately and treat local audit artifacts as non-source files.",
+      "playbook": "1. Ignore `.gstack/`. 2. Check git status and recent commits for leaked local audit files. 3. Remove any committed reports from history if they escaped.",
+      "verification": "self-verified"
+    }
+  ],
+  "supply_chain_summary": {
+    "direct_deps": 0,
+    "transitive_deps": 0,
+    "critical_cves": 0,
+    "high_cves": 0,
+    "install_scripts": 0,
+    "lockfile_present": true,
+    "lockfile_tracked": true,
+    "tools_skipped": ["package manager CVE scan", "CI workflow scan, no root .github workflows present"]
+  },
+  "filter_stats": {
+    "candidates_scanned": 7,
+    "hard_exclusion_filtered": 3,
+    "confidence_gate_filtered": 1,
+    "verification_filtered": 0,
+    "reported": 3
+  },
+  "totals": {
+    "critical": 1,
+    "high": 1,
+    "medium": 1,
+    "tentative": 0
+  },
+  "trend": {
+    "prior_report_date": null,
+    "resolved": 0,
+    "persistent": 0,
+    "new": 3,
+    "direction": "first_run"
+  }
+}

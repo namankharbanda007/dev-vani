@@ -87,14 +87,19 @@ export function usePanditSequence({
 
         const ratio = isPortrait
             ? Math.max(canvasWidth / imgWidth, canvasHeight / imgHeight) // Cover
-            : Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight); // Contain
+            : Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight); // Contain without arbitrary padding
 
         const newWidth = imgWidth * ratio;
         const newHeight = imgHeight * ratio;
 
         // Center the image
         let offsetX = (canvasWidth - newWidth) / 2;
-        const offsetY = (canvasHeight - newHeight) / 2;
+        let offsetY = (canvasHeight - newHeight) / 2;
+
+        if (!isPortrait) {
+            // Align bottom on landscape so the cut-off torso is flush with the section edge
+            offsetY = canvasHeight - newHeight;
+        }
 
         if (isPortrait) {
             // The pandit appears shifted to the left on mobile crops.

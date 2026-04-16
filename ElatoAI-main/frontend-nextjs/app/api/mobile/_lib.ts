@@ -5,6 +5,8 @@ import { HIDDEN_PERSONALITIES, defaultPersonalityId } from "@/lib/data";
 
 export const LIVE_PUJA_PANDIT_PERSONALITY_ID = "8cfaa34a-e887-41cd-b880-c0b6169bf9cd";
 export const GEMINI_LIVE_MODEL = "models/gemini-2.5-flash-native-audio-preview-12-2025";
+export const HOME_PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
+export const HOME_ASTROLOGER_PERSONALITY_ID = "f8d80d91-fc28-459c-b5f6-5e98d4367ecc";
 
 const WEBSITE_HOME_GUIDE_SECTIONS = {
     spiritual: [
@@ -37,6 +39,11 @@ const WEBSITE_HOME_GUIDE_ORDER = [
     ...WEBSITE_HOME_GUIDE_SECTIONS.spiritual,
     ...WEBSITE_HOME_GUIDE_SECTIONS.astrology,
 ];
+
+const HOME_GUIDE_PREFERRED_IDS: Partial<Record<(typeof WEBSITE_HOME_GUIDE_ORDER)[number], string>> = {
+    "pandit ji": HOME_PANDIT_PERSONALITY_ID,
+    "the horoscope astrologer": HOME_ASTROLOGER_PERSONALITY_ID,
+};
 
 const SUPPORTED_GEMINI_LIVE_VOICES = new Set([
     "Achird",
@@ -200,20 +207,42 @@ export async function getMobileGuideCatalog(supabase: SupabaseClient, userId: st
     const websiteHomeGuides = deduped
         .filter((guide) => !guide.creator_id)
         .filter((guide) => Boolean(findWebsiteHomeGuideMatch(guide.title)))
-        .sort((left, right) => {
-            const leftMatch = findWebsiteHomeGuideMatch(left.title);
-            const rightMatch = findWebsiteHomeGuideMatch(right.title);
-            const leftIndex = leftMatch ? WEBSITE_HOME_GUIDE_ORDER.indexOf(leftMatch) : Number.MAX_SAFE_INTEGER;
-            const rightIndex = rightMatch ? WEBSITE_HOME_GUIDE_ORDER.indexOf(rightMatch) : Number.MAX_SAFE_INTEGER;
-
-            if (leftIndex !== rightIndex) {
-                return leftIndex - rightIndex;
+        .reduce((catalog, guide) => {
+            const match = findWebsiteHomeGuideMatch(guide.title);
+            if (!match) {
+                return catalog;
             }
 
-            return left.title.localeCompare(right.title);
-        });
+            const existing = catalog.get(match);
+            if (!existing) {
+                catalog.set(match, guide);
+                return catalog;
+            }
 
-    return websiteHomeGuides;
+            const preferredId = HOME_GUIDE_PREFERRED_IDS[match];
+            const existingPreferred = preferredId ? existing.personality_id === preferredId : false;
+            const guidePreferred = preferredId ? guide.personality_id === preferredId : false;
+
+            if (guidePreferred && !existingPreferred) {
+                catalog.set(match, guide);
+                return catalog;
+            }
+
+            if (existingPreferred && !guidePreferred) {
+                return catalog;
+            }
+
+            if (guide.provider === "gemini" && existing.provider !== "gemini") {
+                catalog.set(match, guide);
+                return catalog;
+            }
+
+            return catalog;
+        }, new Map<string, IPersonality>());
+
+    return WEBSITE_HOME_GUIDE_ORDER
+        .map((slot) => websiteHomeGuides.get(slot))
+        .filter(Boolean) as IPersonality[];
 }
 
 export async function getPersonalityForSession(

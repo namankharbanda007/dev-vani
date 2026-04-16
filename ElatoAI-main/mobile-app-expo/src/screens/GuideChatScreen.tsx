@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ImageBackground,
   KeyboardAvoidingView,
@@ -75,6 +75,10 @@ export function GuideChatScreen({
     });
   };
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages.length, submitting, error]);
+
   const submitMessage = async (rawMessage: string) => {
     const message = rawMessage.trim();
     if (!message || submitting) {
@@ -96,6 +100,7 @@ export function GuideChatScreen({
 
     try {
       const historyForApi = nextMessages
+        .filter(({ id, content }) => id !== "welcome" && content.trim().length > 0)
         .slice(-20)
         .map(({ role, content }) => ({ role, content }));
 
@@ -105,15 +110,19 @@ export function GuideChatScreen({
         personality.personality_id
       );
 
+      const reply = response.response?.trim();
+      if (!reply) {
+        throw new Error("Your guide returned an empty response. Please try again.");
+      }
+
       setMessages((current) => [
         ...current,
         {
           id: `${Date.now()}-assistant`,
           role: "assistant",
-          content: response.response,
+          content: reply,
         },
       ]);
-      scrollToBottom();
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not reach your guide.");
     } finally {
@@ -167,8 +176,9 @@ export function GuideChatScreen({
               <Pressable
                 key={prompt}
                 onPress={() => submitMessage(prompt)}
+                disabled={submitting}
                 android_ripple={{ color: "rgba(124, 58, 237, 0.1)" }}
-                style={({ pressed }) => [styles.quickPrompt, pressed && { opacity: 0.8 }]}
+                style={({ pressed }) => [styles.quickPrompt, pressed && { opacity: 0.8 }, submitting && styles.quickPromptDisabled]}
               >
                 <Text style={styles.quickPromptText}>{prompt}</Text>
               </Pressable>
@@ -330,6 +340,9 @@ const styles = StyleSheet.create({
     borderColor: colors.gray200,
     paddingHorizontal: 12,
     paddingVertical: 10,
+  },
+  quickPromptDisabled: {
+    opacity: 0.5,
   },
   quickPromptText: {
     color: colors.gray700,

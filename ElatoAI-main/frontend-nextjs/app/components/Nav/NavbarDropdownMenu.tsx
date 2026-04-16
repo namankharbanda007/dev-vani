@@ -291,7 +291,7 @@ export function NavbarDropdownMenu({ user }: NavbarMenuButtonProps) {
                             />
                             <div className="flex flex-col items-center">
                                 <span className="font-medium text-xs text-amber-900 dark:text-amber-200">
-                                    Smart Murti
+                                    SMART मूर्ति
                                 </span>
                                 <span className="text-xs text-amber-600 dark:text-amber-400">
                                     View Products

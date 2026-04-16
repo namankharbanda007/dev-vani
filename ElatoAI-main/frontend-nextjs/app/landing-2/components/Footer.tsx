@@ -5,27 +5,27 @@ import { Twitter, Instagram, Mail } from "lucide-react";
 
 export default function Footer() {
     return (
-        <footer className="bg-murti-stone text-white py-20 px-6 md:px-10">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
-
+        <footer className="bg-murti-stone px-6 py-20 text-white md:px-10">
+            <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-10 md:flex-row md:items-end">
                 <div className="space-y-6">
-                    <h2 className="text-4xl md:text-6xl font-serif font-bold text-divine-saffron">SMART MURTI</h2>
-                    <p className="text-white/60 text-lg max-w-sm">
-                        Merging ancient Vedic tradition with futuristic minimalism. Made with devotion in India.
+                    <h2 className="text-4xl font-serif font-bold text-divine-saffron md:text-6xl">
+                        SMART मूर्ति
+                    </h2>
+                    <p className="max-w-sm text-lg text-white/60">
+                        Instant spiritual access for Hindu families worldwide, built with devotion in India.
                     </p>
                 </div>
 
-                <div className="flex flex-col items-start md:items-end space-y-6">
+                <div className="flex flex-col items-start space-y-6 md:items-end">
                     <div className="flex space-x-6">
                         <SocialLink href="#" icon={<Twitter />} label="Twitter" />
                         <SocialLink href="#" icon={<Instagram />} label="Instagram" />
                         <SocialLink href="#" icon={<Mail />} label="Support" />
                     </div>
-                    <p className="text-white/40 text-sm">
-                        © {new Date().getFullYear()} Smart Murti. All rights reserved.
+                    <p className="text-sm text-white/40">
+                        © {new Date().getFullYear()} SMART मूर्ति. All rights reserved.
                     </p>
                 </div>
-
             </div>
         </footer>
     );
@@ -35,7 +35,7 @@ function SocialLink({ href, icon, label }: { href: string; icon: React.ReactNode
     return (
         <Link
             href={href}
-            className="p-3 rounded-full bg-white/5 hover:bg-divine-saffron hover:text-white transition-all duration-300"
+            className="rounded-full bg-white/5 p-3 transition-all duration-300 hover:bg-divine-saffron hover:text-white"
             aria-label={label}
         >
             {icon}

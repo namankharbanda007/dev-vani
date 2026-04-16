@@ -80,14 +80,19 @@ export function GoogleButton({ onError }: GoogleButtonProps) {
 const styles = StyleSheet.create({
   button: {
     height: 58,
-    borderRadius: 18,
+    borderRadius: 20,
     backgroundColor: colors.white,
-    borderWidth: 1.4,
-    borderColor: "#B8ADA0",
+    borderWidth: 1.2,
+    borderColor: colors.gray200,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     gap: 12,
+    shadowColor: "#6A4A2C",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 2,
   },
   iconContainer: {
     width: 32,
@@ -97,8 +102,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   label: {
-    color: "#111111",
+    color: colors.gray900,
     fontFamily: fonts.bodyBold,
-    fontSize: 17,
+    fontSize: 16,
   },
 });

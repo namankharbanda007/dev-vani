@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SMART मूर्ति Mobile Home - Sacred Concierge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Karla:wght@400;700&family=Lora:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1f1711;
+        --temple-brown: #6a4a2c;
+        --paper: #fbf5ea;
+        --cream: #fffdf8;
+        --sandal: #e8d6b8;
+        --saffron: #c86b1f;
+        --marigold: #e7a43a;
+        --plum: #512a73;
+        --rose: #c97b75;
+        --muted: #776452;
+        --line: #ddccb7;
+        --card: #fff9f0;
+        --soft: #f5eee2;
+        --shadow: 0 24px 48px rgba(54, 34, 20, 0.12);
+        --radius-xl: 32px;
+        --radius-lg: 24px;
+        --radius-md: 18px;
+        --radius-pill: 999px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Karla", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(231, 164, 58, 0.18), transparent 28%),
+          linear-gradient(180deg, #fbf5ea 0%, #fffdf8 46%, #f6eee1 100%);
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 40px 20px 72px;
+      }
+
+      .page-head {
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--saffron);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: "Lora", serif;
+        font-size: clamp(32px, 4vw, 48px);
+        line-height: 1.1;
+      }
+
+      .lead {
+        max-width: 760px;
+        margin: 14px 0 0;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.6;
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: minmax(320px, 430px) minmax(280px, 1fr);
+        gap: 28px;
+        align-items: start;
+      }
+
+      .phone-shell {
+        position: sticky;
+        top: 20px;
+        width: min(100%, 430px);
+        margin: 0 auto;
+        padding: 14px;
+        border-radius: 42px;
+        background: #201510;
+        box-shadow: 0 32px 70px rgba(31, 23, 17, 0.24);
+      }
+
+      .phone-shell::before {
+        content: "";
+        display: block;
+        width: 132px;
+        height: 24px;
+        margin: 0 auto 12px;
+        border-radius: 0 0 18px 18px;
+        background: #120d09;
+      }
+
+      .screen {
+        overflow: hidden;
+        border-radius: 28px;
+        background: var(--paper);
+      }
+
+      .screen-scroll {
+        padding: 18px 18px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .hero {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1.15fr 122px;
+        gap: 14px;
+        padding: 20px;
+        min-height: 292px;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        background: linear-gradient(150deg, #5b3823 0%, #512a73 100%);
+        color: white;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -24px;
+        top: -14px;
+        width: 170px;
+        height: 170px;
+        border-radius: 50%;
+        background: rgba(244, 210, 142, 0.12);
+      }
+
+      .hero-copy,
+      .hero-visual {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-copy {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .hero-copy .eyebrow {
+        color: #f1d6a2;
+      }
+
+      .hero-title {
+        margin: 0;
+        font-family: "Lora", serif;
+        font-size: 33px;
+        line-height: 1.15;
+      }
+
+      .hero-text {
+        margin: 0;
+        max-width: 250px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 52px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 22px;
+        background: var(--saffron);
+        color: white;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .link-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #f1d6a2;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .hero-visual {
+        display: flex;
+        align-items: end;
+      }
+
+      .hero-visual-card {
+        position: relative;
+        width: 100%;
+        height: 206px;
+        border-radius: 26px;
+        overflow: hidden;
+        background: linear-gradient(180deg, #d4ae76 0%, #fbf3e5 100%);
+      }
+
+      .hero-visual-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .guide-badge {
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: var(--radius-pill);
+        background: rgba(31, 23, 17, 0.64);
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: 1fr 1px 1fr;
+        gap: 14px;
+        align-items: center;
+        padding: 16px 18px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: var(--card);
+      }
+
+      .summary-divider {
+        height: 100%;
+        background: var(--line);
+      }
+
+      .summary-label {
+        margin: 0 0 4px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .summary-value {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .section-heading h2 {
+        margin: 0;
+        font-family: "Lora", serif;
+        font-size: 25px;
+        line-height: 1.2;
+      }
+
+      .section-heading p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .intent-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .intent-card {
+        min-height: 156px;
+        padding: 16px;
+        border: 1px solid rgba(106, 74, 44, 0.08);
+        border-radius: var(--radius-lg);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .intent-card.health {
+        background: linear-gradient(180deg, #fff4e7 0%, #f7e0be 100%);
+      }
+
+      .intent-card.love {
+        background: linear-gradient(180deg, #fceae7 0%, #f6d4cb 100%);
+      }
+
+      .intent-card.ritual {
+        background: linear-gradient(180deg, #fff1de 0%, #f1c787 100%);
+      }
+
+      .intent-card.finance {
+        background: linear-gradient(180deg, #eee7f8 0%, #d8c6ee 100%);
+      }
+
+      .intent-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.72);
+        font-size: 20px;
+      }
+
+      .intent-card h3 {
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.25;
+      }
+
+      .intent-card p {
+        margin: 0;
+        color: var(--temple-brown);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .stack-card {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        background: var(--cream);
+      }
+
+      .stack-row {
+        display: grid;
+        grid-template-columns: 42px 1fr 18px;
+        gap: 14px;
+        align-items: center;
+        padding: 16px 18px;
+        border-bottom: 1px solid rgba(221, 204, 183, 0.7);
+      }
+
+      .stack-row:last-child {
+        border-bottom: 0;
+      }
+
+      .stack-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #f8f0e3;
+        font-size: 18px;
+      }
+
+      .stack-title {
+        margin: 0 0 3px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .stack-text {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .feature-guide {
+        overflow: hidden;
+        border: 1px solid #e7cca0;
+        border-radius: 28px;
+        background: #fff8ee;
+      }
+
+      .feature-guide img {
+        width: 100%;
+        height: 196px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .feature-guide-copy {
+        padding: 18px;
+      }
+
+      .feature-guide-copy .eyebrow {
+        margin-bottom: 6px;
+      }
+
+      .feature-guide-copy h3 {
+        margin: 0;
+        font-family: "Lora", serif;
+        font-size: 26px;
+      }
+
+      .feature-guide-copy p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .action-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .action-pill {
+        min-height: 44px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .action-pill.primary {
+        background: var(--plum);
+        color: white;
+      }
+
+      .action-pill.secondary {
+        border: 1px solid var(--line);
+        background: #f8f0e3;
+      }
+
+      .compact-guides {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .compact-guide {
+        padding: 16px;
+        border: 1px solid rgba(106, 74, 44, 0.08);
+        border-radius: 22px;
+        background: var(--cream);
+      }
+
+      .compact-guide-top {
+        display: grid;
+        grid-template-columns: 52px 1fr auto;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .compact-guide-top img {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .compact-guide h4 {
+        margin: 0;
+        font-size: 17px;
+      }
+
+      .compact-guide p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .video-pill {
+        padding: 6px 10px;
+        border-radius: var(--radius-pill);
+        background: #f3e6d1;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .compact-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .compact-actions span {
+        min-height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .compact-actions .primary {
+        background: var(--plum);
+        color: white;
+      }
+
+      .compact-actions .secondary {
+        border: 1px solid var(--line);
+        background: #f8f0e3;
+      }
+
+      .utility-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .utility-pill {
+        min-height: 48px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--soft);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .trust {
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: var(--soft);
+      }
+
+      .trust h3 {
+        margin: 0 0 6px;
+        font-size: 17px;
+      }
+
+      .trust p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .notes {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .note-card {
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: rgba(255, 253, 248, 0.9);
+        box-shadow: var(--shadow);
+      }
+
+      .note-card h2,
+      .note-card h3 {
+        margin: 0 0 10px;
+        font-family: "Lora", serif;
+      }
+
+      .note-card p,
+      .note-card li {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .note-card ul {
+        margin: 10px 0 0;
+        padding-left: 20px;
+      }
+
+      .token-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .token {
+        padding: 14px;
+        border-radius: 18px;
+        background: var(--cream);
+        border: 1px solid var(--line);
+      }
+
+      .token strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      @media (max-width: 980px) {
+        .board {
+          grid-template-columns: 1fr;
+        }
+
+        .phone-shell {
+          position: static;
+        }
+      }
+
+      @media (max-width: 520px) {
+        main {
+          padding: 24px 14px 48px;
+        }
+
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-visual {
+          justify-content: flex-end;
+        }
+
+        .hero-visual-card {
+          width: 122px;
+        }
+
+        .intent-grid,
+        .utility-strip,
+        .action-pair,
+        .compact-actions,
+        .token-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="page-head">
+        <p class="eyebrow">Design HTML Finalization</p>
+        <h1>SMART मूर्ति Mobile Home, Sacred Concierge</h1>
+        <p class="lead">
+          Finalized HTML preview for the approved mobile-home direction. Smart Pandit stays the hero, intent comes before browsing, and the whole screen feels calmer, more guided, and more serious.
+        </p>
+      </header>
+
+      <section class="board">
+        <div class="phone-shell">
+          <div class="screen">
+            <div class="screen-scroll">
+              <section class="hero">
+                <div class="hero-copy">
+                  <div>
+                    <p class="eyebrow">Talk to Smart Pandit now</p>
+                    <h2 class="hero-title">Namaste, Naman</h2>
+                    <p class="hero-text">
+                      Start one calm spiritual conversation now. Move into puja, astrology, or family guidance only when you need more.
+                    </p>
+                  </div>
+                  <a class="cta" href="#">Call Smart Pandit</a>
+                  <a class="link-action" href="#">Open chat instead →</a>
+                </div>
+                <div class="hero-visual">
+                  <div class="hero-visual-card">
+                    <img src="../../../mobile-app-expo/assets/branding/smart-pandit-home.jpg" alt="Smart Pandit" />
+                    <div class="guide-badge">✦ Pandit Ji</div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="summary">
+                <div>
+                  <p class="summary-label">Wallet</p>
+                  <p class="summary-value">Rs. 1,200</p>
+                </div>
+                <div class="summary-divider"></div>
+                <div>
+                  <p class="summary-label">Plan</p>
+                  <p class="summary-value">Premium</p>
+                </div>
+              </section>
+
+              <section class="section-heading">
+                <h2>What do you need today?</h2>
+                <p>Choose the moment first, then we route you into the right Smart Pandit lane.</p>
+              </section>
+
+              <section class="intent-grid">
+                <article class="intent-card health">
+                  <div class="intent-icon">🛡</div>
+                  <h3>Health &amp; Protection</h3>
+                  <p>Calm guidance for family peace, healing, and protection.</p>
+                </article>
+                <article class="intent-card love">
+                  <div class="intent-icon">♡</div>
+                  <h3>Love &amp; Relationship</h3>
+                  <p>Sensitive advice for love, marriage, and family emotions.</p>
+                </article>
+                <article class="intent-card ritual">
+                  <div class="intent-icon">🪔</div>
+                  <h3>Family Ritual</h3>
+                  <p>Move directly into puja, havan, and shared family moments.</p>
+                </article>
+                <article class="intent-card finance">
+                  <div class="intent-icon">💼</div>
+                  <h3>Career &amp; Finance</h3>
+                  <p>Get practical spiritual guidance for work, money, and decisions.</p>
+                </article>
+              </section>
+
+              <section class="section-heading">
+                <h2>Continue your journey</h2>
+                <p>Come back into guidance quickly, without wading through the whole app again.</p>
+              </section>
+
+              <section class="stack-card">
+                <div class="stack-row">
+                  <div class="stack-icon">📞</div>
+                  <div>
+                    <p class="stack-title">Resume with Pandit Ji</p>
+                    <p class="stack-text">Jump straight back into a live spiritual conversation.</p>
+                  </div>
+                  <div>›</div>
+                </div>
+                <div class="stack-row">
+                  <div class="stack-icon">📹</div>
+                  <div>
+                    <p class="stack-title">Continue family puja</p>
+                    <p class="stack-text">Bring everyone back into one live spiritual moment.</p>
+                  </div>
+                  <div>›</div>
+                </div>
+                <div class="stack-row">
+                  <div class="stack-icon">✦</div>
+                  <div>
+                    <p class="stack-title">Today's guidance</p>
+                    <p class="stack-text">Check your horoscope and move with a little more clarity.</p>
+                  </div>
+                  <div>›</div>
+                </div>
+              </section>
+
+              <section class="section-heading">
+                <h2>Specialist Pandits</h2>
+                <p>One Smart Murti system, gently routed into the specialist you need right now.</p>
+              </section>
+
+              <section class="feature-guide">
+                <img src="../../../mobile-app-expo/assets/branding/smart-pandit-home.jpg" alt="Featured Pandit" />
+                <div class="feature-guide-copy">
+                  <p class="eyebrow">Featured Guide</p>
+                  <h3>Pandit Ji</h3>
+                  <p>For blessings, live puja, and calm family guidance in the moments that matter.</p>
+                  <div class="action-pair">
+                    <div class="action-pill primary">Call</div>
+                    <div class="action-pill secondary">Chat</div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="compact-guides">
+                <article class="compact-guide">
+                  <div class="compact-guide-top">
+                    <img src="../../../mobile-app-expo/assets/branding/smart-pandit-home.jpg" alt="Ankshastri" />
+                    <div>
+                      <h4>Smart Pandit Ankshastri</h4>
+                      <p>Health, peace, and family protection.</p>
+                    </div>
+                    <span class="video-pill">Video</span>
+                  </div>
+                  <div class="compact-actions">
+                    <span class="primary">Call</span>
+                    <span class="secondary">Chat</span>
+                    <span class="secondary">Video</span>
+                  </div>
+                </article>
+
+                <article class="compact-guide">
+                  <div class="compact-guide-top">
+                    <img src="../../../mobile-app-expo/assets/branding/smart-pandit-home.jpg" alt="Lalit" />
+                    <div>
+                      <h4>Smart Pandit Lalit</h4>
+                      <p>Love, relationship, and emotional guidance.</p>
+                    </div>
+                    <span class="video-pill">Video</span>
+                  </div>
+                  <div class="compact-actions">
+                    <span class="primary">Call</span>
+                    <span class="secondary">Chat</span>
+                    <span class="secondary">Video</span>
+                  </div>
+                </article>
+              </section>
+
+              <section class="utility-strip">
+                <div class="utility-pill">Bhajans</div>
+                <div class="utility-pill">Horoscope</div>
+                <div class="utility-pill">Wallet</div>
+              </section>
+
+              <section class="trust">
+                <h3>Quiet continuity for your family</h3>
+                <p>
+                  Live multilingual guidance, family access across countries, and a calmer spiritual thread that stays with you through the day.
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <aside class="notes">
+          <section class="note-card">
+            <h2>Why this direction works</h2>
+            <p>
+              The old home was still behaving like a category shelf. This version behaves like a front door. One clear action first, then intent routing, then re-entry, then specialists.
+            </p>
+            <ul>
+              <li>Smart Pandit stays the hero.</li>
+              <li>Intent comes before guide browsing.</li>
+              <li>Utility tools stop competing with the sacred funnel.</li>
+              <li>Visual hierarchy is calmer and more premium.</li>
+            </ul>
+          </section>
+
+          <section class="note-card">
+            <h3>Implementation spec</h3>
+            <div class="token-grid">
+              <div class="token">
+                <strong>Primary CTA</strong>
+                Saffron `#C86B1F`
+              </div>
+              <div class="token">
+                <strong>Accent</strong>
+                Deep Plum `#512A73`
+              </div>
+              <div class="token">
+                <strong>Base Surface</strong>
+                Parchment `#FBF5EA`
+              </div>
+              <div class="token">
+                <strong>Cards</strong>
+                Cream / Sandal borders
+              </div>
+              <div class="token">
+                <strong>Heading Font</strong>
+                Lora 700
+              </div>
+              <div class="token">
+                <strong>Body Font</strong>
+                Karla 400/700
+              </div>
+            </div>
+          </section>
+
+          <section class="note-card">
+            <h3>Relationship to the real app</h3>
+            <p>
+              This preview matches the implemented Sacred Concierge structure in the Expo app. It is not a generic concept board. It is a design artifact for the actual home screen we just moved toward.
+            </p>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>

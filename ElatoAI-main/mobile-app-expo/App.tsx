@@ -4,10 +4,6 @@ import { useEffect, useState } from "react";
 import { AppState, AppStateStatus, View } from "react-native";
 import { useFonts as useKarlaFonts, Karla_400Regular, Karla_700Bold } from "@expo-google-fonts/karla";
 import { useFonts as useLoraFonts, Lora_700Bold } from "@expo-google-fonts/lora";
-import {
-  useFonts as useLuckiestGuyFonts,
-  LuckiestGuy_400Regular,
-} from "@expo-google-fonts/luckiest-guy";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Session } from "@supabase/supabase-js";
 import { AuthScreen } from "./src/screens/AuthScreen";
@@ -27,9 +23,6 @@ export default function App() {
   });
   const [loraLoaded] = useLoraFonts({
     Lora_700Bold,
-  });
-  const [luckiestLoaded] = useLuckiestGuyFonts({
-    LuckiestGuy_400Regular,
   });
 
   useEffect(() => {
@@ -79,7 +72,7 @@ export default function App() {
     };
   }, []);
 
-  const fontsLoaded = karlaLoaded && loraLoaded && luckiestLoaded;
+  const fontsLoaded = karlaLoaded && loraLoaded;
 
   if (!fontsLoaded || !authReady) {
     return (

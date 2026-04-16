@@ -5,7 +5,9 @@ import { supabase } from "./supabase";
 import { ChatMessage, DbUser, HoroscopePayload, Personality } from "../models/types";
 
 const DEFAULT_PERSONALITY_ID = "a1c073e6-653d-40cf-acc1-891331689409";
+export const HOME_PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
 export const LIVE_PUJA_PANDIT_PERSONALITY_ID = "8cfaa34a-e887-41cd-b880-c0b6169bf9cd";
+export const HOME_ASTROLOGER_PERSONALITY_ID = "f8d80d91-fc28-459c-b5f6-5e98d4367ecc";
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"] as const;
 const SITE_ORIGIN = "https://www.smartmurti.com";
@@ -57,6 +59,10 @@ const WEBSITE_HOME_GUIDE_ORDER = [
   ...WEBSITE_HOME_GUIDE_SECTIONS.astrology,
 ];
 const VIDEO_ENABLED_GUIDE_TITLES = new Set(["pandit ji", "the horoscope astrologer"]);
+const HOME_GUIDE_PREFERRED_IDS: Partial<Record<(typeof WEBSITE_HOME_GUIDE_ORDER)[number], string>> = {
+  "pandit ji": HOME_PANDIT_PERSONALITY_ID,
+  "the horoscope astrologer": HOME_ASTROLOGER_PERSONALITY_ID,
+};
 
 const HIDDEN_PERSONALITIES = new Set([
   "Anya",
@@ -209,6 +215,36 @@ function isLikelyImageUrl(value?: string | null) {
   }
 
   return IMAGE_URL_PATTERN.test(value.trim());
+}
+
+function isLikelyRelativeAssetPath(value?: string | null) {
+  if (!value) {
+    return false;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.startsWith("/assets/") || trimmed.startsWith("/storage/");
+}
+
+function isGuideImageValue(value?: string | null) {
+  return isLikelyImageUrl(value) || isLikelyRelativeAssetPath(value);
+}
+
+function resolveGuideImageValue(value?: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (isLikelyImageUrl(trimmed)) {
+    return trimmed;
+  }
+
+  if (isLikelyRelativeAssetPath(trimmed)) {
+    return getRemoteAsset(trimmed);
+  }
+
+  return null;
 }
 
 function normalizeGuideTitle(title: string) {
@@ -696,12 +732,12 @@ export async function fetchLiveKitRoomToken(roomId: string, participantName: str
 }
 
 export function getGuideDisplaySubtitle(personality: Personality) {
-  const primary = !isLikelyImageUrl(personality.short_description) ? personality.short_description?.trim() : "";
+  const primary = !isGuideImageValue(personality.short_description) ? personality.short_description?.trim() : "";
   if (primary) {
     return primary;
   }
 
-  const secondary = !isLikelyImageUrl(personality.subtitle) ? personality.subtitle?.trim() : "";
+  const secondary = !isGuideImageValue(personality.subtitle) ? personality.subtitle?.trim() : "";
   if (secondary) {
     return secondary;
   }
@@ -725,7 +761,12 @@ export function getGuideShortTitle(personality: Personality | string) {
 }
 
 export function canGuideUseVideo(personality: Personality | string) {
-  if (typeof personality !== "string" && personality.personality_id === LIVE_PUJA_PANDIT_PERSONALITY_ID) {
+  if (
+    typeof personality !== "string" &&
+    [HOME_PANDIT_PERSONALITY_ID, LIVE_PUJA_PANDIT_PERSONALITY_ID, HOME_ASTROLOGER_PERSONALITY_ID].includes(
+      personality.personality_id
+    )
+  ) {
     return true;
   }
 
@@ -740,22 +781,43 @@ export function isHomeGuide(personality: Personality) {
 }
 
 export function filterHomeGuides(personalities: Personality[]) {
-  return personalities
+  const bySlot = personalities
     .filter((guide) => !guide.creator_id)
     .filter((guide) => !HIDDEN_PERSONALITIES.has(guide.title))
     .filter((guide) => Boolean(findWebsiteHomeGuideMatch(guide.title)))
-    .sort((left, right) => {
-      const leftMatch = findWebsiteHomeGuideMatch(left.title);
-      const rightMatch = findWebsiteHomeGuideMatch(right.title);
-      const leftIndex = leftMatch ? WEBSITE_HOME_GUIDE_ORDER.indexOf(leftMatch) : Number.MAX_SAFE_INTEGER;
-      const rightIndex = rightMatch ? WEBSITE_HOME_GUIDE_ORDER.indexOf(rightMatch) : Number.MAX_SAFE_INTEGER;
-
-      if (leftIndex !== rightIndex) {
-        return leftIndex - rightIndex;
+    .reduce((catalog, guide) => {
+      const match = findWebsiteHomeGuideMatch(guide.title);
+      if (!match) {
+        return catalog;
       }
 
-      return left.title.localeCompare(right.title);
-    });
+      const existing = catalog.get(match);
+      if (!existing) {
+        catalog.set(match, guide);
+        return catalog;
+      }
+
+      const preferredId = HOME_GUIDE_PREFERRED_IDS[match];
+      const existingPreferred = preferredId ? existing.personality_id === preferredId : false;
+      const guidePreferred = preferredId ? guide.personality_id === preferredId : false;
+
+      if (guidePreferred && !existingPreferred) {
+        catalog.set(match, guide);
+        return catalog;
+      }
+
+      if (existingPreferred && !guidePreferred) {
+        return catalog;
+      }
+
+      if (guide.provider === "gemini" && existing.provider !== "gemini") {
+        catalog.set(match, guide);
+      }
+
+      return catalog;
+    }, new Map<string, Personality>());
+
+  return WEBSITE_HOME_GUIDE_ORDER.map((slot) => bySlot.get(slot)).filter(Boolean) as Personality[];
 }
 
 export function getGuideImageAsset(
@@ -766,8 +828,8 @@ export function getGuideImageAsset(
   const title = typeof guideOrTitle === "string" ? guideOrTitle : guideOrTitle.title;
   const imageOverride =
     typeof guideOrTitle === "string"
-      ? [subtitle, shortDescription].find((value) => isLikelyImageUrl(value))
-      : [guideOrTitle.subtitle, guideOrTitle.short_description].find((value) => isLikelyImageUrl(value));
+      ? [subtitle, shortDescription].map(resolveGuideImageValue).find(Boolean)
+      : [guideOrTitle.subtitle, guideOrTitle.short_description].map(resolveGuideImageValue).find(Boolean);
 
   if (imageOverride) {
     return imageOverride.trim();

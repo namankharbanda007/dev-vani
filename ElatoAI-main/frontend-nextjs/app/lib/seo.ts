@@ -1,28 +1,25 @@
 import type { Metadata } from "next";
 
 export const siteConfig = {
-    name: "SMART Murti",
-    alternateName: "SMART मूर्ति",
+    name: "SMART मूर्ति",
+    alternateName: "SMART Murti",
     url: "https://smartmurti.com",
     description:
-        "SMART Murti is an AI devotional ecosystem for guided puja, spiritual conversations, Vedic astrology, daily horoscopes, bhajans, and connected home temple experiences.",
+        "SMART मूर्ति gives Hindu families instant access to a live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.",
     defaultOgImage: "/logos/smartmurti-icon.jpg",
-    creator: "SMART Murti Team",
-    publisher: "SMART Murti",
+    creator: "SMART मूर्ति Team",
+    publisher: "SMART मूर्ति",
     locale: "en_US",
     keywords: [
         "smart murti",
-        "SMART Murti",
+        "smart मूर्ति",
         "ai pandit",
-        "ai astrologer",
-        "ai devotional platform",
-        "guided puja app",
-        "vedic astrology ai",
-        "daily horoscope",
-        "bhajan app",
-        "home temple technology",
-        "spiritual ai assistant",
-        "devotional ai device",
+        "live ai pandit",
+        "family puja online",
+        "multilingual spiritual guidance",
+        "online pandit consultation",
+        "urgent spiritual guidance",
+        "video puja for nri families",
     ],
 } as const;
 
@@ -38,29 +35,29 @@ type BuildMetadataInput = {
 
 export const homeFaqs = [
     {
-        question: "What is SMART Murti?",
+        question: "What is SMART मूर्ति?",
         answer:
-            "SMART Murti is an AI devotional ecosystem that combines spiritual conversations, guided puja support, astrology tools, bhajans, and connected home temple products in one platform.",
+            "SMART मूर्ति lets Hindu families talk to a live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.",
     },
     {
-        question: "What can I do with the AI Pandit?",
+        question: "What can I do with Smart Pandit?",
         answer:
-            "You can speak with an AI Pandit for mantra explanations, puja guidance, devotional Q&A, and everyday spiritual support through voice or chat.",
+            "You can speak with Smart Pandit for spiritual guidance, family questions, puja support, devotional Q&A, and live voice or chat conversations in your preferred language.",
     },
     {
-        question: "Does SMART Murti offer astrology and horoscope features?",
+        question: "Does SMART मूर्ति offer astrology and horoscope features?",
         answer:
-            "Yes. SMART Murti includes an AI astrologer, daily horoscope experiences, and additional divination tools such as palm reading.",
+            "Yes. SMART मूर्ति includes an AI astrologer, daily horoscope guidance, and specialist lanes for relationship, finance, and other personal questions.",
     },
     {
-        question: "Is SMART Murti only a device?",
+        question: "Can my family join from different countries?",
         answer:
-            "No. SMART Murti spans both software and hardware, including digital spiritual services, devotional media, and products like Smart Pandit, Smart Base, and Smart Mandir.",
+            "Yes. SMART मूर्ति is built for families across countries and time zones, so relatives can join shared spiritual moments even when they are not in the same place.",
     },
     {
-        question: "Which languages does SMART Murti support?",
+        question: "Which languages does SMART मूर्ति support?",
         answer:
-            "SMART Murti supports major Indian and global languages so users can have devotional conversations in their preferred language.",
+            "SMART मूर्ति supports Hindi, English, Hinglish, and other major Indian and global languages so families can receive guidance naturally.",
     },
 ];
 
@@ -69,13 +66,13 @@ export const aiReferencePages = [
         path: "/",
         title: "Homepage",
         description:
-            "Main overview of SMART Murti, including products, AI spiritual guidance, astrology, bhajans, and devotional use cases.",
+            "Homepage for SMART मूर्ति, featuring live multilingual AI Pandit guidance, family puja, and urgent spiritual support.",
     },
     {
         path: "/products",
         title: "Products",
         description:
-            "Overview of SMART Murti hardware experiences such as Smart Pandit, Smart Base, and Smart Mandir.",
+            "Overview of SMART मूर्ति products including Smart Pandit, Smart Base, and Smart Mandir.",
     },
     {
         path: "/products/smart-pandit",
@@ -99,7 +96,7 @@ export const aiReferencePages = [
         path: "/pandit",
         title: "AI Pandit",
         description:
-            "Live AI Pandit experience for spiritual conversations and guided devotional support.",
+            "Live AI Pandit experience for spiritual conversations, guided devotional support, and family puja.",
     },
     {
         path: "/astrologer",
@@ -129,7 +126,7 @@ export const aiReferencePages = [
         path: "/pricing",
         title: "Pricing",
         description:
-            "Prepaid wallet pricing for SMART Murti's AI spiritual services and experiences.",
+            "Prepaid wallet pricing for SMART मूर्ति spiritual guidance, live calls, and devotional experiences.",
     },
 ];
 

@@ -1,56 +1,111 @@
-# Smart Murti Mobile (Expo)
+# Smart Murti Mobile App (Expo)
 
-React Native Android app for Smart Murti, built with Expo and connected to the same Supabase auth/data backend used by the Next.js web app.
+This is the active Android app for Smart Murti.
 
-## Current Status
+It is a React Native / Expo client for the same product as the website, not a separate backend. The app uses:
 
-- Expo-based Android workspace with Smart Murti branding and shared backend wiring
-- Native login and signup screen using the same Supabase project as the web app
-- Native home, horoscope, bhajans, wallet, profile, guide chat, and voice-call screens
-- Voice call flow uses native speech recognition and native text-to-speech while keeping the AI response on the Smart Murti backend
-- Mobile-aware wallet and horoscope API access via bearer-token auth
+- Supabase for auth + user data
+- the website backend for mobile bootstrap and shared product rules
+- LiveKit for room/video transport
+- Gemini Live for realtime Smart Pandit call flows
 
-## Setup
+## Important Files
+
+- [src/lib/supabase.ts](C:/Users/NAMAN%20KHARBANDA/Downloads/ElatoAI-main%20(2)/ElatoAI-main/mobile-app-expo/src/lib/supabase.ts)
+  - mobile auth client
+
+- [src/lib/smartMurtiApi.ts](C:/Users/NAMAN%20KHARBANDA/Downloads/ElatoAI-main%20(2)/ElatoAI-main/mobile-app-expo/src/lib/smartMurtiApi.ts)
+  - shared mobile data client
+  - home guides, profile, wallet, session config
+
+- [src/lib/geminiLive.ts](C:/Users/NAMAN%20KHARBANDA/Downloads/ElatoAI-main%20(2)/ElatoAI-main/mobile-app-expo/src/lib/geminiLive.ts)
+  - Gemini Live websocket session runtime
+
+- [src/screens/LiveCallScreen.tsx](C:/Users/NAMAN%20KHARBANDA/Downloads/ElatoAI-main%20(2)/ElatoAI-main/mobile-app-expo/src/screens/LiveCallScreen.tsx)
+- [src/screens/PanditVideoScreen.tsx](C:/Users/NAMAN%20KHARBANDA/Downloads/ElatoAI-main%20(2)/ElatoAI-main/mobile-app-expo/src/screens/PanditVideoScreen.tsx)
+  - core sacred realtime screens
+
+## Required Environment Variables
+
+Create `.env` in this folder with:
+
+```env
+EXPO_PUBLIC_SUPABASE_URL=...
+EXPO_PUBLIC_SUPABASE_ANON_KEY=...
+EXPO_PUBLIC_GEMINI_API_KEY=...
+EXPO_PUBLIC_LIVEKIT_URL=wss://...
+```
+
+Notes:
+- The app will deliberately fail with a config error if Supabase values still point at localhost or placeholders
+- `EXPO_PUBLIC_LIVEKIT_URL` falls back to the current hosted Smart Murti LiveKit URL if omitted
+
+## Local Development
 
 1. Install dependencies:
 
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-2. Create `.env` from `.env.example` and fill in your Supabase values.
+2. Start Expo:
 
-3. Start the Expo dev server:
+   ```bash
+   npm run start:tunnel
+   ```
 
-```bash
-npm run start:tunnel
-```
+3. Typecheck before shipping:
 
-4. For native speech-recognition features, use a development build or release build, not Expo Go.
+   ```bash
+   npm run typecheck
+   ```
 
-5. Run on Android:
+4. Local Android export check:
 
-```bash
-npx expo run:android
-```
+   ```bash
+   npx expo export --platform android
+   ```
 
-## Build outputs
+## Device / Build Commands
 
-- Test APK with EAS:
+- Start on Android:
 
-```bash
-npx eas build -p android --profile preview
-```
+  ```bash
+  npm run android
+  ```
+
+- Preview APK:
+
+  ```bash
+  npx eas build -p android --profile preview
+  ```
 
 - Play Store AAB:
 
-```bash
-npx eas build -p android --profile production
-```
+  ```bash
+  npx eas build -p android --profile production
+  ```
 
-## Notes
+## Architecture Notes
 
-- This app reads auth and customer data from the same Supabase project as the web app.
-- Voice call currently uses native speech recognition plus backend AI responses. It is not yet the same low-latency full-duplex browser Gemini stack used on the web.
-- Some existing web API routes in `frontend-nextjs/app/api/*` rely on Next.js cookie sessions, so they need mobile token support before full feature parity.
-- For Google OAuth to work end to end, the `smartmurti://auth/callback` deep link must be added to the Supabase auth redirect URL allow-list.
+- The app should not invent product truth that differs from the website
+- Shared product rules should come from the website backend first
+- Mobile-specific APIs currently live under:
+  - [frontend-nextjs/app/api/mobile](C:/Users/NAMAN%20KHARBANDA/Downloads/ElatoAI-main%20(2)/ElatoAI-main/frontend-nextjs/app/api/mobile)
+
+## Current Product Scope
+
+The active mobile surface includes:
+
+- auth
+- onboarding
+- Smart Pandit home
+- guide chat
+- live voice call
+- live video puja
+- horoscope
+- bhajans
+- wallet
+- profile/settings
+
+If you are debugging a mismatch between web and mobile, start by checking whether the website backend contract changed first.

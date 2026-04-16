@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+        type GeminiHistoryEntry = { role: "user" | "model"; content: string };
         const selectedPersonality =
             personalityId && personalityId !== dbUser.personality_id
                 ? await getPersonalityById(supabase, personalityId)
@@ -59,13 +60,26 @@ export async function POST(request: NextRequest) {
         // Let's rely on the client passing the current session history for immediate continuity,
         // and the system prompt for long-term / personality context.
 
-        const recentMessages = Array.isArray(messages) ? messages.slice(-12) : [];
+        const recentMessages = Array.isArray(messages) ? messages.slice(-16) : [];
+        const normalizedHistory = recentMessages
+            .map((entry: any): GeminiHistoryEntry => ({
+                role: entry?.role === "user" ? "user" : "model",
+                content: typeof entry?.content === "string" ? entry.content.trim() : "",
+            }))
+            .filter((entry) => entry.content.length > 0);
+        const firstUserIndex = normalizedHistory.findIndex(
+            (entry) => entry.role === "user"
+        );
+        const safeHistory =
+            firstUserIndex >= 0
+                ? normalizedHistory.slice(firstUserIndex).map((entry) => ({
+                    role: entry.role,
+                    parts: [{ text: entry.content }],
+                }))
+                : [];
 
         const chat = model.startChat({
-            history: recentMessages.map((m: any) => ({
-                role: m.role === 'user' ? 'user' : 'model',
-                parts: [{ text: m.content }],
-            })),
+            history: safeHistory,
         });
 
         const result = await chat.sendMessage(message);

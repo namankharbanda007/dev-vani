@@ -17,7 +17,7 @@ export default function LeftNavbarButtons({ user }: LeftNavbarButtonsProps) {
             >
                 <Link href={user ? "/home" : "/landing-2"}>
                     <p className="flex items-center font-luckiestGuy text-2xl tracking-widest">
-                        <span>SMART MURTI</span>
+                        <span>SMART मूर्ति</span>
                     </p>
                 </Link>
             </Button>

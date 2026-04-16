@@ -10,13 +10,13 @@ import {
 export const metadata = buildMetadata({
     title: siteConfig.name,
     description:
-        "Explore SMART Murti's AI devotional ecosystem for guided puja, spiritual conversations, astrology, horoscopes, bhajans, and connected home temple products.",
+        "Talk to SMART Murti's live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.",
     path: "/",
     keywords: [
-        "ai spiritual guide",
-        "guided puja",
-        "ai devotional ecosystem",
-        "home temple ai",
+        "ai pandit",
+        "live ai pandit",
+        "family puja online",
+        "multilingual spiritual guidance",
     ],
 });
 
@@ -29,26 +29,22 @@ const homeJsonLd = {
             url: absoluteUrl("/"),
             name: siteConfig.name,
             description:
-                "Homepage for SMART Murti's AI devotional ecosystem, products, services, and spiritual tools.",
+                "Homepage for SMART Murti's live multilingual AI Pandit, family puja, and spiritual guidance.",
             isPartOf: {
                 "@id": absoluteUrl("/#website"),
             },
             about: [
                 {
                     "@type": "Thing",
-                    name: "AI spiritual guidance",
+                    name: "Live AI pandit guidance",
                 },
                 {
                     "@type": "Thing",
-                    name: "Guided puja",
+                    name: "Family puja online",
                 },
                 {
                     "@type": "Thing",
-                    name: "Vedic astrology",
-                },
-                {
-                    "@type": "Thing",
-                    name: "Bhajans and devotional music",
+                    name: "Multilingual devotional support",
                 },
             ],
         },

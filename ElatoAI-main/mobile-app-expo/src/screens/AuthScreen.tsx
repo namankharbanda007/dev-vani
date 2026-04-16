@@ -42,18 +42,18 @@ function AuthField({
 }) {
   return (
     <View style={styles.fieldWrap}>
+      <View style={styles.fieldLabelChip}>
+        <Text style={styles.fieldLabel}>{label}</Text>
+      </View>
       <View style={styles.fieldShell}>
-        <View style={styles.fieldLabelChip}>
-          <Text style={styles.fieldLabel}>{label}</Text>
-        </View>
         <View style={styles.fieldIconWrap}>
-          <Ionicons name={icon} size={22} color="#4A4A4A" />
+          <Ionicons name={icon} size={20} color={colors.gray500} />
         </View>
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#8F8A82"
+          placeholderTextColor={colors.gray400}
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
@@ -76,17 +76,19 @@ export function AuthScreen() {
     () =>
       mode === "login"
         ? {
-            title: "Welcome Back!",
-            description: "Ready to continue your journey?",
-            divider: "OR USING EMAIL",
+            title: "Welcome Back",
+            description:
+              "Return to one calm spiritual front door for guidance, puja, and family support.",
+            divider: "OR CONTINUE WITH EMAIL",
             submit: "Login",
             pending: "Logging in...",
           }
         : {
-            title: "Join the Family",
-            description: "Start your spiritual journey today",
+            title: "Begin With Smart Pandit",
+            description:
+              "Create your account and start with a spiritual guide that feels personal, immediate, and family-ready.",
             divider: "OR CREATE WITH EMAIL",
-            submit: "Sign Up",
+            submit: "Create Account",
             pending: "Creating account...",
           },
     [mode]
@@ -99,7 +101,6 @@ export function AuthScreen() {
 
   const handleResetPassword = async () => {
     resetMessages();
-
     if (!email.trim()) {
       setErrorMessage("Enter your email first, then tap Forgot password.");
       return;
@@ -170,11 +171,12 @@ export function AuthScreen() {
     }
   };
 
-  const disabled = !email.trim() || (mode === "signup" ? password.length < 6 : password.length === 0);
+  const disabled =
+    !email.trim() || (mode === "signup" ? password.length < 6 : password.length === 0);
 
   return (
     <View style={styles.page}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={styles.flex}
@@ -184,31 +186,68 @@ export function AuthScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <View style={styles.heroPanel}>
-              <Text style={styles.heroHeading}>Spirituality Meets Companionship</Text>
+            <View style={styles.heroShell}>
+              <Text style={styles.heroHeading}>
+                Spirituality meets companionship for families who need guidance now.
+              </Text>
+              <Text style={styles.heroSubcopy}>
+                Talk to Smart Pandit in your language, start with one-to-one guidance, and bring family in later when the moment becomes bigger.
+              </Text>
               <View style={styles.heroArtCard}>
                 <Image
                   source={require("../../assets/branding/login-hero.jpg")}
                   style={styles.heroArt}
                   resizeMode="cover"
                 />
+                <View style={styles.heroOverlay} />
               </View>
-              <Text style={styles.heroSubcopy}>
-                Join thousands of families discovering AI-powered spiritual guidance and companionship.
-              </Text>
+              <View style={styles.trustRow}>
+                <View style={styles.trustChip}>
+                  <Text style={styles.trustChipText}>Live multilingual guidance</Text>
+                </View>
+                <View style={styles.trustChip}>
+                  <Text style={styles.trustChipText}>Family can join later</Text>
+                </View>
+              </View>
             </View>
 
             <View style={styles.formCard}>
-              <Text style={styles.brandTitle}>SMART मूर्ति</Text>
+              <Text style={styles.brandKicker}>SMART मूर्ति</Text>
 
               <View style={styles.tabRow}>
-                <Pressable onPress={() => { resetMessages(); setMode("login"); }} style={styles.tabButton}>
-                  <Text style={[styles.tabText, mode === "login" && styles.tabTextActive]}>Login</Text>
-                  <View style={[styles.tabUnderline, mode === "login" && styles.tabUnderlineActive]} />
+                <Pressable
+                  onPress={() => {
+                    resetMessages();
+                    setMode("login");
+                  }}
+                  style={styles.tabButton}
+                >
+                  <Text style={[styles.tabText, mode === "login" && styles.tabTextActive]}>
+                    Login
+                  </Text>
+                  <View
+                    style={[
+                      styles.tabUnderline,
+                      mode === "login" && styles.tabUnderlineActive,
+                    ]}
+                  />
                 </Pressable>
-                <Pressable onPress={() => { resetMessages(); setMode("signup"); }} style={styles.tabButton}>
-                  <Text style={[styles.tabText, mode === "signup" && styles.tabTextActive]}>Sign Up</Text>
-                  <View style={[styles.tabUnderline, mode === "signup" && styles.tabUnderlineActive]} />
+                <Pressable
+                  onPress={() => {
+                    resetMessages();
+                    setMode("signup");
+                  }}
+                  style={styles.tabButton}
+                >
+                  <Text style={[styles.tabText, mode === "signup" && styles.tabTextActive]}>
+                    Sign Up
+                  </Text>
+                  <View
+                    style={[
+                      styles.tabUnderline,
+                      mode === "signup" && styles.tabUnderlineActive,
+                    ]}
+                  />
                 </Pressable>
               </View>
 
@@ -240,7 +279,7 @@ export function AuthScreen() {
                   label={mode === "login" ? "Password" : "Create Password"}
                   value={password}
                   onChangeText={setPassword}
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   secureTextEntry
                 />
 
@@ -249,13 +288,18 @@ export function AuthScreen() {
                     <Text style={styles.forgotText}>Forgot password?</Text>
                   </Pressable>
                 ) : (
-                  <Text style={styles.signupHint}>Must be at least 6 characters</Text>
+                  <Text style={styles.signupHint}>
+                    Password must be at least 6 characters.
+                  </Text>
                 )}
 
                 <Pressable
                   onPress={() => void handleSubmit()}
                   disabled={loading || disabled}
-                  style={[styles.submitButton, (loading || disabled) && styles.submitButtonDisabled]}
+                  style={[
+                    styles.submitButton,
+                    (loading || disabled) && styles.submitButtonDisabled,
+                  ]}
                 >
                   <Text style={styles.submitText}>{loading ? copy.pending : copy.submit}</Text>
                 </Pressable>
@@ -271,8 +315,8 @@ export function AuthScreen() {
                   onPress={() => Linking.openURL("https://www.smartmurti.com/terms")}
                 >
                   Terms of Service
-                </Text>
-                {" "}and{" "}
+                </Text>{" "}
+                and{" "}
                 <Text
                   style={styles.footerLink}
                   onPress={() => Linking.openURL("https://www.smartmurti.com/privacy")}
@@ -292,7 +336,7 @@ export function AuthScreen() {
 const styles = StyleSheet.create({
   page: {
     flex: 1,
-    backgroundColor: "#FBF6E9",
+    backgroundColor: colors.softPaper,
   },
   safeArea: {
     flex: 1,
@@ -303,69 +347,96 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 18,
-    paddingTop: 12,
-    paddingBottom: 24,
+    paddingTop: 10,
+    paddingBottom: 28,
+    gap: 16,
   },
-  heroPanel: {
+  heroShell: {
     gap: 12,
   },
   heroHeading: {
-    color: "#21160F",
+    color: colors.gray900,
     fontFamily: fonts.heading,
     fontSize: 28,
-    lineHeight: 34,
-    paddingHorizontal: 10,
-  },
-  heroArtCard: {
-    borderRadius: 34,
-    overflow: "hidden",
-    backgroundColor: "#EAB95C",
-    minHeight: 280,
-    borderWidth: 1,
-    borderColor: "rgba(194, 160, 97, 0.16)",
-  },
-  heroArt: {
-    width: "100%",
-    height: 280,
+    lineHeight: 36,
+    paddingHorizontal: 6,
   },
   heroSubcopy: {
-    textAlign: "center",
-    color: "#3E3024",
+    color: colors.gray500,
     fontFamily: fonts.body,
     fontSize: 15,
     lineHeight: 22,
-    paddingHorizontal: 18,
+    paddingHorizontal: 6,
+    maxWidth: 360,
+  },
+  heroArtCard: {
+    minHeight: 292,
+    borderRadius: 34,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(106,74,44,0.12)",
+    backgroundColor: "#EAC17A",
+    shadowColor: "#6A4A2C",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 4,
+  },
+  heroArt: {
+    width: "100%",
+    height: 292,
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255,247,234,0.08)",
+  },
+  trustRow: {
+    flexDirection: "row",
+    gap: 10,
+    flexWrap: "wrap",
+    paddingHorizontal: 6,
+  },
+  trustChip: {
+    borderRadius: 999,
+    backgroundColor: "#F3E6D1",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+  },
+  trustChipText: {
+    color: colors.gray700,
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
   },
   formCard: {
-    backgroundColor: "#FFFDF8",
+    backgroundColor: colors.white,
     borderRadius: 32,
-    paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 40,
-    gap: 18,
+    paddingHorizontal: 22,
+    paddingTop: 28,
+    paddingBottom: 32,
+    gap: 16,
     borderWidth: 1,
-    borderColor: "rgba(123, 94, 50, 0.08)",
-    marginTop: -22,
-    shadowColor: "#C5A66B",
+    borderColor: "rgba(106,74,44,0.08)",
+    shadowColor: "#6A4A2C",
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 18,
+    elevation: 5,
+    marginTop: -12,
   },
-  brandTitle: {
+  brandKicker: {
     textAlign: "center",
-    color: '#3B1E75', // Closer to the mockup's rich deep purple
+    color: colors.purple900,
     fontFamily: fonts.brand,
-    fontSize: 36,
-    letterSpacing: 0.5,
-    marginTop: -4,
+    fontSize: 30,
+    letterSpacing: 0.2,
   },
   tabRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#D9CFC4",
-    marginHorizontal: 16,
-    marginBottom: 4,
+    borderBottomColor: colors.gray200,
+    marginHorizontal: 10,
   },
   tabButton: {
     flex: 1,
@@ -374,58 +445,59 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   tabText: {
-    color: "#7E746A",
+    color: colors.gray500,
     fontFamily: fonts.body,
     fontSize: 16,
   },
   tabTextActive: {
-    color: '#3B1E75',
+    color: colors.purple900,
     fontFamily: fonts.bodyBold,
   },
   tabUnderline: {
     position: "absolute",
-    bottom: -1, // Exactly override the borderBottom pixel
+    bottom: -1,
     left: 0,
     right: 0,
     height: 3,
-    backgroundColor: "transparent",
     borderTopLeftRadius: 3,
     borderTopRightRadius: 3,
+    backgroundColor: "transparent",
   },
   tabUnderlineActive: {
-    backgroundColor: '#3B1E75',
+    backgroundColor: colors.purple900,
   },
   welcomeBlock: {
     alignItems: "center",
-    marginTop: 4,
-    gap: 4,
+    gap: 6,
   },
   welcomeTitle: {
-    color: "#161311",
-    fontFamily: fonts.bodyBold,
-    fontSize: 26,
+    color: colors.gray900,
+    fontFamily: fonts.heading,
+    fontSize: 30,
+    textAlign: "center",
   },
   welcomeSubtitle: {
-    color: "#4C443C",
+    color: colors.gray500,
     fontFamily: fonts.body,
     fontSize: 15,
+    lineHeight: 22,
     textAlign: "center",
   },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingVertical: 2,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: "#D9CFC4",
+    backgroundColor: colors.gray200,
   },
   dividerText: {
-    color: "#4C443C",
+    color: colors.gray500,
     fontFamily: fonts.bodyBold,
-    fontSize: 12,
+    fontSize: 11,
+    letterSpacing: 0.6,
   },
   fieldsStack: {
     gap: 16,
@@ -433,38 +505,38 @@ const styles = StyleSheet.create({
   fieldWrap: {
     paddingTop: 8,
   },
+  fieldLabelChip: {
+    alignSelf: "flex-start",
+    marginLeft: 14,
+    marginBottom: -10,
+    zIndex: 2,
+    paddingHorizontal: 8,
+    backgroundColor: colors.white,
+  },
   fieldLabel: {
-    color: "#6E635A",
+    color: colors.gray500,
     fontFamily: fonts.body,
     fontSize: 12,
   },
-  fieldLabelChip: {
-    position: "absolute",
-    top: -9,
-    left: 14,
-    zIndex: 2,
-    paddingHorizontal: 8,
-    backgroundColor: "#FFFDF8",
-  },
   fieldShell: {
-    minHeight: 56,
-    borderRadius: 16,
+    minHeight: 58,
+    borderRadius: 18,
     borderWidth: 1.2,
-    borderColor: "#A3978B",
-    backgroundColor: "#FFFDF8",
+    borderColor: colors.gray200,
+    backgroundColor: colors.gray50,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
     gap: 12,
   },
   fieldIconWrap: {
-    width: 30,
+    width: 28,
     alignItems: "center",
     justifyContent: "center",
   },
   fieldInput: {
     flex: 1,
-    color: "#1E1A16",
+    color: colors.gray900,
     fontFamily: fonts.body,
     fontSize: 16,
     paddingVertical: 14,
@@ -472,29 +544,28 @@ const styles = StyleSheet.create({
   forgotWrap: {
     alignSelf: "flex-end",
     marginTop: -4,
-    marginBottom: 4,
   },
   forgotText: {
-    color: '#340E7D',
+    color: colors.purple900,
     fontFamily: fonts.bodyBold,
     fontSize: 13,
   },
   signupHint: {
-    marginLeft: 8,
+    marginLeft: 6,
     color: colors.gray500,
     fontFamily: fonts.body,
     fontSize: 12,
   },
   submitButton: {
-    height: 54,
-    borderRadius: 16,
-    backgroundColor: '#340E7D',
+    height: 56,
+    borderRadius: 20,
+    backgroundColor: colors.purple900,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: '#340E7D',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.16,
-    shadowRadius: 10,
+    shadowColor: "#512A73",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.14,
+    shadowRadius: 14,
     elevation: 4,
   },
   submitButtonDisabled: {
@@ -506,15 +577,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   footerText: {
-    marginTop: 4,
+    marginTop: 2,
     textAlign: "center",
-    color: "#4C443C",
+    color: colors.gray500,
     fontFamily: fonts.body,
     fontSize: 12,
     lineHeight: 18,
   },
   footerLink: {
-    color: '#340E7D',
+    color: colors.purple900,
     textDecorationLine: "underline",
   },
 });
