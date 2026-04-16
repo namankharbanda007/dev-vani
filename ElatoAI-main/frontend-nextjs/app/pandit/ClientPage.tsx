@@ -48,7 +48,7 @@ export default function ClientPage({ userProfile }: { userProfile: UserProfileDa
     };
 
     const handleLeave = () => {
-        window.location.href = "/"; // Go back home on leave
+        window.location.href = "/home";
     };
 
     // If logged in, show a simple one-click join (needed for browser AudioContext user-gesture requirement)
@@ -80,7 +80,7 @@ export default function ClientPage({ userProfile }: { userProfile: UserProfileDa
                                 Namaste, {userProfile.name} 🙏
                             </h1>
                             <p className="text-gray-400 text-sm mb-6">
-                                Ready to enter the Live Puja session
+                                Return to your Smart Pandit live room
                             </p>
 
                             {/* Profile info badges */}

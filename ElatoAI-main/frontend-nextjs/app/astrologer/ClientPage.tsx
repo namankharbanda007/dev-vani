@@ -47,7 +47,7 @@ export default function ClientPage({ userProfile }: { userProfile: UserProfileDa
     };
 
     const handleLeave = () => {
-        window.location.href = "/";
+        window.location.href = "/home";
     };
 
     if (!hasJoined) {
@@ -75,7 +75,7 @@ export default function ClientPage({ userProfile }: { userProfile: UserProfileDa
                                 Namaste, {userProfile.name} ✨
                             </h1>
                             <p className="text-gray-400 text-sm mb-6">
-                                Ready to enter the Live Astrology session
+                                Enter the astrology specialist lane inside Smart Murti
                             </p>
 
                             <div className="flex flex-wrap justify-center gap-2 mb-6">
