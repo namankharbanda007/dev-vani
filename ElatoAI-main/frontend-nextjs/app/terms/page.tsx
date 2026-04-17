@@ -1,92 +1,139 @@
-
-import React from 'react';
 import { buildMetadata } from "@/app/lib/seo";
+import LegalPageLayout from "@/app/components/legal/LegalPageLayout";
 
 export const metadata = buildMetadata({
-    title: "Terms and Conditions",
+    title: "Terms of Service",
     description:
-        "Read SMART Murti's terms and conditions for website, mobile app, and AI-enabled hardware devices.",
+        "Terms of Service for Smartmurti AI Private Limited covering website, app, live pandit sessions, wallet use, and family puja experiences.",
     path: "/terms",
 });
 
+const lastUpdated = "April 17, 2026";
+
 export default function TermsPage() {
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-karla">
-            <div className="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                <h1 className="text-3xl md:text-4xl font-bold font-lora text-gray-900 mb-8 border-b pb-4">
-                    Terms and Conditions
-                </h1>
-
-                <div className="prose prose-purple max-w-none text-gray-700 space-y-6">
-                    <p className="text-sm text-gray-500">Last updated: {new Date().toLocaleDateString()}</p>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">1. Introduction</h2>
-                        <p>
-                            Welcome to <strong>SMART मूर्ति</strong> ("we," "our," or "us"). By accessing or using our website, mobile application, and AI-enabled hardware devices (collectively, the "Services"), you agree to be bound by these Terms and Conditions ("Terms"). If you disagree with any part of the terms, then you may not access the Service.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">2. Use of Our Services</h2>
-                        <p>
-                            To use our Services, you must be at least 13 years old. You agree to use the Services only for lawful purposes and in accordance with these Terms. You are responsible for maintaining the confidentiality of your account and password.
-                        </p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>You must not use our Services to harass, abuse, or harm others.</li>
-                            <li>You must not attempt to reverse engineer our hardware or software.</li>
-                            <li>You must not use the Services to generate content that is illegal, offensive, or harmful.</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">3. AI Interactions</h2>
-                        <p>
-                            Our Services utilize Artificial Intelligence (AI) to generate responses. Please note:
-                        </p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li><strong>Accuracy:</strong> AI responses may not always be accurate. You should verify important information.</li>
-                            <li><strong>Safety:</strong> While we implement safety filters, unexpected outputs may occur.</li>
-                            <li><strong>Not Professional Advice:</strong> The AI Companion is not a substitute for professional medical, legal, or financial advice.</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">4. Intellectual Property</h2>
-                        <p>
-                            The Service and its original content (excluding Content provided by users), features, and functionality are and will remain the exclusive property of SMART मूर्ति and its licensors.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">5. User Accounts</h2>
-                        <p>
-                            When you create an account with us, you must provide us information that is accurate, complete, and current at all times. Failure to do so constitutes a breach of the Terms, which may result in immediate termination of your account on our Service.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">6. Limitation of Liability</h2>
-                        <p>
-                            In no event shall SMART मूर्ति, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">7. Changes</h2>
-                        <p>
-                            We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material we will try to provide at least 30 days notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">8. Contact Us</h2>
-                        <p>
-                            If you have any questions about these Terms, please contact us at support@smartmurti.com.
-                        </p>
-                    </section>
-                </div>
-            </div>
-        </div>
+        <LegalPageLayout
+            title="Terms of Service"
+            lastUpdated={lastUpdated}
+            intro={
+                <p>
+                    These Terms of Service govern your use of SMART मूर्ति operated by <strong>Smartmurti AI Private Limited</strong>.
+                    By using our website, app, chat, live calls, wallet, and family puja features, you agree to these terms.
+                </p>
+            }
+            sections={[
+                {
+                    title: "1. Eligibility and Accounts",
+                    body: (
+                        <>
+                            <p>You must use the platform lawfully and provide reasonably accurate information when creating an account or booking a session.</p>
+                            <p>You are responsible for activity under your account and for keeping your login credentials secure.</p>
+                        </>
+                    ),
+                },
+                {
+                    title: "2. Nature of the Service",
+                    body: (
+                        <>
+                            <p>
+                                SMART मूर्ति provides AI-enabled spiritual guidance, live AI pandit sessions, astrology-style flows, family coordination, and related devotional experiences.
+                                These services are designed for spiritual, cultural, devotional, and informational use.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "3. Acceptable Use",
+                    body: (
+                        <>
+                            <p>You agree not to misuse the platform. This includes not using SMART मूर्ति to:</p>
+                            <ul className="list-disc space-y-2 pl-6">
+                                <li>harass, threaten, impersonate, or abuse others,</li>
+                                <li>attempt to disrupt, reverse engineer, scrape, or compromise the service,</li>
+                                <li>engage in unlawful, fraudulent, or harmful conduct, or</li>
+                                <li>upload or send content that violates applicable law or third-party rights.</li>
+                            </ul>
+                        </>
+                    ),
+                },
+                {
+                    title: "4. AI Outputs and Human Judgment",
+                    body: (
+                        <>
+                            <p>
+                                SMART मूर्ति uses AI systems to generate responses. Outputs may occasionally be incomplete, inaccurate, or imperfect.
+                                You should use your own judgment and not rely on the platform as a substitute for professional medical, legal, financial, or emergency advice.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "5. Wallets, Payments, and Digital Sessions",
+                    body: (
+                        <>
+                            <p>
+                                Some features may require prepaid wallet balance, recharges, or session-based payments. Pricing, credits, and usage rules may change over time.
+                            </p>
+                            <p>
+                                Digital sessions and spiritual guidance are treated as digital services. Refund rules are described in our Refund Policy.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "6. Family Sessions and Shared Rooms",
+                    body: (
+                        <>
+                            <p>
+                                If you invite family or guests into a room, you are responsible for sharing the session appropriately.
+                                You should not share room access publicly or in a way that creates misuse or disruption.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "7. Intellectual Property",
+                    body: (
+                        <>
+                            <p>
+                                The SMART मूर्ति platform, brand, software, design, and service materials are owned by Smartmurti AI Private Limited or its licensors.
+                                You may not copy, resell, or exploit them beyond normal use of the service without permission.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "8. Suspension and Termination",
+                    body: (
+                        <>
+                            <p>
+                                We may suspend or terminate access if we reasonably believe you violated these terms, created abuse or fraud risk,
+                                or threatened the security or reliability of the platform.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "9. Limitation of Liability",
+                    body: (
+                        <>
+                            <p>
+                                To the maximum extent permitted by law, Smartmurti AI Private Limited is not liable for indirect, incidental,
+                                special, or consequential damages arising from your use of the service.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "10. Contact",
+                    body: (
+                        <>
+                            <p>Email: <a className="text-amber-700 underline underline-offset-4" href="mailto:support@smartmurti.com">support@smartmurti.com</a></p>
+                            <p>Registered office address: will be published shortly.</p>
+                        </>
+                    ),
+                },
+            ]}
+        />
     );
 }

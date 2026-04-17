@@ -26,6 +26,7 @@ import Preloader from "@/app/landing-2/components/Preloader";
 import DemoForm, { GuestData } from "@/app/landing-2/components/DemoForm";
 import DemoSession from "@/app/landing-2/components/DemoSession";
 import WhatsappIntegration from "@/app/components/LandingPage/WhatsappIntegration";
+import Footer from "@/app/components/Footer";
 import { homeFaqs } from "@/app/lib/seo";
 
 const lenisOptions = {
@@ -187,6 +188,7 @@ export default function RootHomePage() {
                     <FaqSection />
                     <FinalCtaSection isLoggedIn={isLoggedIn} />
                 </main>
+                <Footer />
             </div>
         </ReactLenis>
     );

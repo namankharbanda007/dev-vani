@@ -1,12 +1,26 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Search, Bell, Video as VideoIcon, MessageSquare, Users, FolderOpen, Calendar, Settings, Sun, Moon, Maximize2, Send, ImageIcon, AudioLines, PhoneOff, VideoOff, MicOff, Mic, User, Copy, UserPlus, CheckCircle2 } from 'lucide-react';
+import {
+    Video as VideoIcon,
+    MessageSquare,
+    Users,
+    Send,
+    AudioLines,
+    PhoneOff,
+    VideoOff,
+    MicOff,
+    Mic,
+    User,
+    UserPlus,
+    CheckCircle2,
+    Sparkles,
+    Home,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { useGroupCall } from '../hooks/useGroupCall';
-import { useWebRTC } from '../hooks/useWebRTC';
-import { useMicrophoneVolume } from '../hooks/useMicrophoneVolume';
+import { useGroupCall } from "../hooks/useGroupCall";
+import { useWebRTC } from "../hooks/useWebRTC";
+import { useMicrophoneVolume } from "../hooks/useMicrophoneVolume";
 
-// Keep track of audio contexts to prevent memory leaks
 export const getSharedAudioContext = () => {
     if (!(window as any).sharedAudioCtx) {
         (window as any).sharedAudioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -20,67 +34,57 @@ interface CallScreenProps {
     onLeave: () => void;
     isOriginalHost?: boolean;
     userAvatarUrl?: string | null;
-    userProfile?: { name: string; dateOfBirth: string | null; zodiacSign: string | null; birthPlace: string | null; birthTime: string | null; rashi: string | null };
+    userProfile?: {
+        name: string;
+        dateOfBirth: string | null;
+        zodiacSign: string | null;
+        birthPlace: string | null;
+        birthTime: string | null;
+        rashi: string | null;
+    };
 }
 
-// Helper component to explicitly attach incoming WebRTC React Refs to standard HTML5 video elements.
 const RemoteVideo = ({ stream }: { stream: MediaStream | undefined | null }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
+
     useEffect(() => {
         const video = videoRef.current;
         if (!video || !stream) return;
 
         try {
             video.srcObject = stream;
-
             const playPromise = video.play();
             if (playPromise !== undefined) {
-                playPromise.catch(e => {
+                playPromise.catch((e) => {
                     console.warn("Blocked by browser autoplay policy, attempting muted play... ", e);
-                    // On some strict browsers, we must fall back to muted or require a tap
-                    // but usually WebRTC streams are exempt if the user granted mic access.
                 });
             }
         } catch (e) {
             console.error("Failed to assign RemoteVideo stream", e);
         }
     }, [stream]);
-    return <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover bg-gray-900" />;
+
+    return <video ref={videoRef} autoPlay playsInline className="h-full w-full object-cover bg-gray-900" />;
 };
 
-
-
-// Generate a default avatar using DiceBear API for users without a photo
 const getDefaultAvatar = (name: string) => {
-    const seed = encodeURIComponent(name || 'user');
+    const seed = encodeURIComponent(name || "user");
     return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=c084fc,f59e0b,ec4899&backgroundType=gradientLinear`;
 };
 
 export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false, userAvatarUrl }: CallScreenProps) {
-    // Group Call Voice Connection
-    // We use the same personality ID for the Pandit as the demo session
     const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
 
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOff, setIsVideoOff] = useState(false);
-
-    // UI States
-    const [activeTab, setActiveTab] = useState('PANDIT');
-    const [chatMessage, setChatMessage] = useState('');
+    const [chatMessage, setChatMessage] = useState("");
     const [messages, setMessages] = useState<{ id: number; sender: string; text: string; time: string; isAI: boolean; avatarUrl?: string }[]>([]);
-    const [isChatOpen, setIsChatOpen] = useState(true);
-    const [showMuhurtaWidget, setShowMuhurtaWidget] = useState(true);
-
-    // Family Meet States
     const [linkCopied, setLinkCopied] = useState(false);
     const [showInviteToast, setShowInviteToast] = useState(false);
-
-    // Camera/Audio States
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const [outboundStream, setOutboundStream] = useState<MediaStream | null>(null);
     const [cameraError, setCameraError] = useState<string | null>(null);
 
-    // Audio Mixing Refs
     const mixerContextRef = useRef<AudioContext | null>(null);
     const mixedAiInputStreamRef = useRef<MediaStream | null>(null);
     const aiInputDestRef = useRef<MediaStreamAudioDestinationNode | null>(null);
@@ -88,57 +92,39 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     const peerSourcesRef = useRef<Map<string, MediaStreamAudioSourceNode>>(new Map());
     const aiSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
 
-    // Shared State: Who is the host?
     const [isAiActiveGlobally, setIsAiActiveGlobally] = useState<boolean>(false);
-    const [isHost, setIsHost] = useState(false); // Did THIS user start the AI?
+    const [isHost, setIsHost] = useState(false);
     const [sharedAgentActivity, setSharedAgentActivity] = useState<string>("idle");
 
     const localName = useMemo(() => participants.join(", "), [participants]);
+    const resolvedAvatarUrl = userAvatarUrl || getDefaultAvatar(participants[0] || "User");
 
-    // Notification state
-    const [showNotifications, setShowNotifications] = useState(false);
-    const [showAvatarMenu, setShowAvatarMenu] = useState(false);
-    const notifications = [
-        { id: 1, text: "🪔 Your daily horoscope is ready!", time: "2 min ago", read: false },
-        { id: 2, text: "🎉 New personality added: Vastu Expert", time: "1 hr ago", read: false },
-        { id: 3, text: "🙏 Reminder: Satyanarayan Puja tomorrow", time: "3 hrs ago", read: true },
-    ];
-    const unreadCount = notifications.filter(n => !n.read).length;
-
-    // Resolve avatar URL with fallback
-    const resolvedAvatarUrl = userAvatarUrl || getDefaultAvatar(participants[0] || 'User');
-
-    // Chat auto-scroll ref
     const chatEndRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // 1. Initialize WebRTC P2P Mesh Network Connections
-    // We send the `outboundStream` (Local Mic + AI Voice)
-    const { connected, remoteParticipants, broadcastEvent, channel, debugLogs } = useWebRTC(roomId, localName, outboundStream);
+    const { connected, remoteParticipants, broadcastEvent, channel } = useWebRTC(roomId, localName, outboundStream);
 
-    // 2. Consolidate local user and actual WebRTC remote participants
-    const activeCallUsers = useMemo(() => [
-        { name: localName || "You", type: 'local', id: 'local', stream: localStream },
-        ...remoteParticipants.map(participant => ({
-            name: participant.name || "User",
-            type: 'remote',
-            id: participant.id,
-            stream: participant.stream
-        }))
-    ], [localName, localStream, remoteParticipants]);
+    const activeCallUsers = useMemo(
+        () => [
+            { name: localName || "You", type: "local" as const, id: "local", stream: localStream },
+            ...remoteParticipants.map((participant) => ({
+                name: participant.name || "User",
+                type: "remote" as const,
+                id: participant.id,
+                stream: participant.stream,
+            })),
+        ],
+        [localName, localStream, remoteParticipants]
+    );
 
-    // 3. Compute the unique names for the AI Group Call prompt
     const allParticipantNames = useMemo(() => {
         const names = new Set<string>();
-        // Add the local inputs
-        participants.forEach(p => names.add(p));
-        // Add the remote inputs
-        remoteParticipants.forEach(p => {
-            // Split by comma in case remote peer typed multiple names "A, B"
+        participants.forEach((p) => names.add(p));
+        remoteParticipants.forEach((p) => {
             if (p.name) {
-                p.name.split(',').forEach(n => names.add(n.trim()));
+                p.name.split(",").forEach((n) => names.add(n.trim()));
             } else {
                 names.add("User");
             }
@@ -146,42 +132,35 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         return Array.from(names);
     }, [participants, remoteParticipants]);
 
-    // 4. Initialize the AI Group Call 
-    // This now receives ALL participants (Host + Guests) so it greets everyone correctly
     const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream, sendMessageToAI } = useGroupCall({
         participants: allParticipantNames,
         personalityId: PANDIT_PERSONALITY_ID,
-        contextType: 'pandit'
+        contextType: "pandit",
     });
 
-    // Real webcam feed
-    const videoGridRef = useRef<HTMLDivElement>(null);
     const aiAudioRef = useRef<HTMLAudioElement>(null);
-
-    // Refs for the Pandit Video looping
     const speakingVideoRef = useRef<HTMLVideoElement>(null);
     const listeningVideoRef = useRef<HTMLVideoElement>(null);
-
-    // Notify AI when a guest joins late
     const prevParticipantsLengthRef = useRef(remoteParticipants.length);
+
     useEffect(() => {
         if (remoteParticipants.length > prevParticipantsLengthRef.current) {
-            // Someone joined
             const newGuest = remoteParticipants[remoteParticipants.length - 1];
             if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                sendMessageToAI(`System Alert: A new guest just joined our room named ${newGuest.name}. Please pause, greet them gently, make them comfortable, and ask the host if it's okay to summarize the progress of the Puja so far.`);
+                sendMessageToAI(
+                    `System Alert: A new guest just joined our room named ${newGuest.name}. Please pause, greet them gently, make them comfortable, and ask the host if it's okay to summarize the progress of the Puja so far.`
+                );
             }
         }
         prevParticipantsLengthRef.current = remoteParticipants.length;
     }, [remoteParticipants, isHost, sessionStatus, sendMessageToAI]);
 
-    // Listen for AI shared state changes from other peers via LiveKit DataChannel
     useEffect(() => {
         const handler = (e: Event) => {
             const detail = (e as CustomEvent).detail;
             if (!detail) return;
 
-            if (detail.event === 'AI_STATE') {
+            if (detail.event === "AI_STATE") {
                 if (detail.payload.status === "STARTED") {
                     setIsAiActiveGlobally(true);
                 } else if (detail.payload.status === "STOPPED") {
@@ -189,101 +168,94 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                 }
             }
 
-            if (detail.event === 'AI_ACTIVITY' && !isHost) {
+            if (detail.event === "AI_ACTIVITY" && !isHost) {
                 setSharedAgentActivity(detail.payload.activity);
             }
 
-            if (detail.event === 'ACTIVE_SPEAKER') {
+            if (detail.event === "ACTIVE_SPEAKER") {
                 if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
                     sendMessageToAI(`[Speaker: ${detail.payload.name}] is now speaking. Address them by name in your response.`);
                 }
             }
 
-            // Receive chat messages from other participants
-            if (detail.event === 'CHAT_MESSAGE') {
-                setMessages(prev => [...prev, {
-                    id: Date.now() + Math.random(),
-                    sender: detail.payload.sender,
-                    text: detail.payload.text,
-                    time: detail.payload.time,
-                    isAI: false,
-                    avatarUrl: detail.payload.avatarUrl,
-                }]);
+            if (detail.event === "CHAT_MESSAGE") {
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        id: Date.now() + Math.random(),
+                        sender: detail.payload.sender,
+                        text: detail.payload.text,
+                        time: detail.payload.time,
+                        isAI: false,
+                        avatarUrl: detail.payload.avatarUrl,
+                    },
+                ]);
             }
         };
 
-        window.addEventListener('livekit-data', handler);
-        return () => window.removeEventListener('livekit-data', handler);
+        window.addEventListener("livekit-data", handler);
+        return () => window.removeEventListener("livekit-data", handler);
     }, [isHost, sessionStatus, sendMessageToAI]);
 
-    // Track active speaking for this client
-    const handleActiveSpeakerChange = useCallback((isSpeaking: boolean) => {
-        // we only broadcast if we are unmuted
-        if (isSpeaking && !isMuted && channel) {
-            broadcastEvent('ACTIVE_SPEAKER', { name: localName });
+    const handleActiveSpeakerChange = useCallback(
+        (isSpeaking: boolean) => {
+            if (isSpeaking && !isMuted && channel) {
+                broadcastEvent("ACTIVE_SPEAKER", { name: localName });
 
-            // if we are the host and we speak, we don't need a broadcast, we can just send it
-            if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                sendMessageToAI(`[Speaker: ${localName}] is now speaking. Address them by name in your response.`);
+                if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
+                    sendMessageToAI(`[Speaker: ${localName}] is now speaking. Address them by name in your response.`);
+                }
             }
-        }
-    }, [isMuted, channel, broadcastEvent, localName, isHost, sessionStatus, sendMessageToAI]);
+        },
+        [isMuted, channel, broadcastEvent, localName, isHost, sessionStatus, sendMessageToAI]
+    );
 
     useMicrophoneVolume(localStream, handleActiveSpeakerChange);
 
-    // Cleanup AI on unmount
     useEffect(() => {
         return () => {
             disconnect();
         };
     }, [disconnect]);
 
-    // Handle "Start Live Puja" click (Become Host)
     const handleStartPuja = async () => {
         const connectedToAi = await connect(mixedAiInputStreamRef.current);
-        if (!connectedToAi) {
-            return;
-        }
+        if (!connectedToAi) return;
 
         setIsHost(true);
         setIsAiActiveGlobally(true);
-        broadcastEvent('AI_STATE', { status: "STARTED" });
+        broadcastEvent("AI_STATE", { status: "STARTED" });
     };
 
-    // Auto-stop AI broadcast if we disconnect
     useEffect(() => {
         if (sessionStatus === "DISCONNECTED" && isHost && isAiActiveGlobally) {
             setIsAiActiveGlobally(false);
             setIsHost(false);
-            broadcastEvent('AI_STATE', { status: "STOPPED" });
+            broadcastEvent("AI_STATE", { status: "STOPPED" });
         }
     }, [sessionStatus, broadcastEvent, isAiActiveGlobally, isHost]);
 
-    // Broadcast and apply agent activity changes if Host
     useEffect(() => {
         if (isHost && isAiActiveGlobally) {
             setSharedAgentActivity(agentActivity);
-            broadcastEvent('AI_ACTIVITY', { activity: agentActivity });
+            broadcastEvent("AI_ACTIVITY", { activity: agentActivity });
         }
     }, [agentActivity, isHost, isAiActiveGlobally, broadcastEvent]);
 
-    // Video playback control based on sharedAgentActivity (synced for everyone)
     useEffect(() => {
         if (!speakingVideoRef.current || !listeningVideoRef.current) return;
 
-        // If Host is connected, sessionStatus = "CONNECTED". For guests, sessionStatus is always "DISCONNECTED" but isAiActiveGlobally is true.
         const isActive = sessionStatus === "CONNECTED" || isAiActiveGlobally;
 
         if (isActive && (sharedAgentActivity === "speaking" || sharedAgentActivity === "thinking")) {
-            speakingVideoRef.current.play().catch(e => console.error("Speaking play error:", e));
+            speakingVideoRef.current.play().catch((e) => console.error("Speaking play error:", e));
             listeningVideoRef.current.pause();
         } else {
-            listeningVideoRef.current.play().catch(e => console.error("Listening play error:", e));
+            listeningVideoRef.current.play().catch((e) => console.error("Listening play error:", e));
             speakingVideoRef.current.pause();
         }
     }, [sessionStatus, isAiActiveGlobally, sharedAgentActivity]);
 
-    // Device Setup & Web Audio Bootstrap — runs ONCE on mount
     useEffect(() => {
         let isMounted = true;
         let activeStream: MediaStream | null = null;
@@ -298,7 +270,6 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                 console.error("Camera access error:", err);
                 if (isMounted) setCameraError(err.message || "Camera access denied");
 
-                // Fallback to audio only
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 } catch (audioErr: any) {
@@ -307,7 +278,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
             }
 
             if (!isMounted) {
-                if (stream) stream.getTracks().forEach(track => track.stop());
+                if (stream) stream.getTracks().forEach((track) => track.stop());
                 return;
             }
 
@@ -320,26 +291,21 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
             try {
                 const ctx = getSharedAudioContext();
-                if (ctx.state === 'suspended') void ctx.resume();
+                if (ctx.state === "suspended") void ctx.resume();
                 mixerContextRef.current = ctx;
 
-                // Create the Input Mixer (Pipes everything to AI)
                 const aiInputDest = ctx.createMediaStreamDestination();
                 mixedAiInputStreamRef.current = aiInputDest.stream;
                 aiInputDestRef.current = aiInputDest;
 
-                // Create the Output Mixer (Pipes Your Mic + AI Audio back to WebRTC peers)
                 const p2pOutputDest = ctx.createMediaStreamDestination();
                 p2pOutputDestRef.current = p2pOutputDest;
 
-                // Create a single, stable outbound stream
                 const outputStream = new MediaStream();
                 if (stream && stream.getVideoTracks().length > 0) outputStream.addTrack(stream.getVideoTracks()[0]);
                 outputStream.addTrack(p2pOutputDest.stream.getAudioTracks()[0]);
-
                 setOutboundStream(outputStream);
 
-                // Attach the local mic to both mixers
                 if (stream && stream.getAudioTracks().length > 0) {
                     const localSource = ctx.createMediaStreamSource(stream);
                     localSource.connect(aiInputDest);
@@ -347,7 +313,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                 }
             } catch (e) {
                 console.error("Web Audio setup error:", e);
-                if (stream) setOutboundStream(stream); // fallback
+                if (stream) setOutboundStream(stream);
             }
         };
 
@@ -355,29 +321,25 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
         return () => {
             isMounted = false;
-            if (activeStream) {
-                activeStream.getTracks().forEach(track => track.stop());
-            }
-            if (p2pOutputDestRef.current) p2pOutputDestRef.current = null;
-            if (aiInputDestRef.current) aiInputDestRef.current = null;
-            peerSourcesRef.current.forEach(source => source.disconnect());
+            if (activeStream) activeStream.getTracks().forEach((track) => track.stop());
+            p2pOutputDestRef.current = null;
+            aiInputDestRef.current = null;
+            peerSourcesRef.current.forEach((source) => source.disconnect());
             peerSourcesRef.current.clear();
             if (aiSourceRef.current) {
                 aiSourceRef.current.disconnect();
                 aiSourceRef.current = null;
             }
         };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, []);
 
-    // Toggle video track on/off without recreating media pipeline
     useEffect(() => {
         if (!localStream) return;
-        localStream.getVideoTracks().forEach(track => {
+        localStream.getVideoTracks().forEach((track) => {
             track.enabled = !isVideoOff;
         });
     }, [isVideoOff, localStream]);
 
-    // Mix AI Output back into P2P and Local Speakers
     useEffect(() => {
         if (aiAudioRef.current && aiOutputStream) {
             aiAudioRef.current.srcObject = aiOutputStream;
@@ -387,51 +349,52 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         const p2pOutputDest = p2pOutputDestRef.current;
         if (!ctx || !p2pOutputDest || !aiOutputStream) return;
 
-        // Disconnect previous AI source if it exists
         if (aiSourceRef.current) {
-            try { aiSourceRef.current.disconnect(); } catch (e) { }
+            try {
+                aiSourceRef.current.disconnect();
+            } catch {
+                // ignore disconnect race
+            }
             aiSourceRef.current = null;
         }
 
         if (aiOutputStream.getAudioTracks().length > 0) {
             try {
                 const aiSource = ctx.createMediaStreamSource(aiOutputStream);
-                aiSource.connect(p2pOutputDest);  // Send AI audio to all WebRTC peers
-                // We omit aiSource.connect(ctx.destination) here because the hidden <audio> tag 
-                // native playback handles local playback, fixing the notorious Chrome WebAudio silence bug.
+                aiSource.connect(p2pOutputDest);
                 aiSourceRef.current = aiSource;
-                console.log("✅ AI audio routed to P2P and local speakers");
+                console.log("AI audio routed to P2P and local speakers");
             } catch (e) {
                 console.error("Failed to connect AI output:", e);
             }
         }
     }, [aiOutputStream]);
 
-    // Mix Remote Peer audio into the AI Input (so the AI hears everyone)
     useEffect(() => {
         const ctx = mixerContextRef.current;
         const aiInputDest = aiInputDestRef.current;
         if (!ctx || !aiInputDest || !isHost) return;
 
-        // Current participant IDs
-        const remoteIds = new Set(remoteParticipants.map(p => p.id));
+        const remoteIds = new Set(remoteParticipants.map((p) => p.id));
 
-        // Cleanup dropped peers
         peerSourcesRef.current.forEach((source, id) => {
             if (!remoteIds.has(id)) {
-                try { source.disconnect(); } catch (e) { }
+                try {
+                    source.disconnect();
+                } catch {
+                    // ignore disconnect race
+                }
                 peerSourcesRef.current.delete(id);
             }
         });
 
-        // Add new remote peer audio to the AI input mixer
-        remoteParticipants.forEach(participant => {
+        remoteParticipants.forEach((participant) => {
             if (!peerSourcesRef.current.has(participant.id) && participant.stream.getAudioTracks().length > 0) {
                 try {
                     const peerSource = ctx.createMediaStreamSource(participant.stream);
                     peerSource.connect(aiInputDest);
                     peerSourcesRef.current.set(participant.id, peerSource);
-                    console.log(`✅ Remote peer ${participant.id} audio piped to AI input`);
+                    console.log(`Remote peer ${participant.id} audio piped to AI input`);
                 } catch (e) {
                     console.error(`Failed to connect remote peer ${participant.id} audio: `, e);
                 }
@@ -439,19 +402,21 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         });
     }, [remoteParticipants, isHost]);
 
-    const handleVideoRef = useCallback((node: HTMLVideoElement | null) => {
-        if (node) {
-            node.srcObject = localStream;
-        }
-    }, [localStream]);
+    const handleVideoRef = useCallback(
+        (node: HTMLVideoElement | null) => {
+            if (node) {
+                node.srcObject = localStream;
+            }
+        },
+        [localStream]
+    );
 
-    // Handle Sending Chat Messages — broadcast to all via LiveKit DataChannel
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (!chatMessage.trim()) return;
 
-        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const senderName = participants[0] || 'User';
+        const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const senderName = participants[0] || "User";
 
         const newMsg = {
             id: Date.now(),
@@ -462,36 +427,26 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
             avatarUrl: resolvedAvatarUrl,
         };
 
-        // Add locally
-        setMessages(prev => [...prev, newMsg]);
-
-        // Broadcast to all remote participants via LiveKit
-        broadcastEvent('CHAT_MESSAGE', {
-            sender: senderName,
-            text: chatMessage,
-            time,
-            avatarUrl: resolvedAvatarUrl,
-        });
-
-        setChatMessage('');
+        setMessages((prev) => [...prev, newMsg]);
+        broadcastEvent("CHAT_MESSAGE", { sender: senderName, text: chatMessage, time, avatarUrl: resolvedAvatarUrl });
+        setChatMessage("");
     };
 
     const copyInviteLink = async () => {
         const url = `${window.location.origin}/pandit?room=${roomId}`;
-        // On mobile, use native share sheet (WhatsApp, Messages, etc.)
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: 'Join my Live Puja 🙏',
-                    text: 'Join me for a live puja session with AI Pandit Ji!',
+                    title: "Join my Live Puja",
+                    text: "Join me for a live puja session with Smart Pandit.",
                     url,
                 });
-                return; // share dialog handled it
-            } catch (e) {
-                // User cancelled or share failed — fall through to clipboard
+                return;
+            } catch {
+                // fallback to clipboard
             }
         }
-        // Desktop fallback — copy to clipboard
+
         navigator.clipboard.writeText(url);
         setLinkCopied(true);
         setShowInviteToast(true);
@@ -499,281 +454,168 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         setTimeout(() => setShowInviteToast(false), 5000);
     };
 
+    const roomActive = sessionStatus === "CONNECTED" || isAiActiveGlobally;
+
     return (
-        <div className="min-h-screen w-full bg-[#E5E0F4] relative flex p-2 lg:p-[2vh] overflow-y-auto">
-
-            {/* The main App Window Container with Glassmorphism / neumorphism */}
-            <div className="w-full min-h-[900px] bg-[#f4f2f9]/90 backdrop-blur-2xl rounded-[16px] lg:rounded-[32px] shadow-2xl border border-white/40 flex flex-col relative z-10 transition-all duration-300">
-
-                {/* TOP HEADER BAR */}
-                <header className="h-[60px] lg:h-[80px] w-full flex items-center justify-between px-4 lg:px-8 shrink-0">
-                    <div className="flex items-center gap-2">
-                        <img
-                            src="/assets/landing/logo.png"
-                            alt="SmartMurti Logo"
-                            className="h-6 lg:h-8 object-contain"
-                        />
-                    </div>
-
-                    {/* Navigation Tabs */}
-                    <nav className="hidden md:flex items-center gap-8 text-sm font-semibold tracking-wide text-gray-500">
-                        {[
-                            { label: 'PANDIT', href: '/pandit' },
-                            { label: 'ASTROLOGER', href: '/astrologer' },
-                            { label: 'LOVE ADVISOR', href: '#' },
-                            { label: 'MAHURAT', href: '#' },
-                            { label: 'PUJA', href: '#' },
-                            { label: 'SERVICE', href: '#' },
-                        ].map(tab => (
-                            <a
-                                key={tab.label}
-                                href={tab.href}
-                                className={`relative px-1 py-2 transition-colors ${activeTab === tab.label ? 'text-gray-900' : 'hover:text-gray-700'}`}
-                            >
-                                {tab.label}
-                                {activeTab === tab.label && (
-                                    <motion.div layoutId="nav-indicator" className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gray-900" />
-                                )}
-                            </a>
-                        ))}
-                    </nav>
-
-                    <div className="flex items-center gap-4">
-                        <button className="flex items-center gap-2 bg-indigo-50 text-indigo-600 px-3 sm:px-4 py-2 rounded-full font-bold text-xs sm:text-sm hover:bg-indigo-100 transition-colors" onClick={copyInviteLink}>
-                            {linkCopied ? <CheckCircle2 className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-                            <span className="hidden sm:inline">{linkCopied ? 'Copied!' : 'Invite Family'}</span>
-                        </button>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow text-gray-600 transition-all border border-gray-100" onClick={() => alert("Search functionality coming soon")}>
-                            <Search className="w-5 h-5" />
-                        </button>
-
-                        {/* Notification Bell with Dropdown */}
-                        <div className="relative">
-                            <button
-                                className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow text-gray-600 relative transition-all border border-gray-100"
-                                onClick={() => { setShowNotifications(!showNotifications); setShowAvatarMenu(false); }}
-                            >
-                                <Bell className="w-5 h-5" />
-                                {unreadCount > 0 && (
-                                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 border-2 border-white text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </button>
-                            <AnimatePresence>
-                                {showNotifications && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                                        className="absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden"
-                                    >
-                                        <div className="px-4 py-3 bg-gradient-to-r from-purple-500/10 to-amber-500/10 border-b border-gray-100">
-                                            <h3 className="font-semibold text-sm text-gray-800">Notifications</h3>
-                                        </div>
-                                        <div className="max-h-60 overflow-y-auto">
-                                            {notifications.map((n) => (
-                                                <div key={n.id} className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-50 last:border-b-0 ${!n.read ? 'bg-purple-50/40' : ''}`}>
-                                                    <p className="text-sm text-gray-700">{n.text}</p>
-                                                    <p className="text-xs text-gray-400 mt-1">{n.time}</p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
-                                            <button className="text-xs text-purple-600 hover:text-purple-800 font-medium w-full text-center" onClick={() => setShowNotifications(false)}>Mark all as read</button>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+        <div className="relative flex min-h-screen w-full overflow-y-auto bg-[radial-gradient(circle_at_top,_rgba(233,202,160,0.35),_transparent_35%),linear-gradient(180deg,#f7f1e6_0%,#efe6d6_100%)] p-2 lg:p-4">
+            <div className="relative z-10 flex min-h-[900px] w-full flex-col overflow-hidden rounded-[20px] border border-white/70 bg-[#fffaf2]/90 shadow-[0_30px_80px_rgba(77,55,24,0.15)] backdrop-blur-xl transition-all duration-300 lg:rounded-[32px]">
+                <header className="shrink-0 border-b border-[#eadfcf] bg-white/70 px-4 py-4 lg:px-8 lg:py-5">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex items-center gap-4">
+                            <img src="/assets/landing/logo.png" alt="SmartMurti Logo" className="h-7 object-contain lg:h-9" />
+                            <div className="hidden h-10 w-px bg-[#eadfcf] sm:block" />
+                            <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[#a27f47]">Live Family Puja</p>
+                                <h1 className="font-lora text-xl text-[#26190f] lg:text-2xl">Smart Pandit Room</h1>
+                                <p className="text-sm text-[#7a6651]">Room {roomId.slice(0, 8)} · {activeCallUsers.length} family members present</p>
+                            </div>
                         </div>
 
-                        {/* User Avatar with Dropdown */}
-                        <div className="relative">
-                            <button
-                                className="w-10 h-10 rounded-full overflow-hidden shadow-sm border-2 border-white cursor-pointer hover:border-purple-300 transition-all"
-                                onClick={() => { setShowAvatarMenu(!showAvatarMenu); setShowNotifications(false); }}
+                        <div className="flex flex-wrap items-center gap-3">
+                            <a
+                                href="/home"
+                                className="inline-flex items-center gap-2 rounded-full border border-[#e6dac6] bg-white px-4 py-2 text-sm font-semibold text-[#5b4936] transition hover:border-[#d6c4a7] hover:bg-[#fff8ee]"
                             >
-                                <img src={resolvedAvatarUrl} alt="User" className="w-full h-full object-cover" />
+                                <Home className="h-4 w-4" />
+                                Home
+                            </a>
+                            <button
+                                className="inline-flex items-center gap-2 rounded-full bg-[#f3ead8] px-4 py-2 text-sm font-semibold text-[#7a5a22] transition hover:bg-[#ebddc2]"
+                                onClick={copyInviteLink}
+                            >
+                                {linkCopied ? <CheckCircle2 className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+                                {linkCopied ? "Copied invite" : "Invite family"}
                             </button>
-                            <AnimatePresence>
-                                {showAvatarMenu && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                                        className="absolute right-0 top-12 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden"
-                                    >
-                                        <div className="px-4 py-3 flex items-center gap-3 border-b border-gray-100">
-                                            <img src={resolvedAvatarUrl} alt="User" className="w-8 h-8 rounded-full object-cover border border-purple-200" />
-                                            <p className="font-semibold text-sm text-gray-800 truncate">{participants[0] || 'User'}</p>
-                                        </div>
-                                        <a href="/home/settings" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 transition-colors">
-                                            <Settings className="w-4 h-4 inline mr-2" />Profile & Settings
-                                        </a>
-                                        <a href="/home" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 transition-colors border-t border-gray-50">
-                                            <User className="w-4 h-4 inline mr-2" />Go to Home
-                                        </a>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                            <div className="flex items-center gap-3 rounded-full border border-[#eadfcf] bg-white px-2 py-1.5 shadow-sm">
+                                <img src={resolvedAvatarUrl} alt="User" className="h-8 w-8 rounded-full border border-[#eadfcf] object-cover" />
+                                <span className="pr-2 text-sm font-medium text-[#4a3929]">{participants[0] || "You"}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-3">
+                        <div className="rounded-2xl border border-[#eadfcf] bg-[#fff8ee] px-4 py-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#aa7b2b]">Purpose</p>
+                            <p className="mt-1 text-sm text-[#5c4734]">Gather your family, speak naturally, and let Smart Pandit guide one calm ritual flow.</p>
+                        </div>
+                        <div className="rounded-2xl border border-[#eadfcf] bg-[#fff8ee] px-4 py-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#aa7b2b]">Status</p>
+                            <p className="mt-1 text-sm text-[#5c4734]">
+                                {roomActive ? "Puja is active now." : isOriginalHost ? "Start when your family is ready." : "Waiting for the host to begin."}
+                            </p>
+                        </div>
+                        <div className="rounded-2xl border border-[#eadfcf] bg-[#fff8ee] px-4 py-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#aa7b2b]">Guidance</p>
+                            <p className="mt-1 text-sm text-[#5c4734]">Keep your microphone open when speaking. Use the side rail only for short family coordination.</p>
                         </div>
                     </div>
                 </header>
 
-                {/* MAIN CONTENT AREA */}
-                <div className="flex-1 w-full flex max-lg:flex-col overflow-y-auto overflow-x-hidden lg:overflow-hidden p-4 lg:p-6 pt-2 gap-4 lg:gap-6">
+                <div className="w-full flex-1 overflow-y-auto p-4 lg:p-6">
+                    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+                        <section className="min-w-0">
+                            <div className="mb-4 flex items-center justify-between gap-4">
+                                <div>
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[#a27f47]">Family Presence</p>
+                                    <h2 className="mt-1 font-lora text-2xl text-[#26190f]">Pandit, family, and ritual flow</h2>
+                                </div>
+                                <div className="inline-flex items-center gap-2 rounded-full border border-[#eadfcf] bg-white px-4 py-2 text-sm font-medium text-[#5f4d3a] shadow-sm">
+                                    <Users className="h-4 w-4 text-[#aa7b2b]" />
+                                    {activeCallUsers.length} in room
+                                </div>
+                            </div>
 
-                    {/* LEFT SIDEBAR NAVIGATION */}
-                    <aside className="hidden lg:flex w-[60px] shrink-0 flex-col items-center gap-4 py-4 z-20">
-                        <div className="flex flex-col gap-4 w-full items-center bg-white/60 p-2 rounded-full shadow-sm shadow-black/5 pb-6">
-                            <button className="w-12 h-12 rounded-full bg-[#111] text-white flex items-center justify-center shadow-md hint-tooltip" title="Video Layout">
-                                <VideoIcon className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={() => setIsChatOpen(!isChatOpen)}
-                                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isChatOpen ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-white text-gray-500'}`}
-                                title="Toggle Chat"
-                            >
-                                <MessageSquare className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={copyInviteLink}
-                                className="w-12 h-12 rounded-full hover:bg-white text-gray-500 flex items-center justify-center transition-colors"
-                                title="Invite Family"
-                            >
-                                <Users className="w-5 h-5" />
-                            </button>
-                            <button className="w-12 h-12 rounded-full hover:bg-white text-gray-500 flex items-center justify-center transition-colors" onClick={() => alert("Puja Samagri checklist coming soon")}>
-                                <FolderOpen className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={() => setShowMuhurtaWidget(!showMuhurtaWidget)}
-                                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${showMuhurtaWidget ? 'bg-orange-100 text-orange-600' : 'hover:bg-white text-gray-500'}`}
-                                title="Toggle Muhurtas"
-                            >
-                                <Calendar className="w-5 h-5" />
-                            </button>
-                            <button className="w-12 h-12 rounded-full hover:bg-white text-gray-500 flex items-center justify-center transition-colors" onClick={() => alert("Settings coming soon")}>
-                                <Settings className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        <div className="mt-auto flex flex-col gap-2 w-full items-center bg-white/60 p-2 rounded-full shadow-sm shadow-black/5">
-                            <button className="w-10 h-10 rounded-full bg-[#111] text-white flex items-center justify-center shadow-md">
-                                <Sun className="w-4 h-4" />
-                            </button>
-                            <button className="w-10 h-10 rounded-full hover:bg-white text-gray-500 flex items-center justify-center transition-colors">
-                                <Moon className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </aside>
-
-                    {/* CENTER STAGE (Videos & Guidelines) */}
-                    <div className="flex-1 flex flex-col min-w-0">
-                        <div className="mb-4">
-                            <h1 className="text-3xl lg:text-4xl font-lora font-medium text-gray-900 tracking-tight">Your Pujas Made Easy.</h1>
-                        </div>
-                        <div className="flex-1 flex max-xl:flex-col flex-row gap-4 min-h-[400px] relative">
-
-                            {/* Participant Ticker Column */}
-                            <div className="w-full xl:w-[220px] shrink-0 flex max-xl:flex-row flex-col gap-4 max-xl:overflow-x-auto overflow-y-auto pb-2 xl:pb-4 scrollbar-hide">
-                                {activeCallUsers.map((user, i) => (
-                                    <div key={i} className="relative w-[140px] xl:w-full shrink-0 aspect-[4/3] rounded-[16px] xl:rounded-[24px] overflow-hidden bg-gray-200 shadow-sm border border-black/5 group">
-                                        {user.type === 'local' ? (
+                            <div className="scrollbar-hide mb-4 flex gap-3 overflow-x-auto pb-2">
+                                {activeCallUsers.map((user) => (
+                                    <div key={user.id} className="relative h-[108px] w-[148px] shrink-0 overflow-hidden rounded-[20px] border border-[#eadfcf] bg-[#d7d0c2] shadow-sm">
+                                        {user.type === "local" ? (
                                             isVideoOff ? (
-                                                <div className="w-full h-full flex items-center justify-center bg-gray-800 text-white">
-                                                    <User className="w-12 h-12 opacity-50" />
+                                                <div className="flex h-full w-full items-center justify-center bg-[#53483b] text-white">
+                                                    <User className="h-10 w-10 opacity-60" />
                                                 </div>
                                             ) : cameraError ? (
-                                                <div className="w-full h-full flex flex-col items-center justify-center bg-red-900/20 text-red-500 p-2 text-center text-xs">
-                                                    <VideoOff className="w-6 h-6 mb-1" />
+                                                <div className="flex h-full w-full flex-col items-center justify-center bg-red-900/10 p-2 text-center text-xs text-red-700">
+                                                    <VideoOff className="mb-1 h-5 w-5" />
                                                     <span>{cameraError}</span>
                                                 </div>
                                             ) : (
-                                                <video ref={handleVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
+                                                <video ref={handleVideoRef} autoPlay playsInline muted className="h-full w-full object-cover bg-gray-900" style={{ transform: "scaleX(-1)" }} />
                                             )
                                         ) : (
-                                            <RemoteVideo stream={user.stream!} />
+                                            <RemoteVideo stream={user.stream} />
                                         )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
-                                        <div className="absolute bottom-2 xl:bottom-3 left-2 xl:left-3 text-white font-medium text-xs xl:text-sm drop-shadow-md truncate max-w-[90%] flex items-center gap-1.5">
-                                            {user.type === 'remote' && <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>}
-                                            {user.name} {user.type === 'local' && "(You)"}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                                        <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1.5 text-xs font-medium text-white">
+                                            {user.type === "remote" && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />}
+                                            <span className="truncate">{user.name}{user.type === "local" ? " (You)" : ""}</span>
                                         </div>
                                     </div>
                                 ))}
 
-                                {/* Webrtc Loading Status (Connecting to signaling server) */}
                                 {!connected && (
-                                    <div className="relative w-[140px] xl:w-full shrink-0 aspect-[4/3] rounded-[16px] xl:rounded-[24px] overflow-hidden bg-white/40 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 group cursor-pointer opacity-50">
-                                        <div className="w-6 h-6 rounded-full border-2 border-transparent border-t-indigo-500 animate-spin"></div>
-                                        <span className="text-xs font-bold text-gray-500 text-center px-2">Network Syncing</span>
+                                    <div className="flex h-[108px] w-[148px] shrink-0 flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-[#d6c7b0] bg-white/60 text-center">
+                                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-transparent border-t-[#aa7b2b]" />
+                                        <span className="px-2 text-xs font-semibold text-[#7d6852]">Family network syncing</span>
                                     </div>
                                 )}
-
-
                             </div>
 
-                            {/* Main AI Video Stage */}
-                            <div className="max-xl:flex-none max-xl:h-[400px] flex-1 w-full max-xl:mx-auto max-w-[800px] aspect-square xl:aspect-auto relative rounded-[24px] xl:rounded-[32px] overflow-hidden bg-gray-900 shadow-lg border border-white/10 group">
-
+                            <div className="relative overflow-hidden rounded-[28px] border border-[#2b1f17]/10 bg-[#1d1712] shadow-[0_25px_60px_rgba(38,25,15,0.25)]">
                                 {sessionStatus === "DISCONNECTED" && !isAiActiveGlobally && isOriginalHost && (
-                                    <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
-                                        <div className="w-16 h-12 rounded-2xl bg-[#20bd5c]/20 border border-[#20bd5c]/30 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
-                                            <VideoIcon className="w-6 h-6 text-[#25D366]" />
+                                    <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-gradient-to-t from-black/90 via-black/40 to-black/80 text-white">
+                                        <div className="mb-8 flex h-12 w-16 items-center justify-center rounded-2xl border border-[#20bd5c]/30 bg-[#20bd5c]/20 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
+                                            <VideoIcon className="h-6 w-6 text-[#25D366]" />
                                         </div>
-                                        <h2 className="text-2xl font-lora font-bold mb-3">Ready to start the Puja?</h2>
-                                        <p className="text-gray-400 mb-10 max-w-sm text-center text-sm">Ensure your camera and microphone are ready.<br />The Pandit is waiting.</p>
+                                        <h2 className="mb-3 text-center font-lora text-2xl font-bold">Ready to start the puja?</h2>
+                                        <p className="mb-10 max-w-sm text-center text-sm text-gray-300">Ensure your camera and microphone are ready. Smart Pandit is waiting for the family to begin.</p>
                                         <button
                                             onClick={handleStartPuja}
-                                            className="px-8 py-3.5 bg-[#1da851] hover:bg-[#199446] text-white font-bold rounded-full shadow-lg shadow-[#1da851]/20 transition-all flex items-center gap-2"
+                                            className="flex items-center gap-2 rounded-full bg-[#1da851] px-8 py-3.5 font-bold text-white shadow-lg shadow-[#1da851]/20 transition-all hover:bg-[#199446]"
                                         >
-                                            <Mic className="w-4 h-4" /> Start Live Puja
+                                            <Mic className="h-4 w-4" /> Start Live Puja
                                         </button>
                                     </div>
                                 )}
 
                                 {sessionStatus === "DISCONNECTED" && !isAiActiveGlobally && !isOriginalHost && (
-                                    <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/90 via-black/40 to-black/80 flex flex-col items-center justify-center text-white">
-                                        <div className="w-16 h-12 rounded-2xl bg-[#20bd5c]/20 border border-[#20bd5c]/30 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
-                                            <VideoIcon className="w-6 h-6 text-[#25D366]" />
+                                    <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-gradient-to-t from-black/90 via-black/40 to-black/80 text-white">
+                                        <div className="mb-8 flex h-12 w-16 items-center justify-center rounded-2xl border border-[#20bd5c]/30 bg-[#20bd5c]/20 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
+                                            <VideoIcon className="h-6 w-6 text-[#25D366]" />
                                         </div>
-                                        <h2 className="text-2xl font-lora font-bold mb-3">Ashram Preparation</h2>
-                                        <p className="text-gray-400 mb-10 max-w-sm text-center text-sm">Please wait while the Host starts the Puja.<br />Ensure your camera and microphone are ready.</p>
+                                        <h2 className="mb-3 text-center font-lora text-2xl font-bold">Ashram preparation</h2>
+                                        <p className="mb-10 max-w-sm text-center text-sm text-gray-300">Please wait while the host starts the puja. Keep your microphone and camera ready.</p>
                                     </div>
                                 )}
 
                                 {sessionStatus === "DISCONNECTED" && isAiActiveGlobally && (
-                                    <div className="absolute top-4 right-4 z-40 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 flex flex-row items-center justify-center text-white gap-2 shadow-lg">
-                                        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                                        <p className="font-medium text-xs text-white">Host started the Puja</p>
+                                    <div className="absolute right-4 top-4 z-40 flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-4 py-2 text-white shadow-lg backdrop-blur-md">
+                                        <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                                        <p className="text-xs font-medium">Host started the puja</p>
                                     </div>
                                 )}
 
                                 {sessionStatus === "CONNECTING" && (
-                                    <div className="absolute inset-0 z-40 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center text-white">
-                                        <div className="w-16 h-16 rounded-full border-4 border-transparent border-t-emerald-500 border-r-emerald-500 animate-spin mb-4"></div>
-                                        <p className="font-medium text-lg text-emerald-100">Connecting to Ashram...</p>
-                                        <p className="text-sm text-gray-400 mt-2">Initializing group context for {participants.join(", ")}</p>
+                                    <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-md">
+                                        <div className="mb-4 h-16 w-16 animate-spin rounded-full border-4 border-transparent border-r-emerald-500 border-t-emerald-500" />
+                                        <p className="text-lg font-medium text-emerald-100">Connecting to the ashram...</p>
+                                        <p className="mt-2 text-sm text-gray-400">Initializing group context for {participants.join(", ")}</p>
                                     </div>
                                 )}
 
-                                {/* Speaking Video */}
                                 <video
                                     ref={speakingVideoRef}
                                     src="/assets/Video_Project_2_optimized.mp4"
-                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${((sessionStatus === "CONNECTED" || isAiActiveGlobally) && (sharedAgentActivity === "speaking" || sharedAgentActivity === "thinking")) ? "opacity-100 z-10" : "opacity-0 -z-10"}`}
+                                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${(roomActive && (sharedAgentActivity === "speaking" || sharedAgentActivity === "thinking")) ? "z-10 opacity-100" : "-z-10 opacity-0"}`}
                                     loop
                                     muted
                                     autoPlay
                                     playsInline
                                     preload="auto"
                                 />
-                                {/* Listening/Idle Video */}
                                 <video
                                     ref={listeningVideoRef}
                                     src="/assets/Silently_paying_attention_optimized.mp4"
-                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${(!(sessionStatus === "CONNECTED" || isAiActiveGlobally) || sharedAgentActivity === "listening" || sharedAgentActivity === "idle") ? "opacity-100 z-0" : "opacity-0 -z-10"}`}
+                                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${(!roomActive || sharedAgentActivity === "listening" || sharedAgentActivity === "idle") ? "z-0 opacity-100" : "-z-10 opacity-0"}`}
                                     loop
                                     muted
                                     autoPlay
@@ -781,229 +623,189 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                     preload="auto"
                                 />
 
-                                {/* Gradient overlays */}
-                                <div className="absolute inset-x-0 bottom-0 h-48 z-10 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
-
-                                {/* Floating Namaste indicator shown briefly after connect */}
-                                <AnimatePresence>
-                                    {(sessionStatus === "CONNECTED" || isAiActiveGlobally) && sharedAgentActivity === "speaking" && (
-                                        <motion.div
-                                            initial={{ scale: 0.8, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
-                                            exit={{ scale: 0.8, opacity: 0 }}
-                                            transition={{ type: "spring" }}
-                                            className="absolute top-1/4 right-1/4 bg-white text-gray-900 font-bold px-4 py-2 rounded-2xl rounded-tr-sm shadow-xl z-20"
-                                        >
-                                            Namaste!
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-
-                                <div className={`absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center text-white z-20 transition-colors ${sharedAgentActivity === 'listening' || sharedAgentActivity === 'idle' ? 'bg-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.5)] border border-blue-500/50' : sharedAgentActivity === 'speaking' ? 'bg-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.5)] border border-green-500/50' : 'bg-gray-500/20 border border-gray-500/50'}`}>
-                                    {sharedAgentActivity === 'listening' || sharedAgentActivity === 'idle' ? <Mic className="w-5 h-5 text-blue-400" /> : <Mic className="w-5 h-5 text-green-400" />}
-                                </div>
-
-                                {/* Hidden Audio element to force Chrome's WebAudio API to recognize the stream */}
                                 <audio ref={aiAudioRef} autoPlay playsInline className="hidden" />
 
-                                {/* Internal Controls Overlay */}
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 backdrop-blur-md bg-white/10 border border-white/20 p-2.5 rounded-full shadow-2xl z-30 transition-opacity">
+                                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-52 bg-gradient-to-t from-black/80 to-transparent" />
+
+                                <div className="absolute left-6 top-6 z-20 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/35 px-3 py-2 text-xs font-medium text-white backdrop-blur-md">
+                                    <Sparkles className="h-4 w-4 text-[#f2c56c]" />
+                                    {sharedAgentActivity === "speaking" || sharedAgentActivity === "thinking" ? "Smart Pandit is guiding the ritual" : "Smart Pandit is listening"}
+                                </div>
+
+                                <div className={`absolute top-4 left-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border text-white transition-colors ${sharedAgentActivity === "listening" || sharedAgentActivity === "idle" ? "border-blue-500/50 bg-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.5)]" : sharedAgentActivity === "speaking" ? "border-green-500/50 bg-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.5)]" : "border-gray-500/50 bg-gray-500/20"}`}>
+                                    <Mic className={`h-5 w-5 ${sharedAgentActivity === "speaking" ? "text-green-400" : "text-blue-400"}`} />
+                                </div>
+
+                                <div className="absolute bottom-24 left-6 right-6 z-20 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                                    <div className="max-w-xl rounded-[24px] border border-white/10 bg-black/30 px-5 py-4 backdrop-blur-md">
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#f2c56c]">Ritual Flow</p>
+                                        <p className="mt-2 text-lg font-medium text-white">
+                                            {roomActive
+                                                ? "Stay present. Smart Pandit will guide each step and respond to your family naturally."
+                                                : "Settle your family, check your camera and microphone, then begin the live puja when ready."}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-full border border-white/15 bg-black/35 p-2.5 shadow-2xl backdrop-blur-md">
                                     <button
                                         onClick={() => setIsVideoOff(!isVideoOff)}
-                                        className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isVideoOff ? 'bg-white text-gray-900' : 'bg-white/20 text-white hover:bg-white/30'}`}
+                                        className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${isVideoOff ? "bg-white text-gray-900" : "bg-white/20 text-white hover:bg-white/30"}`}
                                     >
-                                        {isVideoOff ? <VideoOff className="w-5 h-5" /> : <VideoIcon className="w-5 h-5" />}
+                                        {isVideoOff ? <VideoOff className="h-5 w-5" /> : <VideoIcon className="h-5 w-5" />}
                                     </button>
-                                    <button className="w-12 h-12 rounded-full bg-white/20 text-white hover:bg-white/30 flex items-center justify-center transition-colors">
-                                        <AudioLines className="w-5 h-5" />
+                                    <button className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30">
+                                        <AudioLines className="h-5 w-5" />
                                     </button>
                                     <button
                                         onClick={() => {
                                             const newMuted = !isMuted;
                                             setIsMuted(newMuted);
-                                            localStream?.getAudioTracks().forEach(t => t.enabled = !newMuted);
+                                            localStream?.getAudioTracks().forEach((t) => {
+                                                t.enabled = !newMuted;
+                                            });
                                         }}
-                                        className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isMuted ? 'bg-white text-gray-900' : 'bg-white/20 text-white hover:bg-white/30'}`}
+                                        className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${isMuted ? "bg-white text-gray-900" : "bg-white/20 text-white hover:bg-white/30"}`}
                                     >
-                                        {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                                        {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
                                     </button>
                                     <button
                                         onClick={onLeave}
-                                        className="w-12 h-12 rounded-full bg-red-500 text-white hover:bg-red-600 flex items-center justify-center shadow-lg shadow-red-500/20 transition-all"
+                                        className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500 text-white shadow-lg shadow-red-500/20 transition-all hover:bg-red-600"
                                     >
-                                        <PhoneOff className="w-5 h-5" />
+                                        <PhoneOff className="h-5 w-5" />
                                     </button>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Bottom Guidelines & Transcription Area */}
-                        <div className="h-auto xl:h-[80px] shrink-0 w-full mt-3 flex max-xl:flex-col flex-row gap-4">
-                            <div className="flex-1 bg-white/60 backdrop-blur rounded-[16px] xl:rounded-[24px] p-4 xl:p-5 shadow-sm border border-white/60 flex flex-col justify-between">
-                                <div className="flex items-center justify-between pointer-events-none pb-2 xl:pb-0">
-                                    <h3 className="font-bold text-gray-900 text-sm tracking-wide">PUJA GUIDELINES</h3>
-                                    <span className="text-xs text-gray-400 font-mono">cite: 8</span>
+                            <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                                <div className="rounded-[24px] border border-[#eadfcf] bg-white/80 p-5 shadow-sm">
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#a27f47]">Before you continue</p>
+                                    <p className="mt-2 text-sm leading-6 text-[#5a4632]">
+                                        Keep one calm speaker at a time, invite relatives before the main chant begins, and let Smart Pandit handle the sequence of the puja.
+                                    </p>
                                 </div>
-                                <p className="text-gray-700 font-medium text-sm xl:text-base">
-                                    Namaste! We will perform Ganesh Puja shortly. Keep your space sacred for new beginnings. This time is highly auspicious.
+                                <div className="rounded-[24px] border border-[#eadfcf] bg-white/80 p-5 shadow-sm">
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#a27f47]">Live session signal</p>
+                                    <div className="mt-3 flex items-center gap-3">
+                                        <div className="flex flex-1 items-center justify-center gap-1 opacity-70">
+                                            {Array.from({ length: 8 }).map((_, i) => (
+                                                <motion.div
+                                                    key={i}
+                                                    className={`w-1.5 rounded-full ${agentActivity === "speaking" ? "bg-green-500" : "bg-[#aa7b2b]"}`}
+                                                    animate={{
+                                                        height:
+                                                            agentActivity === "speaking" || agentActivity === "thinking"
+                                                                ? ["12px", `${24 + (i % 4) * 6}px`, "12px"]
+                                                                : "6px",
+                                                    }}
+                                                    transition={{
+                                                        repeat: Infinity,
+                                                        duration: 0.5 + (i % 3) * 0.2,
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                        <div className="flex items-center gap-2 rounded-full bg-[#2a211a] px-3 py-2 text-xs font-semibold text-white">
+                                            <div className={`h-2.5 w-2.5 rounded-full ${roomActive ? "bg-emerald-400 animate-pulse" : "bg-white/50"}`} />
+                                            {roomActive ? "Live now" : "Standby"}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <aside className="flex min-h-[580px] flex-col overflow-hidden rounded-[28px] border border-[#eadfcf] bg-white/82 shadow-sm">
+                            <div className="border-b border-[#efe3d2] px-5 py-5">
+                                <div className="flex items-center gap-3">
+                                    <img src="/assets/Pandit Performing Aarti.jpg" alt="Pandit Ji" className="h-11 w-11 rounded-full border border-[#f1d8aa] object-cover" />
+                                    <div>
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#aa7b2b]">Guidance Rail</p>
+                                        <h3 className="font-lora text-xl text-[#26190f]">Smart Pandit Notes</h3>
+                                    </div>
+                                </div>
+                                <p className="mt-3 text-sm leading-6 text-[#65513e]">
+                                    Keep family coordination here. This panel is intentionally light so the ritual stays at the center.
                                 </p>
                             </div>
 
-                            <div className="w-full xl:w-[320px] bg-white/60 backdrop-blur rounded-[16px] xl:rounded-[24px] p-4 xl:p-5 shadow-sm border border-white/60 flex items-center justify-between gap-4">
-                                <div className="flex gap-2">
-                                    <button className="bg-gray-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow">Transcription</button>
-                                    <button className="bg-white text-gray-600 border border-gray-200 text-xs font-bold px-4 py-2 rounded-full shadow-sm hover:bg-gray-50">Subtitle</button>
+                            <div className="flex items-center justify-between border-b border-[#efe3d2] px-5 py-4 text-sm">
+                                <div className="flex items-center gap-2 text-[#5d4a36]">
+                                    <MessageSquare className="h-4 w-4 text-[#aa7b2b]" />
+                                    Family chat
                                 </div>
-
-                                {/* Voice visualizer indication */}
-                                {sessionStatus === "CONNECTED" && (
-                                    <div className="flex-1 max-w-xs mx-auto flex items-center justify-center gap-1 opacity-50">
-                                        {Array.from({ length: 8 }).map((_, i) => (
-                                            <motion.div
-                                                key={i}
-                                                className={`w-1.5 rounded-full ${agentActivity === 'speaking' ? 'bg-green-500' : 'bg-blue-500'}`}
-                                                animate={{
-                                                    height: agentActivity === 'speaking' || agentActivity === 'thinking'
-                                                        ? ["12px", `${24 + (i % 4) * 6}px`, "12px"]
-                                                        : "6px"
-                                                }}
-                                                transition={{
-                                                    repeat: Infinity,
-                                                    duration: 0.5 + (i % 3) * 0.2,
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-
-                                <div className="w-10 h-10 rounded-full bg-gray-900 text-red-500 flex items-center justify-center shadow-md">
-                                    <div className={`w-3 h-3 rounded-full bg-red-500 ${sessionStatus === "CONNECTED" ? "animate-pulse" : ""}`}></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Invite Toast Notification */}
-                        <AnimatePresence>
-                            {showInviteToast && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 50 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 50 }}
-                                    className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 z-50 pointer-events-none"
-                                >
-                                    <CheckCircle2 className="w-5 h-5 text-green-400" />
-                                    <span className="font-medium text-sm">Meeting link copied to clipboard. Share with family!</span>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-
-                    </div>
-
-                    {/* RIGHT SIDEBAR (Chat & Muhurtas) */}
-                    {isChatOpen && (
-                        <div className="w-full lg:w-[350px] shrink-0 flex flex-col gap-4 max-lg:h-[500px] transition-all">
-
-                            {/* Top Expert Profiles Banner */}
-                            <div className="w-full flex justify-end gap-2 mb-2 pr-2">
-                                <div className="flex items-center gap-2 bg-white/80 backdrop-blur rounded-full p-1.5 shadow-sm border border-white border-b-black/5 pr-4 pl-2 cursor-pointer hover:bg-white transition-colors">
-                                    <img src="/assets/Pandit Performing Aarti.jpg" alt="Pandit Ji" className="w-8 h-8 rounded-full border border-orange-200 object-cover" />
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold leading-tight">AI Pandit Ji</span>
-                                    </div>
-                                </div>
+                                <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${roomActive ? "bg-emerald-50 text-emerald-700" : "bg-stone-100 text-stone-600"}`}>
+                                    <span className={`h-2 w-2 rounded-full ${roomActive ? "bg-emerald-500" : "bg-stone-400"}`} />
+                                    {activeCallUsers.length} in room
+                                </span>
                             </div>
 
-                            {/* Chat Container */}
-                            <div className="flex-1 bg-white/60 backdrop-blur rounded-[32px] overflow-hidden shadow-sm border border-white/60 flex flex-col relative h-full">
-                                <div className="p-5 flex items-center justify-between bg-white/40 border-b border-black/5">
-                                    <div>
-                                        <h3 className="font-bold text-gray-900 flex items-center gap-2">LIVE PUJA CHAT <MessageSquare className="w-4 h-4 text-indigo-500" /></h3>
-                                        <div className="flex items-center gap-1.5 mt-0.5">
-                                            <span className={`w-2 h-2 rounded-full ${sessionStatus === 'CONNECTED' ? 'bg-green-500' : 'bg-gray-400'}`}></span>
-                                            <span className={`text-xs font-medium ${sessionStatus === 'CONNECTED' ? 'text-green-600' : 'text-gray-500'}`}>
-                                                {activeCallUsers.length} People in call
-                                            </span>
-                                        </div>
+                            <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+                                {messages.length === 0 ? (
+                                    <div className="rounded-[22px] border border-dashed border-[#dfd1bb] bg-[#fff8ee] p-5 text-sm leading-6 text-[#715d48]">
+                                        Use this rail for short family coordination, like letting late relatives know the puja has started or asking everyone to stay unmuted when speaking.
                                     </div>
-                                    <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 text-gray-500 transition-colors" onClick={() => setIsChatOpen(false)}>
-                                        <Maximize2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-
-                                {/* Chat Messages */}
-                                <div className="flex-1 overflow-y-auto p-5 pb-24 flex flex-col gap-5 scrollbar-hide">
-
-                                    {messages.map((msg) => (
-                                        <div key={msg.id} className={`flex ${msg.isAI ? 'gap-3' : 'gap-3'}`}>
-                                            {/* Avatar */}
+                                ) : (
+                                    messages.map((msg) => (
+                                        <div key={msg.id} className="flex gap-3">
                                             {msg.isAI ? (
-                                                <img src="/assets/Pandit Performing Aarti.jpg" alt="Pandit Ji" className="w-8 h-8 rounded-full bg-orange-100 object-cover shrink-0 mt-1 border border-orange-200" />
+                                                <img src="/assets/Pandit Performing Aarti.jpg" alt="Pandit Ji" className="mt-1 h-8 w-8 shrink-0 rounded-full border border-[#f1d8aa] object-cover" />
                                             ) : (
-                                                <img
-                                                    src={msg.avatarUrl || getDefaultAvatar(msg.sender)}
-                                                    alt={msg.sender}
-                                                    className="w-8 h-8 rounded-full object-cover shrink-0 mt-1 border border-purple-200"
-                                                />
+                                                <img src={msg.avatarUrl || getDefaultAvatar(msg.sender)} alt={msg.sender} className="mt-1 h-8 w-8 shrink-0 rounded-full border border-[#eadfcf] object-cover" />
                                             )}
-                                            <div className="flex flex-col flex-1 min-w-0">
-                                                <span className="text-xs text-gray-500 mb-1 font-medium">
-                                                    {msg.sender} <span className="float-right ml-4">{msg.time}</span>
-                                                </span>
-                                                <div className={`${msg.isAI ? 'bg-white text-gray-700 border border-black/[0.03] rounded-tl-sm' : 'bg-indigo-600 text-white rounded-tl-sm'} p-3.5 rounded-2xl text-sm shadow-sm leading-relaxed`}>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="mb-1 flex items-center justify-between gap-2 text-xs text-[#8a7865]">
+                                                    <span className="font-medium">{msg.sender}</span>
+                                                    <span>{msg.time}</span>
+                                                </div>
+                                                <div className={`rounded-2xl p-3 text-sm leading-6 shadow-sm ${msg.isAI ? "border border-[#f1e6d5] bg-[#fff8ee] text-[#594634]" : "bg-[#8f5d23] text-white"}`}>
                                                     {msg.text}
                                                 </div>
                                             </div>
                                         </div>
-                                    ))}
-                                    <div ref={chatEndRef} />
-
-                                    {/* Optional Muhurta Card injected into Chat (Toggleable) */}
-                                    {showMuhurtaWidget && (
-                                        <div className="flex flex-col items-end w-full pl-4 relative mt-4">
-                                            <div className="bg-white rounded-[24px] p-4 shadow-lg shadow-black/5 w-full border border-orange-100 mt-1 relative z-10">
-                                                <h4 className="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2">
-                                                    <Calendar className="w-4 h-4 text-orange-500" /> PUJA MUHURTAS
-                                                </h4>
-                                                <div className="flex justify-between items-center mb-6">
-                                                    <div className="w-12 h-12 bg-[#ffe4d6] rounded-xl flex items-center justify-center text-xl shadow-inner border border-orange-50">🏺</div>
-                                                    <div className="w-12 h-12 bg-[#fff1cc] rounded-xl flex items-center justify-center text-xl shadow-inner border border-yellow-50">🪔</div>
-                                                    <div className="w-12 h-12 bg-[#ffe4d6] rounded-xl flex items-center justify-center text-xl shadow-inner border border-orange-50">🥥</div>
-                                                    <div className="w-12 h-12 bg-[#dcfce7] rounded-xl flex items-center justify-center text-xl shadow-inner border border-green-50">🪷</div>
-                                                </div>
-                                                <div className="bg-orange-50 text-orange-900 p-4 rounded-xl text-center cursor-pointer hover:bg-orange-100 transition-colors border border-orange-200 max-w-full">
-                                                    <p className="text-xs mb-2 font-medium">View Today's Auspicious Times</p>
-                                                    <button className="bg-white border border-orange-200 text-orange-700 w-full rounded-lg py-2 font-bold text-sm shadow-sm hover:shadow transition-shadow">View Now</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                </div>
-
-                                {/* Chat Input Area */}
-                                <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-black/5 pb-6">
-                                    <form className="relative" onSubmit={handleSendMessage}>
-                                        <input
-                                            type="text"
-                                            value={chatMessage}
-                                            onChange={(e) => setChatMessage(e.target.value)}
-                                            placeholder="Type a message to the group..."
-                                            className="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pl-4 pr-12 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all font-medium text-gray-700"
-                                        />
-                                        <button type="submit" disabled={!chatMessage.trim()} className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-indigo-600 disabled:bg-gray-400 text-white rounded-xl flex items-center justify-center shadow-md hover:bg-indigo-700 transition-colors">
-                                            <Send className="w-4 h-4 ml-0.5" />
-                                        </button>
-                                    </form>
-                                </div>
+                                    ))
+                                )}
+                                <div ref={chatEndRef} />
                             </div>
-                        </div>
-                    )}
+
+                            <div className="border-t border-[#efe3d2] bg-white/90 px-5 py-4">
+                                <form className="relative" onSubmit={handleSendMessage}>
+                                    <input
+                                        type="text"
+                                        value={chatMessage}
+                                        onChange={(e) => setChatMessage(e.target.value)}
+                                        placeholder="Send a short note to your family..."
+                                        className="w-full rounded-2xl border border-[#e3d5bf] bg-[#fffdf9] py-3.5 pl-4 pr-12 text-sm font-medium text-[#4c3a29] shadow-sm transition-all focus:border-[#cda96a] focus:outline-none focus:ring-2 focus:ring-[#e8d2a7]/40"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!chatMessage.trim()}
+                                        className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl bg-[#8f5d23] text-white shadow-md transition-colors hover:bg-[#7b4f1e] disabled:bg-stone-300"
+                                    >
+                                        <Send className="h-4 w-4" />
+                                    </button>
+                                </form>
+                            </div>
+                        </aside>
+                    </div>
+
+                    <AnimatePresence>
+                        {showInviteToast && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 50 }}
+                                className="pointer-events-none fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full bg-[#26190f] px-6 py-3 text-white shadow-2xl"
+                            >
+                                <CheckCircle2 className="h-5 w-5 text-green-400" />
+                                <span className="text-sm font-medium">Invite link copied. Share it with your family.</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 
-            {/* Decorative backdrop blobs mimicking realistic environment */}
-            <div className="absolute top-0 right-0 w-1/3 h-1/2 bg-blue-400/10 blur-[150px] pointer-events-none z-0 rounded-full" />
-            <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-400/20 blur-[150px] pointer-events-none z-0 rounded-full" />
+            <div className="pointer-events-none absolute top-0 right-0 z-0 h-1/2 w-1/3 rounded-full bg-[#f0c680]/20 blur-[160px]" />
+            <div className="pointer-events-none absolute bottom-0 left-0 z-0 h-1/2 w-1/2 rounded-full bg-[#d6b48b]/25 blur-[160px]" />
         </div>
     );
 }

@@ -1,83 +1,132 @@
-
-import React from 'react';
 import { buildMetadata } from "@/app/lib/seo";
+import LegalPageLayout from "@/app/components/legal/LegalPageLayout";
 
 export const metadata = buildMetadata({
     title: "Privacy Policy",
     description:
-        "Read SMART Murti's privacy policy covering personal data, voice data, usage data, and how information is handled across the platform.",
+        "Privacy Policy for Smartmurti AI Private Limited covering account data, voice interactions, spiritual session history, and payments.",
     path: "/privacy",
 });
 
+const lastUpdated = "April 17, 2026";
+
 export default function PrivacyPage() {
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-karla">
-            <div className="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                <h1 className="text-3xl md:text-4xl font-bold font-lora text-gray-900 mb-8 border-b pb-4">
-                    Privacy Policy
-                </h1>
-
-                <div className="prose prose-purple max-w-none text-gray-700 space-y-6">
-                    <p className="text-sm text-gray-500">Last updated: {new Date().toLocaleDateString()}</p>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">1. Introduction</h2>
-                        <p>
-                            <strong>SMART मूर्ति</strong> ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our AI devices.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">2. Information We Collect</h2>
-                        <p>We may collect information about you in a variety of ways:</p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li><strong>Personal Data:</strong> Personally identifiable information, such as your name, email address, and demographic information that you voluntarily give to us when you register with the Services.</li>
-                            <li><strong>Voice Data:</strong> To provide our AI conversation services, we process voice inputs. Meaningful conversations may be stored to provide context for your AI companion's memory, subject to your control.</li>
-                            <li><strong>Usage Data:</strong> Information about your device, IP address, and how you use our Services.</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">3. How We Use Your Information</h2>
-                        <p>We use the information we collect to:</p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>Provide, operate, and maintain our Services.</li>
-                            <li>Improve, personalize, and expand our Services.</li>
-                            <li>Develop new products, services, features, and functionality.</li>
-                            <li>Communicate with you, either directly or through one of our partners, including for customer service.</li>
-                            <li>Process your transactions.</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">4. Data Security</h2>
-                        <p>
-                            We use administrative, technical, and physical security measures to help protect your personal information. While we have taken reasonable steps to secure the personal information you provide to us, please be aware that despite our efforts, no security measures are perfect or impenetrable, and no method of data transmission can be guaranteed against any interception or other type of misuse.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">5. Sharing Your Information</h2>
-                        <p>
-                            We do not sell, trade, or otherwise transfer to outside parties your Personally Identifiable Information unless we provide users with advance notice. This does not include website hosting partners and other parties who assist us in operating our website, conducting our business, or serving our users, so long as those parties agree to keep this information confidential.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">6. Children's Privacy</h2>
-                        <p>
-                            Our Services are not intended for use by children under the age of 13 without parental consent. We do not knowingly collect personally identifiable information from children under 13. If you become aware that a child has provided us with Personal Data, please contact us.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-gray-900 mb-3">7. Contact Us</h2>
-                        <p>
-                            If you have questions or comments about this Privacy Policy, please contact us at support@smartmurti.com.
-                        </p>
-                    </section>
-                </div>
-            </div>
-        </div>
+        <LegalPageLayout
+            title="Privacy Policy"
+            lastUpdated={lastUpdated}
+            intro={
+                <p>
+                    This Privacy Policy explains how <strong>Smartmurti AI Private Limited</strong> collects, uses, stores,
+                    and protects information when you use SMART मूर्ति through our website, mobile application,
+                    chat, live call, WhatsApp experiences, and family puja sessions.
+                </p>
+            }
+            sections={[
+                {
+                    title: "1. Information We Collect",
+                    body: (
+                        <>
+                            <p>We may collect the following categories of information:</p>
+                            <ul className="list-disc space-y-2 pl-6">
+                                <li>Account details such as your name, email address, phone number, and sign-in information.</li>
+                                <li>Profile and spiritual context such as language preference, date of birth, birth time, birth place, zodiac details, and family member information you choose to provide.</li>
+                                <li>Conversation data from chat, voice, and live puja sessions, including family coordination messages and spiritual guidance history.</li>
+                                <li>Usage, device, and technical data such as IP address, browser type, device type, crash logs, and session analytics.</li>
+                                <li>Transaction and wallet information related to recharges, purchases, and payment verification.</li>
+                            </ul>
+                        </>
+                    ),
+                },
+                {
+                    title: "2. How We Use Information",
+                    body: (
+                        <>
+                            <p>We use information to operate and improve SMART मूर्ति, including to:</p>
+                            <ul className="list-disc space-y-2 pl-6">
+                                <li>Provide live multilingual AI pandit guidance, astrology flows, family puja sessions, and support.</li>
+                                <li>Remember spiritual preferences and prior context so future sessions are more relevant and continuous.</li>
+                                <li>Process payments, wallet credits, failed transaction recovery, and fraud checks.</li>
+                                <li>Monitor service quality, reliability, safety, and abuse prevention.</li>
+                                <li>Communicate service updates, support responses, policy changes, and operational notifications.</li>
+                            </ul>
+                        </>
+                    ),
+                },
+                {
+                    title: "3. Voice, Chat, and Session Data",
+                    body: (
+                        <>
+                            <p>
+                                SMART मूर्ति may process voice and chat content to deliver real-time spiritual guidance, family live sessions,
+                                follow-up reminders, and conversation continuity. We may store meaningful parts of these interactions to
+                                improve session quality and maintain spiritual memory across visits.
+                            </p>
+                            <p>
+                                You should not share highly sensitive personal information unless it is necessary for the service you want.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "4. Sharing of Information",
+                    body: (
+                        <>
+                            <p>We do not sell your personal data. We may share limited information with trusted service providers that help us:</p>
+                            <ul className="list-disc space-y-2 pl-6">
+                                <li>host the platform and infrastructure,</li>
+                                <li>process payments,</li>
+                                <li>support authentication, notifications, analytics, and customer support, and</li>
+                                <li>operate voice or AI systems necessary to provide the service.</li>
+                            </ul>
+                            <p>We may also disclose information if required by law, legal process, or to protect our users, platform, or business.</p>
+                        </>
+                    ),
+                },
+                {
+                    title: "5. Data Retention and Security",
+                    body: (
+                        <>
+                            <p>
+                                We retain data for as long as reasonably necessary to provide the service, comply with legal obligations,
+                                resolve disputes, and maintain product continuity. We use reasonable technical and organizational safeguards,
+                                but no system can guarantee absolute security.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "6. Children and Family Use",
+                    body: (
+                        <>
+                            <p>
+                                SMART मूर्ति may be used in family settings, but children should use the service only under the supervision of a parent or guardian.
+                                We do not knowingly collect personal information from children in violation of applicable law.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "7. Your Choices",
+                    body: (
+                        <>
+                            <p>You may contact us to request account support, correction of obvious inaccuracies, or deletion requests where applicable.</p>
+                            <p>
+                                Some data may still be retained where necessary for security, fraud prevention, payment reconciliation, or legal compliance.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    title: "8. Contact",
+                    body: (
+                        <>
+                            <p>Email: <a className="text-amber-700 underline underline-offset-4" href="mailto:support@smartmurti.com">support@smartmurti.com</a></p>
+                            <p>Registered office address: will be published shortly.</p>
+                        </>
+                    ),
+                },
+            ]}
+        />
     );
 }

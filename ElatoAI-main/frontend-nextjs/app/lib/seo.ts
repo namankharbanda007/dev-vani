@@ -128,6 +128,36 @@ export const aiReferencePages = [
         description:
             "Prepaid wallet pricing for SMART मूर्ति spiritual guidance, live calls, and devotional experiences.",
     },
+    {
+        path: "/privacy",
+        title: "Privacy Policy",
+        description:
+            "Privacy Policy for SMART मूर्ति and Smartmurti AI Private Limited.",
+    },
+    {
+        path: "/terms",
+        title: "Terms of Service",
+        description:
+            "Terms of Service for SMART मूर्ति and Smartmurti AI Private Limited.",
+    },
+    {
+        path: "/refunds",
+        title: "Refund Policy",
+        description:
+            "Refund Policy for SMART मूर्ति digital sessions, wallet recharges, and failed payments.",
+    },
+    {
+        path: "/disclaimer",
+        title: "Disclaimer",
+        description:
+            "Disclaimer for SMART मूर्ति covering AI guidance limits and non-professional advice boundaries.",
+    },
+    {
+        path: "/contact",
+        title: "Contact",
+        description:
+            "Contact Smartmurti AI Private Limited and SMART मूर्ति support.",
+    },
 ];
 
 export const sitemapEntries = [
@@ -145,6 +175,9 @@ export const sitemapEntries = [
     { path: "/palm-reading", changeFrequency: "weekly", priority: 0.72 },
     { path: "/privacy", changeFrequency: "monthly", priority: 0.5 },
     { path: "/terms", changeFrequency: "monthly", priority: 0.5 },
+    { path: "/refunds", changeFrequency: "monthly", priority: 0.46 },
+    { path: "/disclaimer", changeFrequency: "monthly", priority: 0.44 },
+    { path: "/contact", changeFrequency: "monthly", priority: 0.44 },
 ] as const;
 
 export function absoluteUrl(path = "/") {
@@ -162,8 +195,7 @@ export function buildMetadata({
     type = "website",
 }: BuildMetadataInput): Metadata {
     const canonical = absoluteUrl(path);
-    const ogTitle =
-        title === siteConfig.name ? siteConfig.name : `${title} | ${siteConfig.name}`;
+    const ogTitle = title === siteConfig.name ? siteConfig.name : `${title} | ${siteConfig.name}`;
     const ogImages = images.map((image) => ({
         url: absoluteUrl(image),
         width: 1200,
