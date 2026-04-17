@@ -560,7 +560,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                 )}
                             </div>
 
-                            <div className="relative overflow-hidden rounded-[28px] border border-[#2b1f17]/10 bg-[#1d1712] shadow-[0_25px_60px_rgba(38,25,15,0.25)]">
+                            <div className="relative min-h-[420px] overflow-hidden rounded-[28px] border border-[#2b1f17]/10 bg-[#1d1712] shadow-[0_25px_60px_rgba(38,25,15,0.25)] md:min-h-[520px] xl:min-h-[640px]">
                                 {sessionStatus === "DISCONNECTED" && !isAiActiveGlobally && isOriginalHost && (
                                     <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-gradient-to-t from-black/90 via-black/40 to-black/80 text-white">
                                         <div className="mb-8 flex h-12 w-16 items-center justify-center rounded-2xl border border-[#20bd5c]/30 bg-[#20bd5c]/20 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
