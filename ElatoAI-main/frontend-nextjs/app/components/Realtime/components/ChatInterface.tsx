@@ -27,6 +27,12 @@ export default function ChatInterface({ personality, onClose }: ChatInterfacePro
         scrollToBottom();
     }, [messages]);
 
+    useEffect(() => {
+        setMessages([]);
+        setInputValue("");
+        setIsLoading(false);
+    }, [personality.personality_id]);
+
     const handleSendMessage = async () => {
         if (!inputValue.trim() || isLoading) return;
 
@@ -44,6 +50,7 @@ export default function ChatInterface({ personality, onClose }: ChatInterfacePro
                 body: JSON.stringify({
                     message: userMessage.content,
                     messages: messages, // Send history for context
+                    personalityId: personality.personality_id,
                 }),
             });
 

@@ -38,7 +38,7 @@ interface AppProps {
   onStateChange?: (state: { sessionStatus: string; isAgentSpeaking: boolean; agentActivity: 'speaking' | 'listening' | 'thinking' }) => void;
   autoConnect?: boolean;
   disconnectRef?: React.MutableRefObject<(() => void) | null>;
-  pendingAction?: 'call' | 'chat' | null;
+  pendingAction?: { type: 'call' | 'chat'; personalityId: string } | null;
   onActionHandled?: () => void;
   children?: React.ReactNode;
 }
@@ -64,7 +64,7 @@ function getErrorDescription(error: unknown, details?: unknown) {
 function App({ personalityIdState, isDoctor, userData, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false, disconnectRef, pendingAction, onActionHandled, children }: AppProps) {
   const supabase = createClient();
 
-  const { transcriptItems, addTranscriptMessage, addTranscriptBreadcrumb } =
+  const { transcriptItems, addTranscriptMessage, addTranscriptBreadcrumb, clearTranscriptItems } =
     useTranscript();
   const { logClientEvent, logServerEvent } = useEvent();
 
@@ -93,12 +93,29 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
     fetchPersonality();
   }, [personalityIdState, supabase]);
 
+  useEffect(() => {
+    if (!personalityIdState) return;
+
+    if (
+      previousPersonalityIdRef.current &&
+      previousPersonalityIdRef.current !== personalityIdState
+    ) {
+      clearTranscriptItems();
+      setIsChatOpen(false);
+      setUserText("");
+    }
+
+    previousPersonalityIdRef.current = personalityIdState;
+  }, [clearTranscriptItems, personalityIdState]);
+
 
   const [dataChannel, setDataChannel] = useState<RTCDataChannel | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
   const geminiDisconnectRef = useRef<(() => void) | null>(null);
   const intentionalDisconnectRef = useRef<boolean>(false);
+  const connectedPersonalityIdRef = useRef<string | null>(null);
+  const previousPersonalityIdRef = useRef<string | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const hasAutoConnectedRef = useRef<boolean>(false);
   const [sessionStatus, setSessionStatus] =
@@ -178,20 +195,28 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
   // Handle pending actions from character card buttons
   useEffect(() => {
     if (!pendingAction || !personality) return;
+    if (personality.personality_id !== pendingAction.personalityId) return;
 
-    if (pendingAction === 'call') {
-      // Auto-connect voice call
+    if (pendingAction.type === 'call') {
+      if (
+        sessionStatus === 'CONNECTED' &&
+        connectedPersonalityIdRef.current &&
+        connectedPersonalityIdRef.current !== pendingAction.personalityId
+      ) {
+        disconnectFromRealtime(true);
+        return;
+      }
+
       if (sessionStatus === 'DISCONNECTED') {
         connectToRealtime();
-        setIsSheetOpen(true);
       }
-    } else if (pendingAction === 'chat') {
-      // Open chat
+      setIsSheetOpen(true);
+    } else if (pendingAction.type === 'chat') {
       setIsChatOpen(true);
     }
 
     onActionHandled?.();
-  }, [pendingAction, personality]);
+  }, [pendingAction, personality, sessionStatus]);
 
   // Usage Tracking Heartbeat
   useEffect(() => {
@@ -243,16 +268,16 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
 
   const fetchSessionData = async (): Promise<any> => {
     logClientEvent({ url: "/session" }, "fetch_session_token_request");
-    let url = "/api/session";
+    const params = new URLSearchParams();
+    if (personalityIdState) {
+      params.set("personalityId", personalityIdState);
+    }
     if (isGuest) {
-      const params = new URLSearchParams({
-        guest: "true",
-        personalityId: personalityIdState,
-      });
+      params.set("guest", "true");
       if (guestName) params.set("guestName", guestName);
       if (guestDob) params.set("guestDob", guestDob);
-      url = `/api/session?${params.toString()}`;
     }
+    const url = params.size > 0 ? `/api/session?${params.toString()}` : "/api/session";
 
     console.log("[App] Fetching session data from:", url);
     const tokenResponse = await fetch(url);
@@ -359,6 +384,7 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
         // Force state to "Speaking" immediately because we expect an initial greeting.
         setIsAgentSpeaking(true);
         setAgentActivity('speaking');
+        connectedPersonalityIdRef.current = personalityIdState;
         setSessionStatus("CONNECTED");
         toast({ description: "Connected" });
 
@@ -396,6 +422,7 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
         geminiDisconnectRef.current = elevenLabsConnection.disconnect;
         setIsAgentSpeaking(false);
         setAgentActivity('listening');
+        connectedPersonalityIdRef.current = personalityIdState;
         setSessionStatus("CONNECTED");
         toast({ description: "Connected" });
 
@@ -437,6 +464,7 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
           handleServerEventRef.current(JSON.parse(e.data));
         });
 
+        connectedPersonalityIdRef.current = personalityIdState;
         setDataChannel(dc);
       }
     } catch (err) {
@@ -468,6 +496,7 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
     setSessionStatus("DISCONNECTED");
     setIsPTTUserSpeaking(false);
     setIsAgentSpeaking(false);
+    connectedPersonalityIdRef.current = null;
 
     logClientEvent({}, "disconnected");
   };

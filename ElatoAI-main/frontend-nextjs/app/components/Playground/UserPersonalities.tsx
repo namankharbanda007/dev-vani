@@ -2,9 +2,10 @@
 
 import CharacterSection from "./CharacterSection";
 
-const CHARACTER_CATEGORIES: {
-  [key: string]: { title: string; emoji: string; characters: string[] };
-} = {
+const CHARACTER_CATEGORIES: Record<
+  string,
+  { title: string; emoji: string; characters: string[] }
+> = {
   spiritual: {
     title: "🙏 Smart Pandit",
     emoji: "🙏",
@@ -42,7 +43,7 @@ const CHARACTER_CATEGORIES: {
 const CATEGORY_ORDER = ["spiritual", "astrology"];
 
 interface UserPersonalitiesProps {
-  onPersonalityPicked: (personalityIdPicked: string) => void;
+  onPersonalityPicked: (personalityIdPicked: string) => Promise<void> | void;
   onCallCharacter?: (personalityId: string) => void;
   onChatCharacter?: (personalityId: string) => void;
   allPersonalities: IPersonality[];
@@ -58,15 +59,13 @@ const normalizeTitle = (title: string): string => title.toLowerCase().trim();
 const findCategory = (personality: IPersonality): string | null => {
   const normalizedTitle = normalizeTitle(personality.title);
 
-  for (const [categoryKey, categoryData] of Object.entries(
-    CHARACTER_CATEGORIES
-  )) {
-    for (const charName of categoryData.characters) {
-      const normalizedCharName = normalizeTitle(charName);
+  for (const [categoryKey, categoryData] of Object.entries(CHARACTER_CATEGORIES)) {
+    for (const characterName of categoryData.characters) {
+      const normalizedCharacterName = normalizeTitle(characterName);
       if (
-        normalizedTitle.includes(normalizedCharName) ||
-        normalizedCharName.includes(normalizedTitle) ||
-        normalizedTitle === normalizedCharName
+        normalizedTitle.includes(normalizedCharacterName) ||
+        normalizedCharacterName.includes(normalizedTitle) ||
+        normalizedTitle === normalizedCharacterName
       ) {
         return categoryKey;
       }
@@ -85,13 +84,12 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
   languageState,
   disableButtons,
   selectedFilters,
-  myPersonalities,
 }) => {
   const premadePersonalities = allPersonalities.filter(
-    (p) => p.creator_id === null
+    (personality) => personality.creator_id === null
   );
 
-  const categorizedPersonalities: { [key: string]: IPersonality[] } = {};
+  const categorizedPersonalities: Record<string, IPersonality[]> = {};
 
   premadePersonalities.forEach((personality) => {
     const category = findCategory(personality);
@@ -104,20 +102,22 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
 
   CATEGORY_ORDER.forEach((categoryKey) => {
     if (!categorizedPersonalities[categoryKey]) return;
-    const categoryCharOrder = CHARACTER_CATEGORIES[categoryKey].characters.map(
-      (c) => normalizeTitle(c)
+    const categoryCharacterOrder = CHARACTER_CATEGORIES[categoryKey].characters.map(
+      (character) => normalizeTitle(character)
     );
+
     categorizedPersonalities[categoryKey].sort((a, b) => {
-      const aIndex = categoryCharOrder.findIndex(
-        (c) =>
-          normalizeTitle(a.title).includes(c) ||
-          c.includes(normalizeTitle(a.title))
+      const aIndex = categoryCharacterOrder.findIndex(
+        (character) =>
+          normalizeTitle(a.title).includes(character) ||
+          character.includes(normalizeTitle(a.title))
       );
-      const bIndex = categoryCharOrder.findIndex(
-        (c) =>
-          normalizeTitle(b.title).includes(c) ||
-          c.includes(normalizeTitle(b.title))
+      const bIndex = categoryCharacterOrder.findIndex(
+        (character) =>
+          normalizeTitle(b.title).includes(character) ||
+          character.includes(normalizeTitle(b.title))
       );
+
       return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
     });
   });
@@ -127,8 +127,6 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
       {CATEGORY_ORDER.map((categoryKey) => {
         const personalities = categorizedPersonalities[categoryKey];
         if (!personalities?.length) return null;
-
-        const categoryInfo = CHARACTER_CATEGORIES[categoryKey];
 
         return (
           <CharacterSection
@@ -140,7 +138,7 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
             onPersonalityPicked={onPersonalityPicked}
             onCallCharacter={onCallCharacter}
             onChatCharacter={onChatCharacter}
-            title={categoryInfo.title}
+            title={CHARACTER_CATEGORIES[categoryKey].title}
             disableButtons={disableButtons}
           />
         );

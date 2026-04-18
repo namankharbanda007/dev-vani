@@ -30,6 +30,12 @@ interface PlaygroundProps {
 }
 
 type IntentAction = "call" | "puja";
+type PendingCharacterAction =
+  | {
+      type: "call" | "chat";
+      personalityId: string;
+    }
+  | null;
 
 export default function Playground({
   currentUser,
@@ -45,9 +51,7 @@ export default function Playground({
   const [selectedFilters, setSelectedFilters] = useState<PersonalityFilter[]>(
     []
   );
-  const [pendingAction, setPendingAction] = useState<"call" | "chat" | null>(
-    null
-  );
+  const [pendingAction, setPendingAction] = useState<PendingCharacterAction>(null);
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -110,12 +114,12 @@ export default function Playground({
     [currentUser.user_id, supabase]
   );
 
-  const handleCallCharacter = useCallback(() => {
-    setPendingAction("call");
+  const handleCallCharacter = useCallback((personalityId: string) => {
+    setPendingAction({ type: "call", personalityId });
   }, []);
 
-  const handleChatCharacter = useCallback(() => {
-    setPendingAction("chat");
+  const handleChatCharacter = useCallback((personalityId: string) => {
+    setPendingAction({ type: "chat", personalityId });
   }, []);
 
   const findGuide = useCallback(
@@ -143,7 +147,7 @@ export default function Playground({
     async (guide: IPersonality | undefined, action: "call" | "chat") => {
       if (!guide?.personality_id) return;
       await onPersonalityPicked(guide.personality_id);
-      setPendingAction(action);
+      setPendingAction({ type: action, personalityId: guide.personality_id });
     },
     [onPersonalityPicked]
   );
@@ -156,7 +160,7 @@ export default function Playground({
         window.location.href = "/pandit";
         return;
       }
-      setPendingAction("call");
+      setPendingAction({ type: "call", personalityId: guide.personality_id });
     },
     [onPersonalityPicked]
   );

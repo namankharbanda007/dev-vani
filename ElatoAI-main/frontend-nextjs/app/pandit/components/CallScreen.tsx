@@ -19,7 +19,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { useGroupCall } from "../hooks/useGroupCall";
 import { useWebRTC } from "../hooks/useWebRTC";
-import { useMicrophoneVolume } from "../hooks/useMicrophoneVolume";
 
 export const getSharedAudioContext = () => {
     if (!(window as any).sharedAudioCtx) {
@@ -44,12 +43,13 @@ interface CallScreenProps {
     };
 }
 
-const RemoteVideo = ({ stream }: { stream: MediaStream | undefined | null }) => {
+const RemoteVideo = ({ stream, name }: { stream: MediaStream | undefined | null; name: string }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const hasVideoTrack = Boolean(stream && stream.getVideoTracks().length > 0);
 
     useEffect(() => {
         const video = videoRef.current;
-        if (!video || !stream) return;
+        if (!video || !stream || !hasVideoTrack) return;
 
         try {
             video.srcObject = stream;
@@ -62,7 +62,17 @@ const RemoteVideo = ({ stream }: { stream: MediaStream | undefined | null }) => 
         } catch (e) {
             console.error("Failed to assign RemoteVideo stream", e);
         }
-    }, [stream]);
+    }, [hasVideoTrack, stream]);
+
+    if (!stream || !hasVideoTrack) {
+        return (
+            <div className="flex h-full w-full flex-col items-center justify-center bg-[#473b31] text-white">
+                <User className="h-9 w-9 opacity-70" />
+                <span className="mt-2 px-2 text-center text-xs font-medium text-white/80">{name}</span>
+                <span className="mt-1 text-[11px] text-white/55">Audio only</span>
+            </div>
+        );
+    }
 
     return <video ref={videoRef} autoPlay playsInline className="h-full w-full object-cover bg-gray-900" />;
 };
@@ -72,7 +82,7 @@ const getDefaultAvatar = (name: string) => {
     return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=c084fc,f59e0b,ec4899&backgroundType=gradientLinear`;
 };
 
-export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false, userAvatarUrl }: CallScreenProps) {
+export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false, userAvatarUrl, userProfile }: CallScreenProps) {
     const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
 
     const [isMuted, setIsMuted] = useState(false);
@@ -95,8 +105,9 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     const [isAiActiveGlobally, setIsAiActiveGlobally] = useState<boolean>(false);
     const [isHost, setIsHost] = useState(false);
     const [sharedAgentActivity, setSharedAgentActivity] = useState<string>("idle");
+    const [joinAnnouncements, setJoinAnnouncements] = useState<string[]>([]);
 
-    const localName = useMemo(() => participants.join(", "), [participants]);
+    const localName = useMemo(() => participants[0]?.trim() || "Guest", [participants]);
     const resolvedAvatarUrl = userAvatarUrl || getDefaultAvatar(participants[0] || "User");
 
     const chatEndRef = useRef<HTMLDivElement>(null);
@@ -104,7 +115,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    const { connected, remoteParticipants, broadcastEvent, channel } = useWebRTC(roomId, localName, outboundStream);
+    const { connected, remoteParticipants, broadcastEvent, connectionError, roomPhase } = useWebRTC(roomId, localName, outboundStream);
 
     const activeCallUsers = useMemo(
         () => [
@@ -121,21 +132,22 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
     const allParticipantNames = useMemo(() => {
         const names = new Set<string>();
-        participants.forEach((p) => names.add(p));
+        names.add(localName);
         remoteParticipants.forEach((p) => {
             if (p.name) {
-                p.name.split(",").forEach((n) => names.add(n.trim()));
+                names.add(p.name.trim());
             } else {
                 names.add("User");
             }
         });
         return Array.from(names);
-    }, [participants, remoteParticipants]);
+    }, [localName, remoteParticipants]);
 
-    const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream, sendMessageToAI } = useGroupCall({
+    const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream } = useGroupCall({
         participants: allParticipantNames,
         personalityId: PANDIT_PERSONALITY_ID,
         contextType: "pandit",
+        isGuestHost: !userProfile,
     });
 
     const aiAudioRef = useRef<HTMLAudioElement>(null);
@@ -146,14 +158,18 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     useEffect(() => {
         if (remoteParticipants.length > prevParticipantsLengthRef.current) {
             const newGuest = remoteParticipants[remoteParticipants.length - 1];
-            if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                sendMessageToAI(
-                    `System Alert: A new guest just joined our room named ${newGuest.name}. Please pause, greet them gently, make them comfortable, and ask the host if it's okay to summarize the progress of the Puja so far.`
-                );
+            setJoinAnnouncements((prev) => [
+                ...prev.slice(-2),
+                `${newGuest?.name?.trim() || "A family member"} joined the room.`,
+            ]);
+
+            if (isHost && isAiActiveGlobally) {
+                broadcastEvent("AI_STATE", { status: "STARTED" });
+                broadcastEvent("AI_ACTIVITY", { activity: agentActivity });
             }
         }
         prevParticipantsLengthRef.current = remoteParticipants.length;
-    }, [remoteParticipants, isHost, sessionStatus, sendMessageToAI]);
+    }, [agentActivity, broadcastEvent, isAiActiveGlobally, isHost, remoteParticipants]);
 
     useEffect(() => {
         const handler = (e: Event) => {
@@ -170,12 +186,6 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
             if (detail.event === "AI_ACTIVITY" && !isHost) {
                 setSharedAgentActivity(detail.payload.activity);
-            }
-
-            if (detail.event === "ACTIVE_SPEAKER") {
-                if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                    sendMessageToAI(`[Speaker: ${detail.payload.name}] is now speaking. Address them by name in your response.`);
-                }
             }
 
             if (detail.event === "CHAT_MESSAGE") {
@@ -195,22 +205,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
         window.addEventListener("livekit-data", handler);
         return () => window.removeEventListener("livekit-data", handler);
-    }, [isHost, sessionStatus, sendMessageToAI]);
-
-    const handleActiveSpeakerChange = useCallback(
-        (isSpeaking: boolean) => {
-            if (isSpeaking && !isMuted && channel) {
-                broadcastEvent("ACTIVE_SPEAKER", { name: localName });
-
-                if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                    sendMessageToAI(`[Speaker: ${localName}] is now speaking. Address them by name in your response.`);
-                }
-            }
-        },
-        [isMuted, channel, broadcastEvent, localName, isHost, sessionStatus, sendMessageToAI]
-    );
-
-    useMicrophoneVolume(localStream, handleActiveSpeakerChange);
+    }, [isHost]);
 
     useEffect(() => {
         return () => {
@@ -241,6 +236,16 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
             broadcastEvent("AI_ACTIVITY", { activity: agentActivity });
         }
     }, [agentActivity, isHost, isAiActiveGlobally, broadcastEvent]);
+
+    useEffect(() => {
+        if (joinAnnouncements.length === 0) return;
+
+        const timer = window.setTimeout(() => {
+            setJoinAnnouncements((prev) => prev.slice(1));
+        }, 5000);
+
+        return () => window.clearTimeout(timer);
+    }, [joinAnnouncements]);
 
     useEffect(() => {
         if (!speakingVideoRef.current || !listeningVideoRef.current) return;
@@ -542,7 +547,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                                 <video ref={handleVideoRef} autoPlay playsInline muted className="h-full w-full object-cover bg-gray-900" style={{ transform: "scaleX(-1)" }} />
                                             )
                                         ) : (
-                                            <RemoteVideo stream={user.stream} />
+                                            <RemoteVideo stream={user.stream} name={user.name} />
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                                         <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1.5 text-xs font-medium text-white">
@@ -555,7 +560,9 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                 {!connected && (
                                     <div className="flex h-[108px] w-[148px] shrink-0 flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-[#d6c7b0] bg-white/60 text-center">
                                         <div className="h-6 w-6 animate-spin rounded-full border-2 border-transparent border-t-[#aa7b2b]" />
-                                        <span className="px-2 text-xs font-semibold text-[#7d6852]">Family network syncing</span>
+                                        <span className="px-2 text-xs font-semibold text-[#7d6852]">
+                                            {roomPhase === "reconnecting" ? "Reconnecting family network" : "Family network syncing"}
+                                        </span>
                                     </div>
                                 )}
                             </div>
@@ -598,7 +605,32 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                     <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-md">
                                         <div className="mb-4 h-16 w-16 animate-spin rounded-full border-4 border-transparent border-r-emerald-500 border-t-emerald-500" />
                                         <p className="text-lg font-medium text-emerald-100">Connecting to the ashram...</p>
-                                        <p className="mt-2 text-sm text-gray-400">Initializing group context for {participants.join(", ")}</p>
+                                        <p className="mt-2 text-sm text-gray-400">Initializing group context for {allParticipantNames.join(", ")}</p>
+                                    </div>
+                                )}
+
+                                {roomPhase === "reconnecting" && (
+                                    <div className="absolute left-6 top-20 z-40 rounded-2xl border border-amber-300/25 bg-black/55 px-4 py-3 text-sm font-medium text-amber-50 shadow-xl backdrop-blur-md">
+                                        Family network is reconnecting. Keep the puja open and we will restore everyone automatically.
+                                    </div>
+                                )}
+
+                                {connectionError && (
+                                    <div className="absolute left-6 top-20 z-40 max-w-md rounded-2xl border border-red-300/25 bg-red-950/70 px-4 py-3 text-sm font-medium text-red-50 shadow-xl backdrop-blur-md">
+                                        Room issue: {connectionError}
+                                    </div>
+                                )}
+
+                                {joinAnnouncements.length > 0 && (
+                                    <div className="absolute right-4 top-20 z-40 flex max-w-sm flex-col gap-2">
+                                        {joinAnnouncements.map((note, index) => (
+                                            <div
+                                                key={`${note}-${index}`}
+                                                className="rounded-2xl border border-white/15 bg-black/55 px-4 py-3 text-sm font-medium text-white shadow-xl backdrop-blur-md"
+                                            >
+                                                {note}
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
 

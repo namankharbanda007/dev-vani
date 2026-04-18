@@ -26,6 +26,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
     const [connected, setConnected] = useState(false);
     const [debugLogs, setDebugLogs] = useState<string[]>([]);
     const [connectionError, setConnectionError] = useState<string | null>(null);
+    const [roomPhase, setRoomPhase] = useState<"connecting" | "connected" | "reconnecting" | "disconnected">("connecting");
 
     // We keep the channel/broadcastEvent API for app-level events (AI state, active speaker).
     // These now go through LiveKit's data channel instead of Supabase broadcast.
@@ -38,6 +39,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
 
     // Track latest localStream via ref (used in track publishing)
     const localStreamRef = useRef<MediaStream | null>(null);
+    const publishedTrackIdsRef = useRef<string[]>([]);
     useEffect(() => {
         localStreamRef.current = localStream;
     }, [localStream]);
@@ -68,13 +70,11 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
         const participants: RemoteParticipantInfo[] = [];
         room.remoteParticipants.forEach((participant) => {
             const stream = buildStreamForParticipant(participant);
-            if (stream.getTracks().length > 0) {
-                participants.push({
-                    id: participant.identity,
-                    name: participant.name || participant.identity,
-                    stream,
-                });
-            }
+            participants.push({
+                id: participant.identity,
+                name: participant.name || participant.identity,
+                stream,
+            });
         });
         setRemoteParticipants(participants);
     }, [buildStreamForParticipant]);
@@ -96,6 +96,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
             addLog("Connected to LiveKit room");
             setConnected(true);
             setConnectionError(null);
+            setRoomPhase("connected");
         });
 
         room.on(RoomEvent.Disconnected, () => {
@@ -103,6 +104,23 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
             addLog("Disconnected from LiveKit room");
             setConnected(false);
             setRemoteParticipants([]);
+            setRoomPhase("disconnected");
+        });
+
+        room.on(RoomEvent.Reconnecting, () => {
+            if (cancelled) return;
+            addLog("Reconnecting to LiveKit room");
+            setConnected(false);
+            setRoomPhase("reconnecting");
+        });
+
+        room.on(RoomEvent.Reconnected, () => {
+            if (cancelled) return;
+            addLog("Reconnected to LiveKit room");
+            setConnected(true);
+            setConnectionError(null);
+            setRoomPhase("connected");
+            refreshParticipants(room);
         });
 
         room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, publication: RemoteTrackPublication, participant: RemoteParticipant) => {
@@ -120,6 +138,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
         room.on(RoomEvent.ParticipantConnected, (participant: RemoteParticipant) => {
             if (cancelled) return;
             addLog(`Participant joined: ${participant.name || participant.identity}`);
+            refreshParticipants(room);
         });
 
         room.on(RoomEvent.ParticipantDisconnected, (participant: RemoteParticipant) => {
@@ -144,6 +163,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
         const connectToRoom = async () => {
             try {
                 setConnectionError(null);
+                setRoomPhase("connecting");
                 addLog("Fetching LiveKit token...");
                 const res = await fetch(`/api/livekit-token?room=${encodeURIComponent(roomId)}&name=${encodeURIComponent(localName)}`);
                 const data = await res.json();
@@ -179,6 +199,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
                             addLog(`Failed to publish ${track.kind}: ${e?.message}`);
                         }
                     }
+                    publishedTrackIdsRef.current = tracks.map((track) => track.id).sort();
                 }
 
                 refreshParticipants(room);
@@ -186,6 +207,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
                 const message = e?.message || "Failed to connect to the live room.";
                 setConnectionError(message);
                 addLog(`Connection failed: ${message}`);
+                setRoomPhase("disconnected");
             }
         };
 
@@ -195,6 +217,8 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
             cancelled = true;
             setConnected(false);
             setRemoteParticipants([]);
+            setRoomPhase("disconnected");
+            publishedTrackIdsRef.current = [];
             room.disconnect();
             roomRef.current = null;
         };
@@ -216,6 +240,14 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
 
         const updateTracks = async () => {
             const localParticipant = room.localParticipant;
+            const nextTrackIds = (localStream?.getTracks() || []).map((track) => track.id).sort();
+
+            if (
+                publishedTrackIdsRef.current.length === nextTrackIds.length &&
+                publishedTrackIdsRef.current.every((id, index) => id === nextTrackIds[index])
+            ) {
+                return;
+            }
 
             // Unpublish all existing tracks first
             const existingPubs = Array.from(localParticipant.trackPublications.values());
@@ -242,6 +274,8 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
                     }
                 }
             }
+
+            publishedTrackIdsRef.current = nextTrackIds;
         };
 
         updateTracks();
@@ -271,5 +305,6 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
         channel: channel as any,
         debugLogs,
         connectionError,
+        roomPhase,
     };
 }

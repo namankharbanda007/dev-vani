@@ -17,20 +17,12 @@ interface JoinScreenProps {
 }
 
 export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
-  const [namesInput, setNamesInput] = useState(initialName || "");
+  const [displayName, setDisplayName] = useState(initialName || "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const names = namesInput
-      .split(",")
-      .map((name) => name.trim())
-      .filter((name) => name.length > 0);
-
-    if (names.length === 0) {
-      names.push("Guest");
-    }
-
-    onJoin(names);
+    const cleanName = displayName.trim() || "Guest";
+    onJoin([cleanName]);
   };
 
   return (
@@ -59,9 +51,8 @@ export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
                 room.
               </h1>
               <p className="max-w-2xl text-base leading-8 text-white/70 md:text-lg">
-                Enter the names of everyone joining today. Smart Pandit can then
-                speak naturally to the family instead of treating the room like
-                a random guest call.
+                Join as one person on this device. Other family members can join
+                from their own devices or use a shared family name like Sharma Family.
               </p>
             </div>
 
@@ -105,27 +96,27 @@ export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
                 Enter the room
               </h2>
               <p className="mt-2 text-sm leading-6 text-white/60">
-                Separate names with commas so Smart Pandit can address the family properly.
+                Use the name Smart Pandit should use for this device in the room.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-white/80">
-                  Participant names
+                  Your display name
                 </label>
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-1">
                   <input
                     type="text"
-                    value={namesInput}
-                    onChange={(e) => setNamesInput(e.target.value)}
-                    placeholder="e.g. Rohan, Priya, Sharma Family"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="e.g. Naman or Sharma Family"
                     className="w-full rounded-[14px] border-none bg-transparent px-4 py-3 text-white placeholder:text-white/35 focus:outline-none"
                     required
                   />
                 </div>
                 <p className="text-xs text-white/45">
-                  Example: Naman, Mom, Dad
+                  Example: Naman
                 </p>
               </div>
 

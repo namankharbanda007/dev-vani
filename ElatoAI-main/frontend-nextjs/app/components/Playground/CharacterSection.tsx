@@ -10,7 +10,7 @@ interface CharacterSectionProps {
     allPersonalities: IPersonality[];
     languageState: string;
     personalityIdState: string;
-    onPersonalityPicked: (personalityIdPicked: string) => void;
+    onPersonalityPicked: (personalityIdPicked: string) => Promise<void> | void;
     onCallCharacter?: (personalityId: string) => void;
     onChatCharacter?: (personalityId: string) => void;
     title: string;
@@ -115,10 +115,10 @@ const CharacterSection = ({
 
                                             <div className="mt-2.5 flex items-center gap-2">
                                                 <button
-                                                    onClick={(e) => {
+                                                    onClick={async (e) => {
                                                         e.stopPropagation();
                                                         if (onCallCharacter && personality.personality_id) {
-                                                            onPersonalityPicked(personality.personality_id);
+                                                            await onPersonalityPicked(personality.personality_id);
                                                             onCallCharacter(personality.personality_id);
                                                         }
                                                     }}
@@ -128,10 +128,10 @@ const CharacterSection = ({
                                                     <span>Call</span>
                                                 </button>
                                                 <button
-                                                    onClick={(e) => {
+                                                    onClick={async (e) => {
                                                         e.stopPropagation();
                                                         if (onChatCharacter && personality.personality_id) {
-                                                            onPersonalityPicked(personality.personality_id);
+                                                            await onPersonalityPicked(personality.personality_id);
                                                             onChatCharacter(personality.personality_id);
                                                         }
                                                     }}

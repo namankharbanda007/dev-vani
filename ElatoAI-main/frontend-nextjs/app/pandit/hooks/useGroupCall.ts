@@ -6,9 +6,10 @@ interface UseGroupCallProps {
     participants: string[];
     personalityId: string;
     contextType: 'pandit' | 'astrologer';
+    isGuestHost?: boolean;
 }
 
-export function useGroupCall({ participants, personalityId, contextType }: UseGroupCallProps) {
+export function useGroupCall({ participants, personalityId, contextType, isGuestHost = false }: UseGroupCallProps) {
     const [sessionStatus, setSessionStatus] = useState<"DISCONNECTED" | "CONNECTING" | "CONNECTED">("DISCONNECTED");
     const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
     const [agentActivity, setAgentActivity] = useState<'speaking' | 'listening' | 'thinking'>('thinking');
@@ -40,7 +41,10 @@ export function useGroupCall({ participants, personalityId, contextType }: UseGr
         setSessionStatus("CONNECTING");
 
         try {
-            const sessionResponse = await fetch(`/api/session?personalityId=${personalityId}&guest=true`);
+            const sessionUrl = isGuestHost
+                ? `/api/session?personalityId=${personalityId}&guest=true`
+                : `/api/session?personalityId=${personalityId}`;
+            const sessionResponse = await fetch(sessionUrl);
             const sessionData = await sessionResponse.json();
 
             if (sessionData.error) {
@@ -133,7 +137,7 @@ RESPONSE STYLE: 1-2 short sentences max. Be ${personalStyle}. Be conversational,
             toast({ description: err?.message || "Failed to connect to Ashram.", variant: "destructive" });
             return false;
         }
-    }, [contextType, participants, personalityId, sessionStatus]);
+    }, [contextType, isGuestHost, participants, personalityId, sessionStatus]);
 
     const disconnect = useCallback(() => {
         if (disconnectRef.current) {
