@@ -21,6 +21,7 @@ export default function ClientPage({
 }: {
   userProfile: UserProfileData | null;
 }) {
+  const HOST_ROOM_STORAGE_KEY = "smartmurti-pandit-host-room";
   const [hasJoined, setHasJoined] = useState(false);
   const [participants, setParticipants] = useState<string[]>(
     userProfile ? [userProfile.name] : []
@@ -32,13 +33,23 @@ export default function ClientPage({
 
   useEffect(() => {
     const room = searchParams.get("room");
+    const hostParam = searchParams.get("host");
+    const storedHostRoom =
+      typeof window !== "undefined"
+        ? window.sessionStorage.getItem(HOST_ROOM_STORAGE_KEY)
+        : null;
+
     if (room) {
       setRoomId(room);
+      setIsOriginalHost(hostParam === "1" || storedHostRoom === room);
     } else {
       const newRoom = `pandit-${uuidv4()}`;
       setRoomId(newRoom);
       setIsOriginalHost(true);
-      router.replace(`/pandit?room=${newRoom}`);
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem(HOST_ROOM_STORAGE_KEY, newRoom);
+      }
+      router.replace(`/pandit?room=${newRoom}&host=1`);
     }
   }, [searchParams, router]);
 

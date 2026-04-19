@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { useGroupCall } from '../../pandit/hooks/useGroupCall';
 import { useWebRTC } from '../../pandit/hooks/useWebRTC';
-import { useMicrophoneVolume } from '../../pandit/hooks/useMicrophoneVolume';
 
 // Keep track of audio contexts to prevent memory leaks
 export const getSharedAudioContext = () => {
@@ -24,11 +23,13 @@ interface CallScreenProps {
 }
 
 // Helper component for remote video
-const RemoteVideo = ({ stream }: { stream: MediaStream | undefined | null }) => {
+const RemoteVideo = ({ stream, name }: { stream: MediaStream | undefined | null; name: string }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const hasVideoTrack = Boolean(stream && stream.getVideoTracks().length > 0);
     useEffect(() => {
         const video = videoRef.current;
-        if (!video || !stream) return;
+        if (!video || !stream || !hasVideoTrack) return;
         try {
             video.srcObject = stream;
             const playPromise = video.play();
@@ -38,7 +39,31 @@ const RemoteVideo = ({ stream }: { stream: MediaStream | undefined | null }) => 
         } catch (e) {
             console.error("Failed to assign RemoteVideo stream", e);
         }
-    }, [stream]);
+    }, [hasVideoTrack, stream]);
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio || !stream || hasVideoTrack) return;
+        try {
+            audio.srcObject = stream;
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => console.warn("Audio autoplay blocked:", e));
+            }
+        } catch (e) {
+            console.error("Failed to assign RemoteAudio stream", e);
+        }
+    }, [hasVideoTrack, stream]);
+
+    if (!stream || !hasVideoTrack) {
+        return (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-800 text-white">
+                <audio ref={audioRef} autoPlay playsInline className="hidden" />
+                <User className="w-10 h-10 opacity-60" />
+                <span className="mt-2 text-xs font-medium text-white/80 px-2 text-center">{name}</span>
+                <span className="mt-1 text-[11px] text-white/55">Audio only</span>
+            </div>
+        );
+    }
     return <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover bg-gray-900" />;
 };
 
@@ -48,7 +73,7 @@ const getDefaultAvatar = (name: string) => {
     return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=c084fc,f59e0b,ec4899&backgroundType=gradientLinear`;
 };
 
-export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false, userAvatarUrl }: CallScreenProps) {
+export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false, userAvatarUrl, userProfile }: CallScreenProps) {
     // Use The Astrologer personality
     const ASTROLOGER_PERSONALITY_ID = "dc2af2af-7839-4787-ad00-3213371be71e";
 
@@ -83,8 +108,9 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     const [isAiActiveGlobally, setIsAiActiveGlobally] = useState<boolean>(false);
     const [isHost, setIsHost] = useState(false);
     const [sharedAgentActivity, setSharedAgentActivity] = useState<string>("idle");
+    const [joinAnnouncements, setJoinAnnouncements] = useState<string[]>([]);
 
-    const localName = useMemo(() => participants.join(", "), [participants]);
+    const localName = useMemo(() => participants[0]?.trim() || "Guest", [participants]);
 
     // Notification state
     const [showNotifications, setShowNotifications] = useState(false);
@@ -106,7 +132,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     }, [messages]);
 
     // 1. Initialize WebRTC
-    const { connected, remoteParticipants, broadcastEvent, channel, debugLogs } = useWebRTC(roomId, localName, outboundStream);
+    const { connected, remoteParticipants, broadcastEvent, debugLogs, connectionError, roomPhase } = useWebRTC(roomId, localName, outboundStream);
 
     // 2. Consolidate users
     const activeCallUsers = useMemo(() => [
@@ -122,22 +148,23 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     // 3. Compute participant names
     const allParticipantNames = useMemo(() => {
         const names = new Set<string>();
-        participants.forEach(p => names.add(p));
+        names.add(localName);
         remoteParticipants.forEach(p => {
             if (p.name) {
-                p.name.split(',').forEach(n => names.add(n.trim()));
+                names.add(p.name.trim());
             } else {
                 names.add("User");
             }
         });
         return Array.from(names);
-    }, [participants, remoteParticipants]);
+    }, [localName, remoteParticipants]);
 
     // 4. Initialize AI Group Call
-    const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream, sendMessageToAI } = useGroupCall({
+    const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream } = useGroupCall({
         participants: allParticipantNames,
         personalityId: ASTROLOGER_PERSONALITY_ID,
-        contextType: 'astrologer'
+        contextType: 'astrologer',
+        isGuestHost: !userProfile,
     });
 
     const videoGridRef = useRef<HTMLDivElement>(null);
@@ -150,14 +177,18 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     useEffect(() => {
         if (remoteParticipants.length > prevParticipantsLengthRef.current) {
             const newParticipants = remoteParticipants.slice(prevParticipantsLengthRef.current);
-            newParticipants.forEach(p => {
-                if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                    sendMessageToAI(`[System] A new participant "${p.name}" has just joined the session. Welcome them warmly and ask about their zodiac sign or birth details.`);
-                }
-            });
+            setJoinAnnouncements((prev) => [
+                ...prev.slice(-2),
+                ...newParticipants.map((participant) => `${participant.name?.trim() || "A participant"} joined the session.`),
+            ]);
+
+            if (isHost && isAiActiveGlobally) {
+                broadcastEvent('AI_STATE', { status: "STARTED" });
+                broadcastEvent('AI_ACTIVITY', { activity: agentActivity });
+            }
         }
         prevParticipantsLengthRef.current = remoteParticipants.length;
-    }, [remoteParticipants, isHost, sessionStatus, sendMessageToAI]);
+    }, [agentActivity, broadcastEvent, isAiActiveGlobally, isHost, remoteParticipants]);
 
     // Listen for LiveKit data events
     useEffect(() => {
@@ -175,11 +206,6 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
             if (detail.event === 'AI_ACTIVITY' && !isHost) {
                 setSharedAgentActivity(detail.payload.activity);
             }
-            if (detail.event === 'ACTIVE_SPEAKER') {
-                if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                    sendMessageToAI(`[Speaker: ${detail.payload.name}] is now speaking. Address them by name in your response.`);
-                }
-            }
             if (detail.event === 'CHAT_MESSAGE') {
                 setMessages(prev => [...prev, {
                     id: Date.now() + Math.random(),
@@ -194,19 +220,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
         window.addEventListener('livekit-data', handler);
         return () => window.removeEventListener('livekit-data', handler);
-    }, [isHost, sessionStatus, sendMessageToAI]);
-
-    // Track active speaking for this client
-    const handleActiveSpeakerChange = useCallback((isSpeaking: boolean) => {
-        if (isSpeaking && !isMuted && channel) {
-            broadcastEvent('ACTIVE_SPEAKER', { name: localName });
-            if (isHost && sessionStatus === "CONNECTED" && sendMessageToAI) {
-                sendMessageToAI(`[Speaker: ${localName}] is now speaking. Address them by name in your response.`);
-            }
-        }
-    }, [isMuted, channel, broadcastEvent, localName, isHost, sessionStatus, sendMessageToAI]);
-
-    useMicrophoneVolume(localStream, handleActiveSpeakerChange);
+    }, []);
 
     // Start/Stop the AI session
     const handleStartSession = useCallback(async () => {
@@ -246,6 +260,14 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
             broadcastEvent('AI_ACTIVITY', { activity: agentActivity });
         }
     }, [agentActivity, isHost, isAiActiveGlobally, broadcastEvent]);
+
+    useEffect(() => {
+        if (joinAnnouncements.length === 0) return;
+        const timer = window.setTimeout(() => {
+            setJoinAnnouncements((prev) => prev.slice(1));
+        }, 5000);
+        return () => window.clearTimeout(timer);
+    }, [joinAnnouncements]);
 
     // Video playback control
     useEffect(() => {
@@ -454,6 +476,18 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         setTimeout(() => setShowInviteToast(false), 5000);
     };
 
+    const roomActive = sessionStatus === "CONNECTED" || isAiActiveGlobally;
+
+    useEffect(() => {
+        if (!roomActive) return;
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            event.preventDefault();
+            event.returnValue = "";
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    }, [roomActive]);
+
     return (
         <div className="min-h-screen w-full bg-[#E0E4F4] relative flex p-2 lg:p-[2vh] overflow-y-auto">
 
@@ -648,7 +682,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                                 <video ref={handleVideoRef} autoPlay playsInline muted className="w-full h-full object-cover bg-gray-900" style={{ transform: 'scaleX(-1)' }} />
                                             )
                                         ) : (
-                                            <RemoteVideo stream={user.stream!} />
+                                            <RemoteVideo stream={user.stream!} name={user.name} />
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
                                         <div className="absolute bottom-2 xl:bottom-3 left-2 xl:left-3 text-white font-medium text-xs xl:text-sm drop-shadow-md truncate max-w-[90%] flex items-center gap-1.5">
@@ -661,7 +695,9 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                 {!connected && (
                                     <div className="relative w-[140px] xl:w-full shrink-0 aspect-[4/3] rounded-[16px] xl:rounded-[24px] overflow-hidden bg-white/40 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 opacity-50">
                                         <div className="w-6 h-6 rounded-full border-2 border-transparent border-t-indigo-500 animate-spin"></div>
-                                        <span className="text-xs font-bold text-gray-500 text-center px-2">Network Syncing</span>
+                                        <span className="text-xs font-bold text-gray-500 text-center px-2">
+                                            {roomPhase === "reconnecting" ? "Reconnecting network" : "Network Syncing"}
+                                        </span>
                                     </div>
                                 )}
 
@@ -708,7 +744,32 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                     <div className="absolute inset-0 z-40 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center text-white">
                                         <div className="w-16 h-16 rounded-full border-4 border-transparent border-t-amber-500 border-r-amber-500 animate-spin mb-4"></div>
                                         <p className="font-medium text-lg text-amber-100">Aligning the Stars...</p>
-                                        <p className="text-sm text-gray-400 mt-2">Initializing session for {participants.join(", ")}</p>
+                                        <p className="text-sm text-gray-400 mt-2">Initializing session for {allParticipantNames.join(", ")}</p>
+                                    </div>
+                                )}
+
+                                {roomPhase === "reconnecting" && (
+                                    <div className="absolute top-16 left-4 z-40 rounded-2xl border border-amber-300/25 bg-black/55 px-4 py-3 text-sm font-medium text-amber-50 shadow-xl backdrop-blur-md">
+                                        Family network is reconnecting. Keep the session open and we will restore everyone automatically.
+                                    </div>
+                                )}
+
+                                {connectionError && (
+                                    <div className="absolute top-16 left-4 z-40 max-w-md rounded-2xl border border-red-300/25 bg-red-950/70 px-4 py-3 text-sm font-medium text-red-50 shadow-xl backdrop-blur-md">
+                                        Room issue: {connectionError}
+                                    </div>
+                                )}
+
+                                {joinAnnouncements.length > 0 && (
+                                    <div className="absolute top-16 right-4 z-40 flex max-w-sm flex-col gap-2">
+                                        {joinAnnouncements.map((note, index) => (
+                                            <div
+                                                key={`${note}-${index}`}
+                                                className="rounded-2xl border border-white/15 bg-black/55 px-4 py-3 text-sm font-medium text-white shadow-xl backdrop-blur-md"
+                                            >
+                                                {note}
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
 

@@ -17,6 +17,7 @@ import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
+import "@livekit/components-styles";
 import { createClient } from "@/utils/supabase/server";
 import { Toaster } from "@/components/ui/toaster";
 import { getUserById } from "@/db/users";

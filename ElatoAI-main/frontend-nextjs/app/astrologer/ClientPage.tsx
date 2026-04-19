@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Star } from "lucide-react";
 
 export default function ClientPage({ userProfile }: { userProfile: UserProfileData | null }) {
+    const HOST_ROOM_STORAGE_KEY = "smartmurti-astrologer-host-room";
     const [hasJoined, setHasJoined] = useState(false);
     const [participants, setParticipants] = useState<string[]>(userProfile ? [userProfile.name] : []);
     const searchParams = useSearchParams();
@@ -19,13 +20,22 @@ export default function ClientPage({ userProfile }: { userProfile: UserProfileDa
 
     useEffect(() => {
         const room = searchParams.get('room');
+        const hostParam = searchParams.get('host');
+        const storedHostRoom =
+            typeof window !== "undefined"
+                ? window.sessionStorage.getItem(HOST_ROOM_STORAGE_KEY)
+                : null;
         if (room) {
             setRoomId(room);
+            setIsOriginalHost(hostParam === "1" || storedHostRoom === room);
         } else {
             const newRoom = `astrologer-${uuidv4()}`;
             setRoomId(newRoom);
             setIsOriginalHost(true);
-            router.replace(`/astrologer?room=${newRoom}`);
+            if (typeof window !== "undefined") {
+                window.sessionStorage.setItem(HOST_ROOM_STORAGE_KEY, newRoom);
+            }
+            router.replace(`/astrologer?room=${newRoom}&host=1`);
         }
     }, [searchParams, router]);
 

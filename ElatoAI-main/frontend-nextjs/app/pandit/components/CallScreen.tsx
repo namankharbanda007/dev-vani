@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
+    ParticipantTile,
+    RoomAudioRenderer,
+    RoomContext,
+    useTracks,
+} from "@livekit/components-react";
+import {
     Video as VideoIcon,
     MessageSquare,
     Users,
@@ -16,6 +22,7 @@ import {
     Home,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Room as LiveKitRoomInstance, Track } from "livekit-client";
 
 import { useGroupCall } from "../hooks/useGroupCall";
 import { useWebRTC } from "../hooks/useWebRTC";
@@ -43,44 +50,63 @@ interface CallScreenProps {
     };
 }
 
-const RemoteVideo = ({ stream, name }: { stream: MediaStream | undefined | null; name: string }) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const hasVideoTrack = Boolean(stream && stream.getVideoTracks().length > 0);
-
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video || !stream || !hasVideoTrack) return;
-
-        try {
-            video.srcObject = stream;
-            const playPromise = video.play();
-            if (playPromise !== undefined) {
-                playPromise.catch((e) => {
-                    console.warn("Blocked by browser autoplay policy, attempting muted play... ", e);
-                });
-            }
-        } catch (e) {
-            console.error("Failed to assign RemoteVideo stream", e);
-        }
-    }, [hasVideoTrack, stream]);
-
-    if (!stream || !hasVideoTrack) {
-        return (
-            <div className="flex h-full w-full flex-col items-center justify-center bg-[#473b31] text-white">
-                <User className="h-9 w-9 opacity-70" />
-                <span className="mt-2 px-2 text-center text-xs font-medium text-white/80">{name}</span>
-                <span className="mt-1 text-[11px] text-white/55">Audio only</span>
-            </div>
-        );
-    }
-
-    return <video ref={videoRef} autoPlay playsInline className="h-full w-full object-cover bg-gray-900" />;
-};
-
 const getDefaultAvatar = (name: string) => {
     const seed = encodeURIComponent(name || "user");
     return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=c084fc,f59e0b,ec4899&backgroundType=gradientLinear`;
 };
+
+function FamilyPresenceGridInner() {
+    const tracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }]);
+
+    if (tracks.length === 0) {
+        return (
+            <div className="flex min-h-[148px] items-center justify-center rounded-[24px] border border-dashed border-[#d9c9b0] bg-white/65 px-4 text-center text-sm text-[#7a6651]">
+                Family video tiles will appear here as soon as the room finishes connecting.
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {tracks.map((trackRef, index) => {
+                const typedTrackRef = trackRef as any;
+                const participantIdentity =
+                    typedTrackRef?.participant?.identity ||
+                    typedTrackRef?.participant?.sid ||
+                    `participant-${index}`;
+                const source =
+                    typedTrackRef?.publication?.source ||
+                    typedTrackRef?.source ||
+                    "camera";
+
+                return (
+                    <ParticipantTile
+                        key={`${participantIdentity}-${source}`}
+                        trackRef={trackRef}
+                        className="family-participant-tile !h-[148px] !overflow-hidden !rounded-[24px] !border !border-[#eadfcf] !bg-[#2d241c] !shadow-sm [&_.lk-participant-metadata]:!bg-black/55 [&_.lk-participant-name]:!text-xs [&_.lk-participant-name]:!font-medium [&_.lk-placeholder]:!bg-[#5e4b3a]"
+                    />
+                );
+            })}
+        </div>
+    );
+}
+
+function FamilyPresenceGrid({ room }: { room: LiveKitRoomInstance | null }) {
+    if (!room) {
+        return (
+            <div className="flex min-h-[148px] items-center justify-center rounded-[24px] border border-dashed border-[#d9c9b0] bg-white/65 px-4 text-center text-sm text-[#7a6651]">
+                Preparing the family room...
+            </div>
+        );
+    }
+
+    return (
+        <RoomContext.Provider value={room}>
+            <RoomAudioRenderer room={room} />
+            <FamilyPresenceGridInner />
+        </RoomContext.Provider>
+    );
+}
 
 export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false, userAvatarUrl, userProfile }: CallScreenProps) {
     const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
@@ -115,7 +141,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    const { connected, remoteParticipants, broadcastEvent, connectionError, roomPhase } = useWebRTC(roomId, localName, outboundStream);
+    const { room, connected, remoteParticipants, broadcastEvent, connectionError, roomPhase } = useWebRTC(roomId, localName, outboundStream);
 
     const activeCallUsers = useMemo(
         () => [
@@ -407,15 +433,6 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         });
     }, [remoteParticipants, isHost]);
 
-    const handleVideoRef = useCallback(
-        (node: HTMLVideoElement | null) => {
-            if (node) {
-                node.srcObject = localStream;
-            }
-        },
-        [localStream]
-    );
-
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (!chatMessage.trim()) return;
@@ -460,6 +477,18 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     };
 
     const roomActive = sessionStatus === "CONNECTED" || isAiActiveGlobally;
+
+    useEffect(() => {
+        if (!roomActive) return;
+
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            event.preventDefault();
+            event.returnValue = "";
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    }, [roomActive]);
 
     return (
         <div className="relative flex min-h-screen w-full overflow-y-auto bg-[radial-gradient(circle_at_top,_rgba(233,202,160,0.35),_transparent_35%),linear-gradient(180deg,#f7f1e6_0%,#efe6d6_100%)] p-2 lg:p-4">
@@ -531,31 +560,9 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                             </div>
 
                             <div className="scrollbar-hide mb-4 flex gap-3 overflow-x-auto pb-2">
-                                {activeCallUsers.map((user) => (
-                                    <div key={user.id} className="relative h-[108px] w-[148px] shrink-0 overflow-hidden rounded-[20px] border border-[#eadfcf] bg-[#d7d0c2] shadow-sm">
-                                        {user.type === "local" ? (
-                                            isVideoOff ? (
-                                                <div className="flex h-full w-full items-center justify-center bg-[#53483b] text-white">
-                                                    <User className="h-10 w-10 opacity-60" />
-                                                </div>
-                                            ) : cameraError ? (
-                                                <div className="flex h-full w-full flex-col items-center justify-center bg-red-900/10 p-2 text-center text-xs text-red-700">
-                                                    <VideoOff className="mb-1 h-5 w-5" />
-                                                    <span>{cameraError}</span>
-                                                </div>
-                                            ) : (
-                                                <video ref={handleVideoRef} autoPlay playsInline muted className="h-full w-full object-cover bg-gray-900" style={{ transform: "scaleX(-1)" }} />
-                                            )
-                                        ) : (
-                                            <RemoteVideo stream={user.stream} name={user.name} />
-                                        )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                                        <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1.5 text-xs font-medium text-white">
-                                            {user.type === "remote" && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />}
-                                            <span className="truncate">{user.name}{user.type === "local" ? " (You)" : ""}</span>
-                                        </div>
-                                    </div>
-                                ))}
+                                <div className="min-w-[min(100%,840px)] flex-1">
+                                    <FamilyPresenceGrid room={room} />
+                                </div>
 
                                 {!connected && (
                                     <div className="flex h-[108px] w-[148px] shrink-0 flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-[#d6c7b0] bg-white/60 text-center">
@@ -716,6 +723,11 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                     <p className="mt-2 text-sm leading-6 text-[#5a4632]">
                                         Keep one calm speaker at a time, invite relatives before the main chant begins, and let Smart Pandit handle the sequence of the puja.
                                     </p>
+                                    {cameraError && (
+                                        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                                            Camera issue: {cameraError}. Audio will continue, and your family can still stay in the ritual room.
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="rounded-[24px] border border-[#eadfcf] bg-white/80 p-5 shadow-sm">
                                     <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#a27f47]">Live session signal</p>

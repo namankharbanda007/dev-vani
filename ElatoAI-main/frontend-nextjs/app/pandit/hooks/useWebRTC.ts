@@ -27,6 +27,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
     const [debugLogs, setDebugLogs] = useState<string[]>([]);
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [roomPhase, setRoomPhase] = useState<"connecting" | "connected" | "reconnecting" | "disconnected">("connecting");
+    const [room, setRoom] = useState<Room | null>(null);
 
     // We keep the channel/broadcastEvent API for app-level events (AI state, active speaker).
     // These now go through LiveKit's data channel instead of Supabase broadcast.
@@ -88,6 +89,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
             dynacast: true,
         });
         roomRef.current = room;
+        setRoom(room);
 
         // --- Event handlers ---
 
@@ -221,6 +223,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
             publishedTrackIdsRef.current = [];
             room.disconnect();
             roomRef.current = null;
+            setRoom(null);
         };
     }, [roomId, localName, addLog, refreshParticipants]);
 
@@ -299,6 +302,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
     }, []);
 
     return {
+        room,
         connected,
         remoteParticipants,
         broadcastEvent,

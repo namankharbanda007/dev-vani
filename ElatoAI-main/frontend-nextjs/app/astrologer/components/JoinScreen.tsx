@@ -10,20 +10,12 @@ interface JoinScreenProps {
 }
 
 export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
-    const [namesInput, setNamesInput] = useState(initialName || "");
+    const [displayName, setDisplayName] = useState(initialName || "");
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const names = namesInput
-            .split(",")
-            .map((name) => name.trim())
-            .filter((name) => name.length > 0);
-
-        if (names.length === 0) {
-            names.push("Guest");
-        }
-
-        onJoin(names);
+        const cleanName = displayName.trim() || "Guest";
+        onJoin([cleanName]);
     };
 
     return (
@@ -43,14 +35,14 @@ export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
                     </div>
                     <h1 className="text-3xl font-bold font-lora mb-2 tracking-tight">Join Live Astrology Session</h1>
                     <p className="text-gray-400 text-sm leading-relaxed">
-                        Enter the names of everyone joining today. The Astrologer will address you all by name and read the stars for you.
+                        Join as one person on this device. Other family members can join from their own devices or use a shared family name.
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-gray-300 ml-1">
-                            Participant Names
+                            Your display name
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -58,14 +50,14 @@ export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
                             </div>
                             <input
                                 type="text"
-                                value={namesInput}
-                                onChange={(e) => setNamesInput(e.target.value)}
-                                placeholder="e.g. Rohan, Priya, Sharma Family"
+                                value={displayName}
+                                onChange={(e) => setDisplayName(e.target.value)}
+                                placeholder="e.g. Naman or Sharma Family"
                                 className="w-full pl-11 pr-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all font-medium"
                                 required
                             />
                         </div>
-                        <p className="text-xs text-gray-500 ml-1">Separate multiple names with commas.</p>
+                        <p className="text-xs text-gray-500 ml-1">Use the name the astrologer should use for this device.</p>
                     </div>
 
                     <div className="flex gap-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
