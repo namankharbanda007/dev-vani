@@ -176,7 +176,7 @@ export function AuthScreen() {
 
   return (
     <View style={styles.page}>
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={styles.flex}
@@ -186,33 +186,15 @@ export function AuthScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <View style={styles.heroShell}>
-              <Text style={styles.heroHeading}>
-                Spirituality meets companionship for families who need guidance now.
+            <View style={styles.headerShell}>
+              <Text style={styles.brandWordmark}>SMART मूर्ति</Text>
+              <Text style={styles.headerSubcopy}>
+                Instant spiritual guidance, live puja access, and one calm front door for your family.
               </Text>
-              <Text style={styles.heroSubcopy}>
-                Talk to Smart Pandit in your language, start with one-to-one guidance, and bring family in later when the moment becomes bigger.
-              </Text>
-              <View style={styles.heroArtCard}>
-                <Image
-                  source={require("../../assets/branding/login-hero.jpg")}
-                  style={styles.heroArt}
-                  resizeMode="cover"
-                />
-                <View style={styles.heroOverlay} />
-              </View>
-              <View style={styles.trustRow}>
-                <View style={styles.trustChip}>
-                  <Text style={styles.trustChipText}>Live multilingual guidance</Text>
-                </View>
-                <View style={styles.trustChip}>
-                  <Text style={styles.trustChipText}>Family can join later</Text>
-                </View>
-              </View>
             </View>
 
             <View style={styles.formCard}>
-              <Text style={styles.brandKicker}>SMART मूर्ति</Text>
+              <Text style={styles.brandKicker}>Start with Smart Pandit</Text>
 
               <View style={styles.tabRow}>
                 <Pressable
@@ -326,6 +308,31 @@ export function AuthScreen() {
                 .
               </Text>
             </View>
+
+            <View style={styles.heroShell}>
+              <View style={styles.heroArtCard}>
+                <Image
+                  source={require("../../assets/branding/login-hero.jpg")}
+                  style={styles.heroArt}
+                  resizeMode="cover"
+                />
+                <View style={styles.heroOverlay} />
+              </View>
+              <Text style={styles.heroHeading}>
+                Guidance first. Family puja when you need more.
+              </Text>
+              <Text style={styles.heroSubcopy}>
+                Begin with one personal conversation, then bring relatives in later when the moment becomes bigger.
+              </Text>
+              <View style={styles.trustRow}>
+                <View style={styles.trustChip}>
+                  <Text style={styles.trustChipText}>Live multilingual guidance</Text>
+                </View>
+                <View style={styles.trustChip}>
+                  <Text style={styles.trustChipText}>Family can join later</Text>
+                </View>
+              </View>
+            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -347,48 +354,69 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 18,
-    paddingTop: 10,
-    paddingBottom: 28,
-    gap: 16,
+    paddingTop: 12,
+    paddingBottom: 24,
+    gap: 14,
+  },
+  headerShell: {
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 8,
+    paddingTop: 2,
+  },
+  brandWordmark: {
+    color: colors.murtiStone,
+    fontFamily: fonts.brand,
+    fontSize: 34,
+    textAlign: "center",
+  },
+  headerSubcopy: {
+    color: colors.gray500,
+    fontFamily: fonts.body,
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: "center",
+    maxWidth: 360,
   },
   heroShell: {
-    gap: 12,
+    gap: 10,
+    paddingHorizontal: 4,
   },
   heroHeading: {
     color: colors.gray900,
     fontFamily: fonts.heading,
-    fontSize: 28,
-    lineHeight: 36,
-    paddingHorizontal: 6,
+    fontSize: 22,
+    lineHeight: 30,
+    paddingHorizontal: 4,
   },
   heroSubcopy: {
     color: colors.gray500,
     fontFamily: fonts.body,
-    fontSize: 15,
-    lineHeight: 22,
-    paddingHorizontal: 6,
+    fontSize: 14,
+    lineHeight: 21,
+    paddingHorizontal: 4,
     maxWidth: 360,
   },
   heroArtCard: {
-    minHeight: 292,
-    borderRadius: 34,
+    minHeight: 156,
+    borderRadius: 28,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "rgba(106,74,44,0.12)",
-    backgroundColor: "#EAC17A",
+    backgroundColor: "#F0D7A8",
     shadowColor: "#6A4A2C",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 3,
   },
   heroArt: {
     width: "100%",
-    height: 292,
+    height: 156,
   },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255,247,234,0.08)",
+    backgroundColor: "rgba(255,247,234,0.12)",
   },
   trustRow: {
     flexDirection: "row",
@@ -413,9 +441,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: 32,
     paddingHorizontal: 22,
-    paddingTop: 28,
-    paddingBottom: 32,
-    gap: 16,
+    paddingTop: 24,
+    paddingBottom: 26,
+    gap: 14,
     borderWidth: 1,
     borderColor: "rgba(106,74,44,0.08)",
     shadowColor: "#6A4A2C",
@@ -423,14 +451,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 18,
     elevation: 5,
-    marginTop: -12,
   },
   brandKicker: {
     textAlign: "center",
-    color: colors.purple900,
-    fontFamily: fonts.brand,
-    fontSize: 30,
-    letterSpacing: 0.2,
+    color: colors.divineSaffron,
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
   },
   tabRow: {
     flexDirection: "row",
@@ -450,7 +478,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   tabTextActive: {
-    color: colors.purple900,
+    color: colors.murtiStone,
     fontFamily: fonts.bodyBold,
   },
   tabUnderline: {
@@ -464,7 +492,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   tabUnderlineActive: {
-    backgroundColor: colors.purple900,
+    backgroundColor: colors.divineSaffron,
   },
   welcomeBlock: {
     alignItems: "center",
@@ -546,7 +574,7 @@ const styles = StyleSheet.create({
     marginTop: -4,
   },
   forgotText: {
-    color: colors.purple900,
+    color: colors.divineSaffron,
     fontFamily: fonts.bodyBold,
     fontSize: 13,
   },
@@ -559,10 +587,10 @@ const styles = StyleSheet.create({
   submitButton: {
     height: 56,
     borderRadius: 20,
-    backgroundColor: colors.purple900,
+    backgroundColor: colors.divineSaffron,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#512A73",
+    shadowColor: "#8C4A15",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.14,
     shadowRadius: 14,
@@ -585,7 +613,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   footerLink: {
-    color: colors.purple900,
+    color: colors.divineSaffron,
     textDecorationLine: "underline",
   },
 });

@@ -8,7 +8,7 @@ import { signInAction, signUpAction } from "@/app/actions";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GoogleLoginButton from "@/app/components/GoogleLoginButton";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface LoginFormProps {
     searchParams?: { [key: string]: string | string[] | undefined };
@@ -30,25 +30,28 @@ export function LoginForm({ searchParams }: LoginFormProps) {
 
     return (
         <div className="w-full max-w-[450px]">
-            <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden ring-1 ring-white/50">
+            <Card className="overflow-hidden rounded-[32px] border border-[#eadfcf] bg-white/88 shadow-[0_24px_70px_rgba(92,67,37,0.14)] backdrop-blur-xl">
                 <CardHeader className="text-center pb-2 pt-8">
-                    <h1 className="text-4xl font-bold font-luckiestGuy tracking-wider text-purple-900 mb-2 drop-shadow-sm">
+                    <h1 className="mb-2 font-lora text-4xl font-bold tracking-tight text-[#24170f]">
                         SMART मूर्ति
                     </h1>
+                    <p className="text-sm font-medium uppercase tracking-[0.22em] text-[#b07229]">
+                        Start with Smart Pandit
+                    </p>
                 </CardHeader>
 
                 <Tabs defaultValue="login" className="w-full">
                     <div className="px-8 mb-6">
-                        <TabsList className="grid w-full grid-cols-2 h-12 bg-gray-100/80 p-1 rounded-2xl">
+                        <TabsList className="grid h-12 w-full grid-cols-2 rounded-2xl border border-[#eadfcf] bg-[#f7efe3] p-1">
                             <TabsTrigger
                                 value="login"
-                                className="rounded-xl text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm transition-all"
+                                className="rounded-xl text-sm font-bold text-[#7f6a55] data-[state=active]:bg-white data-[state=active]:text-[#24170f] data-[state=active]:shadow-sm transition-all"
                             >
                                 Login
                             </TabsTrigger>
                             <TabsTrigger
                                 value="signup"
-                                className="rounded-xl text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm transition-all"
+                                className="rounded-xl text-sm font-bold text-[#7f6a55] data-[state=active]:bg-white data-[state=active]:text-[#24170f] data-[state=active]:shadow-sm transition-all"
                             >
                                 Sign Up
                             </TabsTrigger>
@@ -58,8 +61,8 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                     <CardContent className="px-8 pb-8 space-y-6">
                         <TabsContent value="login" className="space-y-6 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
                             <div className="text-center mb-6">
-                                <h2 className="text-gray-900 font-bold text-xl">Welcome Back!</h2>
-                                <p className="text-gray-500 text-sm mt-1">Ready to continue your journey?</p>
+                                <h2 className="text-xl font-bold text-[#24170f]">Welcome back</h2>
+                                <p className="mt-1 text-sm text-[#7a6651]">Return to one calm front door for guidance, puja, and family support.</p>
                             </div>
 
                             <GoogleLoginButton
@@ -92,7 +95,7 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                                         placeholder="devotee@smartmurti.com"
                                         required
                                         disabled={loading}
-                                        className="h-12 rounded-xl bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-medium"
+                                        className="h-12 rounded-xl border-[#eadfcf] bg-white/70 font-medium transition-all focus:border-[#d8a257] focus:ring-4 focus:ring-[#d8a257]/10"
                                     />
                                 </div>
 
@@ -101,7 +104,7 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                                         <Label htmlFor="password-login" className="text-gray-700 font-bold text-sm">Password</Label>
                                         <Link
                                             href="/forgot-password"
-                                            className="text-xs font-semibold text-purple-600 hover:text-purple-500 transition-colors"
+                                            className="text-xs font-semibold text-[#b07229] transition-colors hover:text-[#9e6526]"
                                         >
                                             Forgot password?
                                         </Link>
@@ -110,17 +113,17 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                                         id="password-login"
                                         name="password"
                                         type="password"
-                                        placeholder="••••••••"
+                                        placeholder="Enter your password"
                                         required
                                         disabled={loading}
-                                        className="h-12 rounded-xl bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-medium"
+                                        className="h-12 rounded-xl border-[#eadfcf] bg-white/70 font-medium transition-all focus:border-[#d8a257] focus:ring-4 focus:ring-[#d8a257]/10"
                                     />
                                 </div>
 
                                 <SubmitButton
                                     formAction={signInAction}
                                     disabled={loading}
-                                    className="w-full h-12 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-purple-900/20 hover:shadow-xl hover:shadow-purple-900/30 transition-all transform hover:-translate-y-0.5"
+                                    className="h-12 w-full rounded-xl bg-gradient-to-r from-[#c86b1f] to-[#9f5520] text-lg font-bold text-white shadow-lg shadow-[#9f5520]/20 transition-all hover:-translate-y-0.5 hover:from-[#b6611c] hover:to-[#8f4b1b] hover:shadow-xl hover:shadow-[#9f5520]/30"
                                     pendingText="Logging in..."
                                 >
                                     Login
@@ -130,8 +133,8 @@ export function LoginForm({ searchParams }: LoginFormProps) {
 
                         <TabsContent value="signup" className="space-y-6 mt-0 animate-in fade-in slide-in-from-right-4 duration-300">
                             <div className="text-center mb-6">
-                                <h2 className="text-gray-900 font-bold text-xl">Join the Family</h2>
-                                <p className="text-gray-500 text-sm mt-1">Start your spiritual journey today</p>
+                                <h2 className="text-xl font-bold text-[#24170f]">Begin with Smart Pandit</h2>
+                                <p className="mt-1 text-sm text-[#7a6651]">Create your account and start with live spiritual guidance that feels personal and immediate.</p>
                             </div>
 
                             <GoogleLoginButton
@@ -164,7 +167,7 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                                         placeholder="devotee@smartmurti.com"
                                         required
                                         disabled={loading}
-                                        className="h-12 rounded-xl bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-medium"
+                                        className="h-12 rounded-xl border-[#eadfcf] bg-white/70 font-medium transition-all focus:border-[#d8a257] focus:ring-4 focus:ring-[#d8a257]/10"
                                     />
                                 </div>
 
@@ -174,11 +177,11 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                                         id="password-signup"
                                         name="password"
                                         type="password"
-                                        placeholder="••••••••"
+                                        placeholder="Create a password"
                                         required
                                         minLength={6}
                                         disabled={loading}
-                                        className="h-12 rounded-xl bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-medium"
+                                        className="h-12 rounded-xl border-[#eadfcf] bg-white/70 font-medium transition-all focus:border-[#d8a257] focus:ring-4 focus:ring-[#d8a257]/10"
                                     />
                                     <p className="text-xs text-gray-500 ml-1">Must be at least 6 characters</p>
                                 </div>
@@ -186,7 +189,7 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                                 <SubmitButton
                                     formAction={signUpAction}
                                     disabled={loading}
-                                    className="w-full h-12 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-pink-900/20 hover:shadow-xl hover:shadow-pink-900/30 transition-all transform hover:-translate-y-0.5"
+                                    className="h-12 w-full rounded-xl bg-gradient-to-r from-[#c86b1f] to-[#9f5520] text-lg font-bold text-white shadow-lg shadow-[#9f5520]/20 transition-all hover:-translate-y-0.5 hover:from-[#b6611c] hover:to-[#8f4b1b] hover:shadow-xl hover:shadow-[#9f5520]/30"
                                     pendingText="Creating account..."
                                 >
                                     Create Account
@@ -211,8 +214,8 @@ export function LoginForm({ searchParams }: LoginFormProps) {
                     </CardContent>
                 </Tabs>
 
-                <div className="bg-gray-50/50 p-4 text-center border-t border-gray-100">
-                    <p className="text-xs text-gray-400 max-w-xs mx-auto">
+                <div className="border-t border-[#efe3d2] bg-[#fff8ef] p-4 text-center">
+                    <p className="mx-auto max-w-xs text-xs text-[#8a7763]">
                         By continuing, you agree to our Terms of Service and Privacy Policy.
                     </p>
                 </div>
