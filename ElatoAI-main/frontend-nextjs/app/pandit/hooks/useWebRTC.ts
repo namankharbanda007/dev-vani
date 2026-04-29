@@ -21,13 +21,15 @@ export interface RemoteParticipantInfo {
  * Maintains the SAME external API so CallScreen.tsx needs minimal changes:
  *   { connected, remoteParticipants, broadcastEvent, channel, debugLogs }
  */
-export function useWebRTC(roomId: string, localName: string, localStream: MediaStream | null) {
+export function useWebRTC(roomId: string, localName: string, localStream: MediaStream | null, inviteToken = "") {
     const [remoteParticipants, setRemoteParticipants] = useState<RemoteParticipantInfo[]>([]);
     const [connected, setConnected] = useState(false);
     const [debugLogs, setDebugLogs] = useState<string[]>([]);
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [roomPhase, setRoomPhase] = useState<"connecting" | "connected" | "reconnecting" | "disconnected">("connecting");
     const [room, setRoom] = useState<Room | null>(null);
+    const [activeSpeakerIds, setActiveSpeakerIds] = useState<string[]>([]);
+    const [localIdentity, setLocalIdentity] = useState<string | null>(null);
 
     // We keep the channel/broadcastEvent API for app-level events (AI state, active speaker).
     // These now go through LiveKit's data channel instead of Supabase broadcast.
@@ -97,6 +99,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
             if (cancelled) return;
             addLog("Connected to LiveKit room");
             setConnected(true);
+            setLocalIdentity(room.localParticipant.identity);
             setConnectionError(null);
             setRoomPhase("connected");
         });
@@ -106,6 +109,8 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
             addLog("Disconnected from LiveKit room");
             setConnected(false);
             setRemoteParticipants([]);
+            setActiveSpeakerIds([]);
+            setLocalIdentity(null);
             setRoomPhase("disconnected");
         });
 
@@ -149,6 +154,16 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
             refreshParticipants(room);
         });
 
+        room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
+            if (cancelled) return;
+            setActiveSpeakerIds(
+                speakers
+                    .map((speaker) => speaker.identity)
+                    .filter(Boolean)
+                    .slice(0, 2)
+            );
+        });
+
         // Listen for app-level data messages (replaces Supabase broadcast)
         room.on(RoomEvent.DataReceived, (payload: Uint8Array) => {
             if (cancelled) return;
@@ -167,7 +182,14 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
                 setConnectionError(null);
                 setRoomPhase("connecting");
                 addLog("Fetching LiveKit token...");
-                const res = await fetch(`/api/livekit-token?room=${encodeURIComponent(roomId)}&name=${encodeURIComponent(localName)}`);
+                const params = new URLSearchParams({
+                    room: roomId,
+                    name: localName,
+                });
+                if (inviteToken) {
+                    params.set("invite", inviteToken);
+                }
+                const res = await fetch(`/api/livekit-token?${params.toString()}`);
                 const data = await res.json();
 
                 if (!res.ok || data.error) {
@@ -219,13 +241,15 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
             cancelled = true;
             setConnected(false);
             setRemoteParticipants([]);
+            setActiveSpeakerIds([]);
+            setLocalIdentity(null);
             setRoomPhase("disconnected");
             publishedTrackIdsRef.current = [];
             room.disconnect();
             roomRef.current = null;
             setRoom(null);
         };
-    }, [roomId, localName, addLog, refreshParticipants]);
+    }, [roomId, localName, inviteToken, addLog, refreshParticipants]);
 
     useEffect(() => {
         if (!connectionError) return;
@@ -310,5 +334,7 @@ export function useWebRTC(roomId: string, localName: string, localStream: MediaS
         debugLogs,
         connectionError,
         roomPhase,
+        activeSpeakerIds,
+        localIdentity,
     };
 }

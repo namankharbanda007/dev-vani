@@ -4,7 +4,7 @@ import { connectUserToDevice, signOutAction } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { LogOut, Camera, Upload, Loader2, CheckCircle } from "lucide-react";
+import { LogOut, Camera, Upload, Loader2, CheckCircle, UserPlus, Trash2 } from "lucide-react";
 
 import GeneralUserForm from "./UserForm";
 import { Slider } from "@/components/ui/slider";
@@ -36,6 +36,9 @@ const AppSettings: React.FC<AppSettingsProps> = ({
     const userFormRef = React.useRef<{ submitForm: () => void } | null>(null);
     const [deviceCode, setDeviceCode] = React.useState("");
     const [error, setError] = React.useState("");
+    const [familyMembers, setFamilyMembers] = React.useState<Array<{ id: string; name: string; email: string; relation: string }>>([]);
+    const [familyDraft, setFamilyDraft] = React.useState({ name: "", email: "", relation: "" });
+    const [familySaving, setFamilySaving] = React.useState(false);
 
     // Profile photo upload state
     const [avatarUrl, setAvatarUrl] = useState(selectedUser.avatar_url);
@@ -60,6 +63,62 @@ const AppSettings: React.FC<AppSettingsProps> = ({
     React.useEffect(() => {
         checkIfUserHasDevice();
     }, [checkIfUserHasDevice]);
+
+    React.useEffect(() => {
+        const loadFamilyMembers = async () => {
+            const response = await fetch("/api/family-members");
+            const payload = await response.json().catch(() => null);
+            if (response.ok && Array.isArray(payload?.familyMembers)) {
+                setFamilyMembers(payload.familyMembers);
+            }
+        };
+
+        void loadFamilyMembers();
+    }, []);
+
+    const addFamilyMember = async () => {
+        if (!familyDraft.name.trim() || !familyDraft.email.trim()) {
+            toast({ description: "Add a name and email for this family member.", variant: "destructive" });
+            return;
+        }
+
+        setFamilySaving(true);
+        try {
+            const response = await fetch("/api/family-members", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(familyDraft),
+            });
+            const payload = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                throw new Error(payload?.error || "Could not save family member.");
+            }
+
+            setFamilyMembers(payload.familyMembers || []);
+            setFamilyDraft({ name: "", email: "", relation: "" });
+            toast({ description: "Family member saved for live puja invites." });
+        } catch (err: any) {
+            toast({ description: err?.message || "Could not save family member.", variant: "destructive" });
+        } finally {
+            setFamilySaving(false);
+        }
+    };
+
+    const removeFamilyMember = async (memberId: string) => {
+        const response = await fetch(`/api/family-members?id=${encodeURIComponent(memberId)}`, {
+            method: "DELETE",
+        });
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            toast({ description: payload?.error || "Could not remove family member.", variant: "destructive" });
+            return;
+        }
+
+        setFamilyMembers(payload.familyMembers || []);
+        toast({ description: "Family member removed." });
+    };
 
     const handlePhotoUpload = async (file: File) => {
         if (!file) return;
@@ -258,6 +317,77 @@ const AppSettings: React.FC<AppSettingsProps> = ({
             <div className="mt-8">
                 <UsageStats user={selectedUser} />
             </div>
+
+            <section className="mt-8 rounded-[28px] border border-amber-100 bg-[#fff8ed] p-6 shadow-sm">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h2 className="font-lora text-2xl font-bold text-[#2b1d12]">Family for Live Puja</h2>
+                        <p className="mt-1 max-w-2xl text-sm leading-6 text-[#725b43]">
+                            Pre-add family members here. When you start a live puja, Smart Murti can prepare one signed room invite for this trusted family circle.
+                        </p>
+                    </div>
+                    <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#8a5b1f] shadow-sm">
+                        {familyMembers.length} saved
+                    </div>
+                </div>
+
+                <div className="mt-5 grid gap-3 md:grid-cols-[1fr_1fr_0.8fr_auto]">
+                    <Input
+                        value={familyDraft.name}
+                        onChange={(event) => setFamilyDraft((draft) => ({ ...draft, name: event.target.value }))}
+                        placeholder="Family member name"
+                        className="rounded-2xl border-amber-100 bg-white"
+                    />
+                    <Input
+                        value={familyDraft.email}
+                        onChange={(event) => setFamilyDraft((draft) => ({ ...draft, email: event.target.value }))}
+                        placeholder="Email used for Smart Murti"
+                        className="rounded-2xl border-amber-100 bg-white"
+                    />
+                    <Input
+                        value={familyDraft.relation}
+                        onChange={(event) => setFamilyDraft((draft) => ({ ...draft, relation: event.target.value }))}
+                        placeholder="Relation"
+                        className="rounded-2xl border-amber-100 bg-white"
+                    />
+                    <Button
+                        type="button"
+                        onClick={addFamilyMember}
+                        disabled={familySaving}
+                        className="rounded-2xl bg-[#8a5b1f] text-white hover:bg-[#754916]"
+                    >
+                        {familySaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                        Add
+                    </Button>
+                </div>
+
+                <div className="mt-5 space-y-2">
+                    {familyMembers.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-amber-200 bg-white/70 p-4 text-sm text-[#725b43]">
+                            No family added yet. Add the people who should be invited whenever you begin a live family puja.
+                        </div>
+                    ) : (
+                        familyMembers.map((member) => (
+                            <div key={member.id} className="flex items-center justify-between gap-3 rounded-2xl border border-amber-100 bg-white px-4 py-3">
+                                <div className="min-w-0">
+                                    <p className="font-semibold text-[#2b1d12]">{member.name}</p>
+                                    <p className="truncate text-xs text-[#7b6650]">
+                                        {member.email}{member.relation ? ` · ${member.relation}` : ""}
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => void removeFamilyMember(member.id)}
+                                    className="rounded-full p-2 text-[#9a5a38] transition hover:bg-red-50 hover:text-red-700"
+                                    aria-label={`Remove ${member.name}`}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </section>
 
             <div className="space-y-6 mt-12 pt-8 border-t border-gray-200/50">
                 <h2 className="text-xl font-bold font-lora text-gray-800 flex items-center gap-2">

@@ -9,6 +9,13 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (process.env.NODE_ENV === "production" && process.env.ALLOW_MOCK_WALLET_RECHARGE !== "true") {
+        return NextResponse.json(
+            { error: "Wallet recharge is temporarily unavailable while payment verification is being configured." },
+            { status: 503 }
+        );
+    }
+
     const dbUser = await ensureMobileUser(supabase, user);
     if (!dbUser) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -17,7 +24,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => null);
     const amount = Number(body?.amount);
 
-    if (!amount || amount < 10) {
+    if (!Number.isFinite(amount) || amount < 10) {
         return NextResponse.json({ error: "Enter a valid amount of at least Rs. 10." }, { status: 400 });
     }
 

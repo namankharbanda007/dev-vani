@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { getSimpleUserById } from "@/db/users";
 import type { UserProfileData } from "@/app/types/UserProfileData";
 import { buildMetadata } from "@/app/lib/seo";
+import { redirect } from "next/navigation";
 
 export const metadata = buildMetadata({
     title: "AI Pandit",
@@ -44,6 +45,10 @@ export default async function PanditCallPage() {
         }
     } catch (err) {
         console.error("Supabase SSR Auth Error:", err);
+    }
+
+    if (!userProfile) {
+        redirect("/login?message=Please%20sign%20in%20to%20join%20a%20live%20puja%20room");
     }
 
     return (

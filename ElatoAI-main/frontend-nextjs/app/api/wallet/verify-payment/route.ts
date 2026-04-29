@@ -10,9 +10,21 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (process.env.NODE_ENV === "production" && process.env.ALLOW_MOCK_WALLET_RECHARGE !== "true") {
+        return NextResponse.json(
+            { error: "Wallet recharge is temporarily unavailable while payment verification is being configured." },
+            { status: 503 }
+        );
+    }
+
     try {
         const body = await req.json();
         const { orderId, amount, paymentId, signature } = body;
+        const numericAmount = Number(amount);
+
+        if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+            return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+        }
 
         // --- MOCK PAYMENT GATEWAY VERIFICATION ---
         console.log(`Verifying MOCK Payment for ${user.id} - Order: ${orderId}, Amount: ₹${amount}`);
@@ -42,7 +54,7 @@ export async function POST(req: Request) {
             throw new Error("Unable to fetch user wallet balance");
         }
 
-        const newBalance = Number(dbUser.wallet_balance) + Number(amount);
+        const newBalance = Number(dbUser.wallet_balance) + numericAmount;
 
         // B. Update Balance
         const { error: updateErr } = await supabase
@@ -58,7 +70,7 @@ export async function POST(req: Request) {
             .insert({
                 user_id: user.id,
                 type: 'credit',
-                amount: Number(amount),
+                amount: numericAmount,
                 service_name: 'Wallet Recharge',
                 status: 'completed'
             });

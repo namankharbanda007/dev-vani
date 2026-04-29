@@ -37,6 +37,7 @@ export const getSharedAudioContext = () => {
 interface CallScreenProps {
     participants: string[];
     roomId: string;
+    inviteToken?: string;
     onLeave: () => void;
     isOriginalHost?: boolean;
     userAvatarUrl?: string | null;
@@ -108,7 +109,7 @@ function FamilyPresenceGrid({ room }: { room: LiveKitRoomInstance | null }) {
     );
 }
 
-export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false, userAvatarUrl, userProfile }: CallScreenProps) {
+export default function CallScreen({ participants, roomId, inviteToken = "", onLeave, isOriginalHost = false, userAvatarUrl, userProfile }: CallScreenProps) {
     const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
 
     const [isMuted, setIsMuted] = useState(false);
@@ -126,6 +127,8 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     const aiInputDestRef = useRef<MediaStreamAudioDestinationNode | null>(null);
     const p2pOutputDestRef = useRef<MediaStreamAudioDestinationNode | null>(null);
     const peerSourcesRef = useRef<Map<string, MediaStreamAudioSourceNode>>(new Map());
+    const localAiSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+    const localP2pSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
     const aiSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
 
     const [isAiActiveGlobally, setIsAiActiveGlobally] = useState<boolean>(false);
@@ -141,7 +144,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    const { room, connected, remoteParticipants, broadcastEvent, connectionError, roomPhase } = useWebRTC(roomId, localName, outboundStream);
+    const { room, connected, remoteParticipants, broadcastEvent, connectionError, roomPhase, activeSpeakerIds, localIdentity } = useWebRTC(roomId, localName, outboundStream, inviteToken);
 
     const activeCallUsers = useMemo(
         () => [
@@ -180,6 +183,14 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     const speakingVideoRef = useRef<HTMLVideoElement>(null);
     const listeningVideoRef = useRef<HTMLVideoElement>(null);
     const prevParticipantsLengthRef = useRef(remoteParticipants.length);
+    const activeRemoteSpeakerId = useMemo(
+        () => activeSpeakerIds.find((speakerId) => speakerId !== localIdentity) || null,
+        [activeSpeakerIds, localIdentity]
+    );
+    const activeRemoteSpeakerName = useMemo(
+        () => remoteParticipants.find((participant) => participant.id === activeRemoteSpeakerId)?.name || null,
+        [activeRemoteSpeakerId, remoteParticipants]
+    );
 
     useEffect(() => {
         if (remoteParticipants.length > prevParticipantsLengthRef.current) {
@@ -338,9 +349,12 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                 setOutboundStream(outputStream);
 
                 if (stream && stream.getAudioTracks().length > 0) {
-                    const localSource = ctx.createMediaStreamSource(stream);
-                    localSource.connect(aiInputDest);
-                    localSource.connect(p2pOutputDest);
+                    const localAiSource = ctx.createMediaStreamSource(stream);
+                    const localP2pSource = ctx.createMediaStreamSource(stream);
+                    localAiSource.connect(aiInputDest);
+                    localP2pSource.connect(p2pOutputDest);
+                    localAiSourceRef.current = localAiSource;
+                    localP2pSourceRef.current = localP2pSource;
                 }
             } catch (e) {
                 console.error("Web Audio setup error:", e);
@@ -360,6 +374,14 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
             if (aiSourceRef.current) {
                 aiSourceRef.current.disconnect();
                 aiSourceRef.current = null;
+            }
+            if (localAiSourceRef.current) {
+                localAiSourceRef.current.disconnect();
+                localAiSourceRef.current = null;
+            }
+            if (localP2pSourceRef.current) {
+                localP2pSourceRef.current.disconnect();
+                localP2pSourceRef.current = null;
             }
         };
     }, []);
@@ -409,7 +431,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         const remoteIds = new Set(remoteParticipants.map((p) => p.id));
 
         peerSourcesRef.current.forEach((source, id) => {
-            if (!remoteIds.has(id)) {
+            if (!remoteIds.has(id) || (activeRemoteSpeakerId && id !== activeRemoteSpeakerId)) {
                 try {
                     source.disconnect();
                 } catch {
@@ -420,6 +442,10 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         });
 
         remoteParticipants.forEach((participant) => {
+            if (activeRemoteSpeakerId && participant.id !== activeRemoteSpeakerId) {
+                return;
+            }
+
             if (!peerSourcesRef.current.has(participant.id) && participant.stream.getAudioTracks().length > 0) {
                 try {
                     const peerSource = ctx.createMediaStreamSource(participant.stream);
@@ -431,7 +457,27 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                 }
             }
         });
-    }, [remoteParticipants, isHost]);
+    }, [remoteParticipants, isHost, activeRemoteSpeakerId]);
+
+    useEffect(() => {
+        const localAiSource = localAiSourceRef.current;
+        const aiInputDest = aiInputDestRef.current;
+        if (!localAiSource || !aiInputDest || !isHost) return;
+
+        try {
+            localAiSource.disconnect(aiInputDest);
+        } catch {
+            // Ignore disconnect races while LiveKit updates the active speaker list.
+        }
+
+        if (!activeRemoteSpeakerId) {
+            try {
+                localAiSource.connect(aiInputDest);
+            } catch {
+                // Ignore duplicate connection races.
+            }
+        }
+    }, [activeRemoteSpeakerId, isHost]);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
@@ -455,7 +501,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     };
 
     const copyInviteLink = async () => {
-        const url = `${window.location.origin}/pandit?room=${roomId}`;
+        const url = `${window.location.origin}/pandit?room=${encodeURIComponent(roomId)}${inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : ""}`;
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -540,7 +586,11 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                         </div>
                         <div className="rounded-2xl border border-[#eadfcf] bg-[#fff8ee] px-4 py-3">
                             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#aa7b2b]">Guidance</p>
-                            <p className="mt-1 text-sm text-[#5c4734]">Keep your microphone open when speaking. Use the side rail only for short family coordination.</p>
+                            <p className="mt-1 text-sm text-[#5c4734]">
+                                {activeRemoteSpeakerName
+                                    ? `${activeRemoteSpeakerName} has the floor. Everyone else should pause for a clean Pandit response.`
+                                    : "One speaker at a time. Smart Pandit listens to the active speaker so the ritual does not get confused."}
+                            </p>
                         </div>
                     </div>
                 </header>
@@ -619,6 +669,12 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                 {roomPhase === "reconnecting" && (
                                     <div className="absolute left-6 top-20 z-40 rounded-2xl border border-amber-300/25 bg-black/55 px-4 py-3 text-sm font-medium text-amber-50 shadow-xl backdrop-blur-md">
                                         Family network is reconnecting. Keep the puja open and we will restore everyone automatically.
+                                    </div>
+                                )}
+
+                                {roomActive && activeRemoteSpeakerName && (
+                                    <div className="absolute left-6 top-20 z-40 rounded-2xl border border-emerald-300/25 bg-black/55 px-4 py-3 text-sm font-medium text-emerald-50 shadow-xl backdrop-blur-md">
+                                        Speaking floor: {activeRemoteSpeakerName}. Smart Pandit is focusing on this voice.
                                     </div>
                                 )}
 

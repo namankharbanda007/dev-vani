@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import JoinScreen from "./components/JoinScreen";
 import CallScreen, { getSharedAudioContext } from "./components/CallScreen";
 import { useSearchParams, useRouter } from "next/navigation";
-import { v4 as uuidv4 } from "uuid";
 import type { UserProfileData } from "@/app/types/UserProfileData";
 import { motion } from "framer-motion";
 import {
@@ -29,10 +28,13 @@ export default function ClientPage({
   const searchParams = useSearchParams();
   const router = useRouter();
   const [roomId, setRoomId] = useState<string>("");
+  const [inviteToken, setInviteToken] = useState<string>("");
+  const [roomSetupError, setRoomSetupError] = useState<string | null>(null);
   const [isOriginalHost, setIsOriginalHost] = useState<boolean>(false);
 
   useEffect(() => {
     const room = searchParams.get("room");
+    const invite = searchParams.get("invite") || "";
     const hostParam = searchParams.get("host");
     const storedHostRoom =
       typeof window !== "undefined"
@@ -41,17 +43,47 @@ export default function ClientPage({
 
     if (room) {
       setRoomId(room);
+      setInviteToken(invite);
       setIsOriginalHost(hostParam === "1" || storedHostRoom === room);
     } else {
-      const newRoom = `pandit-${uuidv4()}`;
-      setRoomId(newRoom);
-      setIsOriginalHost(true);
-      if (typeof window !== "undefined") {
-        window.sessionStorage.setItem(HOST_ROOM_STORAGE_KEY, newRoom);
-      }
-      router.replace(`/pandit?room=${newRoom}&host=1`);
+      let cancelled = false;
+
+      const createRoom = async () => {
+        try {
+          setRoomSetupError(null);
+          const response = await fetch("/api/live-puja/rooms", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ participantName: userProfile?.name }),
+          });
+          const payload = await response.json().catch(() => null);
+
+          if (!response.ok || !payload?.roomId || !payload?.inviteToken) {
+            throw new Error(payload?.error || "Could not create the live puja room.");
+          }
+
+          if (cancelled) return;
+
+          setRoomId(payload.roomId);
+          setInviteToken(payload.inviteToken);
+          setIsOriginalHost(true);
+          if (typeof window !== "undefined") {
+            window.sessionStorage.setItem(HOST_ROOM_STORAGE_KEY, payload.roomId);
+          }
+          router.replace(`/pandit?room=${encodeURIComponent(payload.roomId)}&invite=${encodeURIComponent(payload.inviteToken)}&host=1`);
+        } catch (error) {
+          if (!cancelled) {
+            setRoomSetupError(error instanceof Error ? error.message : "Could not create the live puja room.");
+          }
+        }
+      };
+
+      void createRoom();
+      return () => {
+        cancelled = true;
+      };
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, userProfile?.name]);
 
   const handleJoin = (names?: string[]) => {
     try {
@@ -79,6 +111,24 @@ export default function ClientPage({
   }, [roomId]);
 
   if (!hasJoined) {
+    if (roomSetupError) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-[#f7f1e6] px-4 text-[#2b1d12]">
+          <div className="max-w-md rounded-[28px] border border-[#eadfcf] bg-white p-8 text-center shadow-xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#aa7b2b]">Room setup</p>
+            <h1 className="mt-3 font-lora text-3xl">Could not open live puja</h1>
+            <p className="mt-3 text-sm leading-6 text-[#6d5843]">{roomSetupError}</p>
+            <button
+              onClick={() => router.replace("/login")}
+              className="mt-6 rounded-full bg-[#7a4b18] px-6 py-3 text-sm font-semibold text-white"
+            >
+              Sign in again
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     if (userProfile) {
       return (
         <div className="min-h-screen bg-[linear-gradient(135deg,#fff9f1_0%,#fff4e8_50%,#f6effd_100%)] text-gray-900 selection:bg-purple-200/50">
@@ -251,6 +301,7 @@ export default function ClientPage({
       <CallScreen
         participants={participants}
         roomId={roomId}
+        inviteToken={inviteToken}
         onLeave={handleLeave}
         isOriginalHost={isOriginalHost}
         userAvatarUrl={userProfile?.avatarUrl || null}

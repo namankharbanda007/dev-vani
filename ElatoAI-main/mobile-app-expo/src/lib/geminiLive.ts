@@ -1,4 +1,3 @@
-const GEMINI_LIVE_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 const GEMINI_LIVE_URI =
   "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent";
 const GEMINI_LIVE_MODEL = "models/gemini-2.5-flash-native-audio-preview-12-2025";
@@ -97,7 +96,7 @@ export async function createGeminiLiveSession({
   startupRetries?: number;
   callbacks?: GeminiLiveSessionCallbacks;
 }): Promise<GeminiLiveSession> {
-  const resolvedApiKey = apiKey?.trim() || GEMINI_LIVE_API_KEY;
+  const resolvedApiKey = apiKey?.trim();
   if (!resolvedApiKey) {
     throw new Error("Gemini API key is not configured for live calls.");
   }

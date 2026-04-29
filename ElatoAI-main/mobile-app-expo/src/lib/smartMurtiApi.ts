@@ -705,25 +705,30 @@ export function getRemoteAsset(path: string) {
   return `${SITE_ORIGIN}${path}`;
 }
 
-export function buildLivePujaInviteLink(roomId: string) {
-  return `${SITE_ORIGIN}/pandit?room=${encodeURIComponent(roomId)}`;
+export function buildLivePujaInviteLink(roomId: string, inviteToken?: string | null) {
+  return `${SITE_ORIGIN}/pandit?room=${encodeURIComponent(roomId)}${
+    inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : ""
+  }`;
 }
 
-export async function fetchLiveKitRoomToken(roomId: string, participantName: string) {
-  const response = await fetch(
-    `${SITE_ORIGIN}/api/livekit-token?room=${encodeURIComponent(roomId)}&name=${encodeURIComponent(
-      participantName
-    )}`
-  );
-  const payload = await response.json().catch(() => null);
+export async function createLivePujaRoom(participantName: string) {
+  return await fetchSiteJson<{
+    roomId: string;
+    inviteToken: string;
+    inviteUrl: string;
+    notifiedFamilyMembers: number;
+  }>("/api/live-puja/rooms", {
+    method: "POST",
+    body: JSON.stringify({ participantName }),
+  });
+}
 
-  if (!response.ok || !payload?.token) {
-    throw new Error(
-      payload?.error ||
-        payload?.message ||
-        "Unable to open the live room right now."
-    );
-  }
+export async function fetchLiveKitRoomToken(roomId: string, participantName: string, inviteToken?: string | null) {
+  const payload = await fetchSiteJson<{ token: string }>(
+    `/api/livekit-token?room=${encodeURIComponent(roomId)}&name=${encodeURIComponent(
+      participantName
+    )}${inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : ""}`
+  );
 
   return {
     token: String(payload.token),

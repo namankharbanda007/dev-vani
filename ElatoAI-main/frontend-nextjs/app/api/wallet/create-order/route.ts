@@ -8,11 +8,18 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (process.env.NODE_ENV === "production" && process.env.ALLOW_MOCK_WALLET_RECHARGE !== "true") {
+        return NextResponse.json(
+            { error: "Wallet recharge is temporarily unavailable while payment verification is being configured." },
+            { status: 503 }
+        );
+    }
+
     try {
         const body = await req.json();
         const amount = Number(body.amount);
 
-        if (!amount || amount <= 0) {
+        if (!Number.isFinite(amount) || amount <= 0) {
             return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
         }
 

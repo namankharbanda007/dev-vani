@@ -7,7 +7,7 @@ import { Audio, InterruptionModeAndroid, InterruptionModeIOS, ResizeMode, Video 
 import { LiveKitRoom, VideoTrack, isTrackReference, useLocalParticipant, useTracks } from "@livekit/react-native";
 import { Room, RoomEvent, Track } from "livekit-client";
 import { bypassVoiceProcessing, initialize, playPCMData, requestMicrophonePermissionsAsync, tearDown, toggleRecording, useExpoTwoWayAudioEventListener } from "@speechmatics/expo-two-way-audio";
-import { buildLiveOpeningTurn, buildLivePujaInviteLink, canGuideUseVideo, fetchLiveKitRoomToken, getGuideImageAsset, getGuideSessionConfig } from "../lib/smartMurtiApi";
+import { buildLiveOpeningTurn, buildLivePujaInviteLink, canGuideUseVideo, createLivePujaRoom, fetchLiveKitRoomToken, getGuideImageAsset, getGuideSessionConfig } from "../lib/smartMurtiApi";
 import { createGeminiLiveSession, type GeminiLiveSession } from "../lib/geminiLive";
 import { downsamplePcm16, clampAudioLevel } from "../lib/audioUtils";
 import { Personality } from "../models/types";
@@ -25,10 +25,6 @@ interface Props {
 
 const listeningVideo = require("../../assets/video/listening-pandit.mp4");
 const speakingVideo = require("../../assets/video/speaking-pandit.mp4");
-
-function roomId() {
-  return `smartmurti-puja-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-}
 
 function RoomView({
   personality,
@@ -153,7 +149,6 @@ export function PanditVideoScreen({
   const insets = useSafeAreaInsets();
   const supportsVideo = canGuideUseVideo(personality);
   const room = useRef(new Room({ adaptiveStream: true, dynacast: true })).current;
-  const roomCode = useRef(roomId()).current;
   const liveSessionRef = useRef<GeminiLiveSession | null>(null);
   const callStartedRef = useRef(false);
   const mutedRef = useRef(false);
@@ -167,6 +162,8 @@ export function PanditVideoScreen({
   const resumeOnForegroundRef = useRef(false);
   const [roomToken, setRoomToken] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState<string | null>(null);
+  const [roomCode, setRoomCode] = useState("Opening");
+  const [inviteToken, setInviteToken] = useState<string | null>(null);
   const [roomLoading, setRoomLoading] = useState(true);
   const [roomReady, setRoomReady] = useState(false);
   const [roomError, setRoomError] = useState<string | null>(null);
@@ -301,8 +298,11 @@ export function PanditVideoScreen({
       if (!cameraGranted) {
         setCameraEnabled(false);
       }
-      const creds = await fetchLiveKitRoomToken(roomCode, participantName);
+      const liveRoom = await createLivePujaRoom(participantName);
+      const creds = await fetchLiveKitRoomToken(liveRoom.roomId, participantName, liveRoom.inviteToken);
       if (!mountedRef.current) return;
+      setRoomCode(liveRoom.roomId);
+      setInviteToken(liveRoom.inviteToken);
       setRoomToken(creds.token); setServerUrl(creds.serverUrl);
     } catch (e) {
       if (!mountedRef.current) return;
@@ -311,7 +311,7 @@ export function PanditVideoScreen({
     } finally {
       if (mountedRef.current) setRoomLoading(false);
     }
-  }, [ensureCameraPermission, participantName, roomCode]);
+  }, [ensureCameraPermission, participantName]);
 
   useEffect(() => { mountedRef.current = true; void loadRoom(); return () => { mountedRef.current = false; liveSessionRef.current?.close(); stopAudio(); room.disconnect(); }; }, [loadRoom, room, stopAudio]);
   useEffect(() => { if (roomReady) void room.localParticipant.setCameraEnabled(cameraEnabled).catch((e) => setRoomError(e instanceof Error ? e.message : "Could not update camera.")); }, [cameraEnabled, room, roomReady]);
@@ -503,7 +503,7 @@ export function PanditVideoScreen({
     if (next && userActiveRef.current) { userActiveRef.current = false; }
     setStatusText(next ? "Muted" : "Pandit Ji is listening...");
   }, []);
-  const shareInvite = useCallback(async () => { const link = buildLivePujaInviteLink(roomCode); await Share.share({ title: `${personality.title} live puja`, message: `Join our Smart Murti live puja room: ${link}`, url: link }); }, [personality.title, roomCode]);
+  const shareInvite = useCallback(async () => { const link = buildLivePujaInviteLink(roomCode, inviteToken); await Share.share({ title: `${personality.title} live puja`, message: `Join our Smart Murti live puja room: ${link}`, url: link }); }, [inviteToken, personality.title, roomCode]);
   const handleBack = useCallback(() => {
     if ((callStartedRef.current || connecting) && onMinimize) {
       onMinimize();
