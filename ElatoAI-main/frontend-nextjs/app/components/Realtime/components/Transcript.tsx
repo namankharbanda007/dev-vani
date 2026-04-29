@@ -4,11 +4,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { TranscriptItem } from "@/app/components/Realtime/types";
 import Image from "next/image";
 import { useTranscript } from "@/app/components/Realtime/contexts/TranscriptContext";
-import { getPersonalityImageSrc } from "@/lib/utils";
+import { resolveGuideImageSrc } from "@/lib/guideImages";
 import { ArrowRight } from "lucide-react";
 import { dbInsertTranscriptItem } from "@/db/conversations";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { EmojiComponent } from "../../Playground/EmojiImage";
 
 export interface TranscriptProps {
   userText: string;
@@ -97,21 +96,13 @@ function Transcript({
       {/* Fixed Personality header */}
       <div className="sticky top-0 p-4 border-b border-gray-200 flex items-center bg-white">
         <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden mr-3">
-          {personality.key && (
-            personality.creator_id === null ? (
-              <Image
-                src={getPersonalityImageSrc(personality.key)}
-                alt={personality.title}
-                width={48}
-                height={48}
-                className="object-cover w-full h-full"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <EmojiComponent personality={personality} size={48} />
-              </div>
-            )
-          )}
+          <Image
+            src={resolveGuideImageSrc(personality)}
+            alt={personality.title}
+            width={48}
+            height={48}
+            className="object-cover w-full h-full"
+          />
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="font-medium text-lg truncate">{personality.title}</h2>

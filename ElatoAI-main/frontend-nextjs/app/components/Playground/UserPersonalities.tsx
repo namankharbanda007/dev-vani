@@ -4,11 +4,11 @@ import CharacterSection from "./CharacterSection";
 
 const CHARACTER_CATEGORIES: Record<
   string,
-  { title: string; emoji: string; characters: string[] }
+  { title: string; eyebrow: string; characters: string[] }
 > = {
   spiritual: {
-    title: "🙏 Smart Pandit",
-    emoji: "🙏",
+    title: "Smart Pandit",
+    eyebrow: "Puja and ritual guides",
     characters: [
       "pandit ji",
       "the spiritual guide",
@@ -23,8 +23,8 @@ const CHARACTER_CATEGORIES: Record<
     ],
   },
   astrology: {
-    title: "✨ Specialist Guidance",
-    emoji: "✨",
+    title: "Specialist Guidance",
+    eyebrow: "Astrology and life questions",
     characters: [
       "the horoscope astrologer",
       "the relationship advisor",
@@ -84,9 +84,17 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
   languageState,
   disableButtons,
   selectedFilters,
+  myPersonalities,
 }) => {
-  const premadePersonalities = allPersonalities.filter(
+  const combinedPersonalities = [...allPersonalities, ...myPersonalities].filter(
+    (personality, index, list) =>
+      list.findIndex((candidate) => candidate.personality_id === personality.personality_id) === index
+  );
+  const premadePersonalities = combinedPersonalities.filter(
     (personality) => personality.creator_id === null
+  );
+  const creatorPersonalities = combinedPersonalities.filter(
+    (personality) => personality.creator_id !== null
   );
 
   const categorizedPersonalities: Record<string, IPersonality[]> = {};
@@ -124,6 +132,21 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
 
   return (
     <div className="flex w-full flex-col gap-8">
+      {creatorPersonalities.length > 0 ? (
+        <CharacterSection
+          selectedFilters={selectedFilters}
+          allPersonalities={creatorPersonalities}
+          languageState={languageState}
+          personalityIdState={personalityIdState}
+          onPersonalityPicked={onPersonalityPicked}
+          onCallCharacter={onCallCharacter}
+          onChatCharacter={onChatCharacter}
+          title="Your Guides"
+          eyebrow="Created and saved by you"
+          disableButtons={disableButtons}
+        />
+      ) : null}
+
       {CATEGORY_ORDER.map((categoryKey) => {
         const personalities = categorizedPersonalities[categoryKey];
         if (!personalities?.length) return null;
@@ -139,6 +162,7 @@ const UserPersonalities: React.FC<UserPersonalitiesProps> = ({
             onCallCharacter={onCallCharacter}
             onChatCharacter={onChatCharacter}
             title={CHARACTER_CATEGORIES[categoryKey].title}
+            eyebrow={CHARACTER_CATEGORIES[categoryKey].eyebrow}
             disableButtons={disableButtons}
           />
         );

@@ -14,6 +14,12 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import {
+  DEFAULT_LIVE_PUJA_RITUAL_ID,
+  LIVE_PUJA_RITUALS,
+  getLivePujaRitual,
+  isLivePujaRitualId,
+} from "@/lib/livePujaRituals";
 
 export default function ClientPage({
   userProfile,
@@ -31,11 +37,21 @@ export default function ClientPage({
   const [inviteToken, setInviteToken] = useState<string>("");
   const [roomSetupError, setRoomSetupError] = useState<string | null>(null);
   const [isOriginalHost, setIsOriginalHost] = useState<boolean>(false);
+  const [selectedRitualId, setSelectedRitualId] = useState<string>("");
 
   useEffect(() => {
     const room = searchParams.get("room");
     const invite = searchParams.get("invite") || "";
     const hostParam = searchParams.get("host");
+    const ritualParam = searchParams.get("ritual");
+    const resolvedRitualId = isLivePujaRitualId(ritualParam)
+      ? ritualParam
+      : room
+        ? DEFAULT_LIVE_PUJA_RITUAL_ID
+        : "";
+
+    setSelectedRitualId(resolvedRitualId);
+
     const storedHostRoom =
       typeof window !== "undefined"
         ? window.sessionStorage.getItem(HOST_ROOM_STORAGE_KEY)
@@ -46,6 +62,10 @@ export default function ClientPage({
       setInviteToken(invite);
       setIsOriginalHost(hostParam === "1" || storedHostRoom === room);
     } else {
+      if (!resolvedRitualId) {
+        return;
+      }
+
       let cancelled = false;
 
       const createRoom = async () => {
@@ -54,7 +74,10 @@ export default function ClientPage({
           const response = await fetch("/api/live-puja/rooms", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ participantName: userProfile?.name }),
+            body: JSON.stringify({
+              participantName: userProfile?.name,
+              ritualId: resolvedRitualId,
+            }),
           });
           const payload = await response.json().catch(() => null);
 
@@ -70,7 +93,7 @@ export default function ClientPage({
           if (typeof window !== "undefined") {
             window.sessionStorage.setItem(HOST_ROOM_STORAGE_KEY, payload.roomId);
           }
-          router.replace(`/pandit?room=${encodeURIComponent(payload.roomId)}&invite=${encodeURIComponent(payload.inviteToken)}&host=1`);
+          router.replace(`/pandit?room=${encodeURIComponent(payload.roomId)}&invite=${encodeURIComponent(payload.inviteToken)}&ritual=${encodeURIComponent(resolvedRitualId)}&host=1`);
         } catch (error) {
           if (!cancelled) {
             setRoomSetupError(error instanceof Error ? error.message : "Could not create the live puja room.");
@@ -110,6 +133,15 @@ export default function ClientPage({
     return roomId.replace("pandit-", "").slice(0, 8).toUpperCase();
   }, [roomId]);
 
+  const selectedRitual = useMemo(
+    () => getLivePujaRitual(selectedRitualId || DEFAULT_LIVE_PUJA_RITUAL_ID),
+    [selectedRitualId]
+  );
+
+  const handleRitualSelect = (ritualId: string) => {
+    router.push(`/pandit?ritual=${encodeURIComponent(ritualId)}`);
+  };
+
   if (!hasJoined) {
     if (roomSetupError) {
       return (
@@ -124,6 +156,63 @@ export default function ClientPage({
             >
               Sign in again
             </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (userProfile && !selectedRitualId) {
+      return (
+        <div className="min-h-screen bg-[linear-gradient(135deg,#fff9f1_0%,#fff4e8_58%,#f8efe2_100%)] text-[#2b1d12]">
+          <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+            <div className="pointer-events-none absolute left-[-8%] top-[12%] h-72 w-72 rounded-full bg-amber-200/40 blur-[110px]" />
+            <div className="pointer-events-none absolute bottom-[8%] right-[-4%] h-80 w-80 rounded-full bg-orange-200/35 blur-[120px]" />
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative z-10 w-full max-w-6xl rounded-[32px] border border-[#eadfce] bg-white/88 p-6 shadow-[0_24px_80px_rgba(84,58,28,0.12)] backdrop-blur-xl md:p-8"
+            >
+              <div className="flex flex-col gap-3 md:max-w-3xl">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-900">
+                  <Sparkles className="h-4 w-4" />
+                  Live family puja setup
+                </div>
+                <h1 className="font-lora text-3xl font-bold leading-tight text-[#26190f] md:text-5xl">
+                  Choose the puja before opening the family room.
+                </h1>
+                <p className="text-base leading-8 text-[#6d5843] md:text-lg">
+                  Smart Pandit will use this ritual, samagri, and sankalp context when the host starts the live session.
+                </p>
+              </div>
+
+              <div className="mt-8 grid gap-4 md:grid-cols-2">
+                {LIVE_PUJA_RITUALS.map((ritual) => (
+                  <button
+                    key={ritual.id}
+                    onClick={() => handleRitualSelect(ritual.id)}
+                    className="group rounded-[26px] border border-[#eadfce] bg-[#fffaf3] p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#d5ad67] hover:bg-[#fff5e6] hover:shadow-lg"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#aa7b2b]">
+                          {ritual.durationLabel}
+                        </p>
+                        <h2 className="mt-2 font-lora text-2xl font-bold text-[#26190f]">
+                          {ritual.title}
+                        </h2>
+                      </div>
+                      <ArrowRight className="mt-2 h-5 w-5 text-[#8f5d23] transition group-hover:translate-x-0.5" />
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-[#66513d]">
+                      {ritual.description}
+                    </p>
+                    <p className="mt-4 rounded-2xl border border-[#eadfce] bg-white px-4 py-3 text-sm font-medium text-[#5a4632]">
+                      Sankalp: {ritual.sankalpHint}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </div>
       );
@@ -163,7 +252,7 @@ export default function ClientPage({
                       room, {userProfile.name}.
                     </h1>
                     <p className="max-w-2xl text-base leading-8 text-gray-600 md:text-lg">
-                      This is the premium live family space, one room where your
+                      This is your {selectedRitual.title} room, one place where your
                       family joins, Smart Pandit leads, and everyone can speak
                       naturally.
                     </p>
@@ -173,10 +262,10 @@ export default function ClientPage({
                     <div className="rounded-2xl border border-gray-100 bg-[#fffaf3] p-4">
                       <ShieldCheck className="h-5 w-5 text-amber-700" />
                       <p className="mt-3 text-sm font-semibold text-gray-900">
-                        Family ritual ready
+                        {selectedRitual.shortTitle} ready
                       </p>
                       <p className="mt-1 text-sm leading-6 text-gray-600">
-                        Best for puja, blessings, and urgent spiritual guidance.
+                        {selectedRitual.sankalpHint}.
                       </p>
                     </div>
                     <div className="rounded-2xl border border-gray-100 bg-[#faf6ff] p-4">
@@ -205,7 +294,7 @@ export default function ClientPage({
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-700 via-purple-600 to-amber-600 px-6 py-4 text-base font-semibold text-white shadow-[0_12px_30px_rgba(124,58,237,0.24)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(124,58,237,0.28)]"
                     >
                       <AudioLines className="h-5 w-5" />
-                      Enter live puja room
+                      Enter {selectedRitual.shortTitle} room
                     </button>
                     <button
                       onClick={() => (window.location.href = "/home")}
@@ -268,9 +357,9 @@ export default function ClientPage({
                       What happens next
                     </p>
                     <ol className="mt-3 space-y-3 text-sm leading-6 text-gray-600">
-                      <li>1. You enter the live room and camera/mic connect.</li>
-                      <li>2. Family can join from the same shared link.</li>
-                      <li>3. Smart Pandit leads the puja and responds live.</li>
+                      <li>1. Review the {selectedRitual.shortTitle} samagri and enter the room.</li>
+                      <li>2. Family joins from the same shared link.</li>
+                      <li>3. The host starts when everyone is ready.</li>
                     </ol>
                   </div>
 
@@ -291,13 +380,13 @@ export default function ClientPage({
 
     return (
       <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(119,65,178,0.12),transparent_32%),linear-gradient(180deg,#1f1b2d_0%,#120f19_100%)] text-white selection:bg-purple-500/30">
-        <JoinScreen onJoin={handleJoin} />
+        <JoinScreen onJoin={handleJoin} ritual={selectedRitual} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 text-white font-sans selection:bg-purple-500/30">
+    <div className="min-h-screen bg-[linear-gradient(135deg,#2b1d12_0%,#5a3415_52%,#1a120c_100%)] text-white font-sans selection:bg-amber-300/30">
       <CallScreen
         participants={participants}
         roomId={roomId}
@@ -306,6 +395,7 @@ export default function ClientPage({
         isOriginalHost={isOriginalHost}
         userAvatarUrl={userProfile?.avatarUrl || null}
         userProfile={userProfile || undefined}
+        ritual={selectedRitual}
       />
     </div>
   );

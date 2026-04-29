@@ -7,12 +7,10 @@ import {
 } from "@/components/ui/sheet";
 import Image from "next/image";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { Airplay, Check, MonitorSmartphone, Phone } from "lucide-react";
+import { Check } from "lucide-react";
 import { useState } from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { getPersonalityImageSrc } from "@/lib/utils";
-import { EmojiComponent } from "./EmojiImage";
-import { Badge } from "@/components/ui/badge";
+import { isGuideImageReference, resolveGuideImageSrc } from "@/lib/guideImages";
 
 interface ModifyCharacterSheetProps {
     openPersonality: IPersonality;
@@ -37,6 +35,7 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
 
     const isPersonalCharacter = openPersonality.creator_id !== null;
     const isDoctor = openPersonality.is_doctor;
+    const imageSrc = resolveGuideImageSrc(openPersonality);
 
     const ButtonsComponent = () => {
         return (
@@ -93,33 +92,14 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
         return (
             <div className="container mx-auto p-4 max-w-4xl">
                 <div className="flex flex-col items-center gap-6">
-                    {openPersonality.subtitle && openPersonality.subtitle.startsWith('http') ? (
-                        <div className="relative w-full h-[300px] sm:h-[400px]">
-                            <Image
-                                src={openPersonality.subtitle}
-                                alt={openPersonality.title}
-                                className="rounded-lg object-top sm:object-center object-cover"
-                                fill
-                            />
-                        </div>
-                    ) : isPersonalCharacter ? (
-                        <div className="relative w-full h-[100px] sm:h-[200px] flex items-center justify-center">
-                            <EmojiComponent personality={openPersonality} size={100} />
-                        </div>
-                    ) : (
-                        <div className="relative w-full h-[300px] sm:h-[400px]">
-                            <Image
-                                src={getPersonalityImageSrc(openPersonality.key)}
-                                alt={openPersonality.title}
-                                className="rounded-lg object-top sm:object-center object-cover"
-                                fill
-                            // style={{
-                            //     objectFit: "cover",
-                            //     objectPosition: "top sm:center",
-                            // }}
-                            />
-                        </div>
-                    )}
+                    <div className="relative w-full h-[300px] overflow-hidden rounded-2xl bg-amber-50 sm:h-[400px]">
+                        <Image
+                            src={imageSrc}
+                            alt={openPersonality.title}
+                            className="object-cover object-top sm:object-center"
+                            fill
+                        />
+                    </div>
                     <div className="space-y-2 text-left w-full relative">
                         {/* <div className="absolute top-0 right-0">
                     <Badge variant="outline">
@@ -132,7 +112,7 @@ const ModifyCharacterSheet: React.FC<ModifyCharacterSheetProps> = ({
                             </h3>
                         </div>
 
-                        {!openPersonality.subtitle?.startsWith('http') && (
+                        {!isGuideImageReference(openPersonality.subtitle) && (
                             <p className="text-gray-400">
                                 {openPersonality.subtitle}
                             </p>

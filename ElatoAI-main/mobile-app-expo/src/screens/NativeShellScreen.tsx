@@ -18,6 +18,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBar, AppTab } from "../components/BottomTabBar";
 import { DbUser, Personality, BhajanTrack } from "../models/types";
 import {
+  DEFAULT_LIVE_PUJA_RITUAL_ID,
+  LIVE_PUJA_RITUALS,
   fetchMobileBootstrap,
   LIVE_PUJA_PANDIT_PERSONALITY_ID,
 } from "../lib/smartMurtiApi";
@@ -48,6 +50,7 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
   const [selectedGuide, setSelectedGuide] = useState<Personality | null>(null);
   const [selectedCallGuide, setSelectedCallGuide] = useState<Personality | null>(null);
   const [selectedVideoGuide, setSelectedVideoGuide] = useState<Personality | null>(null);
+  const [selectedRitualId, setSelectedRitualId] = useState(DEFAULT_LIVE_PUJA_RITUAL_ID);
   const [videoOverlayMinimized, setVideoOverlayMinimized] = useState(false);
   const [videoSessionActive, setVideoSessionActive] = useState(false);
   const [videoSessionStatus, setVideoSessionStatus] = useState("Opening your live puja room...");
@@ -178,11 +181,16 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
   }, [loadBundle]);
 
   const handleOpenVideoCall = useCallback(
-    (guide: Personality) => {
+    (guide: Personality, ritualId: string = DEFAULT_LIVE_PUJA_RITUAL_ID) => {
       const lowerTitle = guide.title.toLowerCase();
+      const ritual = LIVE_PUJA_RITUALS.find((item) => item.id === ritualId) || LIVE_PUJA_RITUALS[0];
 
       if (lowerTitle.includes("pandit")) {
         const livePujaGuide =
+          personalities.find(
+            (candidate) =>
+              candidate.personality_id === ritual.personalityId
+          ) ||
           personalities.find(
             (candidate) =>
               candidate.personality_id === LIVE_PUJA_PANDIT_PERSONALITY_ID
@@ -194,6 +202,7 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
           ) ||
           guide;
 
+        setSelectedRitualId(ritual.id);
         setSelectedVideoGuide(livePujaGuide);
         setVideoOverlayMinimized(false);
         setVideoSessionActive(false);
@@ -201,6 +210,7 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
         return;
       }
 
+      setSelectedRitualId(ritual.id);
       setSelectedVideoGuide(guide);
       setVideoOverlayMinimized(false);
       setVideoSessionActive(false);
@@ -335,6 +345,7 @@ export function NativeShellScreen({ session }: NativeShellScreenProps) {
               personality={selectedVideoGuide}
               participantName={userName}
               languageCode={dbUser?.language_code}
+              ritualId={selectedRitualId}
               onMinimize={() => setVideoOverlayMinimized(true)}
               onSessionStateChange={({ active, status }) => {
                 setVideoSessionActive(active);

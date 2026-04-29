@@ -7,7 +7,7 @@ import { Audio, InterruptionModeAndroid, InterruptionModeIOS, ResizeMode, Video 
 import { LiveKitRoom, VideoTrack, isTrackReference, useLocalParticipant, useTracks } from "@livekit/react-native";
 import { Room, RoomEvent, Track } from "livekit-client";
 import { bypassVoiceProcessing, initialize, playPCMData, requestMicrophonePermissionsAsync, tearDown, toggleRecording, useExpoTwoWayAudioEventListener } from "@speechmatics/expo-two-way-audio";
-import { buildLiveOpeningTurn, buildLivePujaInviteLink, canGuideUseVideo, createLivePujaRoom, fetchLiveKitRoomToken, getGuideImageAsset, getGuideSessionConfig } from "../lib/smartMurtiApi";
+import { DEFAULT_LIVE_PUJA_RITUAL_ID, LIVE_PUJA_RITUALS, buildLiveOpeningTurn, buildLivePujaInviteLink, canGuideUseVideo, createLivePujaRoom, fetchLiveKitRoomToken, getGuideImageAsset, getGuideSessionConfig } from "../lib/smartMurtiApi";
 import { createGeminiLiveSession, type GeminiLiveSession } from "../lib/geminiLive";
 import { downsamplePcm16, clampAudioLevel } from "../lib/audioUtils";
 import { Personality } from "../models/types";
@@ -18,6 +18,7 @@ interface Props {
   personality: Personality;
   participantName: string;
   languageCode?: string | null;
+  ritualId?: string;
   onMinimize?: () => void;
   onSessionStateChange?: (payload: { active: boolean; status: string }) => void;
   onClose: () => void;
@@ -142,12 +143,17 @@ export function PanditVideoScreen({
   personality,
   participantName,
   languageCode,
+  ritualId = DEFAULT_LIVE_PUJA_RITUAL_ID,
   onMinimize,
   onSessionStateChange,
   onClose,
 }: Props) {
   const insets = useSafeAreaInsets();
   const supportsVideo = canGuideUseVideo(personality);
+  const selectedRitual = useMemo(
+    () => LIVE_PUJA_RITUALS.find((ritual) => ritual.id === ritualId) || LIVE_PUJA_RITUALS[0],
+    [ritualId]
+  );
   const room = useRef(new Room({ adaptiveStream: true, dynacast: true })).current;
   const liveSessionRef = useRef<GeminiLiveSession | null>(null);
   const callStartedRef = useRef(false);
@@ -421,7 +427,7 @@ export function PanditVideoScreen({
       await initialize(); bypassVoiceProcessing(false);
       const guide = await getGuideSessionConfig(personality.personality_id, languageCode);
       const session = await createGeminiLiveSession({
-        systemInstruction: `${guide.systemInstruction}\n\nLIVE PUJA MODE:\nYou are leading a live family puja with ${participantName}. Speak in short, devotional voice responses.`,
+        systemInstruction: `${guide.systemInstruction}\n\nLIVE PUJA MODE:\nYou are leading ${selectedRitual.title} with ${participantName}. Required samagri: ${selectedRitual.samagri.join(", ")}. Speak in short, devotional voice responses. Confirm readiness before the main ritual begins.`,
         apiKey: guide.geminiApiKey,
         voiceName: guide.voiceName,
         responseModalities: ["AUDIO"],
@@ -443,14 +449,14 @@ export function PanditVideoScreen({
       liveSessionRef.current = session; callStartedRef.current = true; mutedRef.current = false;
       setMuted(false); setCallStarted(true); setActivity("listening");
       toggleRecording(true); setStatusText("Pandit Ji is listening...");
-      session.sendTextTurn(buildLiveOpeningTurn(guide.openingLine || personality.first_message_prompt?.trim(), participantName, "puja"));
+      session.sendTextTurn(`${buildLiveOpeningTurn(guide.openingLine || personality.first_message_prompt?.trim(), participantName, "puja")} Today's selected ritual is ${selectedRitual.title}. Ask if the samagri is ready before starting.`);
     } catch (e) {
       resetLivePujaSession(
         e instanceof Error ? e.message : "Could not start the live puja.",
         roomReady ? "Room ready. Start live puja." : "Opening your live puja room..."
       );
     } finally { if (mountedRef.current) setConnecting(false); }
-  }, [configureCallAudioMode, languageCode, markPanditListening, markPanditSpeaking, participantName, personality.first_message_prompt, personality.personality_id, resetLivePujaSession, roomReady]);
+  }, [configureCallAudioMode, languageCode, markPanditListening, markPanditSpeaking, participantName, personality.first_message_prompt, personality.personality_id, resetLivePujaSession, roomReady, selectedRitual]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextState) => {
@@ -464,7 +470,7 @@ export function PanditVideoScreen({
       ) {
         resumeOnForegroundRef.current = true;
         if (mountedRef.current) {
-          setStatusText("Live puja will reconnect when you return.");
+          setStatusText("Live puja paused. Reopen the app to reconnect before continuing the ritual.");
         }
       }
 
@@ -503,7 +509,7 @@ export function PanditVideoScreen({
     if (next && userActiveRef.current) { userActiveRef.current = false; }
     setStatusText(next ? "Muted" : "Pandit Ji is listening...");
   }, []);
-  const shareInvite = useCallback(async () => { const link = buildLivePujaInviteLink(roomCode, inviteToken); await Share.share({ title: `${personality.title} live puja`, message: `Join our Smart Murti live puja room: ${link}`, url: link }); }, [inviteToken, personality.title, roomCode]);
+  const shareInvite = useCallback(async () => { const link = buildLivePujaInviteLink(roomCode, inviteToken, selectedRitual.id); await Share.share({ title: `${selectedRitual.title} live puja`, message: `Join our Smart Murti ${selectedRitual.title} room: ${link}`, url: link }); }, [inviteToken, roomCode, selectedRitual]);
   const handleBack = useCallback(() => {
     if ((callStartedRef.current || connecting) && onMinimize) {
       onMinimize();
@@ -523,7 +529,7 @@ export function PanditVideoScreen({
           <Ionicons name="arrow-back" size={22} color={colors.gray900} />
         </Pressable>
         <View style={styles.headerCopy}>
-          <Text style={styles.headerTitle}>{personality.title}</Text>
+          <Text style={styles.headerTitle}>{selectedRitual.title}</Text>
           <Text style={styles.headerSub}>Native live puja room</Text>
         </View>
         {(callStarted || connecting) && onMinimize ? (
@@ -567,12 +573,16 @@ export function PanditVideoScreen({
               }
             }}
           >
-            <RoomView personality={personality} participantName={participantName} roomCode={roomCode} remoteParticipants={remoteParticipants} roomReady={roomReady} roomLoading={roomLoading} statusText={statusText} activity={activity} cameraEnabled={cameraEnabled} inputLevel={inputLevel} outputLevel={outputLevel} avatarVideoFailed={avatarVideoFailed} onAvatarVideoFailed={() => setAvatarVideoFailed(true)} onShareInvite={() => void shareInvite()} />
+            <RoomView personality={{ ...personality, title: selectedRitual.title }} participantName={participantName} roomCode={roomCode} remoteParticipants={remoteParticipants} roomReady={roomReady} roomLoading={roomLoading} statusText={statusText} activity={activity} cameraEnabled={cameraEnabled} inputLevel={inputLevel} outputLevel={outputLevel} avatarVideoFailed={avatarVideoFailed} onAvatarVideoFailed={() => setAvatarVideoFailed(true)} onShareInvite={() => void shareInvite()} />
           </LiveKitRoom>
         ) : (
           <View style={styles.centerCard}>{roomLoading ? <><ActivityIndicator color={colors.purple900} /><Text style={styles.centerBody}>Opening the live puja room...</Text></> : <><Text style={styles.centerTitle}>Could not open the room</Text><Text style={styles.centerBody}>{roomError || "Please try again in a moment."}</Text><Pressable onPress={() => void loadRoom()} style={styles.primary}><Text style={styles.primaryText}>Retry room</Text></Pressable></>}</View>
         )}
         {error || roomError ? <View style={styles.error}><Text style={styles.errorText}>{[error, roomError].filter(Boolean).join("\n")}</Text></View> : null}
+        <View style={styles.samagriCard}>
+          <Text style={styles.samagriTitle}>Samagri for {selectedRitual.shortTitle}</Text>
+          <Text style={styles.samagriText}>{selectedRitual.samagri.join(" | ")}</Text>
+        </View>
       </View>
       <View style={[styles.controls, { paddingBottom: Math.max(insets.bottom, 10) }]}>
         {!callStarted ? (
@@ -620,6 +630,9 @@ const styles = StyleSheet.create({
   empty: { borderRadius: 18, backgroundColor: colors.gray50, paddingHorizontal: 18, paddingVertical: 20, alignItems: "center", gap: 8 }, emptyTitle: { color: colors.gray900, fontFamily: fonts.bodyBold, fontSize: 15 }, emptyBody: { color: colors.gray500, fontFamily: fonts.body, fontSize: 13, lineHeight: 20, textAlign: "center" },
   center: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 28, gap: 12 }, centerCard: { flex: 1, borderRadius: 24, backgroundColor: colors.white, alignItems: "center", justifyContent: "center", paddingHorizontal: 28, gap: 12 }, centerTitle: { color: colors.gray900, fontFamily: fonts.heading, fontSize: 28, textAlign: "center" }, centerBody: { color: colors.gray500, fontFamily: fonts.body, fontSize: 15, lineHeight: 22, textAlign: "center" },
   error: { borderRadius: 16, backgroundColor: colors.errorBg, borderWidth: 1, borderColor: colors.errorBorder, padding: 14 }, errorText: { color: colors.errorText, fontFamily: fonts.bodyBold, fontSize: 13, lineHeight: 20 },
+  samagriCard: { borderRadius: 16, backgroundColor: "#FFF8EE", borderWidth: 1, borderColor: "#E7CCA0", padding: 14, gap: 5 },
+  samagriTitle: { color: colors.gray900, fontFamily: fonts.bodyBold, fontSize: 13 },
+  samagriText: { color: colors.gray500, fontFamily: fonts.body, fontSize: 12, lineHeight: 18 },
   controls: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: 18, paddingTop: 12, backgroundColor: "rgba(251,245,234,0.96)", borderTopWidth: 1, borderTopColor: colors.gray100 },
   start: { height: 56, borderRadius: 28, backgroundColor: colors.divineSaffron, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10 }, startText: { color: colors.white, fontFamily: fonts.bodyBold, fontSize: 16 }, controlRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 16 }, round: { width: 56, height: 56, borderRadius: 28, backgroundColor: colors.purple900, alignItems: "center", justifyContent: "center" }, roundAlt: { backgroundColor: colors.gray500 }, end: { width: 68, height: 68, borderRadius: 34, backgroundColor: "#B2564E", alignItems: "center", justifyContent: "center", transform: [{ rotate: "135deg" }] },
   primary: { height: 54, borderRadius: 22, backgroundColor: colors.purple900, paddingHorizontal: 18, alignItems: "center", justifyContent: "center" }, primaryText: { color: colors.white, fontFamily: fonts.bodyBold, fontSize: 16 }, disabled: { opacity: 0.7 }, pressed: { opacity: 0.85 },

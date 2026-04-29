@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import App from "@/app/components/Realtime/App";
 import { TranscriptProvider } from "@/app/components/Realtime/contexts/TranscriptContext";
 import { EventProvider } from "@/app/components/Realtime/contexts/EventContext";
-import { PhoneOff, Mic, MicOff, Volume2 } from "lucide-react";
+import { PhoneOff, Mic, MicOff } from "lucide-react";
 import AartiPlayer from "./AartiPlayer";
 import SamagriChecklist from "./SamagriChecklist";
 
@@ -31,6 +31,18 @@ export default function PujaSession({
     samagriList,
     onClose,
 }: PujaSessionProps) {
+    const disconnectRef = useRef<(() => void) | null>(null);
+    const microphoneControlRef = useRef<((muted: boolean) => void) | null>(null);
+    const [realtimeState, setRealtimeState] = useState<{
+        sessionStatus: string;
+        isAgentSpeaking: boolean;
+        agentActivity: "speaking" | "listening" | "thinking";
+    }>({
+        sessionStatus: "CONNECTING",
+        isAgentSpeaking: false,
+        agentActivity: "thinking",
+    });
+
     return (
         <TranscriptProvider>
             <EventProvider>
@@ -41,12 +53,18 @@ export default function PujaSession({
                         firstName: guestData.firstName,
                         gender: guestData.gender,
                     }}
+                    autoConnect
+                    disconnectRef={disconnectRef}
+                    microphoneControlRef={microphoneControlRef}
+                    onStateChange={setRealtimeState}
                 >
                     <PujaCallUI
-                        guestData={guestData}
                         pujaTitle={pujaTitle}
                         aartiSrc={aartiSrc}
                         samagriList={samagriList}
+                        realtimeState={realtimeState}
+                        disconnectRef={disconnectRef}
+                        microphoneControlRef={microphoneControlRef}
                         onClose={onClose}
                     />
                 </App>
@@ -56,25 +74,31 @@ export default function PujaSession({
 }
 
 function PujaCallUI({
-    guestData,
     pujaTitle,
     aartiSrc,
     samagriList,
+    realtimeState,
+    disconnectRef,
+    microphoneControlRef,
     onClose,
 }: {
-    guestData: any;
     pujaTitle: string;
     aartiSrc?: string;
     samagriList?: SamagriItem[];
+    realtimeState: {
+        sessionStatus: string;
+        isAgentSpeaking: boolean;
+        agentActivity: "speaking" | "listening" | "thinking";
+    };
+    disconnectRef: React.MutableRefObject<(() => void) | null>;
+    microphoneControlRef: React.MutableRefObject<((muted: boolean) => void) | null>;
     onClose: () => void;
 }) {
-    const [callState, setCallState] = useState<"connecting" | "connected">("connecting");
-    const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
-    const [agentActivity, setAgentActivity] = useState<'speaking' | 'listening' | 'thinking'>('thinking');
     const [isMuted, setIsMuted] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const connectedAtRef = useRef<number | null>(null);
-    const disconnectRef = useRef<(() => void) | null>(null);
+    const callState = realtimeState.sessionStatus === "CONNECTED" ? "connected" : "connecting";
+    const agentActivity = realtimeState.agentActivity;
 
     // Elapsed call time
     useEffect(() => {
@@ -85,19 +109,6 @@ function PujaCallUI({
         }, 1000);
         return () => clearInterval(interval);
     }, [callState]);
-
-    const handleStateChange = useCallback(
-        (state: { sessionStatus: string; isAgentSpeaking: boolean; agentActivity: 'speaking' | 'listening' | 'thinking' }) => {
-            if (state.sessionStatus === "CONNECTING") {
-                setCallState("connecting");
-            } else if (state.sessionStatus === "CONNECTED") {
-                setCallState("connected");
-            }
-            setIsAgentSpeaking(state.isAgentSpeaking);
-            setAgentActivity(state.agentActivity);
-        },
-        []
-    );
 
     const handleEndCall = useCallback(() => {
         if (disconnectRef.current) {
@@ -134,15 +145,6 @@ function PujaCallUI({
 
     return (
         <div className="fixed inset-0 z-[100] flex flex-col md:flex-row bg-[#111] overflow-hidden">
-            {/* Realtime API Exposes State Here but is Hidden visually */}
-            <div className="hidden">
-                {/*  
-                    Wait for proper injection of disconnect ref into real-time API. 
-                    This requires the App wrapper to pass it down or use context,
-                    which is handled internally by our modified App/Hook.
-                 */}
-            </div>
-
             {/* MAIN AREA - Puja Visuals & Voice Status */}
             <div className="flex-1 relative flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#1a110a] to-[#0a0604]">
 
@@ -178,7 +180,11 @@ function PujaCallUI({
                 {/* Call Controls positioned at bottom center of the main area */}
                 <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-6">
                     <button
-                        onClick={() => setIsMuted(!isMuted)}
+                        onClick={() => {
+                            const nextMuted = !isMuted;
+                            setIsMuted(nextMuted);
+                            microphoneControlRef.current?.(nextMuted);
+                        }}
                         className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isMuted
                             ? "bg-stone-800 text-stone-400 hover:bg-stone-700"
                             : "bg-stone-800/80 backdrop-blur-md text-white border border-stone-700 hover:bg-stone-700 hover:border-stone-500"
@@ -199,16 +205,18 @@ function PujaCallUI({
             {/* SIDEBAR - Tools & Widgets */}
             <div className="w-full md:w-[400px] bg-[#161616] border-t md:border-t-0 md:border-l border-stone-800 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
 
-                {/* Mahurat Info */}
+                {/* Ritual status */}
                 <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 w-full">
                     <div className="flex items-center gap-3">
                         <div className="relative">
-                            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                            <div className="w-3 h-3 bg-red-500 rounded-full absolute inset-0 animate-ping"></div>
+                            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                            <div className="w-3 h-3 bg-orange-500 rounded-full absolute inset-0 animate-ping"></div>
                         </div>
                         <div>
-                            <span className="text-orange-500 font-semibold text-sm tracking-widest uppercase">Shubh Mahurat</span>
-                            <p className="text-stone-300 text-sm mt-0.5">Currently Active</p>
+                            <span className="text-orange-500 font-semibold text-sm tracking-widest uppercase">Ritual status</span>
+                            <p className="text-stone-300 text-sm mt-0.5">
+                                {callState === "connected" ? "Live guidance active" : "Connecting to Pandit Ji"}
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -11,6 +11,41 @@ export const HOME_ASTROLOGER_PERSONALITY_ID = "f8d80d91-fc28-459c-b5f6-5e98d4367
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"] as const;
 const SITE_ORIGIN = "https://www.smartmurti.com";
+export const DEFAULT_LIVE_PUJA_RITUAL_ID = "ganpati-havan";
+export const LIVE_PUJA_RITUALS = [
+  {
+    id: "ganpati-havan",
+    title: "Ganpati Havan",
+    shortTitle: "Ganpati",
+    description: "Remove obstacles and begin auspiciously with the family.",
+    personalityId: "5363b8f9-cf59-4c91-ba4e-c2433cc591cf",
+    samagri: ["Havan Kund", "Aam Ki Lakdi", "Ghee", "Durva Grass", "Gud"],
+  },
+  {
+    id: "sundarkand-path",
+    title: "Sundarkand Path",
+    shortTitle: "Sundarkand",
+    description: "Hanuman bhakti for protection, courage, and peace.",
+    personalityId: "2b5253c2-a23d-4762-8eac-e0b0788cb4f0",
+    samagri: ["Chameli Tel Diya", "Sindoor", "Tulsi Dal", "Jal", "Besan Ladoo"],
+  },
+  {
+    id: "satyanarayan-puja",
+    title: "Shri Satyanarayan Puja",
+    shortTitle: "Satyanarayan",
+    description: "Gratitude, prosperity, and family harmony.",
+    personalityId: "5b7415d8-b68a-489f-bdc3-273a7cae9629",
+    samagri: ["Chowki", "Kalash", "Panchamrit", "Panjiri", "Tulsi Dal"],
+  },
+  {
+    id: "navagraha-shanti",
+    title: "Navagraha Shanti Havan",
+    shortTitle: "Navagraha",
+    description: "Graha shanti and astrology-backed remedies.",
+    personalityId: "8622d9e6-3271-45df-b3c0-0b9eba1b0301",
+    samagri: ["Havan Kund", "Navagraha Samidha", "Ghee", "Havan Samagri", "Akshat"],
+  },
+] as const;
 export const LIVEKIT_SERVER_URL =
   process.env.EXPO_PUBLIC_LIVEKIT_URL || "wss://smart-murti-u1cpnjeh.livekit.cloud";
 const IMAGE_URL_PATTERN = /^https?:\/\/\S+/i;
@@ -533,7 +568,7 @@ function fallbackHoroscope(sign: string, date: "Yesterday" | "Today" | "Tomorrow
   return {
     date: getDateLabel(date),
     sign,
-    mood: "✨",
+    mood: "Auspicious",
     content: `${sign} energy is steady today. Trust your intuition, stay disciplined, and focus on meaningful action over noise.`,
     lucky_number: luckyNumber,
     lucky_color: luckyColor,
@@ -705,10 +740,10 @@ export function getRemoteAsset(path: string) {
   return `${SITE_ORIGIN}${path}`;
 }
 
-export function buildLivePujaInviteLink(roomId: string, inviteToken?: string | null) {
+export function buildLivePujaInviteLink(roomId: string, inviteToken?: string | null, ritualId: string = DEFAULT_LIVE_PUJA_RITUAL_ID) {
   return `${SITE_ORIGIN}/pandit?room=${encodeURIComponent(roomId)}${
     inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : ""
-  }`;
+  }&ritual=${encodeURIComponent(ritualId)}`;
 }
 
 export async function createLivePujaRoom(participantName: string) {
@@ -768,7 +803,12 @@ export function getGuideShortTitle(personality: Personality | string) {
 export function canGuideUseVideo(personality: Personality | string) {
   if (
     typeof personality !== "string" &&
-    [HOME_PANDIT_PERSONALITY_ID, LIVE_PUJA_PANDIT_PERSONALITY_ID, HOME_ASTROLOGER_PERSONALITY_ID].includes(
+    [
+      HOME_PANDIT_PERSONALITY_ID,
+      LIVE_PUJA_PANDIT_PERSONALITY_ID,
+      HOME_ASTROLOGER_PERSONALITY_ID,
+      ...LIVE_PUJA_RITUALS.map((ritual) => ritual.personalityId),
+    ].includes(
       personality.personality_id
     )
   ) {
@@ -778,7 +818,10 @@ export function canGuideUseVideo(personality: Personality | string) {
   const matchedTitle = findWebsiteHomeGuideMatch(
     typeof personality === "string" ? personality : personality.title
   );
-  return matchedTitle ? VIDEO_ENABLED_GUIDE_TITLES.has(matchedTitle) : false;
+  const title = typeof personality === "string" ? personality.toLowerCase() : personality.title.toLowerCase();
+  return matchedTitle
+    ? VIDEO_ENABLED_GUIDE_TITLES.has(matchedTitle) || title.includes("puja") || title.includes("havan") || title.includes("path")
+    : title.includes("puja") || title.includes("havan") || title.includes("path");
 }
 
 export function isHomeGuide(personality: Personality) {
@@ -786,6 +829,11 @@ export function isHomeGuide(personality: Personality) {
 }
 
 export function filterHomeGuides(personalities: Personality[]) {
+  const creatorGuides = personalities
+    .filter((guide) => guide.creator_id)
+    .filter((guide) => !HIDDEN_PERSONALITIES.has(guide.title))
+    .sort((left, right) => left.title.localeCompare(right.title));
+
   const bySlot = personalities
     .filter((guide) => !guide.creator_id)
     .filter((guide) => !HIDDEN_PERSONALITIES.has(guide.title))
@@ -822,7 +870,17 @@ export function filterHomeGuides(personalities: Personality[]) {
       return catalog;
     }, new Map<string, Personality>());
 
-  return WEBSITE_HOME_GUIDE_ORDER.map((slot) => bySlot.get(slot)).filter(Boolean) as Personality[];
+  const curatedGuides = WEBSITE_HOME_GUIDE_ORDER.map((slot) => bySlot.get(slot)).filter(Boolean) as Personality[];
+  const remainingGuides = sortGuideCatalog(
+    personalities.filter(
+      (guide) =>
+        !guide.creator_id &&
+        !HIDDEN_PERSONALITIES.has(guide.title) &&
+        !curatedGuides.some((curated) => curated.personality_id === guide.personality_id)
+    )
+  );
+
+  return [...creatorGuides, ...curatedGuides, ...remainingGuides];
 }
 
 export function getGuideImageAsset(
@@ -852,6 +910,16 @@ export function getGuideImageAsset(
 
   if (lowerTitle.includes("face")) {
     return getRemoteAsset("/assets/Cartoon Face Reader.jpg");
+  }
+
+  if (
+    lowerTitle.includes("relationship") ||
+    lowerTitle.includes("love") ||
+    lowerTitle.includes("career") ||
+    lowerTitle.includes("business") ||
+    lowerTitle.includes("financial")
+  ) {
+    return getRemoteAsset("/assets/Cartoon Astrologer.jpg");
   }
 
   return getRemoteAsset("/assets/Pandit Performing Aarti.jpg");

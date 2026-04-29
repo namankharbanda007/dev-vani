@@ -9,6 +9,7 @@ import {
     ArrowRight,
     CheckCircle2,
     Clock3,
+    Flame,
     Globe2,
     HeartHandshake,
     Menu,
@@ -253,10 +254,10 @@ function RootHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
 
                     <div className="flex items-center space-x-4">
                         <Link
-                            href={isLoggedIn ? "/home" : "/login"}
-                            className="hidden rounded-full bg-[#512A73] px-6 py-2 text-sm font-medium text-white transition-all hover:bg-[#42225e] md:inline-flex md:items-center md:justify-center"
+                            href={isLoggedIn ? "/pandit?ritual=ganpati-havan" : "/login"}
+                            className="hidden rounded-full bg-[#8f5d23] px-6 py-2 text-sm font-medium text-white transition-all hover:bg-[#7b4f1e] md:inline-flex md:items-center md:justify-center"
                         >
-                            Talk to Smart Pandit now
+                            Start Live Puja
                         </Link>
                         <button
                             onClick={() => setMobileMenuOpen(true)}
@@ -289,11 +290,11 @@ function RootHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                     <Link href="#trust" onClick={() => setMobileMenuOpen(false)}>Trust</Link>
                     <Link href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</Link>
                     <Link
-                        href={isLoggedIn ? "/home" : "/login"}
+                        href={isLoggedIn ? "/pandit?ritual=ganpati-havan" : "/login"}
                         onClick={() => setMobileMenuOpen(false)}
                         className="mt-4 rounded-full bg-[#512A73] px-8 py-3 text-lg font-medium text-white transition-all hover:bg-[#42225e] font-sans"
                     >
-                        Talk to Smart Pandit now
+                        Start Live Puja
                     </Link>
                 </nav>
             </motion.div>
@@ -333,10 +334,10 @@ function ConversionStorySection({ isLoggedIn }: { isLoggedIn: boolean }) {
                     </p>
                     <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                         <Link
-                            href={isLoggedIn ? "/home" : "/login"}
-                            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#512A73] px-8 py-4 text-base font-semibold text-white transition hover:bg-[#42225e]"
+                            href={isLoggedIn ? "/pandit?ritual=ganpati-havan" : "/login"}
+                            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#8f5d23] px-8 py-4 text-base font-semibold text-white transition hover:bg-[#7b4f1e]"
                         >
-                            Talk to Smart Pandit now
+                            Start Live Puja
                             <ArrowRight className="h-4 w-4" />
                         </Link>
                         <a
@@ -442,7 +443,7 @@ function DemoSection({
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent md:from-black/40 md:via-transparent" />
 
             {/* Overlay Buttons */}
-            <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-center md:justify-between items-center gap-4 md:gap-0 pb-10 md:pb-0 pt-40 md:pt-0">
+            <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-center md:justify-between items-center gap-4 pb-10 md:pb-0 pt-40 md:pt-0">
 
                 {/* Left Button: Live Call */}
                 <motion.button
@@ -459,6 +460,21 @@ function DemoSection({
                     </div>
                     <span className="text-base md:text-2xl font-bold text-white tracking-wider md:tracking-widest uppercase font-satoshi">Live Call</span>
                 </motion.button>
+
+                <motion.a
+                    href="/pandit?ritual=ganpati-havan"
+                    initial={{ y: 30, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.6, delay: 0.28 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full md:w-auto group flex items-center justify-center gap-3 md:gap-4 bg-[#8f5d23]/90 backdrop-blur-md border border-amber-200/20 px-6 py-4 md:px-8 md:py-5 rounded-2xl md:rounded-full shadow-[0_0_40px_-10px_rgba(0,0,0,0.5)] hover:bg-[#7b4f1e] hover:border-amber-100/40 transition-all duration-300"
+                >
+                    <div className="p-2 md:p-3 bg-white/10 rounded-full group-hover:bg-[#FFD700] group-hover:text-black transition-colors duration-300">
+                        <Flame className="w-5 h-5 md:w-8 md:h-8" />
+                    </div>
+                    <span className="text-base md:text-2xl font-bold text-white tracking-wider md:tracking-widest uppercase font-satoshi">Live Puja</span>
+                </motion.a>
 
                 {/* Right Button: Live Chat */}
                 <motion.button

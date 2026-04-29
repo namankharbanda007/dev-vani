@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Image from "next/image";
-import { cn, getPersonalityImageSrc } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { resolveGuideImageSrc } from "@/lib/guideImages";
 import {
     Card,
     CardContent,
@@ -10,7 +11,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { EmojiComponent } from "../Playground/EmojiImage";
 
 
 interface CharacterShowcaseProps {
@@ -35,19 +35,13 @@ export const CharacterShowcase = ({ allPersonalities }: CharacterShowcaseProps) 
           )}
       >
           <CardContent className="flex-shrink-0 p-0 h-[160px] sm:h-[180px] relative">
-              {personality.creator_id === null ? (
-                  <Image
-                      src={getPersonalityImageSrc(personality.key)}
-                      alt={personality.key}
-                      width={100}
-                      height={180}
+              <Image
+                  src={resolveGuideImageSrc(personality)}
+                  alt={personality.title}
+                  width={100}
+                  height={180}
                   className="rounded-3xl rounded-br-none rounded-bl-none w-full h-full object-cover"
               />
-              ) : (
-                  <div className="flex flex-row items-center justify-center h-full">
-                      <EmojiComponent personality={personality} />
-                  </div>
-              )}
           </CardContent>
           <CardHeader className="flex-shrink-0 gap-0 px-4 py-2">
               <CardTitle className="font-semibold text-md flex flex-row items-center gap-2">

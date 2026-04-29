@@ -7,9 +7,14 @@ interface UseGroupCallProps {
     personalityId: string;
     contextType: 'pandit' | 'astrologer';
     isGuestHost?: boolean;
+    ritualContext?: {
+        title: string;
+        sankalpHint: string;
+        samagriList: string[];
+    };
 }
 
-export function useGroupCall({ participants, personalityId, contextType, isGuestHost = false }: UseGroupCallProps) {
+export function useGroupCall({ participants, personalityId, contextType, isGuestHost = false, ritualContext }: UseGroupCallProps) {
     const [sessionStatus, setSessionStatus] = useState<"DISCONNECTED" | "CONNECTING" | "CONNECTED">("DISCONNECTED");
     const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
     const [agentActivity, setAgentActivity] = useState<'speaking' | 'listening' | 'thinking'>('thinking');
@@ -60,9 +65,11 @@ export function useGroupCall({ participants, personalityId, contextType, isGuest
             const participantList = participants.join(", ");
 
             const isPandit = contextType === 'pandit';
-            const sessionType = isPandit ? "a live Puja" : "a live Astrology Reading session";
+            const sessionType = isPandit
+                ? `a live ${ritualContext?.title || "Puja"}`
+                : "a live Astrology Reading session";
             const exampleGreeting = isPandit
-                ? `"Namaste ${participantList}, aaj hum sab milke puja karenge..."`
+                ? `"Namaste ${participantList}, aaj hum sab milke ${ritualContext?.title || "puja"} karenge..."`
                 : `"Namaste ${participantList}, aaj hum aapke sitaaron ki sthiti dekhte hain..."`;
             const personalStyle = isPandit
                 ? "like a real Pandit ji who knows his devotees"
@@ -72,12 +79,13 @@ export function useGroupCall({ participants, personalityId, contextType, isGuest
             const groupContextPrompt = `${basePrompt}
 
 GROUP CALL: You are on a live video call conducting ${sessionType}. Participants: ${participantList}.
+${ritualContext ? `RITUAL CONTEXT: Sankalp is "${ritualContext.sankalpHint}". Required samagri: ${ritualContext.samagriList.join(", ")}.` : ""}
 When "[Speaker: Name]" alerts appear, address that person by name. Greet everyone by name: ${exampleGreeting}
 RESPONSE STYLE: 1-2 short sentences max. Be ${personalStyle}. Be conversational, never lecture.`;
 
             // Initial greeting — context-aware
             const firstMsg = isPandit
-                ? `Namaste Pandit ji, we are joining you today. The people here are: ${participantList}. Please welcome each of us by name and ask how we are doing.`
+                ? `Namaste Pandit ji, we are joining you today for ${ritualContext?.title || "puja"}. The people here are: ${participantList}. Please welcome each of us by name, confirm the sankalp, and ask the host if the family is ready to begin.`
                 : `Namaste Astrologer ji, we are joining you today. The people here are: ${participantList}. Please welcome each of us by name and ask about our zodiac signs or birth details.`;
 
             let connection;
@@ -137,7 +145,7 @@ RESPONSE STYLE: 1-2 short sentences max. Be ${personalStyle}. Be conversational,
             toast({ description: err?.message || "Failed to connect to Ashram.", variant: "destructive" });
             return false;
         }
-    }, [contextType, isGuestHost, participants, personalityId, sessionStatus]);
+    }, [contextType, isGuestHost, participants, personalityId, ritualContext, sessionStatus]);
 
     const disconnect = useCallback(() => {
         if (disconnectRef.current) {

@@ -10,19 +10,22 @@ import {
   Users,
   Video,
 } from "lucide-react";
+import type { LivePujaRitual } from "@/lib/livePujaRituals";
 
 interface JoinScreenProps {
   onJoin: (names: string[]) => void;
   initialName?: string | null;
+  ritual: LivePujaRitual;
 }
 
-export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
+export default function JoinScreen({ onJoin, initialName, ritual }: JoinScreenProps) {
   const [displayName, setDisplayName] = useState(initialName || "");
+  const [familyRole, setFamilyRole] = useState("Family member");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanName = displayName.trim() || "Guest";
-    onJoin([cleanName]);
+    onJoin([familyRole ? `${cleanName} (${familyRole})` : cleanName]);
   };
 
   return (
@@ -39,7 +42,7 @@ export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90">
               <Video className="h-4 w-4 text-amber-300" />
-              <span>Live family puja</span>
+              <span>{ritual.title}</span>
             </div>
 
             <div className="space-y-4">
@@ -51,8 +54,8 @@ export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
                 room.
               </h1>
               <p className="max-w-2xl text-base leading-8 text-white/70 md:text-lg">
-                Join as one person on this device. Other family members can join
-                from their own devices or use a shared family name like Sharma Family.
+                Join as one person on this device. Smart Pandit will guide the
+                {` ${ritual.shortTitle} `}flow and keep the family context in mind.
               </p>
             </div>
 
@@ -63,7 +66,7 @@ export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
                   Structured ritual flow
                 </p>
                 <p className="mt-1 text-sm leading-6 text-white/65">
-                  Best for family puja, blessings, and devotional guidance.
+                  {ritual.sankalpHint}.
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -72,7 +75,7 @@ export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
                   Family joins together
                 </p>
                 <p className="mt-1 text-sm leading-6 text-white/65">
-                  Everyone can join the same room, even from different countries.
+                  Everyone can join the same {ritual.shortTitle} room, even from different countries.
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -120,12 +123,31 @@ export default function JoinScreen({ onJoin, initialName }: JoinScreenProps) {
                 </p>
               </div>
 
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-white/80">
+                  Family role
+                </label>
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-1">
+                  <select
+                    value={familyRole}
+                    onChange={(e) => setFamilyRole(e.target.value)}
+                    className="w-full rounded-[14px] border-none bg-transparent px-4 py-3 text-white focus:outline-none"
+                  >
+                    <option className="bg-[#15111f] text-white">Family member</option>
+                    <option className="bg-[#15111f] text-white">Host</option>
+                    <option className="bg-[#15111f] text-white">Parent</option>
+                    <option className="bg-[#15111f] text-white">Elder</option>
+                    <option className="bg-[#15111f] text-white">Child</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="rounded-2xl border border-amber-300/15 bg-amber-300/10 p-4">
                 <p className="text-sm font-semibold text-amber-100">
                   Live audio is active in this room
                 </p>
                 <p className="mt-2 text-sm leading-6 text-amber-50/75">
-                  Everyone can speak naturally. Smart Pandit will listen and respond live.
+                  Everyone can speak naturally. Smart Pandit will lead {ritual.title} and respond live.
                 </p>
               </div>
 

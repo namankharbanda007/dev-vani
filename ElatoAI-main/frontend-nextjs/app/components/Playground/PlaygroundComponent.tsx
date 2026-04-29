@@ -9,6 +9,7 @@ import { TranscriptProvider } from "../Realtime/contexts/TranscriptContext";
 import { EventProvider } from "../Realtime/contexts/EventContext";
 import App from "../Realtime/App";
 import { defaultPersonalityId } from "@/lib/data";
+import { DEFAULT_LIVE_PUJA_RITUAL_ID } from "@/lib/livePujaRituals";
 import UserPersonalities from "./UserPersonalities";
 import {
   ArrowRight,
@@ -87,7 +88,7 @@ export default function Playground({
       (isDoctor
         ? allPersonalities.filter((p) => p.is_story || p.is_doctor)
         : allPersonalities
-      ).filter((p) => p.creator_id === null),
+      ),
     [allPersonalities, isDoctor]
   );
 
@@ -157,7 +158,7 @@ export default function Playground({
       if (!guide?.personality_id) return;
       await onPersonalityPicked(guide.personality_id);
       if (action === "puja") {
-        window.location.href = "/pandit";
+        window.location.href = `/pandit?ritual=${DEFAULT_LIVE_PUJA_RITUAL_ID}`;
         return;
       }
       setPendingAction({ type: "call", personalityId: guide.personality_id });
@@ -190,10 +191,10 @@ export default function Playground({
       {
         key: "ritual",
         title: "Family Ritual",
-        body: "Move directly into a deeper Smart Pandit session or live family puja.",
+        body: "Choose a puja, prepare samagri, invite family, and start together.",
         icon: Users,
         accent:
-          "from-purple-50 via-violet-50 to-indigo-50 border-purple-200/70",
+          "from-amber-50 via-orange-50 to-yellow-50 border-amber-200/70",
         guide: livePujaGuide,
         action: "puja" as IntentAction,
       },
@@ -249,15 +250,24 @@ export default function Playground({
 
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <button
+                    onClick={() => {
+                      window.location.href = `/pandit?ritual=${DEFAULT_LIVE_PUJA_RITUAL_ID}`;
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#8f5d23] px-6 py-4 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(143,93,35,0.22)] transition hover:-translate-y-0.5 hover:bg-[#7b4f1e]"
+                  >
+                    <Users className="h-4 w-4" />
+                    Start live family puja
+                  </button>
+                  <button
                     onClick={() => void launchGuide(currentPersonality, "call")}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-700 via-purple-600 to-amber-600 px-6 py-4 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(124,58,237,0.24)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(124,58,237,0.28)]"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-white/90 px-6 py-4 text-sm font-semibold text-[#5b3a18] transition hover:border-amber-300 hover:bg-amber-50"
                   >
                     <AudioLines className="h-4 w-4" />
                     Talk to Smart Pandit now
                   </button>
                   <button
                     onClick={() => void launchGuide(currentPersonality, "chat")}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white/90 px-6 py-4 text-sm font-semibold text-gray-800 transition hover:border-purple-200 hover:bg-purple-50/40"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white/90 px-6 py-4 text-sm font-semibold text-gray-800 transition hover:border-amber-200 hover:bg-amber-50/40"
                   >
                     <ArrowRight className="h-4 w-4" />
                     Open chat
@@ -266,7 +276,7 @@ export default function Playground({
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                <div className="rounded-2xl border border-white/80 bg-white/74 px-4 py-4">
+                <div className="rounded-2xl border border-white/80 bg-white/75 px-4 py-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
                     Current Guide
                   </p>
@@ -274,7 +284,7 @@ export default function Playground({
                     {currentPersonality?.title || "Pandit Ji"}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-white/80 bg-white/74 px-4 py-4">
+                <div className="rounded-2xl border border-white/80 bg-white/75 px-4 py-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
                     Best For
                   </p>
@@ -282,7 +292,7 @@ export default function Playground({
                     Urgent guidance, rituals, family questions
                   </p>
                 </div>
-                <div className="rounded-2xl border border-white/80 bg-white/74 px-4 py-4">
+                <div className="rounded-2xl border border-white/80 bg-white/75 px-4 py-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
                     Main Flow
                   </p>
@@ -365,7 +375,7 @@ export default function Playground({
                 </p>
               </button>
               <Link
-                href="/pandit"
+                href={`/pandit?ritual=${DEFAULT_LIVE_PUJA_RITUAL_ID}`}
                 className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-left transition hover:border-amber-200 hover:bg-amber-50/40"
               >
                 <p className="text-sm font-semibold text-gray-900">

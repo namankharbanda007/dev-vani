@@ -38,6 +38,7 @@ interface AppProps {
   onStateChange?: (state: { sessionStatus: string; isAgentSpeaking: boolean; agentActivity: 'speaking' | 'listening' | 'thinking' }) => void;
   autoConnect?: boolean;
   disconnectRef?: React.MutableRefObject<(() => void) | null>;
+  microphoneControlRef?: React.MutableRefObject<((muted: boolean) => void) | null>;
   pendingAction?: { type: 'call' | 'chat'; personalityId: string } | null;
   onActionHandled?: () => void;
   children?: React.ReactNode;
@@ -61,7 +62,7 @@ function getErrorDescription(error: unknown, details?: unknown) {
   return [primary, secondary].filter(Boolean).join(": ") || "Failed to connect";
 }
 
-function App({ personalityIdState, isDoctor, userData, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false, disconnectRef, pendingAction, onActionHandled, children }: AppProps) {
+function App({ personalityIdState, isDoctor, userData, isGuest = false, guestName, guestDob, onStateChange, autoConnect = false, disconnectRef, microphoneControlRef, pendingAction, onActionHandled, children }: AppProps) {
   const supabase = createClient();
 
   const { transcriptItems, addTranscriptMessage, addTranscriptBreadcrumb, clearTranscriptItems } =
@@ -191,6 +192,22 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
       disconnectRef.current = () => disconnectFromRealtime(true);
     }
   });
+
+  useEffect(() => {
+    if (!microphoneControlRef) return;
+
+    microphoneControlRef.current = (muted: boolean) => {
+      pcRef.current?.getSenders().forEach((sender) => {
+        if (sender.track?.kind === "audio") {
+          sender.track.enabled = !muted;
+        }
+      });
+    };
+
+    return () => {
+      microphoneControlRef.current = null;
+    };
+  }, [microphoneControlRef]);
 
   // Handle pending actions from character card buttons
   useEffect(() => {
@@ -697,8 +714,10 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
 
   return (
     <>
+      {children}
+
       {/* Only show BottomToolbar when not in card-action mode (i.e. guest/external usage) */}
-      {(isGuest || autoConnect) && (
+      {!children && (isGuest || autoConnect) && (
         <div className="inline-block">
           <BottomToolbar
             sessionStatus={sessionStatus}
@@ -712,13 +731,13 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
       )}
 
       {/* Voice Sheet */}
-      <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
+      {!children && <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
         <SheetContent
           side={isMobile ? "bottom" : "right"}
-          className="h-[80vh] md:h-full p-0"
-          style={{ maxWidth: isMobile ? "100%" : "50%" }}
+          className="h-[88dvh] overflow-hidden rounded-t-[28px] border-amber-100 bg-[#fff8ee] p-0 shadow-2xl md:h-full md:w-[440px] md:max-w-[440px] md:rounded-l-[28px] md:rounded-tr-none"
+          style={{ maxWidth: isMobile ? "100%" : "440px" }}
         >
-          <div className="flex flex-col h-full bg-black">
+          <div className="flex flex-col h-full bg-[#fff8ee]">
             <div className="flex-1 overflow-hidden relative">
               {sessionStatus === "CONNECTED" || sessionStatus === "CONNECTING" ? (
                 <ActiveCallView
@@ -744,7 +763,7 @@ function App({ personalityIdState, isDoctor, userData, isGuest = false, guestNam
             </div>
           </div>
         </SheetContent>
-      </Sheet>
+      </Sheet>}
 
       {/* Chat Sheet */}
       <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>

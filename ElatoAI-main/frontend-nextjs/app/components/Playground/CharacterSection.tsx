@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { cn, getPersonalityImageSrc } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { resolveGuideImageSrc } from "@/lib/guideImages";
 import { Phone, MessageCircle, Info } from "lucide-react";
-import { EmojiComponent } from "./EmojiImage";
 import ModifyCharacterSheet from "./ModifyCharacterSheet";
 
 interface CharacterSectionProps {
@@ -14,6 +14,7 @@ interface CharacterSectionProps {
     onCallCharacter?: (personalityId: string) => void;
     onChatCharacter?: (personalityId: string) => void;
     title: string;
+    eyebrow?: string;
     disableButtons: boolean;
     selectedFilters: PersonalityFilter[];
 }
@@ -26,6 +27,7 @@ const CharacterSection = ({
     onCallCharacter,
     onChatCharacter,
     title,
+    eyebrow = "Guides",
     disableButtons,
     selectedFilters,
 }: CharacterSectionProps) => {
@@ -37,19 +39,13 @@ const CharacterSection = ({
         return null;
     }
 
-    const emojiMatch = title.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)/u);
-    const emoji = emojiMatch ? emojiMatch[0] : null;
-    const titleText = emoji ? title.replace(emoji, "").trim() : title;
-
     return (
         <div className="flex w-full flex-col gap-4">
-            <div className="flex items-center gap-3 px-1">
-                {emoji && (
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-purple-100/50 bg-purple-50 text-lg">
-                        {emoji}
-                    </span>
-                )}
-                <h3 className="section-title font-lora text-xl text-gray-800 md:text-2xl">{titleText}</h3>
+            <div className="flex items-end justify-between gap-3 px-1">
+                <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#a87835]">{eyebrow}</p>
+                    <h3 className="font-lora text-xl text-[#24170f] md:text-2xl">{title}</h3>
+                </div>
                 <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-400">
                     {filteredPersonalities.length}
                 </span>
@@ -79,27 +75,12 @@ const CharacterSection = ({
                                     )}
                                 >
                                     <div className="relative aspect-[3/4] w-full overflow-hidden">
-                                        {personality.subtitle &&
-                                        (personality.subtitle.startsWith("http") ||
-                                            personality.subtitle.startsWith("/")) ? (
-                                            <Image
-                                                src={personality.subtitle}
-                                                alt={personality.title}
-                                                fill
-                                                className="object-cover transition-transform duration-500 group-hover/card:scale-110"
-                                            />
-                                        ) : personality.creator_id === null ? (
-                                            <Image
-                                                src={getPersonalityImageSrc(personality.key)}
-                                                alt={personality.key}
-                                                fill
-                                                className="object-cover transition-transform duration-500 group-hover/card:scale-110"
-                                            />
-                                        ) : (
-                                            <div className="flex h-full items-center justify-center bg-gradient-to-br from-purple-100 via-purple-50 to-amber-100">
-                                                <EmojiComponent personality={personality} />
-                                            </div>
-                                        )}
+                                        <Image
+                                            src={resolveGuideImageSrc(personality)}
+                                            alt={personality.title}
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover/card:scale-110"
+                                        />
 
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 

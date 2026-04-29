@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { getPersonalityImageSrc } from "@/lib/utils";
+import { resolveGuideImageSrc } from "@/lib/guideImages";
 
 const LandingPagePersonalityCard = ({
     personality,
@@ -23,8 +23,8 @@ const LandingPagePersonalityCard = ({
         >
             <CardContent className="flex-shrink-0 p-0 sm:h-[180px] h-[120px]">
                 <Image
-                    src={personality.subtitle && personality.subtitle.startsWith('http') ? personality.subtitle : getPersonalityImageSrc(personality.key)}
-                    alt={personality.key}
+                    src={resolveGuideImageSrc(personality)}
+                    alt={personality.title}
                     width={180}
                     height={140}
                     className="rounded-full w-full h-full object-cover"

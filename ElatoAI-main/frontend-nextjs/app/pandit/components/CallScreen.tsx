@@ -10,7 +10,6 @@ import {
     MessageSquare,
     Users,
     Send,
-    AudioLines,
     PhoneOff,
     VideoOff,
     MicOff,
@@ -20,12 +19,14 @@ import {
     CheckCircle2,
     Sparkles,
     Home,
+    Copy,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Room as LiveKitRoomInstance, Track } from "livekit-client";
 
 import { useGroupCall } from "../hooks/useGroupCall";
 import { useWebRTC } from "../hooks/useWebRTC";
+import type { LivePujaRitual } from "@/lib/livePujaRituals";
 
 export const getSharedAudioContext = () => {
     if (!(window as any).sharedAudioCtx) {
@@ -49,6 +50,7 @@ interface CallScreenProps {
         birthTime: string | null;
         rashi: string | null;
     };
+    ritual: LivePujaRitual;
 }
 
 const getDefaultAvatar = (name: string) => {
@@ -109,9 +111,7 @@ function FamilyPresenceGrid({ room }: { room: LiveKitRoomInstance | null }) {
     );
 }
 
-export default function CallScreen({ participants, roomId, inviteToken = "", onLeave, isOriginalHost = false, userAvatarUrl, userProfile }: CallScreenProps) {
-    const PANDIT_PERSONALITY_ID = "3bb38537-39a6-47c5-a7ae-04dd8ad10cd9";
-
+export default function CallScreen({ participants, roomId, inviteToken = "", onLeave, isOriginalHost = false, userAvatarUrl, userProfile, ritual }: CallScreenProps) {
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOff, setIsVideoOff] = useState(false);
     const [chatMessage, setChatMessage] = useState("");
@@ -172,11 +172,21 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
         return Array.from(names);
     }, [localName, remoteParticipants]);
 
+    const ritualContext = useMemo(
+        () => ({
+            title: ritual.title,
+            sankalpHint: ritual.sankalpHint,
+            samagriList: ritual.samagriList.map((item) => item.name),
+        }),
+        [ritual]
+    );
+
     const { sessionStatus, connect, disconnect, agentActivity, aiOutputStream } = useGroupCall({
         participants: allParticipantNames,
-        personalityId: PANDIT_PERSONALITY_ID,
+        personalityId: ritual.personalityId,
         contextType: "pandit",
         isGuestHost: !userProfile,
+        ritualContext,
     });
 
     const aiAudioRef = useRef<HTMLAudioElement>(null);
@@ -213,12 +223,18 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
             const detail = (e as CustomEvent).detail;
             if (!detail) return;
 
-            if (detail.event === "AI_STATE") {
-                if (detail.payload.status === "STARTED") {
-                    setIsAiActiveGlobally(true);
-                } else if (detail.payload.status === "STOPPED") {
-                    setIsAiActiveGlobally(false);
+        if (detail.event === "AI_STATE") {
+            if (detail.payload.status === "STARTED") {
+                setIsAiActiveGlobally(true);
+                if (detail.payload.ritualTitle) {
+                    setJoinAnnouncements((prev) => [
+                        ...prev.slice(-2),
+                        `${detail.payload.ritualTitle} has started. Stay present and follow Smart Pandit.`,
+                    ]);
                 }
+            } else if (detail.payload.status === "STOPPED") {
+                setIsAiActiveGlobally(false);
+            }
             }
 
             if (detail.event === "AI_ACTIVITY" && !isHost) {
@@ -256,16 +272,16 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
 
         setIsHost(true);
         setIsAiActiveGlobally(true);
-        broadcastEvent("AI_STATE", { status: "STARTED" });
+        broadcastEvent("AI_STATE", { status: "STARTED", ritualId: ritual.id, ritualTitle: ritual.title });
     };
 
     useEffect(() => {
         if (sessionStatus === "DISCONNECTED" && isHost && isAiActiveGlobally) {
             setIsAiActiveGlobally(false);
             setIsHost(false);
-            broadcastEvent("AI_STATE", { status: "STOPPED" });
+            broadcastEvent("AI_STATE", { status: "STOPPED", ritualId: ritual.id, ritualTitle: ritual.title });
         }
-    }, [sessionStatus, broadcastEvent, isAiActiveGlobally, isHost]);
+    }, [sessionStatus, broadcastEvent, isAiActiveGlobally, isHost, ritual.id, ritual.title]);
 
     useEffect(() => {
         if (isHost && isAiActiveGlobally) {
@@ -431,7 +447,7 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
         const remoteIds = new Set(remoteParticipants.map((p) => p.id));
 
         peerSourcesRef.current.forEach((source, id) => {
-            if (!remoteIds.has(id) || (activeRemoteSpeakerId && id !== activeRemoteSpeakerId)) {
+            if (!remoteIds.has(id)) {
                 try {
                     source.disconnect();
                 } catch {
@@ -442,10 +458,6 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
         });
 
         remoteParticipants.forEach((participant) => {
-            if (activeRemoteSpeakerId && participant.id !== activeRemoteSpeakerId) {
-                return;
-            }
-
             if (!peerSourcesRef.current.has(participant.id) && participant.stream.getAudioTracks().length > 0) {
                 try {
                     const peerSource = ctx.createMediaStreamSource(participant.stream);
@@ -457,7 +469,7 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                 }
             }
         });
-    }, [remoteParticipants, isHost, activeRemoteSpeakerId]);
+    }, [remoteParticipants, isHost]);
 
     useEffect(() => {
         const localAiSource = localAiSourceRef.current;
@@ -470,14 +482,12 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
             // Ignore disconnect races while LiveKit updates the active speaker list.
         }
 
-        if (!activeRemoteSpeakerId) {
-            try {
-                localAiSource.connect(aiInputDest);
-            } catch {
-                // Ignore duplicate connection races.
-            }
+        try {
+            localAiSource.connect(aiInputDest);
+        } catch {
+            // Ignore duplicate connection races.
         }
-    }, [activeRemoteSpeakerId, isHost]);
+    }, [isHost]);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
@@ -501,7 +511,7 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
     };
 
     const copyInviteLink = async () => {
-        const url = `${window.location.origin}/pandit?room=${encodeURIComponent(roomId)}${inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : ""}`;
+        const url = `${window.location.origin}/pandit?room=${encodeURIComponent(roomId)}${inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : ""}&ritual=${encodeURIComponent(ritual.id)}`;
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -546,7 +556,7 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                             <div className="hidden h-10 w-px bg-[#eadfcf] sm:block" />
                             <div>
                                 <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[#a27f47]">Live Family Puja</p>
-                                <h1 className="font-lora text-xl text-[#26190f] lg:text-2xl">Smart Pandit Room</h1>
+                                <h1 className="font-lora text-xl text-[#26190f] lg:text-2xl">{ritual.title}</h1>
                                 <p className="text-sm text-[#7a6651]">Room {roomId.slice(0, 8)} · {activeCallUsers.length} family members present</p>
                             </div>
                         </div>
@@ -576,7 +586,7 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                     <div className="mt-4 grid gap-3 md:grid-cols-3">
                         <div className="rounded-2xl border border-[#eadfcf] bg-[#fff8ee] px-4 py-3">
                             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#aa7b2b]">Purpose</p>
-                            <p className="mt-1 text-sm text-[#5c4734]">Gather your family, speak naturally, and let Smart Pandit guide one calm ritual flow.</p>
+                            <p className="mt-1 text-sm text-[#5c4734]">{ritual.sankalpHint}.</p>
                         </div>
                         <div className="rounded-2xl border border-[#eadfcf] bg-[#fff8ee] px-4 py-3">
                             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#aa7b2b]">Status</p>
@@ -588,8 +598,8 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#aa7b2b]">Guidance</p>
                             <p className="mt-1 text-sm text-[#5c4734]">
                                 {activeRemoteSpeakerName
-                                    ? `${activeRemoteSpeakerName} has the floor. Everyone else should pause for a clean Pandit response.`
-                                    : "One speaker at a time. Smart Pandit listens to the active speaker so the ritual does not get confused."}
+                                    ? `${activeRemoteSpeakerName} is speaking. Smart Pandit can still hear the full family room.`
+                                    : "Smart Pandit hears the family room. Keep one calm speaker at a time for the cleanest response."}
                             </p>
                         </div>
                     </div>
@@ -630,13 +640,13 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                                         <div className="mb-8 flex h-12 w-16 items-center justify-center rounded-2xl border border-[#20bd5c]/30 bg-[#20bd5c]/20 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
                                             <VideoIcon className="h-6 w-6 text-[#25D366]" />
                                         </div>
-                                        <h2 className="mb-3 text-center font-lora text-2xl font-bold">Ready to start the puja?</h2>
-                                        <p className="mb-10 max-w-sm text-center text-sm text-gray-300">Ensure your camera and microphone are ready. Smart Pandit is waiting for the family to begin.</p>
+                                        <h2 className="mb-3 text-center font-lora text-2xl font-bold">Ready to start {ritual.shortTitle}?</h2>
+                                        <p className="mb-10 max-w-sm text-center text-sm text-gray-300">Review the samagri, invite relatives, and start when the family is ready.</p>
                                         <button
                                             onClick={handleStartPuja}
                                             className="flex items-center gap-2 rounded-full bg-[#1da851] px-8 py-3.5 font-bold text-white shadow-lg shadow-[#1da851]/20 transition-all hover:bg-[#199446]"
                                         >
-                                            <Mic className="h-4 w-4" /> Start Live Puja
+                                            <Mic className="h-4 w-4" /> Start {ritual.shortTitle}
                                         </button>
                                     </div>
                                 )}
@@ -646,8 +656,8 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                                         <div className="mb-8 flex h-12 w-16 items-center justify-center rounded-2xl border border-[#20bd5c]/30 bg-[#20bd5c]/20 shadow-[0_0_30px_rgba(32,189,92,0.2)]">
                                             <VideoIcon className="h-6 w-6 text-[#25D366]" />
                                         </div>
-                                        <h2 className="mb-3 text-center font-lora text-2xl font-bold">Ashram preparation</h2>
-                                        <p className="mb-10 max-w-sm text-center text-sm text-gray-300">Please wait while the host starts the puja. Keep your microphone and camera ready.</p>
+                                        <h2 className="mb-3 text-center font-lora text-2xl font-bold">{ritual.shortTitle} preparation</h2>
+                                        <p className="mb-10 max-w-sm text-center text-sm text-gray-300">The host is checking readiness and samagri. Keep your microphone and camera ready.</p>
                                     </div>
                                 )}
 
@@ -674,7 +684,7 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
 
                                 {roomActive && activeRemoteSpeakerName && (
                                     <div className="absolute left-6 top-20 z-40 rounded-2xl border border-emerald-300/25 bg-black/55 px-4 py-3 text-sm font-medium text-emerald-50 shadow-xl backdrop-blur-md">
-                                        Speaking floor: {activeRemoteSpeakerName}. Smart Pandit is focusing on this voice.
+                                        Speaking now: {activeRemoteSpeakerName}. Smart Pandit can still hear the full family room.
                                     </div>
                                 )}
 
@@ -727,17 +737,17 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                                     {sharedAgentActivity === "speaking" || sharedAgentActivity === "thinking" ? "Smart Pandit is guiding the ritual" : "Smart Pandit is listening"}
                                 </div>
 
-                                <div className={`absolute top-4 left-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border text-white transition-colors ${sharedAgentActivity === "listening" || sharedAgentActivity === "idle" ? "border-blue-500/50 bg-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.5)]" : sharedAgentActivity === "speaking" ? "border-green-500/50 bg-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.5)]" : "border-gray-500/50 bg-gray-500/20"}`}>
-                                    <Mic className={`h-5 w-5 ${sharedAgentActivity === "speaking" ? "text-green-400" : "text-blue-400"}`} />
+                                <div className={`absolute right-6 top-6 z-20 flex h-10 w-10 items-center justify-center rounded-full border text-white transition-colors ${sharedAgentActivity === "listening" || sharedAgentActivity === "idle" ? "border-[#f2c56c]/50 bg-[#f2c56c]/20 shadow-[0_0_15px_rgba(242,197,108,0.35)]" : sharedAgentActivity === "speaking" ? "border-emerald-400/50 bg-emerald-400/20 shadow-[0_0_15px_rgba(52,211,153,0.35)]" : "border-gray-500/50 bg-gray-500/20"}`}>
+                                    <Mic className={`h-5 w-5 ${sharedAgentActivity === "speaking" ? "text-emerald-300" : "text-[#f2c56c]"}`} />
                                 </div>
 
                                 <div className="absolute bottom-24 left-6 right-6 z-20 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                                     <div className="max-w-xl rounded-[24px] border border-white/10 bg-black/30 px-5 py-4 backdrop-blur-md">
-                                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#f2c56c]">Ritual Flow</p>
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#f2c56c]">{ritual.title}</p>
                                         <p className="mt-2 text-lg font-medium text-white">
                                             {roomActive
-                                                ? "Stay present. Smart Pandit will guide each step and respond to your family naturally."
-                                                : "Settle your family, check your camera and microphone, then begin the live puja when ready."}
+                                                ? "Stay present. Smart Pandit is guiding the selected ritual and responding to your family naturally."
+                                                : `Settle your family, check ${ritual.shortTitle} samagri, then begin when ready.`}
                                         </p>
                                     </div>
                                 </div>
@@ -749,8 +759,12 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                                     >
                                         {isVideoOff ? <VideoOff className="h-5 w-5" /> : <VideoIcon className="h-5 w-5" />}
                                     </button>
-                                    <button className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30">
-                                        <AudioLines className="h-5 w-5" />
+                                    <button
+                                        onClick={copyInviteLink}
+                                        aria-label="Copy invite link"
+                                        className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+                                    >
+                                        <Copy className="h-5 w-5" />
                                     </button>
                                     <button
                                         onClick={() => {
@@ -777,7 +791,7 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                                 <div className="rounded-[24px] border border-[#eadfcf] bg-white/80 p-5 shadow-sm">
                                     <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#a27f47]">Before you continue</p>
                                     <p className="mt-2 text-sm leading-6 text-[#5a4632]">
-                                        Keep one calm speaker at a time, invite relatives before the main chant begins, and let Smart Pandit handle the sequence of the puja.
+                                        Keep one calm speaker at a time, invite relatives before the main chant begins, and keep these items nearby: {ritual.samagriList.slice(0, 3).map((item) => item.name).join(", ")}.
                                     </p>
                                     {cameraError && (
                                         <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -820,12 +834,23 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                                     <img src="/assets/Pandit Performing Aarti.jpg" alt="Pandit Ji" className="h-11 w-11 rounded-full border border-[#f1d8aa] object-cover" />
                                     <div>
                                         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#aa7b2b]">Guidance Rail</p>
-                                        <h3 className="font-lora text-xl text-[#26190f]">Smart Pandit Notes</h3>
+                                        <h3 className="font-lora text-xl text-[#26190f]">{ritual.shortTitle} Notes</h3>
                                     </div>
                                 </div>
                                 <p className="mt-3 text-sm leading-6 text-[#65513e]">
-                                    Keep family coordination here. This panel is intentionally light so the ritual stays at the center.
+                                    Keep family coordination here. Room code {roomId.slice(0, 8).toUpperCase()} can be shared if the link is hard to open.
                                 </p>
+                                <div className="mt-4 rounded-2xl border border-[#eadfcf] bg-[#fff8ee] p-4">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#aa7b2b]">Samagri</p>
+                                    <div className="mt-3 grid gap-2">
+                                        {ritual.samagriList.map((item) => (
+                                            <div key={item.id} className="flex items-center gap-2 text-sm text-[#5d4a36]">
+                                                <CheckCircle2 className="h-4 w-4 text-[#b8822d]" />
+                                                <span>{item.name}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="flex items-center justify-between border-b border-[#efe3d2] px-5 py-4 text-sm">

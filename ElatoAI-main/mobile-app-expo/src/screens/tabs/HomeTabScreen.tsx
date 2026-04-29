@@ -15,6 +15,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { DbUser, Personality } from "../../models/types";
 import {
   canGuideUseVideo,
+  DEFAULT_LIVE_PUJA_RITUAL_ID,
+  LIVE_PUJA_RITUALS,
   filterHomeGuides,
   getGuideDisplaySubtitle,
   getGuideImageAsset,
@@ -30,7 +32,7 @@ interface HomeTabScreenProps {
   personalities: Personality[];
   onOpenGuide: (personality: Personality) => void;
   onOpenCall: (personality: Personality) => void;
-  onOpenVideoCall: (personality: Personality) => void;
+  onOpenVideoCall: (personality: Personality, ritualId?: string) => void;
   onOpenHoroscope: () => void;
   onOpenBhajan: () => void;
   onOpenWallet: () => void;
@@ -181,7 +183,7 @@ export function HomeTabScreen({
     }
 
     if (lane.key === "ritual" && canGuideUseVideo(targetGuide)) {
-      onOpenVideoCall(targetGuide);
+      onOpenVideoCall(targetGuide, DEFAULT_LIVE_PUJA_RITUAL_ID);
       return;
     }
 
@@ -249,7 +251,7 @@ export function HomeTabScreen({
 
               {continueVideoGuide ? (
                 <Pressable
-                  onPress={() => onOpenVideoCall(continueVideoGuide)}
+                  onPress={() => onOpenVideoCall(continueVideoGuide, DEFAULT_LIVE_PUJA_RITUAL_ID)}
                   android_ripple={{ color: "rgba(255,255,255,0.06)" }}
                   style={({ pressed }) => [styles.heroSecondaryAction, pressed && styles.pressedAction]}
                 >
@@ -280,6 +282,28 @@ export function HomeTabScreen({
           Choose the moment first, then we route you into the right Smart Pandit lane.
         </Text>
       </View>
+
+      {continueVideoGuide ? (
+        <View style={styles.ritualPickerCard}>
+          <View style={styles.ritualPickerHeader}>
+            <Text style={styles.ritualPickerEyebrow}>Live puja</Text>
+            <Text style={styles.ritualPickerTitle}>Choose the ritual first</Text>
+          </View>
+          <View style={styles.ritualGrid}>
+            {LIVE_PUJA_RITUALS.map((ritual) => (
+              <Pressable
+                key={ritual.id}
+                onPress={() => onOpenVideoCall(continueVideoGuide, ritual.id)}
+                android_ripple={{ color: "rgba(31,23,17,0.05)" }}
+                style={({ pressed }) => [styles.ritualChip, pressed && styles.pressedAction]}
+              >
+                <Text style={styles.ritualChipTitle}>{ritual.shortTitle}</Text>
+                <Text style={styles.ritualChipText}>{ritual.description}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      ) : null}
 
       <View style={styles.intentGrid}>
         {intentLanes.map((lane, index) => (
@@ -327,7 +351,7 @@ export function HomeTabScreen({
 
         {continueVideoGuide ? (
           <Pressable
-            onPress={() => onOpenVideoCall(continueVideoGuide)}
+            onPress={() => onOpenVideoCall(continueVideoGuide, DEFAULT_LIVE_PUJA_RITUAL_ID)}
             android_ripple={{ color: "rgba(31,23,17,0.04)" }}
             style={({ pressed }) => [styles.continueRow, pressed && styles.pressedAction]}
           >
@@ -449,12 +473,12 @@ export function HomeTabScreen({
 
                       {canGuideUseVideo(guide) ? (
                         <Pressable
-                          onPress={() => onOpenVideoCall(guide)}
+                          onPress={() => onOpenVideoCall(guide, DEFAULT_LIVE_PUJA_RITUAL_ID)}
                           android_ripple={{ color: "rgba(31,23,17,0.06)" }}
                           style={({ pressed }) => [styles.guideChatButton, pressed && styles.pressedAction]}
                         >
                           <Ionicons name="videocam-outline" size={16} color={colors.gray900} />
-                          <Text style={styles.guideChatButtonText}>Video</Text>
+                          <Text style={styles.guideChatButtonText}>Live Puja</Text>
                         </Pressable>
                       ) : null}
                     </View>
@@ -665,6 +689,55 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     maxWidth: 330,
+  },
+  ritualPickerCard: {
+    borderRadius: 26,
+    backgroundColor: "#FFF8EE",
+    borderWidth: 1,
+    borderColor: "#E7CCA0",
+    padding: 16,
+    gap: 14,
+  },
+  ritualPickerHeader: {
+    gap: 4,
+  },
+  ritualPickerEyebrow: {
+    color: colors.divineSaffron,
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  ritualPickerTitle: {
+    color: colors.gray900,
+    fontFamily: fonts.heading,
+    fontSize: 23,
+  },
+  ritualGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  ritualChip: {
+    width: "48%",
+    minHeight: 112,
+    borderRadius: 20,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: "rgba(106,74,44,0.1)",
+    padding: 13,
+    gap: 6,
+  },
+  ritualChipTitle: {
+    color: colors.gray900,
+    fontFamily: fonts.bodyBold,
+    fontSize: 15,
+  },
+  ritualChipText: {
+    color: colors.gray500,
+    fontFamily: fonts.body,
+    fontSize: 12,
+    lineHeight: 17,
   },
   intentGrid: {
     flexDirection: "row",
