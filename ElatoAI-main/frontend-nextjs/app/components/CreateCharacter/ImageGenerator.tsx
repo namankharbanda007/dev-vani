@@ -103,7 +103,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated, initi
                     <div className="space-y-1">
                         <h3 className="font-semibold text-gray-900">AI Appearance</h3>
                         <p className="text-xs text-gray-500 max-w-[200px] mx-auto">
-                            Generate a unique look based on your character's description.
+                            Generate a unique look based on your character&apos;s description.
                         </p>
                     </div>
                     <Button

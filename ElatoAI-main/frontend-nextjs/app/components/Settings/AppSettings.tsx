@@ -393,7 +393,7 @@ const AppSettings: React.FC<AppSettingsProps> = ({
                 <h2 className="text-xl font-bold font-lora text-gray-800 flex items-center gap-2">
                     Device Settings
                 </h2>
-                {skipDeviceRegistration && <div className="flex flex-col text-purple-500 text-xs gap-2">You don't need to register your device because NEXT_PUBLIC_SKIP_DEVICE_REGISTRATION is set to True.</div>}
+                {skipDeviceRegistration && <div className="flex flex-col text-purple-500 text-xs gap-2">You don&apos;t need to register your device because NEXT_PUBLIC_SKIP_DEVICE_REGISTRATION is set to True.</div>}
                 <div className="flex flex-col gap-6">
                     <div className="flex flex-col gap-3">
                         <div className="flex flex-row items-center gap-2">

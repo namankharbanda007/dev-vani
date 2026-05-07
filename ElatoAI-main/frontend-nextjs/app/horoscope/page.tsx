@@ -211,7 +211,7 @@ function HoroscopeContent() {
                                     key={sign.name}
                                     onClick={() => handleSignChange(sign)}
                                     className="flex flex-col items-center gap-2 min-w-[64px] group"
-                                    aria-selected={isActive}
+                                    aria-pressed={isActive}
                                     aria-label={`Select ${sign.name}`}
                                 >
                                     <div className={`
@@ -247,7 +247,7 @@ function HoroscopeContent() {
                                         flex flex-col items-center gap-2 p-2 rounded-xl transition-all duration-200
                                         ${isActive ? 'bg-white shadow-md ring-2 ring-[#FFD700]' : 'hover:bg-gray-100'}
                                     `}
-                                    aria-selected={isActive}
+                                    aria-pressed={isActive}
                                 >
                                     <div className="relative w-12 h-12 rounded-full overflow-hidden">
                                         <Image

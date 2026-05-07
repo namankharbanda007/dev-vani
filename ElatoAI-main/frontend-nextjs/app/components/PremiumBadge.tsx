@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { getSimpleUserById } from "@/db/users";
 import { createClient } from "@/utils/supabase/client";
 import { Crown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface PremiumBadgeProps {
     currentUserId: string;
@@ -16,7 +16,7 @@ const PremiumBadge: React.FC<PremiumBadgeProps> = ({
     displayText,
 }) => {
     const [dbUser, setDbUser] = useState<IUser | null>(null);
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
 
     useEffect(() => {
         const getDbUser = async () => {
@@ -24,7 +24,7 @@ const PremiumBadge: React.FC<PremiumBadgeProps> = ({
             setDbUser(dbUser ?? null);
         };
         getDbUser();
-    }, [currentUserId]);
+    }, [currentUserId, supabase]);
 
     if (!dbUser || !dbUser?.is_premium) {
         return null;

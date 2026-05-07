@@ -4,11 +4,10 @@ import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { useEffect } from "react";
 
+const hiddenPaths = ["/home"];
+
 const TawkToScript = () => {
     const pathname = usePathname();
-
-    // specific paths where we DON'T want the chat widget
-    const hiddenPaths = ["/home"];
 
     useEffect(() => {
         // Function to toggle visibility

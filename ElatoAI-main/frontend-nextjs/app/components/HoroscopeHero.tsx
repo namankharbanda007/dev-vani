@@ -115,7 +115,7 @@ const HoroscopeHero: React.FC<HoroscopeHeroProps> = ({ currentUser }) => {
 
                             {horoscopeData?.content && (
                                 <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-lg mt-2 italic border-l-2 border-purple-500/50 pl-4 py-1">
-                                    "{horoscopeData.content}"
+                                    &quot;{horoscopeData.content}&quot;
                                 </p>
                             )}
                         </div>

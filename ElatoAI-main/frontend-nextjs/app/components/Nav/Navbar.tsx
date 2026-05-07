@@ -17,8 +17,6 @@ export function Navbar({
     const pathname = usePathname();
     const isHome = pathname.includes("/home") || pathname.includes("/bhajan");
 
-    if (pathname === "/landing") return null;
-
     useEffect(() => {
         if (typeof window !== "undefined" && isMobile) {
             const handleScroll = () => {
@@ -33,6 +31,8 @@ export function Navbar({
             return () => window.removeEventListener("scroll", handleScroll);
         }
     }, [lastScrollY, isMobile]);
+
+    if (pathname === "/landing") return null;
 
     return (
         <div

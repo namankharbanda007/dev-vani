@@ -588,8 +588,8 @@ function TrustSection() {
                             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-amber-300">
                                 What the first session should feel like
                             </p>
-                        <h3 className="mb-4 text-3xl font-bold text-white">
-                                "I can get real spiritual help right now."
+                            <h3 className="mb-4 text-3xl font-bold text-white">
+                                &quot;I can get real spiritual help right now.&quot;
                             </h3>
                             <p className="leading-relaxed text-purple-100/80">
                                 Not futuristic. Not gimmicky. Not like a feature catalog. Just calm

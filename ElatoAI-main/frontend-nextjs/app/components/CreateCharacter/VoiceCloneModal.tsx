@@ -23,20 +23,23 @@ interface VoiceCloneModalProps {
     voiceInputLabel: string;
     voiceInputPlaceholder: string;
     voiceDescription: string;
-  };
+  } | null;
 }
 
 export default function VoiceCloneModal({ isOpen, onClose, onSuccess, selectedUser, voiceCloneModalProps }: VoiceCloneModalProps) {
-if (!voiceCloneModalProps) return null;
-  const { provider, title, voiceInputLabel, voiceInputPlaceholder, voiceDescription } = voiceCloneModalProps;
-const [isSubmitting, setIsSubmitting] = useState(false);
+  const provider = voiceCloneModalProps?.provider ?? "elevenlabs";
+  const title = voiceCloneModalProps?.title ?? "";
+  const voiceInputLabel = voiceCloneModalProps?.voiceInputLabel ?? "Voice agent ID";
+  const voiceInputPlaceholder = voiceCloneModalProps?.voiceInputPlaceholder ?? "Enter voice agent ID";
+  const voiceDescription = voiceCloneModalProps?.voiceDescription ?? "";
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: '',
     agentId: ''
   });
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { toast } = useToast();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +75,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
     } finally {
       setIsSubmitting(false);
     }
-  }, [form.name, form.agentId, onClose, onSuccess, toast, supabase, selectedUser.user_id]);
+  }, [form.name, form.agentId, onClose, onSuccess, provider, toast, supabase, selectedUser.user_id]);
 
   const handleClose = useCallback(() => {
     onClose();
@@ -132,13 +135,26 @@ const [isSubmitting, setIsSubmitting] = useState(false);
         </Button>
       </div>
     </form>
-  ), [form.name, form.agentId, handleSubmit, handleNameChange, handleAgentIdChange, handleClose, isSubmitting]);
+  ), [
+    form.name,
+    form.agentId,
+    handleSubmit,
+    handleNameChange,
+    handleAgentIdChange,
+    handleClose,
+    isSubmitting,
+    voiceDescription,
+    voiceInputLabel,
+    voiceInputPlaceholder,
+  ]);
 
   const handleOpenChange = useCallback((open: boolean) => {
     if (!open) {
       handleClose();
     }
   }, [handleClose]);
+
+  if (!voiceCloneModalProps) return null;
 
   if (isDesktop) {
     return (
