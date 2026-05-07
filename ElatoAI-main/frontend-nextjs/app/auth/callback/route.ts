@@ -1,7 +1,7 @@
 import { createUser, doesUserExist } from "@/db/users";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
-import { defaultPersonalityId, defaultToyId } from "@/lib/data";
+import { defaultPersonalityId } from "@/lib/data";
 import { getBaseUrl } from "@/lib/utils";
 
 export async function GET(request: Request) {
@@ -10,8 +10,6 @@ export async function GET(request: Request) {
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get("code");
-    const queryParamsToyId = requestUrl.searchParams.get("toy_id");
-
     // const origin = requestUrl.origin;
     // const origin = "http://localhost:3000";
     const origin = getBaseUrl();

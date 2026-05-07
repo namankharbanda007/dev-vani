@@ -1,49 +1,25 @@
-import Twemoji from "react-twemoji";
-import { useMemo } from "react";
+import Image from "next/image";
+import { resolveGuideImageSrc } from "@/lib/guideImages";
 
-// List of cute animals and human faces emojis
-const emojiList = [
-  // Cute animals
-  "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯",
-  "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🦄", "🦋",
-  "🐢", "🐙", "🦥", "🦦", "🦔", "🐿️", "🦇", "🦉", "🦜", "🐞",
-  // Cute human faces
-  "😊", "🥰", "😍", "🤗", "😌", "😇", "🥺", "😄", "😁", "😆", 
-  "😋", "😛", "😜", "😝", "🤪", "😺", "😸", "😹", "😻", "😽",
-  "🙈", "🙉", "🙊", "👶", "🧒", "👦", "👧", "🥳", "😎", "🤓"
-];
-
-// Simple hash function to get a consistent number from a string
-const hashString = (str: string): number => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash);
-};
-
-export const EmojiComponent = ({ personality, size = 100 }: { personality: IPersonality, size?: number }) => {
-  // Use useMemo to avoid recalculating on every render
-  const emoji = useMemo(() => {
-    // Use personality.id or another unique property as seed
-    const seed = personality.personality_id || personality.title;
-    const hash = hashString(seed);
-    const index = hash % emojiList.length;
-    return emojiList[index];
-  }, [personality]);
-
+export const EmojiComponent = ({
+  personality,
+  size = 100,
+}: {
+  personality: IPersonality;
+  size?: number;
+}) => {
   return (
-	<div className="flex items-center justify-center" style={{ width: `${size}px`, height: `${size}px` }}>
-	<Twemoji
-	  options={{ 
-		className: "twemoji flex-shrink-0",
-		style: { fontSize: `${size}px` }
-	  }}
-	>
-	  {emoji}
-	</Twemoji>
-  </div>
+    <div
+      className="relative overflow-hidden rounded-2xl bg-[#FBF5EA]"
+      style={{ width: `${size}px`, height: `${size}px` }}
+    >
+      <Image
+        src={resolveGuideImageSrc(personality)}
+        alt={personality.title || "Smart Murti guide"}
+        fill
+        className="object-cover"
+        unoptimized
+      />
+    </div>
   );
 };

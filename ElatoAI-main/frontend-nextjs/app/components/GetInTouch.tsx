@@ -6,7 +6,7 @@ import { SendHorizonal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { businessDemoLink } from "@/lib/data";
 
-interface PreorderButtonProps {
+interface GetInTouchButtonProps {
     size: "sm" | "lg";
     className?: string;
     iconOnMobile?: boolean;
@@ -16,7 +16,7 @@ const GetInTouchButton = ({
     size,
     className,
     iconOnMobile,
-}: PreorderButtonProps) => {
+}: GetInTouchButtonProps) => {
     return (
         <Link href={businessDemoLink} passHref>
             <Button

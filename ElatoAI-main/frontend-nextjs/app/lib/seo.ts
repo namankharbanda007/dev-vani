@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
 
 export const siteConfig = {
-    name: "SMART मूर्ति",
+    name: "SMART Murti",
     alternateName: "SMART Murti",
     url: "https://smartmurti.com",
     description:
-        "SMART मूर्ति gives Hindu families instant access to a live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.",
+        "SMART Murti gives Hindu families instant access to a live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.",
     defaultOgImage: "/logos/smartmurti-icon.jpg",
-    creator: "SMART मूर्ति Team",
-    publisher: "SMART मूर्ति",
+    creator: "SMART Murti Team",
+    publisher: "SMART Murti",
     locale: "en_US",
     keywords: [
         "smart murti",
-        "smart मूर्ति",
         "ai pandit",
         "live ai pandit",
         "family puja online",
@@ -35,9 +34,9 @@ type BuildMetadataInput = {
 
 export const homeFaqs = [
     {
-        question: "What is SMART मूर्ति?",
+        question: "What is SMART Murti?",
         answer:
-            "SMART मूर्ति lets Hindu families talk to a live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.",
+            "SMART Murti lets Hindu families talk to a live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.",
     },
     {
         question: "What can I do with Smart Pandit?",
@@ -45,19 +44,19 @@ export const homeFaqs = [
             "You can speak with Smart Pandit for spiritual guidance, family questions, puja support, devotional Q&A, and live voice or chat conversations in your preferred language.",
     },
     {
-        question: "Does SMART मूर्ति offer astrology and horoscope features?",
+        question: "Does SMART Murti offer astrology and horoscope features?",
         answer:
-            "Yes. SMART मूर्ति includes an AI astrologer, daily horoscope guidance, and specialist lanes for relationship, finance, and other personal questions.",
+            "Yes. SMART Murti includes an AI astrologer, daily horoscope guidance, and specialist lanes for relationship, finance, and other personal questions.",
     },
     {
         question: "Can my family join from different countries?",
         answer:
-            "Yes. SMART मूर्ति is built for families across countries and time zones, so relatives can join shared spiritual moments even when they are not in the same place.",
+            "Yes. SMART Murti is built for families across countries and time zones, so relatives can join shared spiritual moments even when they are not in the same place.",
     },
     {
-        question: "Which languages does SMART मूर्ति support?",
+        question: "Which languages does SMART Murti support?",
         answer:
-            "SMART मूर्ति supports Hindi, English, Hinglish, and other major Indian and global languages so families can receive guidance naturally.",
+            "SMART Murti supports Hindi, English, Hinglish, and other major Indian and global languages so families can receive guidance naturally.",
     },
 ];
 
@@ -66,31 +65,7 @@ export const aiReferencePages = [
         path: "/",
         title: "Homepage",
         description:
-            "Homepage for SMART मूर्ति, featuring live multilingual AI Pandit guidance, family puja, and urgent spiritual support.",
-    },
-    {
-        path: "/products",
-        title: "Products",
-        description:
-            "Overview of SMART मूर्ति products including Smart Pandit, Smart Base, and Smart Mandir.",
-    },
-    {
-        path: "/products/smart-pandit",
-        title: "Smart Pandit",
-        description:
-            "AI spiritual guide for guided puja, mantra recitation, and devotional conversations at home.",
-    },
-    {
-        path: "/products/smart-base",
-        title: "Smart Base",
-        description:
-            "Smart devotional base that upgrades an existing murti with audio, rituals, and spiritual guidance.",
-    },
-    {
-        path: "/products/smart-mandir",
-        title: "Smart Mandir",
-        description:
-            "AI-powered home temple experience with devotional audio, rituals, and interactive spiritual support.",
+            "Homepage for SMART Murti, featuring live multilingual AI Pandit guidance, family puja, and urgent spiritual support.",
     },
     {
         path: "/pandit",
@@ -126,47 +101,43 @@ export const aiReferencePages = [
         path: "/pricing",
         title: "Pricing",
         description:
-            "Prepaid wallet pricing for SMART मूर्ति spiritual guidance, live calls, and devotional experiences.",
+            "Prepaid wallet pricing for SMART Murti spiritual guidance, live calls, and devotional experiences.",
     },
     {
         path: "/privacy",
         title: "Privacy Policy",
         description:
-            "Privacy Policy for SMART मूर्ति and Smartmurti AI Private Limited.",
+            "Privacy Policy for SMART Murti and Smartmurti AI Private Limited.",
     },
     {
         path: "/terms",
         title: "Terms of Service",
         description:
-            "Terms of Service for SMART मूर्ति and Smartmurti AI Private Limited.",
+            "Terms of Service for SMART Murti and Smartmurti AI Private Limited.",
     },
     {
         path: "/refunds",
         title: "Refund Policy",
         description:
-            "Refund Policy for SMART मूर्ति digital sessions, wallet recharges, and failed payments.",
+            "Refund Policy for SMART Murti digital sessions, wallet recharges, and failed payments.",
     },
     {
         path: "/disclaimer",
         title: "Disclaimer",
         description:
-            "Disclaimer for SMART मूर्ति covering AI guidance limits and non-professional advice boundaries.",
+            "Disclaimer for SMART Murti covering AI guidance limits and non-professional advice boundaries.",
     },
     {
         path: "/contact",
         title: "Contact",
         description:
-            "Contact Smartmurti AI Private Limited and SMART मूर्ति support.",
+            "Contact Smartmurti AI Private Limited and SMART Murti support.",
     },
 ];
 
 export const sitemapEntries = [
     { path: "/", changeFrequency: "weekly", priority: 1 },
     { path: "/landing-2", changeFrequency: "weekly", priority: 0.92 },
-    { path: "/products", changeFrequency: "weekly", priority: 0.9 },
-    { path: "/products/smart-pandit", changeFrequency: "weekly", priority: 0.88 },
-    { path: "/products/smart-base", changeFrequency: "weekly", priority: 0.84 },
-    { path: "/products/smart-mandir", changeFrequency: "weekly", priority: 0.84 },
     { path: "/pricing", changeFrequency: "weekly", priority: 0.82 },
     { path: "/pandit", changeFrequency: "weekly", priority: 0.8 },
     { path: "/astrologer", changeFrequency: "weekly", priority: 0.8 },

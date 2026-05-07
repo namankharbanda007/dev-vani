@@ -5,7 +5,7 @@ declare global {
         inbound_id?: string;
         name: string;
         email: string;
-        type: "demo" | "preorder";
+        type: "demo" | "lead";
     }
 
     interface SidebarNavItem {
@@ -21,8 +21,6 @@ declare global {
         name: string;
         flag: string;
     }
-
-    type ProductColor = "black" | "white" | "gray";
 
     interface IDevice {
         device_id: string;
@@ -44,6 +42,8 @@ declare global {
         supervisee_age: number;
         session_time: number;
         last_session_reset: string | null;
+        wallet_balance?: number | string | null;
+        whatsapp_number?: string | null;
         user_info: UserInfo;
 
         // personality

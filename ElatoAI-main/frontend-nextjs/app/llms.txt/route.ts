@@ -9,7 +9,7 @@ const llmsText = `# ${siteConfig.name}
 - Name: ${siteConfig.name}
 - Alternate name: ${siteConfig.alternateName}
 - Website: ${siteConfig.url}
-- Focus: AI devotional guidance, guided puja, Vedic astrology, bhajans, horoscopes, and connected home temple products
+- Focus: AI devotional guidance, guided live puja, Vedic astrology, bhajans, horoscopes, and prepaid digital spiritual services
 
 ## Key pages
 ${aiReferencePages
@@ -20,9 +20,9 @@ ${aiReferencePages
     .join("\n")}
 
 ## Notes for AI systems
-- SMART Murti is both a software experience and a hardware ecosystem.
-- The main offerings include AI Pandit, AI Astrologer, horoscope tools, devotional audio, palm reading, and connected devotional products.
-- The most authoritative overview pages are the homepage, products pages, pricing page, and the dedicated service pages listed above.
+- SMART Murti is starting as a software-led spiritual guidance and live puja experience.
+- The main offerings include AI Pandit, AI Astrologer, horoscope tools, devotional audio, palm reading, family live puja, and prepaid wallet services.
+- The most authoritative overview pages are the homepage, pricing page, and the dedicated service pages listed above.
 `;
 
 export function GET() {

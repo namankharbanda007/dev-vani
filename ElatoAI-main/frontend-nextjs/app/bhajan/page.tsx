@@ -8,6 +8,7 @@ import { Play, Music, Share2 } from 'lucide-react';
 export default function BhajanPage() {
     const [currentTrack, setCurrentTrack] = useState<Track>(bhajans[0]);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [shareMessage, setShareMessage] = useState<string | null>(null);
 
     const handlePlay = (track: Track) => {
         if (currentTrack.id === track.id) {
@@ -62,7 +63,13 @@ export default function BhajanPage() {
                             <span className="w-1 h-8 bg-orange-500 rounded-full"></span>
                             Sacred Tracks
                         </h2>
-                        <button className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-full text-sm font-medium transition-colors shadow-lg shadow-orange-500/20">
+                        <button
+                            onClick={() => {
+                                setCurrentTrack(bhajans[0]);
+                                setIsPlaying(true);
+                            }}
+                            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-full text-sm font-medium transition-colors shadow-lg shadow-orange-500/20"
+                        >
                             Play All
                         </button>
                     </div>
@@ -112,7 +119,8 @@ export default function BhajanPage() {
                                                 }).catch(console.error);
                                             } else {
                                                 navigator.clipboard.writeText(`${window.location.href} - Listen to ${track.title}`);
-                                                alert('Link copied to clipboard!');
+                                                setShareMessage("Link copied");
+                                                window.setTimeout(() => setShareMessage(null), 1800);
                                             }
                                         }}
                                         className="p-2 text-stone-400 hover:text-orange-500 transition-colors"
@@ -125,6 +133,11 @@ export default function BhajanPage() {
                         ))}
                     </div>
                 </div>
+                {shareMessage ? (
+                    <div className="mt-4 rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm font-semibold text-orange-800 shadow-sm">
+                        {shareMessage}
+                    </div>
+                ) : null}
             </div>
 
             {/* Player Component */}

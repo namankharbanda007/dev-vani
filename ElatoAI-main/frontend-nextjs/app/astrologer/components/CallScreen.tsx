@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Search, Bell, Video as VideoIcon, MessageSquare, Users, FolderOpen, Calendar, Settings, Sun, Moon, Maximize2, Send, ImageIcon, AudioLines, PhoneOff, VideoOff, MicOff, Mic, User, Copy, UserPlus, CheckCircle2, Star } from 'lucide-react';
+import { Video as VideoIcon, MessageSquare, Users, Calendar, Settings, Sun, Moon, Maximize2, Send, PhoneOff, VideoOff, MicOff, Mic, User, UserPlus, CheckCircle2, Star } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useGroupCall } from '../../pandit/hooks/useGroupCall';
@@ -67,11 +67,7 @@ const RemoteVideo = ({ stream, name }: { stream: MediaStream | undefined | null;
     return <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover bg-gray-900" />;
 };
 
-// Generate a default avatar using DiceBear API
-const getDefaultAvatar = (name: string) => {
-    const seed = encodeURIComponent(name || 'user');
-    return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=c084fc,f59e0b,ec4899&backgroundType=gradientLinear`;
-};
+const getDefaultAvatar = () => "/logos/smartmurti-icon.jpg";
 
 export default function CallScreen({ participants, roomId, onLeave, isOriginalHost = false, userAvatarUrl, userProfile }: CallScreenProps) {
     // Use The Astrologer personality
@@ -113,17 +109,10 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
     const localName = useMemo(() => participants[0]?.trim() || "Guest", [participants]);
 
     // Notification state
-    const [showNotifications, setShowNotifications] = useState(false);
     const [showAvatarMenu, setShowAvatarMenu] = useState(false);
-    const notifications = [
-        { id: 1, text: "⭐ Your daily horoscope is ready!", time: "2 min ago", read: false },
-        { id: 2, text: "🌙 Mercury retrograde starts tomorrow", time: "1 hr ago", read: false },
-        { id: 3, text: "🔮 Your birth chart analysis is complete", time: "3 hrs ago", read: true },
-    ];
-    const unreadCount = notifications.filter(n => !n.read).length;
 
     // Resolve avatar URL with fallback
-    const resolvedAvatarUrl = userAvatarUrl || getDefaultAvatar(participants[0] || 'User');
+    const resolvedAvatarUrl = userAvatarUrl || getDefaultAvatar();
 
     // Chat auto-scroll ref
     const chatEndRef = useRef<HTMLDivElement>(null);
@@ -460,7 +449,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: 'Join my Astrology Session ✨',
+                    title: 'Join my Astrology Session',
                     text: 'Join me for a live astrology session with AI Astrologer Ji!',
                     url,
                 });
@@ -509,10 +498,10 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                         {[
                             { label: 'PANDIT', href: '/pandit' },
                             { label: 'ASTROLOGER', href: '/astrologer' },
-                            { label: 'LOVE ADVISOR', href: '#' },
-                            { label: 'MAHURAT', href: '#' },
-                            { label: 'PUJA', href: '#' },
-                            { label: 'SERVICE', href: '#' },
+                            { label: 'HOROSCOPE', href: '/horoscope' },
+                            { label: 'MAHURAT', href: '/pandit?ritual=ganpati-havan' },
+                            { label: 'PUJA', href: '/pandit' },
+                            { label: 'PRICING', href: '/pricing' },
                         ].map(tab => (
                             <a
                                 key={tab.label}
@@ -532,55 +521,11 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                             {linkCopied ? <CheckCircle2 className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
                             <span className="hidden sm:inline">{linkCopied ? 'Copied!' : 'Invite Family'}</span>
                         </button>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow text-gray-600 transition-all border border-gray-100" onClick={() => alert("Search functionality coming soon")}>
-                            <Search className="w-5 h-5" />
-                        </button>
-
-                        {/* Notification Bell */}
-                        <div className="relative">
-                            <button
-                                className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow text-gray-600 relative transition-all border border-gray-100"
-                                onClick={() => { setShowNotifications(!showNotifications); setShowAvatarMenu(false); }}
-                            >
-                                <Bell className="w-5 h-5" />
-                                {unreadCount > 0 && (
-                                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 border-2 border-white text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </button>
-                            <AnimatePresence>
-                                {showNotifications && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                                        className="absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden"
-                                    >
-                                        <div className="px-4 py-3 bg-gradient-to-r from-indigo-500/10 to-amber-500/10 border-b border-gray-100">
-                                            <h3 className="font-semibold text-sm text-gray-800">Notifications</h3>
-                                        </div>
-                                        <div className="max-h-60 overflow-y-auto">
-                                            {notifications.map((n) => (
-                                                <div key={n.id} className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-50 last:border-b-0 ${!n.read ? 'bg-amber-50/40' : ''}`}>
-                                                    <p className="text-sm text-gray-700">{n.text}</p>
-                                                    <p className="text-xs text-gray-400 mt-1">{n.time}</p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
-                                            <button className="text-xs text-indigo-600 hover:text-indigo-800 font-medium w-full text-center" onClick={() => setShowNotifications(false)}>Mark all as read</button>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-
                         {/* User Avatar */}
                         <div className="relative">
                             <button
                                 className="w-10 h-10 rounded-full overflow-hidden shadow-sm border-2 border-white cursor-pointer hover:border-amber-300 transition-all"
-                                onClick={() => { setShowAvatarMenu(!showAvatarMenu); setShowNotifications(false); }}
+                                onClick={() => setShowAvatarMenu(!showAvatarMenu)}
                             >
                                 <img src={resolvedAvatarUrl} alt="User" className="w-full h-full object-cover" />
                             </button>
@@ -632,9 +577,9 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                             >
                                 <Users className="w-5 h-5" />
                             </button>
-                            <button className="w-12 h-12 rounded-full hover:bg-white text-gray-500 flex items-center justify-center transition-colors" onClick={() => alert("Astrology tools coming soon")}>
+                            <a href="/horoscope" className="w-12 h-12 rounded-full hover:bg-white text-gray-500 flex items-center justify-center transition-colors" title="Open Horoscope">
                                 <Star className="w-5 h-5" />
-                            </button>
+                            </a>
                             <button
                                 onClick={() => setShowMuhurtaWidget(!showMuhurtaWidget)}
                                 className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${showMuhurtaWidget ? 'bg-amber-100 text-amber-600' : 'hover:bg-white text-gray-500'}`}
@@ -642,9 +587,9 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                             >
                                 <Calendar className="w-5 h-5" />
                             </button>
-                            <button className="w-12 h-12 rounded-full hover:bg-white text-gray-500 flex items-center justify-center transition-colors" onClick={() => alert("Settings coming soon")}>
+                            <a href="/home/settings" className="w-12 h-12 rounded-full hover:bg-white text-gray-500 flex items-center justify-center transition-colors" title="Profile Settings">
                                 <Settings className="w-5 h-5" />
-                            </button>
+                            </a>
                         </div>
 
                         <div className="mt-auto flex flex-col gap-2 w-full items-center bg-white/60 p-2 rounded-full shadow-sm shadow-black/5">
@@ -660,7 +605,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                     {/* CENTER STAGE */}
                     <div className="flex-1 flex flex-col min-w-0">
                         <div className="mb-4">
-                            <h1 className="text-3xl lg:text-4xl font-lora font-medium text-gray-900 tracking-tight">Your Stars, Your Destiny. ✨</h1>
+                            <h1 className="text-3xl lg:text-4xl font-lora font-medium text-gray-900 tracking-tight">Your Stars, Your Destiny.</h1>
                         </div>
                         <div className="flex-1 flex max-xl:flex-col flex-row gap-4 min-h-[400px] relative">
 
@@ -809,7 +754,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                             transition={{ type: "spring" }}
                                             className="absolute top-1/4 right-1/4 bg-white text-gray-900 font-bold px-4 py-2 rounded-2xl rounded-tr-sm shadow-xl z-20"
                                         >
-                                            ✨ Reading...
+                                            Reading...
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
@@ -828,9 +773,6 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                         className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isVideoOff ? 'bg-white text-gray-900' : 'bg-white/20 text-white hover:bg-white/30'}`}
                                     >
                                         {isVideoOff ? <VideoOff className="w-5 h-5" /> : <VideoIcon className="w-5 h-5" />}
-                                    </button>
-                                    <button className="w-12 h-12 rounded-full bg-white/20 text-white hover:bg-white/30 flex items-center justify-center transition-colors">
-                                        <AudioLines className="w-5 h-5" />
                                     </button>
                                     <button
                                         onClick={() => {
@@ -857,7 +799,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                             <div className="flex-1 bg-white/60 backdrop-blur rounded-[16px] xl:rounded-[24px] p-4 xl:p-5 shadow-sm border border-white/60 flex flex-col justify-between">
                                 <div className="flex items-center justify-between pointer-events-none pb-2 xl:pb-0">
                                     <h3 className="font-bold text-gray-900 text-sm tracking-wide">ASTROLOGY INSIGHTS</h3>
-                                    <span className="text-xs text-gray-400 font-mono">⭐ live</span>
+                                    <span className="text-xs text-gray-400 font-mono">live</span>
                                 </div>
                                 <p className="text-gray-700 font-medium text-sm xl:text-base">
                                     Welcome! Share your birth date, time, and place for an accurate reading. The stars have much to reveal today.
@@ -866,8 +808,8 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
 
                             <div className="w-full xl:w-[320px] bg-white/60 backdrop-blur rounded-[16px] xl:rounded-[24px] p-4 xl:p-5 shadow-sm border border-white/60 flex items-center justify-between gap-4">
                                 <div className="flex gap-2">
-                                    <button className="bg-gray-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow">Transcription</button>
-                                    <button className="bg-white text-gray-600 border border-gray-200 text-xs font-bold px-4 py-2 rounded-full shadow-sm hover:bg-gray-50">Subtitle</button>
+                                    <span className="bg-gray-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow">Live notes</span>
+                                    <span className="bg-white text-gray-600 border border-gray-200 text-xs font-bold px-4 py-2 rounded-full shadow-sm">Group chat</span>
                                 </div>
 
                                 {sessionStatus === "CONNECTED" && (
@@ -953,7 +895,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                                 <img src="/assets/Pandit Performing Aarti.jpg" alt="Astrologer" className="w-8 h-8 rounded-full bg-amber-100 object-cover shrink-0 mt-1 border border-amber-200" />
                                             ) : (
                                                 <img
-                                                    src={msg.avatarUrl || getDefaultAvatar(msg.sender)}
+                                                    src={msg.avatarUrl || getDefaultAvatar()}
                                                     alt={msg.sender}
                                                     className="w-8 h-8 rounded-full object-cover shrink-0 mt-1 border border-purple-200"
                                                 />
@@ -978,14 +920,14 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                                                     <Star className="w-4 h-4 text-amber-500" /> TODAY&apos;S STARS
                                                 </h4>
                                                 <div className="flex justify-between items-center mb-6">
-                                                    <div className="w-12 h-12 bg-[#ffe4d6] rounded-xl flex items-center justify-center text-xl shadow-inner border border-amber-50">♈</div>
-                                                    <div className="w-12 h-12 bg-[#fff1cc] rounded-xl flex items-center justify-center text-xl shadow-inner border border-yellow-50">♉</div>
-                                                    <div className="w-12 h-12 bg-[#e4d6ff] rounded-xl flex items-center justify-center text-xl shadow-inner border border-indigo-50">♊</div>
-                                                    <div className="w-12 h-12 bg-[#dcfce7] rounded-xl flex items-center justify-center text-xl shadow-inner border border-green-50">♋</div>
+                                                    <div className="w-12 h-12 bg-[#ffe4d6] rounded-xl flex items-center justify-center text-[11px] font-bold shadow-inner border border-amber-50">Aries</div>
+                                                    <div className="w-12 h-12 bg-[#fff1cc] rounded-xl flex items-center justify-center text-[11px] font-bold shadow-inner border border-yellow-50">Taurus</div>
+                                                    <div className="w-12 h-12 bg-[#e4d6ff] rounded-xl flex items-center justify-center text-[11px] font-bold shadow-inner border border-indigo-50">Gemini</div>
+                                                    <div className="w-12 h-12 bg-[#dcfce7] rounded-xl flex items-center justify-center text-[11px] font-bold shadow-inner border border-green-50">Cancer</div>
                                                 </div>
                                                 <div className="bg-amber-50 text-amber-900 p-4 rounded-xl text-center cursor-pointer hover:bg-amber-100 transition-colors border border-amber-200 max-w-full">
                                                     <p className="text-xs mb-2 font-medium">View Your Zodiac Reading</p>
-                                                    <button className="bg-white border border-amber-200 text-amber-700 w-full rounded-lg py-2 font-bold text-sm shadow-sm hover:shadow transition-shadow">Read Now</button>
+                                                    <a href="/horoscope" className="block bg-white border border-amber-200 text-amber-700 w-full rounded-lg py-2 font-bold text-sm shadow-sm hover:shadow transition-shadow">Open Horoscope</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -1014,9 +956,6 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                 </div>
             </div>
 
-            {/* Decorative blobs */}
-            <div className="absolute top-0 right-0 w-1/3 h-1/2 bg-indigo-400/10 blur-[150px] pointer-events-none z-0 rounded-full" />
-            <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-amber-400/20 blur-[150px] pointer-events-none z-0 rounded-full" />
         </div>
     );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Building2, Hospital, User } from "lucide-react";
+import { ArrowRight, Building2, User } from "lucide-react";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -81,7 +81,7 @@ const UserType: React.FC<{
                                 variant="secondary"
                                 className="text-xs absolute top-2 left-2 rounded-sm font-medium text-muted-foreground"
                             >
-                                Coming Soon
+                                Invite Only
                             </Badge>
                         )}
                     </Card>

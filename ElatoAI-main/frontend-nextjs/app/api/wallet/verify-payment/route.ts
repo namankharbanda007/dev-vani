@@ -3,7 +3,7 @@ import { getSupabaseForRouteAuth } from "@/utils/supabase/route-auth";
 
 export async function POST(req: Request) {
     // Note: If verifying webhooks, we'd use a service_role client. 
-    // If the frontend calls this securely after checkout, we can use the user's session.
+    // If the frontend calls this securely after payment, we can use the user's session.
     const { supabase, user } = await getSupabaseForRouteAuth(req);
 
     if (!user) {

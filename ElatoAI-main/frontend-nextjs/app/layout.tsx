@@ -125,7 +125,7 @@ export const metadata: Metadata = {
                 url: absoluteUrl(siteConfig.defaultOgImage),
                 width: 1200,
                 height: 630,
-                alt: `${siteConfig.name} - AI devotional ecosystem`,
+                alt: `${siteConfig.name} - live AI Pandit`,
             },
         ],
     },
@@ -197,7 +197,7 @@ const jsonLd = {
                 "Guided puja",
                 "Vedic astrology",
                 "Bhajans and devotional audio",
-                "Connected home temple products",
+                "Live family puja",
             ],
         },
         {
@@ -224,7 +224,7 @@ const jsonLd = {
             about: [
                 {
                     "@type": "Thing",
-                    name: "AI devotional ecosystem",
+                    name: "Live AI pandit guidance",
                 },
                 {
                     "@type": "Thing",

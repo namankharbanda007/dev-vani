@@ -2,7 +2,7 @@ import { createUser, doesUserExist, getUserById } from "@/db/users";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import Playground from "../components/Playground/PlaygroundComponent";
-import { defaultPersonalityId, defaultToyId, HIDDEN_PERSONALITIES } from "@/lib/data";
+import { defaultPersonalityId, HIDDEN_PERSONALITIES } from "@/lib/data";
 import { getAllPersonalities, getMyPersonalities } from "@/db/personalities";
 
 
@@ -54,26 +54,6 @@ export default async function Home() {
                     </div>
                 );
             }
-
-            return (
-                <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-red-50 text-red-900">
-                    <h1 className="text-2xl font-bold mb-4">Account Creation Failed</h1>
-                    <p className="mb-4">We verified your number, but could not create your profile.</p>
-                    <div className="bg-white p-4 rounded shadow font-mono text-sm border border-red-200 mb-6 max-w-lg overflow-auto">
-                        {result.error}
-                    </div>
-                    <form action={async () => {
-                        "use server";
-                        const sb = createClient();
-                        await sb.auth.signOut();
-                        redirect("/login");
-                    }}>
-                        <button className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">
-                            Sign Out & Try Again
-                        </button>
-                    </form>
-                </div>
-            );
         }
     }
 

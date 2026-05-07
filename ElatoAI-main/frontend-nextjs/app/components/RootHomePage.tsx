@@ -400,7 +400,6 @@ function ConversionStorySection({ isLoggedIn }: { isLoggedIn: boolean }) {
                     </div>
 
                     <div className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#F5E8CF] via-[#FFF8EF] to-white p-6">
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(200,107,31,0.22),transparent_45%)]" />
                         <div className="relative">
                             <Image
                                 src="/products/family-namaste.jpg"
@@ -547,9 +546,6 @@ function TrustSection() {
             className="w-full overflow-hidden bg-gradient-to-br from-[#3A2316] via-[#512A73] to-[#22160E] py-16 md:py-24"
         >
             <div className="container relative mx-auto max-w-screen-xl px-4 md:px-6">
-                <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-purple-500/20 blur-3xl" />
-                <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-amber-500/15 blur-3xl" />
-
                 <div className="relative z-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
                     <div>
                         <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-amber-300">

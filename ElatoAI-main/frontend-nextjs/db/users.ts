@@ -6,13 +6,6 @@ export const createUser = async (
     user: User,
     userProps: Partial<IUser>,
 ) => {
-    console.log("=== CREATING USER ===");
-    console.log("User ID:", user.id);
-    console.log("User Email:", user.email);
-    console.log("User Phone:", user.phone);
-    console.log("User Metadata:", JSON.stringify(user.user_metadata, null, 2));
-    console.log("User Props:", JSON.stringify(userProps, null, 2));
-
     // Use email if available, otherwise use phone number for phone-only authentication
     const identifier = user.email ?? (user.phone ? `${user.phone}@phone.com` : "") ?? "";
 
@@ -33,12 +26,8 @@ export const createUser = async (
             user_type: "user",
             user_metadata: {}
         },
-        avatar_url: user.user_metadata?.avatar_url ??
-            `/user_avatar/user_avatar_${Math.floor(Math.random() * 10)
-            }.png`,
+        avatar_url: user.user_metadata?.avatar_url ?? "/logos/smartmurti-icon.jpg",
     };
-
-    console.log("Attempting to insert user:", JSON.stringify(userToInsert, null, 2));
 
     // Try to use service role client to bypass RLS, fallback to regular client if not available
     let clientToUse = supabase;
@@ -46,18 +35,14 @@ export const createUser = async (
         if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
             const serviceClient = createServiceClient();
             clientToUse = serviceClient;
-            console.log("Using service role client for user creation");
-        } else {
-            console.log("Service role key not found, using regular client");
         }
     } catch (e) {
-        console.log("Could not create service client, using regular client:", e);
+        // Fall back to the request-scoped client when service role is unavailable.
     }
 
-    const { data, error } = await clientToUse.from("users").insert([userToInsert as IUser]);
+    const { error } = await clientToUse.from("users").insert([userToInsert as IUser]);
 
     if (error) {
-        console.error("=== DATABASE ERROR ===");
         console.error("Error Message:", error.message);
         console.error("Error Details:", error.details);
         console.error("Error Hint:", error.hint);
@@ -70,8 +55,6 @@ export const createUser = async (
         };
     }
 
-    console.log("=== USER CREATED SUCCESSFULLY ===");
-    console.log("Inserted data:", data);
     return { success: true };
 };
 

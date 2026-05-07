@@ -16,7 +16,6 @@ export function Navbar({
     const isMobile = useMediaQuery("(max-width: 768px)");
     const pathname = usePathname();
     const isHome = pathname.includes("/home") || pathname.includes("/bhajan");
-    const isProduct = usePathname().includes("/products");
 
     if (pathname === "/landing") return null;
 
