@@ -63,7 +63,7 @@ const urgencyCards = [
 
 const comparisonPoints = [
     "Instant access, without waiting for local pandit availability or timezone coordination.",
-    "Far more affordable than fragmented live consultations and per-minute apps.",
+    "Clear NRI launch packages instead of confusing paid-call math.",
     "Interactive and personal, unlike passive YouTube streams or temple recordings.",
     "Built for family participation, so one devotee can start and everyone can join later.",
 ];
@@ -84,14 +84,14 @@ const specialistCards = [
         accent: "bg-purple-100 text-purple-700",
     },
     {
-        title: "Relationship & Love",
+        title: "Family Harmony",
         description:
             "Ask for calm spiritual guidance around marriage, love, compatibility, and family tension.",
         icon: HeartHandshake,
         accent: "bg-rose-100 text-rose-700",
     },
     {
-        title: "Money & Direction",
+        title: "Prosperity & Direction",
         description:
             "Get grounded guidance for money stress, work confusion, and major personal decisions.",
         icon: Sparkles,
@@ -330,7 +330,7 @@ function ConversionStorySection({ isLoggedIn }: { isLoggedIn: boolean }) {
                     <p className="mx-auto max-w-3xl text-lg leading-relaxed text-[#4D3C2E] md:text-xl">
                         Smart Murti gives families a live multilingual AI pandit for urgent spiritual
                         guidance, calm devotional support, and family rituals without waiting on local
-                        temple availability or expensive per-minute services.
+                        temple availability or fragmented paid consultations.
                     </p>
                     <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                         <Link
@@ -344,7 +344,7 @@ function ConversionStorySection({ isLoggedIn }: { isLoggedIn: boolean }) {
                             href="#demo"
                             className="inline-flex items-center justify-center rounded-full border border-[#DDCCB7] bg-white/80 px-8 py-4 text-base font-semibold text-[#241A14] transition hover:border-[#CDB28E] hover:bg-white"
                         >
-                            See live demo
+                            Preview flow
                         </a>
                     </div>
                     <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm font-medium text-gray-700">
@@ -355,7 +355,7 @@ function ConversionStorySection({ isLoggedIn }: { isLoggedIn: boolean }) {
                             Family can join from anywhere
                         </span>
                         <span className="rounded-full bg-[#E8EFE2] px-4 py-2 text-[#476340]">
-                            Affordable alternative to per-minute apps
+                            Clear USD launch packages
                         </span>
                     </div>
                 </div>
@@ -663,7 +663,7 @@ function FinalCtaSection({ isLoggedIn }: { isLoggedIn: boolean }) {
                 </h2>
                 <p className="mx-auto mb-8 max-w-3xl text-lg leading-relaxed text-white/75">
                     Start with guidance now. Bring your family in later when you need a full live
-                    puja. One clear front door, one calm spiritual companion.
+                    puja. One clear front door, one calm spiritual guide.
                 </p>
                 <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                     <Link
@@ -677,7 +677,7 @@ function FinalCtaSection({ isLoggedIn }: { isLoggedIn: boolean }) {
                         href="#demo"
                         className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-8 py-4 text-base font-semibold text-white transition hover:bg-white/10"
                     >
-                        Watch the demo
+                        Preview the flow
                     </a>
                 </div>
             </div>

@@ -15,7 +15,7 @@ export default function LeftNavbarButtons({ user }: LeftNavbarButtonsProps) {
                 aria-label="Go to home page"
                 title="Click to go to home page"
             >
-                <Link href={user ? "/home" : "/landing-2"}>
+                <Link href={user ? "/home" : "/"}>
                     <p className="flex items-center font-luckiestGuy text-2xl tracking-widest">
                         <span>SMART मूर्ति</span>
                     </p>

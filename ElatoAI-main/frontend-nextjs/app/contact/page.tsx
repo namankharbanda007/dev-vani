@@ -35,7 +35,7 @@ export default function ContactPage() {
                     body: (
                         <>
                             <p>Company Name: Smartmurti AI Private Limited</p>
-                            <p>Registered office address: will be published shortly.</p>
+                            <p>Remote-first support: Smart Murti serves NRI families through email, WhatsApp, and scheduled digital sessions across time zones.</p>
                         </>
                     ),
                 },

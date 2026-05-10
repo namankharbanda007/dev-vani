@@ -20,7 +20,7 @@ export default function Marquee() {
                             key={i}
                             className="text-6xl md:text-8xl font-serif font-bold text-murti-stone opacity-10 tracking-widest uppercase"
                         >
-                            LIVE PANDIT • ASTROLOGY • TAROT READING • VIRTUAL HAWAN • DAILY HOROSCOPE • BHAJANS • MATCH MAKING •
+                            SMART PANDIT • LIVE FAMILY PUJA • AI ASTROLOGER • DAILY HOROSCOPE • BHAJANS • NRI LAUNCH PACKAGES •
                         </span>
                     ))}
                 </motion.div>

@@ -26,11 +26,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
         }
 
-        // --- MOCK PAYMENT GATEWAY VERIFICATION ---
-        console.log(`Verifying MOCK Payment for ${user.id} - Order: ${orderId}, Amount: ₹${amount}`);
+        console.log(`Verifying test wallet payment for ${user.id} - Order: ${orderId}, Amount: $${amount}`);
 
-        // In reality, verify the Razorpay signature or Stripe Webhook secret here
-        const isSignatureValid = true; // Always true for mock
+        // Replace this with provider signature verification before enabling public production checkout.
+        const isSignatureValid = true;
 
         if (!isSignatureValid) {
             return NextResponse.json({ error: "Invalid Signature" }, { status: 400 });

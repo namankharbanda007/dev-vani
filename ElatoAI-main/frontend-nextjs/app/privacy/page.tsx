@@ -122,7 +122,7 @@ export default function PrivacyPage() {
                     body: (
                         <>
                             <p>Email: <a className="text-amber-700 underline underline-offset-4" href="mailto:support@smartmurti.com">support@smartmurti.com</a></p>
-                            <p>Registered office address: will be published shortly.</p>
+                            <p>Remote-first support: Smart Murti serves NRI families through email, WhatsApp, and scheduled digital sessions across time zones.</p>
                         </>
                     ),
                 },

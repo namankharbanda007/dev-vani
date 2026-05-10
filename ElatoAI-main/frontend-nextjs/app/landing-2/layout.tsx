@@ -1,15 +1,11 @@
 import { buildMetadata } from "@/app/lib/seo";
 
 export const metadata = buildMetadata({
-    title: "Smart Murti Demo Experience",
+    title: "Smart Murti",
     description:
-        "Discover SMART Murti's alternate landing experience for AI-powered devotional guidance, astrology, and daily spiritual rituals.",
+        "Redirecting to the main SMART Murti experience for AI Pandit guidance and live family puja.",
     path: "/landing-2",
-    keywords: [
-        "smart murti demo",
-        "ai pandit demo",
-        "spiritual ai demo",
-    ],
+    noIndex: true,
 });
 
 export default function LandingLayout({

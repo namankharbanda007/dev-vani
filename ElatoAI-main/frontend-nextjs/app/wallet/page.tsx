@@ -3,8 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { formatUsd, nriLaunchPackages } from "@/app/lib/pricing";
 
-const WALLET_TIERS = [101, 251, 501, 1000];
+const WALLET_TIERS = nriLaunchPackages.map((item) => ({
+    amount: item.price,
+    label: item.name,
+}));
 
 export default function WalletPage() {
     const router = useRouter();
@@ -13,7 +17,7 @@ export default function WalletPage() {
     const [balance, setBalance] = useState<number>(0);
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
-    const [selectedAmount, setSelectedAmount] = useState<number>(101);
+    const [selectedAmount, setSelectedAmount] = useState<number>(11);
     const [customAmount, setCustomAmount] = useState<string>("");
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -87,7 +91,7 @@ export default function WalletPage() {
 
             setBalance(Number(verifyData.newBalance));
             setCustomAmount("");
-            setMessage({ type: "success", text: `Wallet recharged with Rs ${amountToRecharge}.` });
+            setMessage({ type: "success", text: `Wallet credited with ${formatUsd(amountToRecharge)}.` });
         } catch (error) {
             setMessage({
                 type: "error",
@@ -108,58 +112,67 @@ export default function WalletPage() {
 
     return (
         <div className="min-h-screen bg-[#FBF5EA] px-4 py-12 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-md overflow-hidden rounded-3xl border border-[#E8D6B8] bg-[#FFFDF8] p-8 shadow-xl">
+            <div className="mx-auto max-w-3xl overflow-hidden rounded-lg border border-[#E8D6B8] bg-[#FFFDF8] p-8 shadow-xl">
                 <div className="mb-8 text-center">
-                    <h1 className="mb-2 text-2xl font-bold text-[#1F1711]">Smart Murti Wallet</h1>
-                    <p className="mb-6 text-sm text-[#6A4A2C]">Prepaid balance for Smart Pandit sessions</p>
+                    <p className="mb-2 text-sm font-semibold uppercase tracking-[0.22em] text-[#A85F18]">
+                        USD launch packages
+                    </p>
+                    <h1 className="mb-2 text-3xl font-bold text-[#1F1711]">Smart Murti Wallet</h1>
+                    <p className="mx-auto mb-6 max-w-xl text-sm leading-6 text-[#6A4A2C]">
+                        Your balance is used behind the scenes for Smart Pandit sessions, live family puja,
+                        and ritual requests. NRI customers see clear USD packages first.
+                    </p>
 
-                    <div className="rounded-2xl bg-gradient-to-r from-[#C86B1F] to-[#8f5d23] p-6 text-white shadow-lg">
+                    <div className="rounded-lg bg-gradient-to-r from-[#C86B1F] to-[#8f5d23] p-6 text-white shadow-lg">
                         <p className="mb-1 text-sm font-semibold uppercase tracking-wider opacity-90">Current Balance</p>
-                        <p className="text-5xl font-bold">Rs {balance.toLocaleString("en-IN")}</p>
+                        <p className="text-5xl font-bold">{formatUsd(balance)}</p>
                     </div>
                 </div>
 
                 <div className="mb-6">
-                    <h2 className="mb-4 text-lg font-semibold text-[#1F1711]">Recharge Wallet</h2>
+                    <h2 className="mb-4 text-lg font-semibold text-[#1F1711]">Choose a launch package</h2>
 
-                    <div className="mb-4 grid grid-cols-2 gap-3">
+                    <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         {WALLET_TIERS.map((tier) => (
                             <button
-                                key={tier}
+                                key={tier.amount}
                                 type="button"
                                 onClick={() => {
-                                    setSelectedAmount(tier);
+                                    setSelectedAmount(tier.amount);
                                     setCustomAmount("");
                                 }}
-                                className={`rounded-xl border-2 px-4 py-3 font-semibold transition-all ${
-                                    selectedAmount === tier && !customAmount
+                                className={`rounded-lg border-2 px-4 py-3 text-left font-semibold transition-all ${
+                                    selectedAmount === tier.amount && !customAmount
                                         ? "border-[#C86B1F] bg-orange-50 text-[#8f5d23] shadow-sm"
                                         : "border-[#E8D6B8] text-[#6A4A2C] hover:border-[#C86B1F]/40 hover:bg-orange-50/50"
                                 }`}
                             >
-                                Rs {tier}
+                                <span className="block text-lg">{formatUsd(tier.amount)}</span>
+                                <span className="mt-1 block text-xs font-medium text-[#8a7763]">{tier.label}</span>
                             </button>
                         ))}
                     </div>
 
                     <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-[#6A4A2C]">Rs</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-[#6A4A2C]">$</span>
                         <input
                             type="number"
-                            placeholder="Enter custom amount"
+                            min="1"
+                            step="1"
+                            placeholder="Custom USD amount"
                             value={customAmount}
                             onChange={(e) => {
                                 setCustomAmount(e.target.value);
                                 setSelectedAmount(0);
                             }}
-                            className="w-full rounded-xl border-2 border-[#E8D6B8] py-3 pl-12 pr-4 font-medium text-[#1F1711] outline-none transition-colors focus:border-[#C86B1F]"
+                            className="w-full rounded-lg border-2 border-[#E8D6B8] py-3 pl-10 pr-4 font-medium text-[#1F1711] outline-none transition-colors focus:border-[#C86B1F]"
                         />
                     </div>
                 </div>
 
                 {message ? (
                     <div
-                        className={`mb-4 rounded-xl border px-4 py-3 text-sm font-medium ${
+                        className={`mb-4 rounded-lg border px-4 py-3 text-sm font-medium ${
                             message.type === "success"
                                 ? "border-green-200 bg-green-50 text-green-700"
                                 : "border-red-200 bg-red-50 text-red-700"
@@ -173,13 +186,13 @@ export default function WalletPage() {
                     type="button"
                     onClick={handleTopUp}
                     disabled={processing || (!selectedAmount && !customAmount)}
-                    className="w-full rounded-xl bg-[#1F1711] py-4 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70 disabled:hover:translate-y-0"
+                    className="w-full rounded-lg bg-[#1F1711] py-4 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                    {processing ? "Processing..." : `Recharge Rs ${customAmount || selectedAmount}`}
+                    {processing ? "Processing..." : `Credit ${formatUsd(Number(customAmount || selectedAmount))}`}
                 </button>
 
                 <p className="mt-4 text-center text-xs text-[#8a7763]">
-                    Payments must be verified before balance updates. If online recharge is unavailable, contact support.
+                    Online recharge is guarded until payment verification is live. If checkout is unavailable, contact support for a manual package link.
                 </p>
             </div>
         </div>

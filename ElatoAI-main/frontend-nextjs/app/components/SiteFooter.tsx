@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MapPin, ShieldCheck, Sparkles } from "lucide-react";
+import { Globe2, Mail, ShieldCheck, Sparkles } from "lucide-react";
 
 type SiteFooterProps = {
     variant?: "light" | "dark";
@@ -15,9 +15,13 @@ const legalLinks = [
 
 const productLinks = [
     { href: "/pandit", label: "Smart Pandit" },
+    { href: "/pandit?ritual=ganpati-havan", label: "Live Family Puja" },
     { href: "/astrologer", label: "Astrologer" },
     { href: "/pricing", label: "Pricing" },
-    { href: "/home", label: "Dashboard" },
+    {
+        href: "https://wa.me/917982251998?text=Namaste%20Smart%20Murti%2C%20I%20want%20to%20try%20Smart%20Pandit.",
+        label: "WhatsApp",
+    },
 ];
 
 export default function SiteFooter({ variant = "light" }: SiteFooterProps) {
@@ -44,11 +48,11 @@ export default function SiteFooter({ variant = "light" }: SiteFooterProps) {
                         </div>
 
                         <p className={`max-w-xl text-base leading-7 ${isDark ? "text-white/70" : "text-[#5b4837]"}`}>
-                            Smartmurti AI Private Limited helps Hindu families access live multilingual AI pandit guidance, family puja, and spiritual support from anywhere in the world.
+                            Smartmurti AI Private Limited helps Hindu families access live multilingual AI Pandit guidance, family puja, and spiritual support from anywhere in the world.
                         </p>
 
                         <div className="grid gap-3 sm:grid-cols-2">
-                            <div className={`rounded-2xl border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-[#eadfcf] bg-white/80"}`}>
+                            <div className={`rounded-lg border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-[#eadfcf] bg-white/80"}`}>
                                 <div className="flex items-center gap-2">
                                     <Mail className={`h-4 w-4 ${isDark ? "text-amber-300" : "text-amber-700"}`} />
                                     <span className="text-sm font-semibold">Support</span>
@@ -61,13 +65,13 @@ export default function SiteFooter({ variant = "light" }: SiteFooterProps) {
                                 </a>
                             </div>
 
-                            <div className={`rounded-2xl border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-[#eadfcf] bg-white/80"}`}>
+                            <div className={`rounded-lg border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-[#eadfcf] bg-white/80"}`}>
                                 <div className="flex items-center gap-2">
-                                    <MapPin className={`h-4 w-4 ${isDark ? "text-amber-300" : "text-amber-700"}`} />
-                                    <span className="text-sm font-semibold">Registered Office</span>
+                                    <Globe2 className={`h-4 w-4 ${isDark ? "text-amber-300" : "text-amber-700"}`} />
+                                    <span className="text-sm font-semibold">Remote-first support</span>
                                 </div>
                                 <p className={`mt-2 text-sm leading-6 ${isDark ? "text-white/65" : "text-[#6a5542]"}`}>
-                                    Address will be published shortly.
+                                    Serving NRI families across time zones through email, WhatsApp, and live digital sessions.
                                 </p>
                             </div>
                         </div>
@@ -83,6 +87,8 @@ export default function SiteFooter({ variant = "light" }: SiteFooterProps) {
                                     key={link.href}
                                     href={link.href}
                                     className={`block text-sm transition ${isDark ? "text-white/70 hover:text-white" : "text-[#5a4632] hover:text-[#20130b]"}`}
+                                    target={link.href.startsWith("http") ? "_blank" : undefined}
+                                    rel={link.href.startsWith("http") ? "noreferrer" : undefined}
                                 >
                                     {link.label}
                                 </Link>

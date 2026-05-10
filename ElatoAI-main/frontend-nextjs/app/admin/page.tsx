@@ -57,7 +57,7 @@ function formatDate(value?: string | null) {
 
 function money(value: number | string | null | undefined) {
     const amount = Number(value || 0);
-    return `Rs ${amount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+    return `$${amount.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 }
 
 async function loadUsers(service: ReturnType<typeof createServiceClient>) {

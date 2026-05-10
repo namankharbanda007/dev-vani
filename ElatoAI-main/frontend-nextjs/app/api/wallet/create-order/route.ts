@@ -23,11 +23,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
         }
 
-        // --- MOCK PAYMENT GATEWAY ORDER CREATION ---
-        console.log(`Creating MOCK Payment Order for ${user.id} - Amount: ₹${amount}`);
+        console.log(`Creating test wallet order for ${user.id} - Amount: $${amount}`);
 
-        // In a real app with Razorpay/Stripe, you would call their API here to generate an order ID
-        // const order = await razorpay.orders.create({ amount: amount * 100, currency: "INR" });
+        // Replace this with a verified payment provider order before enabling public production checkout.
 
         const mockOrderId = `order_mock_${Date.now()}`;
 
@@ -35,8 +33,8 @@ export async function POST(req: Request) {
             success: true,
             orderId: mockOrderId,
             amount: amount,
-            currency: "INR",
-            key: "mock_gateway_key_123" // The public key for your frontend SDK
+            currency: "USD",
+            key: "test_gateway_key"
         });
 
     } catch (error) {

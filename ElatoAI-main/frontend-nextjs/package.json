@@ -7,6 +7,7 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
+        "test:story": "node scripts/verify-smartmurti-story.mjs",
         "update-types": "npx supabase gen types typescript --project-id \"<project-id>\" > db/supabase.ts"
     },
     "dependencies": {

@@ -101,7 +101,7 @@ export const aiReferencePages = [
         path: "/pricing",
         title: "Pricing",
         description:
-            "Prepaid wallet pricing for SMART Murti spiritual guidance, live calls, and devotional experiences.",
+            "NRI launch packages for SMART Murti AI Pandit guidance, digital puja, live family puja, and premium havan.",
     },
     {
         path: "/privacy",
@@ -137,7 +137,6 @@ export const aiReferencePages = [
 
 export const sitemapEntries = [
     { path: "/", changeFrequency: "weekly", priority: 1 },
-    { path: "/landing-2", changeFrequency: "weekly", priority: 0.92 },
     { path: "/pricing", changeFrequency: "weekly", priority: 0.82 },
     { path: "/pandit", changeFrequency: "weekly", priority: 0.8 },
     { path: "/astrologer", changeFrequency: "weekly", priority: 0.8 },

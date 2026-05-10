@@ -8,7 +8,7 @@ import { buildMetadata } from "@/app/lib/seo";
 export const metadata = buildMetadata({
     title: "AI Astrologer",
     description:
-        "Talk to SMART Murti's AI astrologer for spiritual guidance, horoscope support, and personalized astrology conversations.",
+        "Talk to SMART Murti's real-time AI astrologer for horoscope support, birth-chart context, and NRI family guidance.",
     path: "/astrologer",
     keywords: [
         "ai astrologer",
@@ -46,7 +46,7 @@ export default async function AstrologerCallPage() {
     }
 
     return (
-        <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-900 flex items-center justify-center text-white font-lora text-xl">Connecting to the Stars...</div>}>
+        <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#fffaf2] font-lora text-xl text-[#20130b]">Preparing astrology room...</div>}>
             <ClientPage userProfile={userProfile} />
         </Suspense>
     );

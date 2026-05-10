@@ -1,146 +1,155 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, Share2, Briefcase, Heart, MessageCircle, Phone, Loader2, DollarSign, Activity, Plane, Home, RefreshCw } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
+import {
+    Activity,
+    Briefcase,
+    ChevronLeft,
+    DollarSign,
+    Heart,
+    Home,
+    Loader2,
+    MessageCircle,
+    Phone,
+    Plane,
+    RefreshCw,
+    Share2,
+} from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
 import { getSunSign } from "@/lib/astrology";
 
-// Zodiac Data Helper (Centralized)
-// We could move this to a shared constant file too
 const zodiacSigns = [
-    { name: "Aries", index: "01", symbol: "♈" },
-    { name: "Taurus", index: "02", symbol: "♉" },
-    { name: "Gemini", index: "03", symbol: "♊" },
-    { name: "Cancer", index: "04", symbol: "♋" },
-    { name: "Leo", index: "05", symbol: "♌" },
-    { name: "Virgo", index: "06", symbol: "♍" },
-    { name: "Libra", index: "07", symbol: "♎" },
-    { name: "Scorpio", index: "08", symbol: "♏" },
-    { name: "Sagittarius", index: "09", symbol: "♐" },
-    { name: "Capricorn", index: "10", symbol: "♑" },
-    { name: "Aquarius", index: "11", symbol: "♒" },
-    { name: "Pisces", index: "12", symbol: "♓" },
-];
+    { name: "Aries", index: "01", symbol: "Ar" },
+    { name: "Taurus", index: "02", symbol: "Ta" },
+    { name: "Gemini", index: "03", symbol: "Ge" },
+    { name: "Cancer", index: "04", symbol: "Ca" },
+    { name: "Leo", index: "05", symbol: "Le" },
+    { name: "Virgo", index: "06", symbol: "Vi" },
+    { name: "Libra", index: "07", symbol: "Li" },
+    { name: "Scorpio", index: "08", symbol: "Sc" },
+    { name: "Sagittarius", index: "09", symbol: "Sa" },
+    { name: "Capricorn", index: "10", symbol: "Cp" },
+    { name: "Aquarius", index: "11", symbol: "Aq" },
+    { name: "Pisces", index: "12", symbol: "Pi" },
+] as const;
+
+const aspectCards = [
+    { key: "love", label: "Family Harmony", icon: Heart, tone: "bg-rose-50 text-rose-600" },
+    { key: "career", label: "Work Direction", icon: Briefcase, tone: "bg-orange-50 text-orange-600" },
+    { key: "money", label: "Prosperity", icon: DollarSign, tone: "bg-emerald-50 text-emerald-600" },
+    { key: "health", label: "Wellbeing", icon: Activity, tone: "bg-teal-50 text-teal-600" },
+    { key: "travel", label: "Travel", icon: Plane, tone: "bg-blue-50 text-blue-600" },
+] as const;
+
+type ZodiacSign = (typeof zodiacSigns)[number];
+
+function fallbackText(signName: string) {
+    return `Select a sign to see guidance for ${signName}. For deeper questions, continue with the Astrologer or Smart Pandit.`;
+}
+
+function scoreLabel(value: unknown) {
+    return typeof value === "number" ? `${value}%` : "Guidance";
+}
 
 function HoroscopeContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
 
-    // URL State
-    const signParam = searchParams.get('sign');
-    const dateParam = searchParams.get('date') || 'Today';
+    const signParam = searchParams.get("sign");
+    const dateParam = searchParams.get("date") || "Today";
 
-    const [activeSign, setActiveSign] = useState(zodiacSigns[0]);
-
+    const [activeSign, setActiveSign] = useState<ZodiacSign>(zodiacSigns[0]);
     const [horoscopeData, setHoroscopeData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [userSign, setUserSign] = useState<string | null>(null);
 
-    // Sync State with URL
     useEffect(() => {
         if (signParam) {
-            const found = zodiacSigns.find(z => z.name === signParam);
+            const found = zodiacSigns.find((zodiac) => zodiac.name === signParam);
             if (found) setActiveSign(found);
+            return;
         }
-    }, [signParam]);
 
-    // Initial User Fetch (to set default sign if URL is empty)
-    useEffect(() => {
-        const fetchUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data: dbUser } = await supabase
-                    .from("users")
-                    .select("user_info")
-                    .eq("user_id", user.id)
-                    .single();
+        const fetchUserSign = async () => {
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
 
-                if (dbUser) {
-                    const metadata = (dbUser.user_info as any)?.user_metadata || {};
-                    const birthDate = metadata.birth_date ? new Date(metadata.birth_date) : new Date("2000-03-21");
-                    const mySign = getSunSign(birthDate).name;
-                    setUserSign(mySign);
+            if (!user) return;
 
-                    // If no sign in URL, set it to user's sign
-                    if (!signParam) {
-                        router.replace(`/horoscope?sign=${mySign}&date=${dateParam}`);
-                    }
-                }
-            }
+            const { data: dbUser } = await supabase
+                .from("users")
+                .select("user_info")
+                .eq("user_id", user.id)
+                .single();
+
+            const metadata = (dbUser?.user_info as any)?.user_metadata || {};
+            if (!metadata.birth_date) return;
+
+            const mySign = getSunSign(new Date(metadata.birth_date)).name;
+            router.replace(`/horoscope?sign=${encodeURIComponent(mySign)}&date=${encodeURIComponent(dateParam)}`);
         };
-        fetchUser();
-    }, [supabase, router, signParam, dateParam]);
 
-    // Fetch Horoscope
+        fetchUserSign();
+    }, [dateParam, router, signParam, supabase]);
+
     useEffect(() => {
         const fetchHoroscope = async () => {
             setLoading(true);
             setError(null);
+
             try {
-                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                const params = new URLSearchParams();
-                params.append('sign', activeSign.name);
-                params.append('date', dateParam);
-                params.append('timezone', tz);
+                const params = new URLSearchParams({
+                    sign: activeSign.name,
+                    date: dateParam,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                });
 
                 const res = await fetch(`/api/horoscope/daily?${params.toString()}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setHoroscopeData(data);
-                } else {
-                    const errorText = await res.text();
-                    let errorMessage = "Failed to fetch horoscope";
-                    try {
-                        const errorJson = JSON.parse(errorText);
-                        errorMessage = errorJson.error || errorJson.details || errorMessage;
-                    } catch (e) {
-                        // erratic response
-                    }
-                    throw new Error(errorMessage);
+                if (!res.ok) {
+                    const payload = await res.json().catch(() => null);
+                    throw new Error(payload?.error || payload?.details || "Unable to load horoscope.");
                 }
-            } catch (error: any) {
-                console.error(error);
-                setError(error.message || "Unable to connect to the stars. Please try again.");
+
+                setHoroscopeData(await res.json());
+            } catch (err) {
+                console.error(err);
+                setError(err instanceof Error ? err.message : "Unable to load horoscope.");
             } finally {
                 setLoading(false);
             }
         };
 
-        // Only fetch if we have a valid active sign
-        if (activeSign) {
-            fetchHoroscope();
-        }
-    }, [activeSign, dateParam]);
+        fetchHoroscope();
+    }, [activeSign.name, dateParam]);
 
-    const handleSignChange = (sign: typeof zodiacSigns[0]) => {
+    const handleSignChange = (sign: ZodiacSign) => {
         setActiveSign(sign);
-        router.push(`/horoscope?sign=${sign.name}&date=${dateParam}`);
+        router.push(`/horoscope?sign=${encodeURIComponent(sign.name)}&date=${encodeURIComponent(dateParam)}`);
     };
 
     const handleTabChange = (tab: string) => {
-        router.push(`/horoscope?sign=${activeSign.name}&date=${tab}`);
+        router.push(`/horoscope?sign=${encodeURIComponent(activeSign.name)}&date=${encodeURIComponent(tab)}`);
     };
 
     const handleShare = async () => {
+        const text = `Daily Horoscope on Smart Murti\nSign: ${activeSign.name}\nLucky Number: ${horoscopeData?.lucky_number || "pending"}`;
+
         if (navigator.share) {
             try {
                 await navigator.share({
                     title: `Daily Horoscope for ${activeSign.name}`,
-                    text: `My Lucky Number today is ${horoscopeData?.lucky_number}! ✨ Check yours on Smart Murti.`,
+                    text,
                     url: window.location.href,
                 });
-            } catch (err) {
-                console.log('Share canceled');
+            } catch {
+                return;
             }
         } else {
-            // Fallback
-            const text = `Check out my daily horoscope! ✨\nSign: ${activeSign.name}\nLucky Number: ${horoscopeData?.lucky_number}`;
-            const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-            window.open(url, '_blank');
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
         }
     };
 
@@ -148,27 +157,29 @@ function HoroscopeContent() {
         if (window.history.length > 2) {
             router.back();
         } else {
-            router.push('/home');
+            router.push("/home");
         }
     };
 
     const displayDate = new Date().toLocaleDateString("en-GB", {
-        day: 'numeric', month: 'short', year: 'numeric'
+        day: "numeric",
+        month: "short",
+        year: "numeric",
     });
 
     if (error) {
         return (
-            <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-6 text-center space-y-4">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-2">
-                    <Activity className="w-8 h-8 text-red-500" />
+            <div className="flex min-h-screen flex-col items-center justify-center space-y-4 bg-[#fffaf2] p-6 text-center">
+                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-lg bg-red-100">
+                    <Activity className="h-8 w-8 text-red-500" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Cosmic Connection Interrupted</h2>
-                <p className="text-gray-500 max-w-xs">{error}</p>
+                <h2 className="text-xl font-bold text-gray-900">Horoscope could not load</h2>
+                <p className="max-w-xs text-gray-600">{error}</p>
                 <button
                     onClick={() => window.location.reload()}
-                    className="px-6 py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                    className="flex items-center gap-2 rounded-lg bg-black px-6 py-2 font-medium text-white transition-colors hover:bg-gray-800"
                 >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className="h-4 w-4" />
                     Retry
                 </button>
             </div>
@@ -176,108 +187,73 @@ function HoroscopeContent() {
     }
 
     return (
-        <div className="min-h-screen bg-neutral-50 pb-28">
-            {/* 1. Top Navigation */}
-            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-                <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto w-full">
+        <div className="min-h-screen bg-[#fffaf2] pb-28">
+            <header className="sticky top-0 z-50 border-b border-amber-100 bg-white/85 backdrop-blur-md">
+                <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-2">
-                        <button onClick={handleBack} className="p-2 -ml-2 hover:bg-gray-100 rounded-full" aria-label="Go Back">
-                            <ChevronLeft className="w-6 h-6 text-gray-800" />
+                        <button onClick={handleBack} className="-ml-2 rounded-lg p-2 hover:bg-amber-50" aria-label="Go back">
+                            <ChevronLeft className="h-6 w-6 text-gray-800" />
                         </button>
-                        <button onClick={() => router.push('/home')} className="p-2 hover:bg-gray-100 rounded-full" aria-label="Go Home">
-                            <Home className="w-5 h-5 text-gray-800" />
+                        <button onClick={() => router.push("/home")} className="rounded-lg p-2 hover:bg-amber-50" aria-label="Go home">
+                            <Home className="h-5 w-5 text-gray-800" />
                         </button>
                     </div>
 
-                    <h1 className="text-lg font-semibold text-gray-900">Daily Horoscope</h1>
+                    <div className="text-center">
+                        <h1 className="text-lg font-semibold text-gray-900">Daily Horoscope</h1>
+                        <p className="text-xs text-gray-500">Select a sign to see guidance</p>
+                    </div>
 
-                    <button onClick={handleShare} className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-medium hover:bg-green-100 transition-colors" aria-label="Share Horoscope">
-                        <Share2 className="w-4 h-4" />
+                    <button
+                        onClick={handleShare}
+                        className="flex items-center gap-1.5 rounded-lg bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition-colors hover:bg-green-100"
+                        aria-label="Share horoscope"
+                    >
+                        <Share2 className="h-4 w-4" />
                         Share
                     </button>
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-4 pb-8 space-y-8 pt-6">
-
-                {/* 2. Zodiac Selector (Grid on Desktop, Scroll on Mobile) */}
-                <div className="relative">
-                    {/* Mobile Scroll */}
-                    <div className="flex md:hidden overflow-x-auto gap-4 pb-4 no-scrollbar items-center">
-                        {zodiacSigns.map((sign) => {
-                            const isActive = activeSign.name === sign.name;
-                            return (
-                                <button
-                                    key={sign.name}
-                                    onClick={() => handleSignChange(sign)}
-                                    className="flex flex-col items-center gap-2 min-w-[64px] group"
-                                    aria-pressed={isActive}
-                                    aria-label={`Select ${sign.name}`}
-                                >
-                                    <div className={`
-                                        relative w-16 h-16 rounded-full p-1 transition-all duration-300
-                                        ${isActive ? 'bg-[#FFD700] scale-110 shadow-lg' : 'bg-transparent group-active:scale-95'}
-                                    `}>
-                                        <div className="w-full h-full rounded-full overflow-hidden bg-gray-200 relative border border-gray-100">
-                                            <Image
-                                                src={`/assets/horoscope-${sign.index}.webp`}
-                                                alt={sign.name}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        </div>
-                                    </div>
-                                    <span className={`text-xs font-medium ${isActive ? 'text-black' : 'text-gray-500'}`}>
-                                        {sign.name}
-                                    </span>
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    {/* Desktop Grid */}
-                    <div className="hidden md:grid grid-cols-6 lg:grid-cols-12 gap-4">
-                        {zodiacSigns.map((sign) => {
-                            const isActive = activeSign.name === sign.name;
-                            return (
-                                <button
-                                    key={sign.name}
-                                    onClick={() => handleSignChange(sign)}
-                                    className={`
-                                        flex flex-col items-center gap-2 p-2 rounded-xl transition-all duration-200
-                                        ${isActive ? 'bg-white shadow-md ring-2 ring-[#FFD700]' : 'hover:bg-gray-100'}
-                                    `}
-                                    aria-pressed={isActive}
-                                >
-                                    <div className="relative w-12 h-12 rounded-full overflow-hidden">
-                                        <Image
-                                            src={`/assets/horoscope-${sign.index}.webp`}
-                                            alt={sign.name}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                    <span className={`text-xs font-medium ${isActive ? 'text-black' : 'text-gray-500'}`}>
-                                        {sign.name}
-                                    </span>
-                                </button>
-                            );
-                        })}
-                    </div>
+            <main className="mx-auto max-w-7xl space-y-8 px-4 pb-8 pt-6">
+                <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-12">
+                    {zodiacSigns.map((sign) => {
+                        const isActive = activeSign.name === sign.name;
+                        return (
+                            <button
+                                key={sign.name}
+                                onClick={() => handleSignChange(sign)}
+                                className={`flex flex-col items-center gap-2 rounded-lg p-2 transition ${
+                                    isActive ? "bg-white shadow-sm ring-2 ring-[#d59c31]" : "hover:bg-white"
+                                }`}
+                                aria-pressed={isActive}
+                            >
+                                <div className="relative h-14 w-14 overflow-hidden rounded-full border border-amber-100 bg-white">
+                                    <Image
+                                        src={`/assets/horoscope-${sign.index}.webp`}
+                                        alt={sign.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <span className={`text-xs font-medium ${isActive ? "text-black" : "text-gray-500"}`}>
+                                    {sign.name}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
 
-                {/* 3. Date Toggle */}
-                <div className="max-w-md mx-auto bg-gray-200/50 p-1.5 rounded-xl flex items-center justify-between text-sm font-medium">
-                    {['Yesterday', 'Today', 'Tomorrow'].map((tab) => {
+                <div className="mx-auto flex max-w-md items-center justify-between rounded-lg bg-amber-100/70 p-1.5 text-sm font-medium">
+                    {["Yesterday", "Today", "Tomorrow"].map((tab) => {
                         const isActive = dateParam === tab;
                         return (
                             <button
                                 key={tab}
                                 onClick={() => handleTabChange(tab)}
-                                className={`
-                                    flex-1 py-2.5 text-center rounded-lg transition-all duration-300
-                                    ${isActive ? 'bg-white shadow-sm text-black font-semibold' : 'text-gray-500 hover:text-gray-700'}
-                                `}
+                                className={`flex-1 rounded-md py-2.5 text-center transition ${
+                                    isActive ? "bg-white font-semibold text-black shadow-sm" : "text-[#7a6651] hover:text-[#20130b]"
+                                }`}
                             >
                                 {tab}
                             </button>
@@ -285,70 +261,42 @@ function HoroscopeContent() {
                     })}
                 </div>
 
-                {/* 4. Daily Summary Card */}
-                <div className="w-full relative overflow-hidden rounded-[32px] bg-[#0F111A] text-white p-8 shadow-2xl min-h-[380px]">
-                    {/* Background Effects */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/60 via-purple-900/40 to-black pointer-events-none"></div>
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFD700] opacity-10 blur-[100px] rounded-full"></div>
+                <section className="relative min-h-[360px] overflow-hidden rounded-lg bg-[#20130b] p-8 text-white shadow-xl">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#4d2a12] via-[#20130b] to-black" />
 
                     {loading ? (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-black/60 backdrop-blur-sm">
-                            <Loader2 className="w-12 h-12 text-[#FFD700] animate-spin mb-4" />
-                            <p className="text-gray-300 text-sm font-light tracking-widest uppercase">Consulting the Stars...</p>
+                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm">
+                            <Loader2 className="mb-4 h-12 w-12 animate-spin text-[#FFD700]" />
+                            <p className="text-sm font-light uppercase tracking-widest text-gray-300">Preparing guidance...</p>
                         </div>
                     ) : (
-                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-
-                            {/* Left Content */}
-                            <div className="flex-1 w-full flex flex-col items-center md:items-start text-center md:text-left space-y-8">
+                        <div className="relative z-10 grid items-center gap-10 md:grid-cols-[1fr_320px]">
+                            <div className="space-y-8">
                                 <div>
-                                    <div className="mb-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-md">
-                                        <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse"></span>
-                                        <span className="text-xs font-medium tracking-widest text-gray-200 uppercase">
-                                            {activeSign.name} • {horoscopeData?.date || displayDate}
+                                    <div className="mb-3 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-3 py-1 backdrop-blur-md">
+                                        <span className="h-2 w-2 rounded-full bg-[#FFD700]" />
+                                        <span className="text-xs font-medium uppercase tracking-widest text-gray-200">
+                                            {activeSign.name} | {horoscopeData?.date || displayDate}
                                         </span>
                                     </div>
-                                    <h2 className="text-3xl md:text-5xl font-sans font-medium leading-tight">
-                                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Your Cosmic</span> <br />
-                                        <span className="text-[#FFD700]">Insight</span>
+                                    <h2 className="font-lora text-4xl font-bold leading-tight md:text-6xl">
+                                        Guidance for today
                                     </h2>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-x-12 gap-y-8 w-full max-w-sm">
-                                    <div className="space-y-1">
-                                        <p className="text-xs text-gray-400 uppercase tracking-wider">Lucky Colour</p>
-                                        <div className="flex items-center justify-center md:justify-start gap-3">
-                                            <div className="w-4 h-4 rounded-full bg-[#FF7F50] shadow-[0_0_10px_#FF7F50]"></div>
-                                            <span className="text-lg font-light">{horoscopeData?.lucky_color || "--"}</span>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-xs text-gray-400 uppercase tracking-wider">Mood</p>
-                                        <p className="text-3xl">{horoscopeData?.mood || "✨"}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-xs text-gray-400 uppercase tracking-wider">Lucky Number</p>
-                                        <p className="text-4xl font-light text-[#FFD700]">{horoscopeData?.lucky_number || "--"}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-xs text-gray-400 uppercase tracking-wider">Lucky Time</p>
-                                        <p className="text-xl font-light whitespace-nowrap">{horoscopeData?.lucky_time || "--"}</p>
-                                    </div>
+                                <div className="grid max-w-md grid-cols-2 gap-6">
+                                    <Fact label="Lucky Color" value={horoscopeData?.lucky_color || "Pending"} />
+                                    <Fact label="Mood" value={horoscopeData?.mood || "Calm"} />
+                                    <Fact label="Lucky Number" value={horoscopeData?.lucky_number || "..."} highlight />
+                                    <Fact label="Lucky Time" value={horoscopeData?.lucky_time || "Pending"} />
                                 </div>
                             </div>
 
-                            {/* Right Avatar */}
-                            <div className="relative w-56 h-56 md:w-80 md:h-80 flex-shrink-0">
-                                {/* Orbits */}
-                                <div className="absolute inset-0 rounded-full border border-white/10 animate-[spin_20s_linear_infinite]"></div>
-                                <div className="absolute -inset-4 rounded-full border border-white/5 animate-[spin_30s_linear_infinite_reverse]"></div>
-
-                                {/* Zodiac Badge */}
-                                <div className="absolute top-0 right-0 z-20 w-16 h-16 bg-[#FFD700] text-black rounded-full flex items-center justify-center border-4 border-[#0F111A] shadow-lg transform -rotate-12">
-                                    <span className="font-bold text-2xl">{activeSign.symbol}</span>
+                            <div className="relative mx-auto h-64 w-64">
+                                <div className="absolute right-0 top-0 z-20 flex h-16 w-16 -rotate-6 items-center justify-center rounded-lg border-4 border-[#20130b] bg-[#FFD700] text-black shadow-lg">
+                                    <span className="text-lg font-bold">{activeSign.symbol}</span>
                                 </div>
-
-                                <div className="w-full h-full rounded-full overflow-hidden border-4 border-white/10 relative bg-black shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                                <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-white/10 bg-black shadow-[0_0_50px_rgba(0,0,0,0.5)]">
                                     <Image
                                         src={`/assets/horoscope-${activeSign.index}.webp`}
                                         alt={activeSign.name}
@@ -359,124 +307,78 @@ function HoroscopeContent() {
                             </div>
                         </div>
                     )}
-                </div>
+                </section>
 
-                {/* 5. Detailed Insight Cards (Responsive Grid) */}
-                <div className="space-y-6">
+                <section className="space-y-6">
                     <h3 className="text-2xl font-bold text-gray-900">Horoscope Readings</h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-red-50 rounded-lg text-red-500"><Heart className="w-5 h-5 fill-current" /></div>
-                                    <span className="font-bold text-gray-900">Love</span>
-                                </div>
-                                <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                    {horoscopeData?.love?.percentage ?? "--"}%
-                                </span>
-                            </div>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                                {horoscopeData?.love?.text || "No specific insight for this aspect today."}
-                            </p>
-                        </div>
-
-                        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-orange-50 rounded-lg text-orange-500"><Briefcase className="w-5 h-5 fill-current" /></div>
-                                    <span className="font-bold text-gray-900">Career</span>
-                                </div>
-                                <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                    {horoscopeData?.career?.percentage ?? "--"}%
-                                </span>
-                            </div>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                                {horoscopeData?.career?.text || "No specific insight for this aspect today."}
-                            </p>
-                        </div>
-
-                        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-emerald-50 rounded-lg text-emerald-500"><DollarSign className="w-5 h-5" /></div>
-                                    <span className="font-bold text-gray-900">Money</span>
-                                </div>
-                                <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                    {horoscopeData?.money?.percentage ?? "--"}%
-                                </span>
-                            </div>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                                {horoscopeData?.money?.text || "No specific insight for this aspect today."}
-                            </p>
-                        </div>
-
-                        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-teal-50 rounded-lg text-teal-500"><Activity className="w-5 h-5" /></div>
-                                    <span className="font-bold text-gray-900">Health</span>
-                                </div>
-                                <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                    {horoscopeData?.health?.percentage ?? "--"}%
-                                </span>
-                            </div>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                                {horoscopeData?.health?.text || "No specific insight for this aspect today."}
-                            </p>
-                        </div>
-
-                        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow md:col-span-2 lg:col-span-2">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-blue-50 rounded-lg text-blue-500"><Plane className="w-5 h-5" /></div>
-                                    <span className="font-bold text-gray-900">Travel</span>
-                                </div>
-                                <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                    {horoscopeData?.travel?.percentage ?? "--"}%
-                                </span>
-                            </div>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                                {horoscopeData?.travel?.text || "No specific insight for this aspect today."}
-                            </p>
-                        </div>
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+                        {aspectCards.map((aspect) => {
+                            const Icon = aspect.icon;
+                            const data = horoscopeData?.[aspect.key];
+                            return (
+                                <article key={aspect.key} className="rounded-lg border border-amber-100 bg-white p-6 shadow-sm">
+                                    <div className="mb-4 flex items-start justify-between gap-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`rounded-lg p-2 ${aspect.tone}`}>
+                                                <Icon className="h-5 w-5" />
+                                            </div>
+                                            <span className="font-bold text-gray-900">{aspect.label}</span>
+                                        </div>
+                                        <span className="rounded-lg bg-amber-100 px-2 py-1 text-xs font-bold text-amber-800">
+                                            {scoreLabel(data?.percentage)}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm leading-relaxed text-gray-600">
+                                        {data?.text || fallbackText(activeSign.name)}
+                                    </p>
+                                </article>
+                            );
+                        })}
                     </div>
-                </div>
-
+                </section>
             </main>
 
-            {/* 6. Sticky Bottom Action Bar */}
-            <div className="fixed bottom-6 left-0 right-0 px-4 z-40 max-w-md mx-auto">
-                <div className="flex gap-4">
-                    <button className="flex-1 bg-[#FFD700] hover:bg-[#FFC000] text-black py-3.5 px-4 rounded-full font-bold text-sm flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20 transition-transform active:scale-95 border-2 border-white/10">
-                        <MessageCircle className="w-5 h-5" />
-                        Chat with Astrologer
+            <div className="fixed bottom-6 left-0 right-0 z-40 mx-auto max-w-md px-4">
+                <div className="flex gap-3 rounded-lg border border-amber-100 bg-white/90 p-2 shadow-xl backdrop-blur">
+                    <button
+                        onClick={() => router.push("/astrologer")}
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#FFD700] px-4 py-3 text-sm font-bold text-black transition active:scale-95"
+                    >
+                        <MessageCircle className="h-5 w-5" />
+                        Chat Astrologer
                     </button>
-                    <button className="flex-1 bg-[#0F111A] text-white hover:bg-black py-3.5 px-4 rounded-full font-bold text-sm flex items-center justify-center gap-2 shadow-xl shadow-black/20 transition-transform active:scale-95 border-2 border-white/10">
-                        <Phone className="w-5 h-5" />
-                        Call with Astrologer
+                    <button
+                        onClick={() => router.push("/astrologer")}
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#20130b] px-4 py-3 text-sm font-bold text-white transition active:scale-95"
+                    >
+                        <Phone className="h-5 w-5" />
+                        Call Astrologer
                     </button>
                 </div>
             </div>
-
-            <style jsx global>{`
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-                .no-scrollbar {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
-            `}</style>
         </div>
     );
 }
 
-// Wrap in Suspense for SearchParams
+function Fact({ label, value, highlight = false }: { label: string; value: string | number; highlight?: boolean }) {
+    return (
+        <div className="space-y-1">
+            <p className="text-xs uppercase tracking-wider text-gray-400">{label}</p>
+            <p className={highlight ? "text-4xl font-light text-[#FFD700]" : "text-xl font-light"}>{value}</p>
+        </div>
+    );
+}
+
 export default function DetailedHoroscopePage() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex min-h-screen items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                </div>
+            }
+        >
             <HoroscopeContent />
         </Suspense>
     );

@@ -50,7 +50,7 @@ export async function POST(req: Request) {
             if (currentBalance < minimumRequired) {
                 return NextResponse.json({
                     error: "insufficient_funds",
-                    message: `Please top up your wallet. Minimum ₹${minimumRequired} required to start a metered session.`,
+                    message: `Please top up your wallet. Minimum $${minimumRequired} required to start a metered session.`,
                     deficit: minimumRequired - currentBalance
                 }, { status: 402 });
             }
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, message: "Session authorized", currentBalance });
         }
 
-        // Fixed Price OR Metered per-minute ongoing deduction
+        // Fixed package charge or metered ongoing deduction.
         if (currentBalance < price) {
             return NextResponse.json({
                 error: "insufficient_funds",

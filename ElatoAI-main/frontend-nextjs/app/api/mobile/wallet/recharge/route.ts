@@ -24,8 +24,8 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => null);
     const amount = Number(body?.amount);
 
-    if (!Number.isFinite(amount) || amount < 10) {
-        return NextResponse.json({ error: "Enter a valid amount of at least Rs. 10." }, { status: 400 });
+    if (!Number.isFinite(amount) || amount < 1) {
+        return NextResponse.json({ error: "Enter a valid amount of at least $1." }, { status: 400 });
     }
 
     const currentBalance = Number((dbUser as IUser & { wallet_balance?: number | null }).wallet_balance ?? 0);
