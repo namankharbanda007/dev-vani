@@ -29,6 +29,7 @@ import DemoSession from "@/app/landing-2/components/DemoSession";
 import WhatsappIntegration from "@/app/components/LandingPage/WhatsappIntegration";
 import Footer from "@/app/components/Footer";
 import { homeFaqs } from "@/app/lib/seo";
+import BrandLogo from "@/app/components/brand/BrandLogo";
 
 const lenisOptions = {
     lerp: 0.1,
@@ -235,15 +236,7 @@ function RootHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                             : "none",
                     }}
                 >
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="relative h-10 w-auto">
-                            <img
-                                src="/assets/landing/logo.png"
-                                alt="Smart Murti"
-                                className="h-full w-auto object-contain"
-                            />
-                        </div>
-                    </Link>
+                    <BrandLogo href="/" size={isScrolled ? "sm" : "md"} className="transition-all" />
 
                     <nav className="hidden md:flex items-center space-x-8">
                         <HeaderLink href="#why-smartmurti" label="Why Smart Murti" />

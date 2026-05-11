@@ -1,7 +1,9 @@
+import BrandLogo from "@/app/components/brand/BrandLogo";
+
 export default function Logo() {
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <h1 className="text-7xl font-bold font-silkscreen">Smartmurti </h1>
-    </div>
-  );
+    return (
+        <div className="flex h-screen items-center justify-center bg-[#fff8ef]">
+            <BrandLogo size="xl" />
+        </div>
+    );
 }

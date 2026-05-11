@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { useGroupCall } from '../../pandit/hooks/useGroupCall';
 import { useWebRTC } from '../../pandit/hooks/useWebRTC';
+import BrandLogo from "@/app/components/brand/BrandLogo";
 
 // Keep track of audio contexts to prevent memory leaks
 export const getSharedAudioContext = () => {
@@ -486,11 +487,7 @@ export default function CallScreen({ participants, roomId, onLeave, isOriginalHo
                 {/* TOP HEADER BAR */}
                 <header className="h-[60px] lg:h-[80px] w-full flex items-center justify-between px-4 lg:px-8 shrink-0">
                     <div className="flex items-center gap-2">
-                        <img
-                            src="/assets/landing/logo.png"
-                            alt="SmartMurti Logo"
-                            className="h-6 lg:h-8 object-contain"
-                        />
+                        <BrandLogo href="/" size="sm" />
                     </div>
 
                     {/* Navigation Tabs */}

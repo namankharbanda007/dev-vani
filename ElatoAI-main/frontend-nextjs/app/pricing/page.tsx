@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CalendarCheck, Globe2, MessageCircle, ShieldCheck, Sparkles, Users } from "lucide-react";
-import { buildMetadata } from "@/app/lib/seo";
+import { buildMetadata, siteConfig } from "@/app/lib/seo";
 import { formatUsd, nriLaunchPackages } from "@/app/lib/pricing";
 
 export const metadata = buildMetadata({
     title: "Pricing",
     description:
-        "View SMART Murti's NRI launch packages for AI Pandit guidance, digital puja, live family puja, and premium havan.",
+        `View ${siteConfig.name}'s NRI launch packages for AI Pandit guidance, digital puja, live family puja, and premium havan.`,
     path: "/pricing",
     keywords: [
         "smart murti pricing",

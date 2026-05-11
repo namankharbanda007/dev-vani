@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { updateUser } from "@/db/users";
 import { createClient } from "@/utils/supabase/client";
+import { companyInfo } from "@/app/lib/company";
 
 type TUserType = "doctor" | "user" | "business";
 
@@ -21,7 +22,7 @@ const UserTypes: IUserType[] = [
     {
         type: "user",
         name: "Personal user",
-        title: "You are looking to use Smartmurti for personal use",
+        title: `You are looking to use ${companyInfo.brandName} for personal use`,
         icon: <User />,
     },
     {

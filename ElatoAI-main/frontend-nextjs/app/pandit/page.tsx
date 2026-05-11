@@ -3,13 +3,13 @@ import ClientPage from "./ClientPage";
 import { Suspense } from "react";
 import { getSimpleUserById } from "@/db/users";
 import type { UserProfileData } from "@/app/types/UserProfileData";
-import { buildMetadata } from "@/app/lib/seo";
+import { buildMetadata, siteConfig } from "@/app/lib/seo";
 import { redirect } from "next/navigation";
 
 export const metadata = buildMetadata({
     title: "AI Pandit",
     description:
-        "Connect with SMART Murti's AI Pandit for guided puja, devotional questions, and spiritual conversations through voice and chat.",
+        `Connect with ${siteConfig.name}'s AI Pandit for guided puja, devotional questions, and spiritual conversations through voice and chat.`,
     path: "/pandit",
     keywords: [
         "ai pandit",

@@ -3,12 +3,12 @@ import ClientPage from "./ClientPage";
 import { Suspense } from "react";
 import { getSimpleUserById } from "@/db/users";
 import type { UserProfileData } from "@/app/types/UserProfileData";
-import { buildMetadata } from "@/app/lib/seo";
+import { buildMetadata, siteConfig } from "@/app/lib/seo";
 
 export const metadata = buildMetadata({
     title: "AI Astrologer",
     description:
-        "Talk to SMART Murti's real-time AI astrologer for horoscope support, birth-chart context, and NRI family guidance.",
+        `Talk to ${siteConfig.name}'s real-time AI astrologer for horoscope support, birth-chart context, and NRI family guidance.`,
     path: "/astrologer",
     keywords: [
         "ai astrologer",

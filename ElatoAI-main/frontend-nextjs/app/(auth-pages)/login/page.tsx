@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { LoginForm } from "./login-form";
+import BrandLogo from "@/app/components/brand/BrandLogo";
 
 interface LoginProps {
   searchParams?: { [key: string]: string | string[] | undefined };
@@ -18,9 +19,7 @@ export default async function Login({ searchParams }: LoginProps) {
           priority
         />
         <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/85 via-black/45 to-transparent p-12 text-white">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.24em] text-[#f3c97c]">
-            SMART मूर्ति
-          </p>
+          <BrandLogo size="md" tone="light" className="mb-4 flex text-[#f3c97c]" />
           <h2 className="mb-4 max-w-xl font-lora text-4xl font-bold leading-tight">
             Talk to Smart Pandit now. Bring your family in when the moment gets bigger.
           </h2>

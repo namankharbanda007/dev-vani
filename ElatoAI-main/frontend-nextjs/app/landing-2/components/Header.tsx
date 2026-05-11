@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import clsx from "clsx";
 import { createClient } from "@/utils/supabase/client";
+import BrandLogo from "@/app/components/brand/BrandLogo";
 
 export default function Header() {
     const { scrollY } = useScroll();
@@ -55,15 +56,7 @@ export default function Header() {
                     }}
                 >
                     {/* Logo */}
-                    <Link href="/landing-2" className="flex items-center gap-2">
-                        <div className="relative h-10 w-auto">
-                            <img
-                                src="/assets/landing/logo.png"
-                                alt="Smart Murti"
-                                className="h-full w-auto object-contain"
-                            />
-                        </div>
-                    </Link>
+                    <BrandLogo href="/" size={isScrolled ? "sm" : "md"} className="transition-all" />
 
                     {/* Desktop Nav */}
                     <nav className="hidden md:flex items-center space-x-8">

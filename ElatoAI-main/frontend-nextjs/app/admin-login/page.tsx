@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import AdminLoginForm from "./AdminLoginForm";
+import BrandLogo from "@/app/components/brand/BrandLogo";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export default async function AdminLoginPage() {
         <div className="min-h-screen bg-[#FBF5EA] px-4 py-10 text-[#1F1711]">
             <div className="mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-6xl items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
                 <section>
+                    <BrandLogo size="md" className="mb-6 flex" />
                     <p className="mb-4 text-sm font-bold uppercase tracking-[0.24em] text-[#C86B1F]">
                         Owner access
                     </p>

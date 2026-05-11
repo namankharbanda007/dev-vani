@@ -18,7 +18,7 @@ export default function TermsPage() {
             lastUpdated={lastUpdated}
             intro={
                 <p>
-                    These Terms of Service govern your use of SMART Murti operated by <strong>{companyInfo.legalName}</strong>.
+                    These Terms of Service govern your use of {companyInfo.brandName} operated by <strong>{companyInfo.legalName}</strong>.
                     By using our website, app, chat, live calls, wallet, and family puja features, you agree to these terms.
                 </p>
             }
@@ -37,7 +37,7 @@ export default function TermsPage() {
                     body: (
                         <>
                             <p>
-                                SMART Murti provides AI-enabled spiritual guidance, live AI pandit sessions, astrology-style flows, family coordination, and related devotional experiences.
+                                {companyInfo.brandName} provides AI-enabled spiritual guidance, live AI pandit sessions, astrology-style flows, family coordination, and related devotional experiences.
                                 These services are designed for spiritual, cultural, devotional, and informational use.
                             </p>
                         </>
@@ -47,7 +47,7 @@ export default function TermsPage() {
                     title: "3. Acceptable Use",
                     body: (
                         <>
-                            <p>You agree not to misuse the platform. This includes not using SMART Murti to:</p>
+                            <p>You agree not to misuse the platform. This includes not using {companyInfo.brandName} to:</p>
                             <ul className="list-disc space-y-2 pl-6">
                                 <li>harass, threaten, impersonate, or abuse others,</li>
                                 <li>attempt to disrupt, reverse engineer, scrape, or compromise the service,</li>
@@ -62,7 +62,7 @@ export default function TermsPage() {
                     body: (
                         <>
                             <p>
-                                SMART Murti uses AI systems to generate responses. Outputs may occasionally be incomplete, inaccurate, or imperfect.
+                                {companyInfo.brandName} uses AI systems to generate responses. Outputs may occasionally be incomplete, inaccurate, or imperfect.
                                 You should use your own judgment and not rely on the platform as a substitute for professional medical, legal, financial, or emergency advice.
                             </p>
                         </>
@@ -97,7 +97,7 @@ export default function TermsPage() {
                     body: (
                         <>
                             <p>
-                                The SMART Murti platform, brand, software, design, and service materials are owned by {companyInfo.legalName} or its licensors.
+                                The {companyInfo.brandName} platform, brand, software, design, and service materials are owned by {companyInfo.legalName} or its licensors.
                                 You may not copy, resell, or exploit them beyond normal use of the service without permission.
                             </p>
                         </>

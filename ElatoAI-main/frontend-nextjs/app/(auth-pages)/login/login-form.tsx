@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GoogleLoginButton from "@/app/components/GoogleLoginButton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import BrandLogo from "@/app/components/brand/BrandLogo";
 
 interface LoginFormProps {
     searchParams?: { [key: string]: string | string[] | undefined };
@@ -32,9 +33,7 @@ export function LoginForm({ searchParams }: LoginFormProps) {
         <div className="w-full max-w-[450px]">
             <Card className="overflow-hidden rounded-[32px] border border-[#eadfcf] bg-white/88 shadow-[0_24px_70px_rgba(92,67,37,0.14)] backdrop-blur-xl">
                 <CardHeader className="text-center pb-2 pt-8">
-                    <h1 className="mb-2 font-lora text-4xl font-bold tracking-tight text-[#24170f]">
-                        SMART मूर्ति
-                    </h1>
+                    <BrandLogo size="lg" className="mb-2 flex justify-center" />
                     <p className="text-sm font-medium uppercase tracking-[0.22em] text-[#b07229]">
                         Start with Smart Pandit
                     </p>

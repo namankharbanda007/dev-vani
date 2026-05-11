@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { companyInfo } from "@/app/lib/company";
 
 export const siteConfig = {
-    name: "SMART Murti",
-    alternateName: "SMART Murti",
+    name: companyInfo.brandName,
+    alternateName: companyInfo.brandName,
     url: "https://smartmurti.com",
     description:
-        "SMART Murti gives Hindu families instant access to a live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.",
+        `${companyInfo.brandName} gives Hindu families instant access to a live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.`,
     defaultOgImage: "/logos/smartmurti-icon.jpg",
-    creator: "SMART Murti Team",
-    publisher: "SMART Murti",
+    creator: `${companyInfo.brandName} Team`,
+    publisher: companyInfo.brandName,
     locale: "en_US",
     keywords: [
         "smart murti",
@@ -35,9 +35,9 @@ type BuildMetadataInput = {
 
 export const homeFaqs = [
     {
-        question: "What is SMART Murti?",
+        question: `What is ${companyInfo.brandName}?`,
         answer:
-            "SMART Murti lets Hindu families talk to a live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.",
+            `${companyInfo.brandName} lets Hindu families talk to a live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.`,
     },
     {
         question: "What can I do with Smart Pandit?",
@@ -45,19 +45,19 @@ export const homeFaqs = [
             "You can speak with Smart Pandit for spiritual guidance, family questions, puja support, devotional Q&A, and live voice or chat conversations in your preferred language.",
     },
     {
-        question: "Does SMART Murti offer astrology and horoscope features?",
+        question: `Does ${companyInfo.brandName} offer astrology and horoscope features?`,
         answer:
-            "Yes. SMART Murti includes an AI astrologer, daily horoscope guidance, and specialist lanes for relationship, finance, and other personal questions.",
+            `Yes. ${companyInfo.brandName} includes an AI astrologer, daily horoscope guidance, and specialist lanes for relationship, finance, and other personal questions.`,
     },
     {
         question: "Can my family join from different countries?",
         answer:
-            "Yes. SMART Murti is built for families across countries and time zones, so relatives can join shared spiritual moments even when they are not in the same place.",
+            `Yes. ${companyInfo.brandName} is built for families across countries and time zones, so relatives can join shared spiritual moments even when they are not in the same place.`,
     },
     {
-        question: "Which languages does SMART Murti support?",
+        question: `Which languages does ${companyInfo.brandName} support?`,
         answer:
-            "SMART Murti supports Hindi, English, Hinglish, and other major Indian and global languages so families can receive guidance naturally.",
+            `${companyInfo.brandName} supports Hindi, English, Hinglish, and other major Indian and global languages so families can receive guidance naturally.`,
     },
 ];
 
@@ -66,7 +66,7 @@ export const aiReferencePages = [
         path: "/",
         title: "Homepage",
         description:
-            "Homepage for SMART Murti, featuring live multilingual AI Pandit guidance, family puja, and urgent spiritual support.",
+            `${companyInfo.brandName} homepage, featuring live multilingual AI Pandit guidance, family puja, and urgent spiritual support.`,
     },
     {
         path: "/pandit",
@@ -102,37 +102,37 @@ export const aiReferencePages = [
         path: "/pricing",
         title: "Pricing",
         description:
-            "NRI launch packages for SMART Murti AI Pandit guidance, digital puja, live family puja, and premium havan.",
+            `NRI launch packages for ${companyInfo.brandName} AI Pandit guidance, digital puja, live family puja, and premium havan.`,
     },
     {
         path: "/privacy",
         title: "Privacy Policy",
         description:
-            `Privacy Policy for SMART Murti and ${companyInfo.legalName}.`,
+            `Privacy Policy for ${companyInfo.brandName} and ${companyInfo.legalName}.`,
     },
     {
         path: "/terms",
         title: "Terms of Service",
         description:
-            `Terms of Service for SMART Murti and ${companyInfo.legalName}.`,
+            `Terms of Service for ${companyInfo.brandName} and ${companyInfo.legalName}.`,
     },
     {
         path: "/refunds",
         title: "Refund Policy",
         description:
-            "Refund Policy for SMART Murti digital sessions, wallet recharges, and failed payments.",
+            `Refund Policy for ${companyInfo.brandName} digital sessions, wallet recharges, and failed payments.`,
     },
     {
         path: "/disclaimer",
         title: "Disclaimer",
         description:
-            "Disclaimer for SMART Murti covering AI guidance limits and non-professional advice boundaries.",
+            `Disclaimer for ${companyInfo.brandName} covering AI guidance limits and non-professional advice boundaries.`,
     },
     {
         path: "/contact",
         title: "Contact",
         description:
-            `Contact ${companyInfo.legalName} and SMART Murti support.`,
+            `Contact ${companyInfo.legalName} and ${companyInfo.brandName} support.`,
     },
 ];
 

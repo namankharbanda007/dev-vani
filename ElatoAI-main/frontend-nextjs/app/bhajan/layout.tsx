@@ -1,9 +1,9 @@
-import { buildMetadata } from "@/app/lib/seo";
+import { buildMetadata, siteConfig } from "@/app/lib/seo";
 
 export const metadata = buildMetadata({
     title: "Bhajan Library",
     description:
-        "Listen to SMART Murti's bhajan library with devotional songs, mantras, and aarti tracks for daily spiritual practice.",
+        `Listen to ${siteConfig.name}'s bhajan library with devotional songs, mantras, and aarti tracks for daily spiritual practice.`,
     path: "/bhajan",
     keywords: [
         "bhajan app",

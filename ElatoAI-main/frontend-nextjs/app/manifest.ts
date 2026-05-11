@@ -4,7 +4,7 @@ import { siteConfig } from "@/app/lib/seo";
 export default function manifest(): MetadataRoute.Manifest {
     return {
         name: siteConfig.name,
-        short_name: "SmartMurti",
+        short_name: siteConfig.name,
         description: siteConfig.description,
         start_url: "/",
         display: "standalone",

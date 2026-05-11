@@ -10,7 +10,7 @@ import {
 export const metadata = buildMetadata({
     title: siteConfig.name,
     description:
-        "Talk to SMART Murti's live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.",
+        `Talk to ${siteConfig.name}'s live multilingual AI Pandit for spiritual guidance, family puja, and urgent devotional support from anywhere in the world.`,
     path: "/",
     keywords: [
         "ai pandit",
@@ -29,7 +29,7 @@ const homeJsonLd = {
             url: absoluteUrl("/"),
             name: siteConfig.name,
             description:
-                "Homepage for SMART Murti's live multilingual AI Pandit, family puja, and spiritual guidance.",
+                `Homepage for ${siteConfig.name}'s live multilingual AI Pandit, family puja, and spiritual guidance.`,
             isPartOf: {
                 "@id": absoluteUrl("/#website"),
             },

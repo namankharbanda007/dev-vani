@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { updateUser } from "@/db/users";
 import { Loader2 } from "lucide-react";
+import { companyInfo } from "@/app/lib/company";
 
 const Steps: React.FC<{
     selectedUser?: IUser;
@@ -56,9 +57,9 @@ const Steps: React.FC<{
         }
     };
 
-    let heading = "Let's get your Smartmurti device & account set up";
+    let heading = `Let's get your ${companyInfo.brandName} account set up`;
     let subHeading =
-        "We want to make sure that your Smartmurti is set up to provide you the best experience possible.";
+        `We want to make sure that your ${companyInfo.brandName} experience is set up properly.`;
 
     if (step === 1) {
         {

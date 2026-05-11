@@ -47,6 +47,7 @@ const checks = [
   {
     file: "app/lib/company.ts",
     mustInclude: [
+      "brandName: \"SMART मूर्ति\"",
       "SMARTMURTI AI PVT LTD",
       "connect@smartmurti.com",
       "Innov8 Okhla, 3rd Floor, 211, Okhla Industrial Estate Phase III, New Delhi 110020",
@@ -55,14 +56,54 @@ const checks = [
     mustExclude: ["support@smartmurti.com"],
   },
   {
-    file: "app/landing-2/page.tsx",
-    mustInclude: ["redirect(\"/\")"],
-    mustExclude: ["TAROT READING", "MATCH MAKING"],
+    file: "app/components/brand/BrandLogo.tsx",
+    mustInclude: ["companyInfo.brandName", "tracking-normal"],
+    mustExclude: ["SMART Murti", "SmartMurti", "/assets/landing/logo.png"],
+  },
+  {
+    file: "app/components/RootHomePage.tsx",
+    mustInclude: ["BrandLogo href=\"/\""],
+    mustExclude: ["/assets/landing/logo.png", "alt=\"Smart Murti\""],
+  },
+  {
+    file: "app/landing-2/components/Header.tsx",
+    mustInclude: ["BrandLogo href=\"/\""],
+    mustExclude: ["/assets/landing/logo.png", "alt=\"Smart Murti\""],
+  },
+  {
+    file: "app/pandit/components/CallScreen.tsx",
+    mustInclude: ["<BrandLogo href=\"/\" size=\"sm\" />"],
+    mustExclude: ["/assets/landing/logo.png", "SmartMurti Logo"],
+  },
+  {
+    file: "app/astrologer/components/CallScreen.tsx",
+    mustInclude: ["<BrandLogo href=\"/\" size=\"sm\" />"],
+    mustExclude: ["/assets/landing/logo.png", "SmartMurti Logo"],
+  },
+  {
+    file: "app/components/SiteFooter.tsx",
+    mustInclude: ["<BrandLogo size=\"lg\"", "companyInfo.email", "companyInfo.registeredOffice", "companyInfo.cin"],
+    mustExclude: ["Address will be published shortly", "Remote-first support", "support@smartmurti.com", "SMART Murti"],
   },
   {
     file: "app/lib/seo.ts",
-    mustInclude: ["NRI launch packages"],
-    mustExclude: ["prepaid wallet pricing"],
+    mustInclude: ["name: companyInfo.brandName", "NRI launch packages"],
+    mustExclude: ["name: \"SMART Murti\"", "prepaid wallet pricing"],
+  },
+  {
+    file: "app/manifest.ts",
+    mustInclude: ["short_name: siteConfig.name"],
+    mustExclude: ["SmartMurti"],
+  },
+  {
+    file: "app/logo/page.tsx",
+    mustInclude: ["BrandLogo size=\"xl\""],
+    mustExclude: ["Smartmurti"],
+  },
+  {
+    file: "app/landing-2/page.tsx",
+    mustInclude: ["redirect(\"/\")"],
+    mustExclude: ["TAROT READING", "MATCH MAKING"],
   },
 ];
 

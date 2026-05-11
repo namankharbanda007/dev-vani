@@ -18,7 +18,7 @@ export default function RefundsPage() {
             lastUpdated={lastUpdated}
             intro={
                 <p>
-                    This Refund Policy explains how refunds are handled for SMART Murti digital services provided by <strong>{companyInfo.legalName}</strong>.
+                    This Refund Policy explains how refunds are handled for {companyInfo.brandName} digital services provided by <strong>{companyInfo.legalName}</strong>.
                 </p>
             }
             sections={[

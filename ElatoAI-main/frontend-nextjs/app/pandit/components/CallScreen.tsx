@@ -27,6 +27,7 @@ import { Room as LiveKitRoomInstance, Track } from "livekit-client";
 import { useGroupCall } from "../hooks/useGroupCall";
 import { useWebRTC } from "../hooks/useWebRTC";
 import type { LivePujaRitual } from "@/lib/livePujaRituals";
+import BrandLogo from "@/app/components/brand/BrandLogo";
 
 export const getSharedAudioContext = () => {
     if (!(window as any).sharedAudioCtx) {
@@ -552,7 +553,7 @@ export default function CallScreen({ participants, roomId, inviteToken = "", onL
                 <header className="shrink-0 border-b border-[#eadfcf] bg-white/70 px-4 py-4 lg:px-8 lg:py-5">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div className="flex items-center gap-4">
-                            <img src="/assets/landing/logo.png" alt="SmartMurti Logo" className="h-7 object-contain lg:h-9" />
+                            <BrandLogo href="/" size="sm" />
                             <div className="hidden h-10 w-px bg-[#eadfcf] sm:block" />
                             <div>
                                 <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[#a27f47]">Live Family Puja</p>

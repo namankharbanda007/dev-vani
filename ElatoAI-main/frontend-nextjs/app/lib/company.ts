@@ -1,4 +1,5 @@
 export const companyInfo = {
+    brandName: "SMART मूर्ति",
     legalName: "SMARTMURTI AI PVT LTD",
     displayName: "Smartmurti AI Private Limited",
     email: "connect@smartmurti.com",

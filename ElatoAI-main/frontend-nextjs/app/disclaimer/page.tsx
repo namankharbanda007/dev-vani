@@ -18,7 +18,7 @@ export default function DisclaimerPage() {
             lastUpdated={lastUpdated}
             intro={
                 <p>
-                    SMART Murti is a spiritual technology platform operated by <strong>{companyInfo.legalName}</strong>. This page explains the limits of the service.
+                    {companyInfo.brandName} is a spiritual technology platform operated by <strong>{companyInfo.legalName}</strong>. This page explains the limits of the service.
                 </p>
             }
             sections={[
@@ -27,7 +27,7 @@ export default function DisclaimerPage() {
                     body: (
                         <>
                             <p>
-                                SMART Murti is intended for devotional, cultural, spiritual, and informational use. It is not guaranteed to be factually perfect,
+                                {companyInfo.brandName} is intended for devotional, cultural, spiritual, and informational use. It is not guaranteed to be factually perfect,
                                 religiously universal, or suitable for every tradition, family practice, or personal belief.
                             </p>
                         </>

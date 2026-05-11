@@ -1,9 +1,9 @@
-import { buildMetadata } from "@/app/lib/seo";
+import { buildMetadata, siteConfig } from "@/app/lib/seo";
 
 export const metadata = buildMetadata({
-    title: "Smart Murti",
+    title: siteConfig.name,
     description:
-        "Redirecting to the main SMART Murti experience for AI Pandit guidance and live family puja.",
+        `Redirecting to the main ${siteConfig.name} experience for AI Pandit guidance and live family puja.`,
     path: "/landing-2",
     noIndex: true,
 });

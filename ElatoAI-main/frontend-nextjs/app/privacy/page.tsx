@@ -19,7 +19,7 @@ export default function PrivacyPage() {
             intro={
                 <p>
                     This Privacy Policy explains how <strong>{companyInfo.legalName}</strong> collects, uses, stores,
-                    and protects information when you use SMART Murti through our website, mobile application,
+                    and protects information when you use {companyInfo.brandName} through our website, mobile application,
                     chat, live call, WhatsApp experiences, and family puja sessions.
                 </p>
             }
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
                     title: "2. How We Use Information",
                     body: (
                         <>
-                            <p>We use information to operate and improve SMART Murti, including to:</p>
+                            <p>We use information to operate and improve {companyInfo.brandName}, including to:</p>
                             <ul className="list-disc space-y-2 pl-6">
                                 <li>Provide live multilingual AI pandit guidance, astrology flows, family puja sessions, and support.</li>
                                 <li>Remember spiritual preferences and prior context so future sessions are more relevant and continuous.</li>
@@ -59,7 +59,7 @@ export default function PrivacyPage() {
                     body: (
                         <>
                             <p>
-                                SMART Murti may process voice and chat content to deliver real-time spiritual guidance, family live sessions,
+                                {companyInfo.brandName} may process voice and chat content to deliver real-time spiritual guidance, family live sessions,
                                 follow-up reminders, and conversation continuity. We may store meaningful parts of these interactions to
                                 improve session quality and maintain spiritual memory across visits.
                             </p>
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
                     body: (
                         <>
                             <p>
-                                SMART Murti may be used in family settings, but children should use the service only under the supervision of a parent or guardian.
+                                {companyInfo.brandName} may be used in family settings, but children should use the service only under the supervision of a parent or guardian.
                                 We do not knowingly collect personal information from children in violation of applicable law.
                             </p>
                         </>

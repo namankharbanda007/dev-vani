@@ -1,31 +1,23 @@
+import { companyInfo } from "@/app/lib/company";
+
 const OurAddressSign = () => {
     return (
         <p>
-            Akashdeep Deb, [
-            <a
-                href="mailto:akash@www.Smartmurti.com"
-                className="text-blue-400 underline"
-            >
-                akadeb97@gmail.com
+            {companyInfo.legalName}
+            <br />
+            Email:{" "}
+            <a href={`mailto:${companyInfo.email}`} className="text-blue-400 underline">
+                {companyInfo.email}
             </a>
-            ] <br />
-            Founder, SMART मूर्ति
             <br />
+            Website:{" "}
+            <a href={companyInfo.websiteUrl} className="text-blue-400 underline">
+                {companyInfo.website}
+            </a>
             <br />
-            <span className="underline">US</span>
+            CIN: {companyInfo.cin}
             <br />
-            Floor 3, <br />
-            44 Montgomery St, <br />
-            San Francisco, CA, <br />
-            94104, <br />
-            <br />
-            <span className="underline">UK</span>
-            <br />
-            LG Floor, <br />
-            Makerversity, Ltd, <br />
-            Somerset House, <br />
-            London, <br />
-            WC2R 1LA
+            Registered Office: {companyInfo.registeredOffice}
         </p>
     );
 };

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Globe2, Mail, MapPin, ShieldCheck, Sparkles } from "lucide-react";
 import { companyInfo } from "@/app/lib/company";
+import BrandLogo from "@/app/components/brand/BrandLogo";
 
 type SiteFooterProps = {
     variant?: "light" | "dark";
@@ -39,14 +40,7 @@ export default function SiteFooter({ variant = "light" }: SiteFooterProps) {
             <div className="mx-auto max-w-7xl">
                 <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr_1fr]">
                     <div className="space-y-5">
-                        <div>
-                            <p className={`text-xs font-semibold uppercase tracking-[0.28em] ${isDark ? "text-amber-300" : "text-amber-700"}`}>
-                                Smart Murti
-                            </p>
-                            <h2 className={`mt-2 font-lora text-4xl font-bold ${isDark ? "text-white" : "text-[#20130b]"}`}>
-                                SMART Murti
-                            </h2>
-                        </div>
+                        <BrandLogo size="lg" tone={isDark ? "light" : "dark"} />
 
                         <p className={`max-w-xl text-base leading-7 ${isDark ? "text-white/70" : "text-[#5b4837]"}`}>
                             {companyInfo.legalName} helps Hindu families access live multilingual AI Pandit guidance, family puja, and spiritual support from anywhere in the world.

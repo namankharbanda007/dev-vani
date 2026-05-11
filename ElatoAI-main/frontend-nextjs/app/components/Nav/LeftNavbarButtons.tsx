@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import BrandLogo from "@/app/components/brand/BrandLogo";
 
 interface LeftNavbarButtonsProps {
     user: IUser | null;
@@ -16,9 +17,7 @@ export default function LeftNavbarButtons({ user }: LeftNavbarButtonsProps) {
                 title="Click to go to home page"
             >
                 <Link href={user ? "/home" : "/"}>
-                    <p className="flex items-center font-luckiestGuy text-2xl tracking-widest">
-                        <span>SMART मूर्ति</span>
-                    </p>
+                    <BrandLogo size="md" />
                 </Link>
             </Button>
         </div>

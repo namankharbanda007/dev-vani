@@ -1,9 +1,9 @@
-import { buildMetadata } from "@/app/lib/seo";
+import { buildMetadata, siteConfig } from "@/app/lib/seo";
 
 export const metadata = buildMetadata({
     title: "Daily Horoscope",
     description:
-        "Get SMART Murti's daily horoscope experience with zodiac forecasts, spiritual remedies, and personalized guidance.",
+        `Get ${siteConfig.name}'s daily horoscope experience with zodiac forecasts, spiritual remedies, and personalized guidance.`,
     path: "/horoscope",
     keywords: [
         "daily horoscope",
