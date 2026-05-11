@@ -1,10 +1,11 @@
 import { buildMetadata } from "@/app/lib/seo";
 import LegalPageLayout from "@/app/components/legal/LegalPageLayout";
+import { companyInfo } from "@/app/lib/company";
 
 export const metadata = buildMetadata({
     title: "Disclaimer",
     description:
-        "Service disclaimer for Smartmurti AI Private Limited covering spiritual guidance, AI outputs, and non-professional advice boundaries.",
+        `Service disclaimer for ${companyInfo.legalName} covering spiritual guidance, AI outputs, and non-professional advice boundaries.`,
     path: "/disclaimer",
 });
 
@@ -17,7 +18,7 @@ export default function DisclaimerPage() {
             lastUpdated={lastUpdated}
             intro={
                 <p>
-                    SMART मूर्ति is a spiritual technology platform operated by <strong>Smartmurti AI Private Limited</strong>. This page explains the limits of the service.
+                    SMART Murti is a spiritual technology platform operated by <strong>{companyInfo.legalName}</strong>. This page explains the limits of the service.
                 </p>
             }
             sections={[
@@ -26,7 +27,7 @@ export default function DisclaimerPage() {
                     body: (
                         <>
                             <p>
-                                SMART मूर्ति is intended for devotional, cultural, spiritual, and informational use. It is not guaranteed to be factually perfect,
+                                SMART Murti is intended for devotional, cultural, spiritual, and informational use. It is not guaranteed to be factually perfect,
                                 religiously universal, or suitable for every tradition, family practice, or personal belief.
                             </p>
                         </>
@@ -78,7 +79,9 @@ export default function DisclaimerPage() {
                     title: "6. Contact",
                     body: (
                         <>
-                            <p>Email: <a className="text-amber-700 underline underline-offset-4" href="mailto:support@smartmurti.com">support@smartmurti.com</a></p>
+                            <p>Email: <a className="text-amber-700 underline underline-offset-4" href={`mailto:${companyInfo.email}`}>{companyInfo.email}</a></p>
+                            <p>Registered Office: {companyInfo.registeredOffice}</p>
+                            <p>CIN: {companyInfo.cin}</p>
                         </>
                     ),
                 },

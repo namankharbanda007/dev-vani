@@ -1,10 +1,11 @@
 import { buildMetadata } from "@/app/lib/seo";
 import LegalPageLayout from "@/app/components/legal/LegalPageLayout";
+import { companyInfo } from "@/app/lib/company";
 
 export const metadata = buildMetadata({
     title: "Terms of Service",
     description:
-        "Terms of Service for Smartmurti AI Private Limited covering website, app, live pandit sessions, wallet use, and family puja experiences.",
+        `Terms of Service for ${companyInfo.legalName} covering website, app, live pandit sessions, wallet use, and family puja experiences.`,
     path: "/terms",
 });
 
@@ -17,7 +18,7 @@ export default function TermsPage() {
             lastUpdated={lastUpdated}
             intro={
                 <p>
-                    These Terms of Service govern your use of SMART मूर्ति operated by <strong>Smartmurti AI Private Limited</strong>.
+                    These Terms of Service govern your use of SMART Murti operated by <strong>{companyInfo.legalName}</strong>.
                     By using our website, app, chat, live calls, wallet, and family puja features, you agree to these terms.
                 </p>
             }
@@ -36,7 +37,7 @@ export default function TermsPage() {
                     body: (
                         <>
                             <p>
-                                SMART मूर्ति provides AI-enabled spiritual guidance, live AI pandit sessions, astrology-style flows, family coordination, and related devotional experiences.
+                                SMART Murti provides AI-enabled spiritual guidance, live AI pandit sessions, astrology-style flows, family coordination, and related devotional experiences.
                                 These services are designed for spiritual, cultural, devotional, and informational use.
                             </p>
                         </>
@@ -46,7 +47,7 @@ export default function TermsPage() {
                     title: "3. Acceptable Use",
                     body: (
                         <>
-                            <p>You agree not to misuse the platform. This includes not using SMART मूर्ति to:</p>
+                            <p>You agree not to misuse the platform. This includes not using SMART Murti to:</p>
                             <ul className="list-disc space-y-2 pl-6">
                                 <li>harass, threaten, impersonate, or abuse others,</li>
                                 <li>attempt to disrupt, reverse engineer, scrape, or compromise the service,</li>
@@ -61,7 +62,7 @@ export default function TermsPage() {
                     body: (
                         <>
                             <p>
-                                SMART मूर्ति uses AI systems to generate responses. Outputs may occasionally be incomplete, inaccurate, or imperfect.
+                                SMART Murti uses AI systems to generate responses. Outputs may occasionally be incomplete, inaccurate, or imperfect.
                                 You should use your own judgment and not rely on the platform as a substitute for professional medical, legal, financial, or emergency advice.
                             </p>
                         </>
@@ -96,7 +97,7 @@ export default function TermsPage() {
                     body: (
                         <>
                             <p>
-                                The SMART मूर्ति platform, brand, software, design, and service materials are owned by Smartmurti AI Private Limited or its licensors.
+                                The SMART Murti platform, brand, software, design, and service materials are owned by {companyInfo.legalName} or its licensors.
                                 You may not copy, resell, or exploit them beyond normal use of the service without permission.
                             </p>
                         </>
@@ -118,7 +119,7 @@ export default function TermsPage() {
                     body: (
                         <>
                             <p>
-                                To the maximum extent permitted by law, Smartmurti AI Private Limited is not liable for indirect, incidental,
+                                To the maximum extent permitted by law, {companyInfo.legalName} is not liable for indirect, incidental,
                                 special, or consequential damages arising from your use of the service.
                             </p>
                         </>
@@ -128,8 +129,9 @@ export default function TermsPage() {
                     title: "10. Contact",
                     body: (
                         <>
-                            <p>Email: <a className="text-amber-700 underline underline-offset-4" href="mailto:support@smartmurti.com">support@smartmurti.com</a></p>
-                            <p>Remote-first support: Smart Murti serves NRI families through email, WhatsApp, and scheduled digital sessions across time zones.</p>
+                            <p>Email: <a className="text-amber-700 underline underline-offset-4" href={`mailto:${companyInfo.email}`}>{companyInfo.email}</a></p>
+                            <p>Registered Office: {companyInfo.registeredOffice}</p>
+                            <p>CIN: {companyInfo.cin}</p>
                         </>
                     ),
                 },

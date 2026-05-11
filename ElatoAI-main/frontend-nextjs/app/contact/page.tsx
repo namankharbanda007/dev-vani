@@ -1,10 +1,11 @@
 import { buildMetadata } from "@/app/lib/seo";
 import LegalPageLayout from "@/app/components/legal/LegalPageLayout";
+import { companyInfo } from "@/app/lib/company";
 
 export const metadata = buildMetadata({
     title: "Contact",
     description:
-        "Contact Smartmurti AI Private Limited for support, payments, legal, and product questions.",
+        `Contact ${companyInfo.legalName} for support, payments, legal, and product questions.`,
     path: "/contact",
 });
 
@@ -17,7 +18,7 @@ export default function ContactPage() {
             lastUpdated={lastUpdated}
             intro={
                 <p>
-                    For support, payment issues, policy questions, or business communication, please contact <strong>Smartmurti AI Private Limited</strong> using the details below.
+                    For support, payment issues, policy questions, or business communication, please contact <strong>{companyInfo.legalName}</strong> using the details below.
                 </p>
             }
             sections={[
@@ -25,7 +26,7 @@ export default function ContactPage() {
                     title: "1. Support",
                     body: (
                         <>
-                            <p>Email: <a className="text-amber-700 underline underline-offset-4" href="mailto:support@smartmurti.com">support@smartmurti.com</a></p>
+                            <p>Email: <a className="text-amber-700 underline underline-offset-4" href={`mailto:${companyInfo.email}`}>{companyInfo.email}</a></p>
                             <p>Please include your registered email and any relevant transaction or session details if you need account help.</p>
                         </>
                     ),
@@ -34,8 +35,10 @@ export default function ContactPage() {
                     title: "2. Business and Legal Communication",
                     body: (
                         <>
-                            <p>Company Name: Smartmurti AI Private Limited</p>
-                            <p>Remote-first support: Smart Murti serves NRI families through email, WhatsApp, and scheduled digital sessions across time zones.</p>
+                            <p>Company Name: {companyInfo.legalName}</p>
+                            <p>Website: <a className="text-amber-700 underline underline-offset-4" href={companyInfo.websiteUrl} target="_blank" rel="noreferrer">{companyInfo.website}</a></p>
+                            <p>Registered Office: {companyInfo.registeredOffice}</p>
+                            <p>CIN: {companyInfo.cin}</p>
                         </>
                     ),
                 },

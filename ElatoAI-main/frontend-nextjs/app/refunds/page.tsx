@@ -1,10 +1,11 @@
 import { buildMetadata } from "@/app/lib/seo";
 import LegalPageLayout from "@/app/components/legal/LegalPageLayout";
+import { companyInfo } from "@/app/lib/company";
 
 export const metadata = buildMetadata({
     title: "Refund Policy",
     description:
-        "Refund Policy for Smartmurti AI Private Limited covering live sessions, wallet recharges, duplicate payments, and failed transactions.",
+        `Refund Policy for ${companyInfo.legalName} covering live sessions, wallet recharges, duplicate payments, and failed transactions.`,
     path: "/refunds",
 });
 
@@ -17,7 +18,7 @@ export default function RefundsPage() {
             lastUpdated={lastUpdated}
             intro={
                 <p>
-                    This Refund Policy explains how refunds are handled for SMART मूर्ति digital services provided by <strong>Smartmurti AI Private Limited</strong>.
+                    This Refund Policy explains how refunds are handled for SMART Murti digital services provided by <strong>{companyInfo.legalName}</strong>.
                 </p>
             }
             sections={[
@@ -68,9 +69,11 @@ export default function RefundsPage() {
                     body: (
                         <>
                             <p>
-                                For payment or refund review, contact <a className="text-amber-700 underline underline-offset-4" href="mailto:support@smartmurti.com">support@smartmurti.com</a> with your registered email,
+                                For payment or refund review, contact <a className="text-amber-700 underline underline-offset-4" href={`mailto:${companyInfo.email}`}>{companyInfo.email}</a> with your registered email,
                                 payment reference, approximate date and time, and a short explanation of the issue.
                             </p>
+                            <p>Registered Office: {companyInfo.registeredOffice}</p>
+                            <p>CIN: {companyInfo.cin}</p>
                         </>
                     ),
                 },

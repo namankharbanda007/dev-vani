@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Globe2, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { Globe2, Mail, MapPin, ShieldCheck, Sparkles } from "lucide-react";
+import { companyInfo } from "@/app/lib/company";
 
 type SiteFooterProps = {
     variant?: "light" | "dark";
@@ -43,35 +44,47 @@ export default function SiteFooter({ variant = "light" }: SiteFooterProps) {
                                 Smart Murti
                             </p>
                             <h2 className={`mt-2 font-lora text-4xl font-bold ${isDark ? "text-white" : "text-[#20130b]"}`}>
-                                SMART मूर्ति
+                                SMART Murti
                             </h2>
                         </div>
 
                         <p className={`max-w-xl text-base leading-7 ${isDark ? "text-white/70" : "text-[#5b4837]"}`}>
-                            Smartmurti AI Private Limited helps Hindu families access live multilingual AI Pandit guidance, family puja, and spiritual support from anywhere in the world.
+                            {companyInfo.legalName} helps Hindu families access live multilingual AI Pandit guidance, family puja, and spiritual support from anywhere in the world.
                         </p>
 
                         <div className="grid gap-3 sm:grid-cols-2">
                             <div className={`rounded-lg border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-[#eadfcf] bg-white/80"}`}>
                                 <div className="flex items-center gap-2">
                                     <Mail className={`h-4 w-4 ${isDark ? "text-amber-300" : "text-amber-700"}`} />
-                                    <span className="text-sm font-semibold">Support</span>
+                                    <span className="text-sm font-semibold">Contact</span>
                                 </div>
                                 <a
-                                    href="mailto:support@smartmurti.com"
+                                    href={`mailto:${companyInfo.email}`}
                                     className={`mt-2 block text-sm transition ${isDark ? "text-white/75 hover:text-white" : "text-[#6a5542] hover:text-[#2b1d13]"}`}
                                 >
-                                    support@smartmurti.com
+                                    {companyInfo.email}
+                                </a>
+                                <a
+                                    href={companyInfo.websiteUrl}
+                                    className={`mt-2 flex items-center gap-2 text-sm transition ${isDark ? "text-white/75 hover:text-white" : "text-[#6a5542] hover:text-[#2b1d13]"}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <Globe2 className="h-4 w-4" />
+                                    {companyInfo.website}
                                 </a>
                             </div>
 
                             <div className={`rounded-lg border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-[#eadfcf] bg-white/80"}`}>
                                 <div className="flex items-center gap-2">
-                                    <Globe2 className={`h-4 w-4 ${isDark ? "text-amber-300" : "text-amber-700"}`} />
-                                    <span className="text-sm font-semibold">Remote-first support</span>
+                                    <MapPin className={`h-4 w-4 ${isDark ? "text-amber-300" : "text-amber-700"}`} />
+                                    <span className="text-sm font-semibold">Registered Office</span>
                                 </div>
                                 <p className={`mt-2 text-sm leading-6 ${isDark ? "text-white/65" : "text-[#6a5542]"}`}>
-                                    Serving NRI families across time zones through email, WhatsApp, and live digital sessions.
+                                    {companyInfo.registeredOffice}
+                                </p>
+                                <p className={`mt-2 text-xs uppercase tracking-[0.18em] ${isDark ? "text-white/50" : "text-[#8c755e]"}`}>
+                                    CIN: {companyInfo.cin}
                                 </p>
                             </div>
                         </div>
@@ -121,7 +134,7 @@ export default function SiteFooter({ variant = "light" }: SiteFooterProps) {
                     </div>
                     <div className="flex items-center gap-2">
                         <Sparkles className="h-4 w-4" />
-                        <span>© {new Date().getFullYear()} Smartmurti AI Private Limited. All rights reserved.</span>
+                        <span>Copyright {new Date().getFullYear()} {companyInfo.legalName}. All rights reserved.</span>
                     </div>
                 </div>
             </div>

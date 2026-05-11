@@ -1,10 +1,11 @@
 import { buildMetadata } from "@/app/lib/seo";
 import LegalPageLayout from "@/app/components/legal/LegalPageLayout";
+import { companyInfo } from "@/app/lib/company";
 
 export const metadata = buildMetadata({
     title: "Privacy Policy",
     description:
-        "Privacy Policy for Smartmurti AI Private Limited covering account data, voice interactions, spiritual session history, and payments.",
+        `Privacy Policy for ${companyInfo.legalName} covering account data, voice interactions, spiritual session history, and payments.`,
     path: "/privacy",
 });
 
@@ -17,8 +18,8 @@ export default function PrivacyPage() {
             lastUpdated={lastUpdated}
             intro={
                 <p>
-                    This Privacy Policy explains how <strong>Smartmurti AI Private Limited</strong> collects, uses, stores,
-                    and protects information when you use SMART मूर्ति through our website, mobile application,
+                    This Privacy Policy explains how <strong>{companyInfo.legalName}</strong> collects, uses, stores,
+                    and protects information when you use SMART Murti through our website, mobile application,
                     chat, live call, WhatsApp experiences, and family puja sessions.
                 </p>
             }
@@ -42,7 +43,7 @@ export default function PrivacyPage() {
                     title: "2. How We Use Information",
                     body: (
                         <>
-                            <p>We use information to operate and improve SMART मूर्ति, including to:</p>
+                            <p>We use information to operate and improve SMART Murti, including to:</p>
                             <ul className="list-disc space-y-2 pl-6">
                                 <li>Provide live multilingual AI pandit guidance, astrology flows, family puja sessions, and support.</li>
                                 <li>Remember spiritual preferences and prior context so future sessions are more relevant and continuous.</li>
@@ -58,7 +59,7 @@ export default function PrivacyPage() {
                     body: (
                         <>
                             <p>
-                                SMART मूर्ति may process voice and chat content to deliver real-time spiritual guidance, family live sessions,
+                                SMART Murti may process voice and chat content to deliver real-time spiritual guidance, family live sessions,
                                 follow-up reminders, and conversation continuity. We may store meaningful parts of these interactions to
                                 improve session quality and maintain spiritual memory across visits.
                             </p>
@@ -100,7 +101,7 @@ export default function PrivacyPage() {
                     body: (
                         <>
                             <p>
-                                SMART मूर्ति may be used in family settings, but children should use the service only under the supervision of a parent or guardian.
+                                SMART Murti may be used in family settings, but children should use the service only under the supervision of a parent or guardian.
                                 We do not knowingly collect personal information from children in violation of applicable law.
                             </p>
                         </>
@@ -121,8 +122,9 @@ export default function PrivacyPage() {
                     title: "8. Contact",
                     body: (
                         <>
-                            <p>Email: <a className="text-amber-700 underline underline-offset-4" href="mailto:support@smartmurti.com">support@smartmurti.com</a></p>
-                            <p>Remote-first support: Smart Murti serves NRI families through email, WhatsApp, and scheduled digital sessions across time zones.</p>
+                            <p>Email: <a className="text-amber-700 underline underline-offset-4" href={`mailto:${companyInfo.email}`}>{companyInfo.email}</a></p>
+                            <p>Registered Office: {companyInfo.registeredOffice}</p>
+                            <p>CIN: {companyInfo.cin}</p>
                         </>
                     ),
                 },

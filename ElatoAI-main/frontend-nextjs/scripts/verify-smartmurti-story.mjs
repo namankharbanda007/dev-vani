@@ -36,13 +36,23 @@ const checks = [
   },
   {
     file: "app/components/SiteFooter.tsx",
-    mustInclude: ["Remote-first support"],
-    mustExclude: ["Address will be published shortly"],
+    mustInclude: ["companyInfo.email", "companyInfo.registeredOffice", "companyInfo.cin"],
+    mustExclude: ["Address will be published shortly", "Remote-first support", "support@smartmurti.com"],
   },
   {
     file: "app/contact/page.tsx",
-    mustInclude: ["Remote-first support"],
-    mustExclude: ["will be published shortly"],
+    mustInclude: ["companyInfo.email", "companyInfo.registeredOffice", "companyInfo.cin", "companyInfo.website"],
+    mustExclude: ["will be published shortly", "Remote-first support", "support@smartmurti.com"],
+  },
+  {
+    file: "app/lib/company.ts",
+    mustInclude: [
+      "SMARTMURTI AI PVT LTD",
+      "connect@smartmurti.com",
+      "Innov8 Okhla, 3rd Floor, 211, Okhla Industrial Estate Phase III, New Delhi 110020",
+      "U47912DL2025PTC460200",
+    ],
+    mustExclude: ["support@smartmurti.com"],
   },
   {
     file: "app/landing-2/page.tsx",

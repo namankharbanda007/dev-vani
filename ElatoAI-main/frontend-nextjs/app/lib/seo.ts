@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { companyInfo } from "@/app/lib/company";
 
 export const siteConfig = {
     name: "SMART Murti",
@@ -107,13 +108,13 @@ export const aiReferencePages = [
         path: "/privacy",
         title: "Privacy Policy",
         description:
-            "Privacy Policy for SMART Murti and Smartmurti AI Private Limited.",
+            `Privacy Policy for SMART Murti and ${companyInfo.legalName}.`,
     },
     {
         path: "/terms",
         title: "Terms of Service",
         description:
-            "Terms of Service for SMART Murti and Smartmurti AI Private Limited.",
+            `Terms of Service for SMART Murti and ${companyInfo.legalName}.`,
     },
     {
         path: "/refunds",
@@ -131,7 +132,7 @@ export const aiReferencePages = [
         path: "/contact",
         title: "Contact",
         description:
-            "Contact Smartmurti AI Private Limited and SMART Murti support.",
+            `Contact ${companyInfo.legalName} and SMART Murti support.`,
     },
 ];
 
