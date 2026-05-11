@@ -167,7 +167,7 @@ const AppSettings: React.FC<AppSettingsProps> = ({
 
             setAvatarUrl(publicUrl);
             setUploadSuccess(true);
-            toast({ description: "Profile photo updated! 📸" });
+            toast({ description: "Profile photo updated." });
 
             // Clear success state after a few seconds
             setTimeout(() => setUploadSuccess(false), 3000);
@@ -218,7 +218,7 @@ const AppSettings: React.FC<AppSettingsProps> = ({
             },
             userId);
         toast({
-            description: "Your prefereces have been saved!",
+            description: "Your preferences have been saved!",
         });
     }
 
@@ -228,7 +228,7 @@ const AppSettings: React.FC<AppSettingsProps> = ({
             {/* Profile Photo Section */}
             <section className="mb-8 pb-8 border-b border-gray-200/50">
                 <h2 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 pb-2 flex items-center gap-2 mb-4">
-                    📷 Profile Photo
+                    Profile Photo
                 </h2>
                 <p className="text-xs text-gray-500 mb-4">
                     This photo will be shown in the navbar and can also be used for face reading features.
@@ -289,7 +289,7 @@ const AppSettings: React.FC<AppSettingsProps> = ({
                                 Click or drag a photo here
                             </p>
                             <p className="text-xs text-gray-400 mt-1">
-                                JPG, PNG or WebP • Max 5MB
+                                JPG, PNG or WebP - Max 5MB
                             </p>
                         </div>
                         <input
@@ -372,7 +372,7 @@ const AppSettings: React.FC<AppSettingsProps> = ({
                                 <div className="min-w-0">
                                     <p className="font-semibold text-[#2b1d12]">{member.name}</p>
                                     <p className="truncate text-xs text-[#7b6650]">
-                                        {member.email}{member.relation ? ` · ${member.relation}` : ""}
+                                        {member.email}{member.relation ? ` - ${member.relation}` : ""}
                                     </p>
                                 </div>
                                 <button

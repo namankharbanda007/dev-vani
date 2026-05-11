@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { getSimpleUserById } from "@/db/users";
 import type { UserProfileData } from "@/app/types/UserProfileData";
 import { buildMetadata, siteConfig } from "@/app/lib/seo";
+import { resolveUserDisplayName } from "@/app/lib/userProfileName";
 
 export const metadata = buildMetadata({
     title: "AI Astrologer",
@@ -26,7 +27,7 @@ export default async function AstrologerCallPage() {
 
         if (user && !error) {
             const dbUser = await getSimpleUserById(supabase, user.id);
-            const userName = dbUser?.supervisor_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
+            const userName = resolveUserDisplayName({ dbUser, authUser: user });
             const avatarUrl = dbUser?.avatar_url || user.user_metadata?.avatar_url || null;
 
             const metadata = (dbUser?.user_info as any)?.user_metadata || {};

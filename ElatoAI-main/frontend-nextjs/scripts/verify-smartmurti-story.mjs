@@ -105,6 +105,16 @@ const checks = [
     mustInclude: ["redirect(\"/\")"],
     mustExclude: ["TAROT READING", "MATCH MAKING"],
   },
+  {
+    file: "app/components/Settings/UserForm.tsx",
+    mustInclude: ["Basic Info", "Birth Details"],
+    mustExclude: ["ðŸ", "âœ", "â", "â€¢", "Â·", "\u{1F464}", "\u{1F382}", "\u{1F3AD}", "\u{2728}", "\u{1F4CD}", "\u{1F4C5}", "\u{23F0}", "\u{1F31F}"],
+  },
+  {
+    file: "app/components/Settings/AppSettings.tsx",
+    mustInclude: ["Your preferences have been saved!", "Profile Photo", "WebP - Max 5MB"],
+    mustExclude: ["prefereces", "ðŸ", "âœ", "â", "â€¢", "Â·", "\u{1F4F8}", "\u{1F4F7}", "\u2022", "\u00b7"],
+  },
 ];
 
 const failures = [];

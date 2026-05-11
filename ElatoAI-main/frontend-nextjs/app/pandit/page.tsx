@@ -5,6 +5,7 @@ import { getSimpleUserById } from "@/db/users";
 import type { UserProfileData } from "@/app/types/UserProfileData";
 import { buildMetadata, siteConfig } from "@/app/lib/seo";
 import { redirect } from "next/navigation";
+import { resolveUserDisplayName } from "@/app/lib/userProfileName";
 
 export const metadata = buildMetadata({
     title: "AI Pandit",
@@ -27,7 +28,7 @@ export default async function PanditCallPage() {
 
         if (user && !error) {
             const dbUser = await getSimpleUserById(supabase, user.id);
-            const userName = dbUser?.supervisor_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
+            const userName = resolveUserDisplayName({ dbUser, authUser: user });
             const avatarUrl = dbUser?.avatar_url || user.user_metadata?.avatar_url || null;
 
             // Extract birth details from user_info JSONB

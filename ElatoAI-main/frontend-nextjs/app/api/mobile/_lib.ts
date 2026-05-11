@@ -2,6 +2,7 @@ import { type SupabaseClient, type User } from "@supabase/supabase-js";
 import { getAllPersonalities, getMyPersonalities, getPersonalityById } from "@/db/personalities";
 import { getUserById } from "@/db/users";
 import { HIDDEN_PERSONALITIES, defaultPersonalityId } from "@/lib/data";
+import { resolveUserDisplayName } from "@/app/lib/userProfileName";
 
 export const LIVE_PUJA_PANDIT_PERSONALITY_ID = "8cfaa34a-e887-41cd-b880-c0b6169bf9cd";
 export const GEMINI_LIVE_MODEL = "models/gemini-2.5-flash-native-audio-preview-12-2025";
@@ -103,13 +104,7 @@ export function getUserMetadata(dbUser: IUser | null | undefined) {
 }
 
 export function getDisplayName(authUser: User, dbUser: IUser | null | undefined) {
-    return (
-        dbUser?.supervisee_name ||
-        dbUser?.supervisor_name ||
-        (authUser.user_metadata?.name as string | undefined) ||
-        authUser.email?.split("@")[0] ||
-        "Devotee"
-    );
+    return resolveUserDisplayName({ dbUser, authUser });
 }
 
 export function getGuideOpeningLine(personality: IPersonality) {

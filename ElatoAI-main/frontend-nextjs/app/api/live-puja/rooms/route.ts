@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createLivePujaInviteToken } from "../_room-token";
 import { getSupabaseForRouteAuth } from "@/utils/supabase/route-auth";
+import { resolveUserDisplayName } from "@/app/lib/userProfileName";
 
 const INVITE_TTL_MS = 1000 * 60 * 60 * 6;
 
@@ -16,10 +17,6 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json().catch(() => null);
-    const displayName =
-        typeof body?.participantName === "string" && body.participantName.trim()
-            ? body.participantName.trim().slice(0, 80)
-            : user.user_metadata?.name || user.email?.split("@")[0] || "Devotee";
     const roomId = `pandit-${safeRoomSegment(user.id)}-${Date.now().toString(36)}`;
     const inviteToken = createLivePujaInviteToken({
         roomId,
@@ -29,9 +26,13 @@ export async function POST(req: Request) {
 
     const { data: dbUser } = await supabase
         .from("users")
-        .select("user_info")
+        .select("supervisee_name,supervisor_name,user_info")
         .eq("user_id", user.id)
         .maybeSingle();
+    const displayName =
+        typeof body?.participantName === "string" && body.participantName.trim()
+            ? body.participantName.trim().slice(0, 80)
+            : resolveUserDisplayName({ dbUser, authUser: user });
 
     const userInfo = (dbUser?.user_info || {}) as Record<string, unknown>;
     const familyMembers = Array.isArray(userInfo.family_members) ? userInfo.family_members : [];

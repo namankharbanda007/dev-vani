@@ -7,7 +7,8 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "test:story": "node scripts/verify-smartmurti-story.mjs",
+        "test:profile-name": "node scripts/verify-user-profile-name.mjs",
+        "test:story": "node scripts/verify-smartmurti-story.mjs && npm run test:profile-name",
         "update-types": "npx supabase gen types typescript --project-id \"<project-id>\" > db/supabase.ts"
     },
     "dependencies": {

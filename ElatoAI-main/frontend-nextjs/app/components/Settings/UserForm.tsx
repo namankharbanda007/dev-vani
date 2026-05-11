@@ -80,7 +80,7 @@ const GeneralUserForm = ({ selectedUser, onSave, onClickCallback, userId, headin
                 {heading}
                 <section className="space-y-4 max-w-screen-sm">
                     <h2 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-amber-600 border-b border-gray-200/50 pb-2 flex items-center gap-2">
-                        👤 Basic Info
+                        Basic Info
                     </h2>
                     <div className="flex flex-col gap-6">
                         <FormField
@@ -110,7 +110,7 @@ const GeneralUserForm = ({ selectedUser, onSave, onClickCallback, userId, headin
                             render={({ field }) => (
                                 <FormItem className="w-full rounded-md">
                                     <FormLabel className="text-sm font-semibold text-gray-700">
-                                        🎂 {userFormAgeLabel}
+                                        {userFormAgeLabel}
                                     </FormLabel>
                                     <FormDescription className="text-xs text-gray-500">
                                         {userFormAgeDescription}
@@ -135,7 +135,7 @@ const GeneralUserForm = ({ selectedUser, onSave, onClickCallback, userId, headin
                             render={({ field }) => (
                                 <FormItem className="w-full rounded-md">
                                     <FormLabel className="text-sm font-semibold text-gray-700">
-                                        🎭 {userFormPersonaLabel}
+                                        {userFormPersonaLabel}
                                     </FormLabel>
                                     <FormControl>
                                         <Textarea
@@ -156,7 +156,7 @@ const GeneralUserForm = ({ selectedUser, onSave, onClickCallback, userId, headin
 
                 <section className="space-y-4 max-w-screen-sm">
                     <h2 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-orange-600 border-b border-gray-200/50 pb-2 flex items-center gap-2">
-                        ✨ Birth Details
+                        Birth Details
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField
@@ -165,7 +165,7 @@ const GeneralUserForm = ({ selectedUser, onSave, onClickCallback, userId, headin
                             render={({ field }) => (
                                 <FormItem className="w-full rounded-md">
                                     <FormLabel className="text-sm font-semibold text-gray-700">
-                                        📍 Birth Place
+                                        Birth Place
                                     </FormLabel>
                                     <FormControl>
                                         <Input
@@ -184,7 +184,7 @@ const GeneralUserForm = ({ selectedUser, onSave, onClickCallback, userId, headin
                             render={({ field }) => (
                                 <FormItem className="w-full rounded-md">
                                     <FormLabel className="text-sm font-semibold text-gray-700">
-                                        📅 Birth Date
+                                        Birth Date
                                     </FormLabel>
                                     <FormControl>
                                         <Input
@@ -204,7 +204,7 @@ const GeneralUserForm = ({ selectedUser, onSave, onClickCallback, userId, headin
                             render={({ field }) => (
                                 <FormItem className="w-full rounded-md">
                                     <FormLabel className="text-sm font-semibold text-gray-700">
-                                        ⏰ Birth Time
+                                        Birth Time
                                     </FormLabel>
                                     <FormControl>
                                         <Input
@@ -223,7 +223,7 @@ const GeneralUserForm = ({ selectedUser, onSave, onClickCallback, userId, headin
                             render={({ field }) => (
                                 <FormItem className="w-full rounded-md">
                                     <FormLabel className="text-sm font-semibold text-gray-700">
-                                        🌟 Rashi (Optional)
+                                        Rashi (Optional)
                                     </FormLabel>
                                     <FormControl>
                                         <Input
